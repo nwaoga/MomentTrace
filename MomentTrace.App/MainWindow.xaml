@@ -195,7 +195,7 @@
                 </StackPanel>
 
                 <StackPanel Grid.Row="3">
-                    <Button Style="{StaticResource RailButton}">
+                    <Button Style="{StaticResource RailButton}" Click="SettingsButton_Click">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="⚙" Width="28" />
                             <TextBlock Text="Settings" />
@@ -223,6 +223,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="132" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <Grid>
                         <TextBox x:Name="SearchBox" TextChanged="SearchBox_TextChanged" VerticalAlignment="Center" />
@@ -247,7 +248,8 @@
                         <ComboBoxItem Content="Document" />
                         <ComboBoxItem Content="Development" />
                     </ComboBox>
-                    <Button Grid.Column="2" Style="{StaticResource ChromeButton}" Content="Refresh" Click="RefreshButton_Click" VerticalAlignment="Center" />
+                    <Button Grid.Column="2" Style="{StaticResource ChromeButton}" Content="Refresh" Click="RefreshButton_Click" VerticalAlignment="Center" Margin="0,0,10,0" />
+                    <Button Grid.Column="3" Style="{StaticResource ChromeButton}" Content="Settings" Click="SettingsButton_Click" VerticalAlignment="Center" />
                 </Grid>
             </Border>
 
@@ -432,14 +434,7 @@
 
                 <StackPanel Grid.Row="4">
                     <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,0,0,16" />
-                    <TextBlock Text="Settings" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,12" />
-                    <DockPanel Margin="0,0,0,8">
-                        <TextBlock Text="Transparency" Foreground="{StaticResource MutedTextBrush}" DockPanel.Dock="Left" />
-                        <TextBlock x:Name="OpacityValueText" Foreground="{StaticResource TextBrush}" HorizontalAlignment="Right" />
-                    </DockPanel>
-                    <Slider x:Name="OpacitySlider" Minimum="55" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="False" ValueChanged="OpacitySlider_ValueChanged" Margin="0,0,0,18" />
-                    <CheckBox x:Name="StartWithWindowsCheckBox" Content="Start with Windows" Margin="0,0,0,14" Checked="StartWithWindowsCheckBox_Changed" Unchecked="StartWithWindowsCheckBox_Changed" />
-                    <Button x:Name="RecordingButton" Style="{StaticResource ChromeButton}" Content="Pause recording" Click="RecordingButton_Click" />
+                    <Button Style="{StaticResource ChromeButton}" Content="Open settings" Click="SettingsButton_Click" />
                 </StackPanel>
             </Grid>
         </Border>

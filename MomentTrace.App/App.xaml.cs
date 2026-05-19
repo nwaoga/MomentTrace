@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.IO;
+using System.Threading;
 using System.Windows;
 using Forms = System.Windows.Forms;
 using MomentTrace.Core;
@@ -10,13 +11,30 @@ namespace MomentTrace.App;
 
 public partial class App : System.Windows.Application
 {
+    private const string SingleInstanceMutexName = @"Local\MomentTrace.SingleInstance";
+    private const string ShowWindowEventName = @"Local\MomentTrace.ShowWindow";
+
     private Forms.NotifyIcon? _notifyIcon;
     private MainWindow? _mainWindow;
     private IActivityRecorder? _recorder;
+    private Mutex? _singleInstanceMutex;
+    private EventWaitHandle? _showWindowEvent;
+    private RegisteredWaitHandle? _showWindowRegistration;
+    private bool _ownsSingleInstance;
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        _singleInstanceMutex = new Mutex(initiallyOwned: true, SingleInstanceMutexName, out var isFirstInstance);
+        _ownsSingleInstance = isFirstInstance;
+        if (!_ownsSingleInstance)
+        {
+            SignalExistingInstance();
+            Shutdown();
+            return;
+        }
+
         base.OnStartup(e);
+        RegisterShowWindowSignal();
 
         var store = new SqliteActivityStore(SqliteActivityStore.DefaultDatabasePath);
         await store.InitializeAsync();
@@ -48,6 +66,14 @@ public partial class App : System.Windows.Application
         }
 
         _notifyIcon?.Dispose();
+        _showWindowRegistration?.Unregister(null);
+        _showWindowEvent?.Dispose();
+        if (_ownsSingleInstance)
+        {
+            _singleInstanceMutex?.ReleaseMutex();
+        }
+
+        _singleInstanceMutex?.Dispose();
         base.OnExit(e);
     }
 
@@ -91,6 +117,30 @@ public partial class App : System.Windows.Application
         _mainWindow.Show();
         _mainWindow.WindowState = WindowState.Normal;
         _mainWindow.Activate();
+    }
+
+    private static void SignalExistingInstance()
+    {
+        try
+        {
+            using var showWindowEvent = EventWaitHandle.OpenExisting(ShowWindowEventName);
+            showWindowEvent.Set();
+        }
+        catch
+        {
+            System.Media.SystemSounds.Exclamation.Play();
+        }
+    }
+
+    private void RegisterShowWindowSignal()
+    {
+        _showWindowEvent = new EventWaitHandle(false, EventResetMode.AutoReset, ShowWindowEventName);
+        _showWindowRegistration = ThreadPool.RegisterWaitForSingleObject(
+            _showWindowEvent,
+            (_, _) => Dispatcher.Invoke(ShowMainWindow),
+            null,
+            Timeout.InfiniteTimeSpan,
+            executeOnlyOnce: false);
     }
 
     private async Task StopRecordingAsync()

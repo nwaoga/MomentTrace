@@ -20,9 +20,6 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<ActivityItemViewModel> _activities = [];
     private readonly ICollectionView _activityView;
     private bool _allowClose;
-    private bool _isUpdatingStartupCheckBox;
-    private bool _isUpdatingOpacitySlider;
-    private bool _canSaveOpacity;
 
     public MainWindow(IActivityStore store, IActivityRecorder recorder, IStartupRegistration startupRegistration)
     {
@@ -49,12 +46,7 @@ public partial class MainWindow : Window
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        _isUpdatingStartupCheckBox = true;
-        StartWithWindowsCheckBox.IsChecked = _startupRegistration.IsEnabled();
-        _isUpdatingStartupCheckBox = false;
-
         ApplySavedOpacity();
-        _canSaveOpacity = true;
         await _recorder.StartAsync();
         UpdateRecordingStatus();
         await LoadActivitiesAsync();
@@ -144,24 +136,8 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void RecordingButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (_recorder.IsRecording)
-        {
-            await _recorder.StopAsync();
-        }
-        else
-        {
-            await _recorder.StartAsync();
-        }
-
-        UpdateRecordingStatus();
-        await LoadActivitiesAsync();
-    }
-
     private void UpdateRecordingStatus()
     {
-        RecordingButton.Content = _recorder.IsRecording ? "Pause" : "Resume";
         StatusText.Text = _recorder.IsRecording
             ? "Recording foreground window activity with timestamps."
             : "Recording is paused.";
@@ -235,40 +211,11 @@ public partial class MainWindow : Window
         Hide();
     }
 
-    private void StartWithWindowsCheckBox_Changed(object sender, RoutedEventArgs e)
-    {
-        if (_isUpdatingStartupCheckBox)
-        {
-            return;
-        }
-
-        _startupRegistration.SetEnabled(StartWithWindowsCheckBox.IsChecked == true);
-    }
-
-    private void OpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-    {
-        if (_isUpdatingOpacitySlider || !_canSaveOpacity)
-        {
-            return;
-        }
-
-        var opacity = Math.Clamp(OpacitySlider.Value / 100, 0.55, 1.0);
-        ApplySurfaceTransparency(opacity);
-        OpacityValueText.Text = $"{Math.Round(OpacitySlider.Value)}%";
-        _preferences.Opacity = opacity;
-        _preferences.Save();
-    }
-
     private void ApplySavedOpacity()
     {
         var opacity = Math.Clamp(_preferences.Opacity, 0.55, 1.0);
         Opacity = 1.0;
         ApplySurfaceTransparency(opacity);
-
-        _isUpdatingOpacitySlider = true;
-        OpacitySlider.Value = opacity * 100;
-        OpacityValueText.Text = $"{Math.Round(OpacitySlider.Value)}%";
-        _isUpdatingOpacitySlider = false;
     }
 
     private void ApplySurfaceTransparency(double opacity)
@@ -280,6 +227,28 @@ public partial class MainWindow : Window
         RailSurface.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(panelAlpha, 241, 245, 249));
         TopCommandSurface.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(panelAlpha, 255, 255, 255));
         DetailSurface.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(panelAlpha, 255, 255, 255));
+    }
+
+    private void SettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        var settingsWindow = new SettingsWindow(
+            _recorder,
+            _startupRegistration,
+            _preferences.Opacity,
+            SaveOpacity,
+            UpdateRecordingStatus)
+        {
+            Owner = this
+        };
+
+        settingsWindow.ShowDialog();
+    }
+
+    private void SaveOpacity(double opacity)
+    {
+        _preferences.Opacity = Math.Clamp(opacity, 0.55, 1.0);
+        ApplySurfaceTransparency(_preferences.Opacity);
+        _preferences.Save();
     }
 
     private void DragSurface_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
