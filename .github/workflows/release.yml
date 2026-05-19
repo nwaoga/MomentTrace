@@ -44,7 +44,7 @@ jobs:
           "ARTIFACT_NAME=MomentTrace-$version-win-x64" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Restore
-        run: dotnet restore .\MomentTrace.slnx
+        run: dotnet restore .\MomentTrace.App\MomentTrace.App.csproj --runtime win-x64
 
       - name: Publish Windows app
         run: >
