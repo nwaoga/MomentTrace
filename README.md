@@ -99,6 +99,24 @@ The published executable is written to:
 publish\win-x64\MomentTrace.App.exe
 ```
 
+## CI And Releases
+
+GitHub Actions are used for build checks and downloadable releases:
+
+- `.github/workflows/ci.yml` builds the solution on pushes and pull requests to `main`.
+- `.github/workflows/release.yml` creates a versioned Windows zip and attaches it to a GitHub Release.
+
+To create a release from Git:
+
+```powershell
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The release workflow validates the `vMAJOR.MINOR.PATCH` tag format, publishes the app as a self-contained Windows `win-x64` build, stamps the assembly/file version, creates a zip named like `MomentTrace-0.1.0-win-x64.zip`, and uploads it to the GitHub Release.
+
+You can also run the **Release** workflow manually in GitHub Actions and provide a version such as `v0.1.0`.
+
 ## Development Notes
 
 - Keep platform-neutral logic in `MomentTrace.Core` and `MomentTrace.Storage`.

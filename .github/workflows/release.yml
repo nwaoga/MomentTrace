@@ -1,0 +1,90 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version, for example v0.1.0"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Resolve version
+        shell: pwsh
+        run: |
+          $tag = if ("${{ github.event_name }}" -eq "workflow_dispatch") { "${{ inputs.version }}" } else { "${{ github.ref_name }}" }
+          if ($tag -notmatch '^v\d+\.\d+\.\d+$') {
+            throw "Version must use vMAJOR.MINOR.PATCH format, for example v0.1.0."
+          }
+
+          $version = $tag.TrimStart('v')
+          "RELEASE_TAG=$tag" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "PACKAGE_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "ARTIFACT_NAME=MomentTrace-$version-win-x64" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Restore
+        run: dotnet restore .\MomentTrace.slnx
+
+      - name: Publish Windows app
+        run: >
+          dotnet publish .\MomentTrace.App\MomentTrace.App.csproj
+          --configuration Release
+          --runtime win-x64
+          --self-contained true
+          --no-restore
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:Version=${{ env.PACKAGE_VERSION }}
+          -p:AssemblyVersion=${{ env.PACKAGE_VERSION }}.0
+          -p:FileVersion=${{ env.PACKAGE_VERSION }}.0
+          -p:InformationalVersion=${{ env.RELEASE_TAG }}
+          --output .\artifacts\${{ env.ARTIFACT_NAME }}
+
+      - name: Package zip
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path .\dist | Out-Null
+          Compress-Archive -Path ".\artifacts\${{ env.ARTIFACT_NAME }}\*" -DestinationPath ".\dist\${{ env.ARTIFACT_NAME }}.zip" -Force
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: .\dist\${{ env.ARTIFACT_NAME }}.zip
+
+      - name: Create GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $notes = @"
+          MomentTrace ${{ env.RELEASE_TAG }}
+
+          Download the Windows build below and extract the zip to run MomentTrace.App.exe.
+          "@
+
+          gh release create "${{ env.RELEASE_TAG }}" ".\dist\${{ env.ARTIFACT_NAME }}.zip" `
+            --title "MomentTrace ${{ env.RELEASE_TAG }}" `
+            --notes $notes `
+            --target "${{ github.sha }}"
