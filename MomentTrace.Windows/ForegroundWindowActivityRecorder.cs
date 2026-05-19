@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using FlaUI.Core.Definitions;
+using FlaUI.UIA3;
 using MomentTrace.Core;
 
 namespace MomentTrace.Windows;
@@ -111,6 +113,7 @@ public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IAc
             WindowTitle = snapshot.WindowTitle,
             ProcessName = snapshot.ProcessName,
             ExecutablePath = snapshot.ExecutablePath,
+            Resource = snapshot.Resource,
             Kind = ActivityClassifier.Classify(snapshot.ProcessName),
             StartedAt = now,
             EndedAt = now
@@ -131,12 +134,13 @@ public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IAc
         _currentSnapshot = null;
     }
 
-    private sealed record Snapshot(string ProcessName, string AppName, string WindowTitle, string? ExecutablePath)
+    private sealed record Snapshot(string ProcessName, string AppName, string WindowTitle, string? ExecutablePath, string? Resource)
     {
         public bool SameActivity(Snapshot other)
         {
             return string.Equals(ProcessName, other.ProcessName, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(WindowTitle, other.WindowTitle, StringComparison.Ordinal);
+                && string.Equals(WindowTitle, other.WindowTitle, StringComparison.Ordinal)
+                && string.Equals(Resource, other.Resource, StringComparison.OrdinalIgnoreCase);
         }
 
         public static Snapshot? Capture()
@@ -161,8 +165,10 @@ public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IAc
                 var processName = process.ProcessName;
                 var executablePath = TryGetExecutablePath(process);
                 var appName = TryGetDisplayName(process, executablePath);
+                var kind = ActivityClassifier.Classify(processName);
+                var resource = kind == MomentTrace.Core.ActivityKind.Browser ? TryGetBrowserUrl(handle) : null;
 
-                return new Snapshot(processName, appName, title.Trim(), executablePath);
+                return new Snapshot(processName, appName, title.Trim(), executablePath, resource);
             }
             catch
             {
@@ -188,6 +194,61 @@ public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IAc
             }
 
             return process.ProcessName;
+        }
+
+        private static string? TryGetBrowserUrl(IntPtr handle)
+        {
+            try
+            {
+                using var automation = new UIA3Automation();
+                var root = automation.FromHandle(handle);
+                var edits = root.FindAllDescendants(condition => condition.ByControlType(ControlType.Edit));
+
+                foreach (var edit in edits)
+                {
+                    var value = edit.Patterns.Value.PatternOrDefault?.Value;
+                    if (TryNormalizeUrl(value, out var url))
+                    {
+                        return url;
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            return null;
+        }
+
+        private static bool TryNormalizeUrl(string? value, out string url)
+        {
+            url = string.Empty;
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+
+            var candidate = value.Trim();
+            if (!candidate.Contains('.', StringComparison.Ordinal) || candidate.Contains(' ', StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            if (!candidate.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+                && !candidate.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                candidate = $"https://{candidate}";
+            }
+
+            if (!Uri.TryCreate(candidate, UriKind.Absolute, out var uri)
+                || uri.Scheme is not ("http" or "https")
+                || string.IsNullOrWhiteSpace(uri.Host))
+            {
+                return false;
+            }
+
+            url = uri.ToString();
+            return true;
         }
 
         private static string? TryGetExecutablePath(Process process)

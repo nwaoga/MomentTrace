@@ -195,15 +195,31 @@ public partial class MainWindow : Window
 
         try
         {
-            var target = !string.IsNullOrWhiteSpace(selected.ExecutablePath)
-                ? selected.ExecutablePath
-                : selected.ProcessName;
+            var target = GetOpenTarget(selected);
             Process.Start(new ProcessStartInfo(target) { UseShellExecute = true });
         }
         catch
         {
             System.Media.SystemSounds.Exclamation.Play();
         }
+    }
+
+    private static string GetOpenTarget(ActivityItemViewModel activity)
+    {
+        if (IsWebUrl(activity.Resource))
+        {
+            return activity.Resource!;
+        }
+
+        return !string.IsNullOrWhiteSpace(activity.ExecutablePath)
+            ? activity.ExecutablePath
+            : activity.ProcessName;
+    }
+
+    private static bool IsWebUrl(string? value)
+    {
+        return Uri.TryCreate(value, UriKind.Absolute, out var uri)
+            && uri.Scheme is "http" or "https";
     }
 
     private void MinimizeButton_Click(object sender, RoutedEventArgs e)

@@ -10,4 +10,8 @@
     <ProjectReference Include="..\MomentTrace.Core\MomentTrace.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="FlaUI.UIA3" Version="4.0.0" />
+  </ItemGroup>
+
 </Project>

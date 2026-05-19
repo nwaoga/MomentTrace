@@ -22,6 +22,8 @@ public sealed class ActivityItemViewModel(TimelineActivity activity)
 
     public string? ExecutablePath => Activity.ExecutablePath;
 
+    public string? Resource => Activity.Resource;
+
     public ImageSource? ProgramIcon => IconCache.GetIcon(Activity.ExecutablePath);
 
     public string Kind => Activity.Kind.ToString();
@@ -80,7 +82,7 @@ public sealed class ActivityItemViewModel(TimelineActivity activity)
 
     public string Location => Activity.Kind switch
     {
-        ActivityKind.Browser => "Web activity",
+        ActivityKind.Browser => string.IsNullOrWhiteSpace(Activity.Resource) ? "Web activity" : Activity.Resource,
         ActivityKind.Document => "Documents",
         ActivityKind.Development => "Developer workspace",
         ActivityKind.System => "Windows",
