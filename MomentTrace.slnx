@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="MomentTrace.App/MomentTrace.App.csproj" />
+  <Project Path="MomentTrace.Core/MomentTrace.Core.csproj" />
+  <Project Path="MomentTrace.Storage/MomentTrace.Storage.csproj" />
+  <Project Path="MomentTrace.Windows/MomentTrace.Windows.csproj" />
+</Solution>
