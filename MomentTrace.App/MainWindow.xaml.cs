@@ -156,6 +156,8 @@ public partial class MainWindow : Window
             DetailProcessText.Text = string.Empty;
             DetailIconImage.Source = null;
             DetailIconFallbackText.Visibility = Visibility.Visible;
+            ScreenshotPreviewImage.Source = null;
+            ScreenshotPreviewBorder.Visibility = Visibility.Collapsed;
             return;
         }
 
@@ -172,6 +174,8 @@ public partial class MainWindow : Window
         DetailIconImage.Source = selected.ProgramIcon;
         DetailIconFallbackText.Text = selected.IconGlyph;
         DetailIconFallbackText.Visibility = selected.ProgramIcon is null ? Visibility.Visible : Visibility.Collapsed;
+        ScreenshotPreviewImage.Source = selected.ScreenshotPreview;
+        ScreenshotPreviewBorder.Visibility = selected.ScreenshotPreview is null ? Visibility.Collapsed : Visibility.Visible;
         PinButton.Content = activity.IsPinned ? "Unpin" : "Pin";
     }
 

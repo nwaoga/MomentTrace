@@ -24,6 +24,10 @@ public sealed class ActivityItemViewModel(TimelineActivity activity)
 
     public string? Resource => Activity.Resource;
 
+    public string? ScreenshotPath => Activity.ScreenshotPath;
+
+    public ImageSource? ScreenshotPreview => ImageCache.GetImage(Activity.ScreenshotPath);
+
     public ImageSource? ProgramIcon => IconCache.GetIcon(Activity.ExecutablePath);
 
     public string Kind => Activity.Kind.ToString();
@@ -170,6 +174,43 @@ file static class IconCache
             source.Freeze();
             Cache[path] = source;
             return source;
+        }
+        catch
+        {
+            Cache[path] = null;
+            return null;
+        }
+    }
+}
+
+file static class ImageCache
+{
+    private static readonly Dictionary<string, ImageSource?> Cache = new(StringComparer.OrdinalIgnoreCase);
+
+    public static ImageSource? GetImage(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+        {
+            return null;
+        }
+
+        if (Cache.TryGetValue(path, out var cached))
+        {
+            return cached;
+        }
+
+        try
+        {
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.DecodePixelWidth = 420;
+            image.UriSource = new Uri(path, UriKind.Absolute);
+            image.EndInit();
+            image.Freeze();
+
+            Cache[path] = image;
+            return image;
         }
         catch
         {

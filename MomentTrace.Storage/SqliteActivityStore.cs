@@ -41,6 +41,7 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
                 process_name TEXT NOT NULL,
                 executable_path TEXT NULL,
                 resource TEXT NULL,
+                screenshot_path TEXT NULL,
                 kind TEXT NOT NULL,
                 started_at TEXT NOT NULL,
                 ended_at TEXT NOT NULL,
@@ -53,6 +54,7 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
 
         await command.ExecuteNonQueryAsync(cancellationToken);
         await EnsureColumnAsync(connection, "executable_path", "TEXT NULL", cancellationToken);
+        await EnsureColumnAsync(connection, "screenshot_path", "TEXT NULL", cancellationToken);
     }
 
     public async Task<long> AddAsync(TimelineActivity activity, CancellationToken cancellationToken = default)
@@ -63,10 +65,10 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
         var command = connection.CreateCommand();
         command.CommandText = """
             INSERT INTO activities (
-                app_name, window_title, process_name, executable_path, resource, kind, started_at, ended_at, is_pinned
+                app_name, window_title, process_name, executable_path, resource, screenshot_path, kind, started_at, ended_at, is_pinned
             )
             VALUES (
-                $app_name, $window_title, $process_name, $executable_path, $resource, $kind, $started_at, $ended_at, $is_pinned
+                $app_name, $window_title, $process_name, $executable_path, $resource, $screenshot_path, $kind, $started_at, $ended_at, $is_pinned
             );
             SELECT last_insert_rowid();
             """;
@@ -132,7 +134,7 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
 
         command.Parameters.AddWithValue("$limit", Math.Clamp(query.Limit, 1, 1000));
         command.CommandText = $"""
-            SELECT id, app_name, window_title, process_name, executable_path, resource, kind, started_at, ended_at, is_pinned
+            SELECT id, app_name, window_title, process_name, executable_path, resource, screenshot_path, kind, started_at, ended_at, is_pinned
             FROM activities
             {(filters.Count > 0 ? "WHERE " + string.Join(" AND ", filters) : string.Empty)}
             ORDER BY is_pinned DESC, started_at DESC
@@ -168,6 +170,7 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
         command.Parameters.AddWithValue("$process_name", activity.ProcessName);
         command.Parameters.AddWithValue("$executable_path", (object?)activity.ExecutablePath ?? DBNull.Value);
         command.Parameters.AddWithValue("$resource", (object?)activity.Resource ?? DBNull.Value);
+        command.Parameters.AddWithValue("$screenshot_path", (object?)activity.ScreenshotPath ?? DBNull.Value);
         command.Parameters.AddWithValue("$kind", activity.Kind.ToString());
         command.Parameters.AddWithValue("$started_at", activity.StartedAt.ToString("O"));
         command.Parameters.AddWithValue("$ended_at", activity.EndedAt.ToString("O"));
@@ -184,10 +187,11 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
             ProcessName = reader.GetString(3),
             ExecutablePath = reader.IsDBNull(4) ? null : reader.GetString(4),
             Resource = reader.IsDBNull(5) ? null : reader.GetString(5),
-            Kind = Enum.TryParse<ActivityKind>(reader.GetString(6), out var kind) ? kind : ActivityKind.App,
-            StartedAt = DateTimeOffset.Parse(reader.GetString(7)),
-            EndedAt = DateTimeOffset.Parse(reader.GetString(8)),
-            IsPinned = reader.GetInt32(9) == 1
+            ScreenshotPath = reader.IsDBNull(6) ? null : reader.GetString(6),
+            Kind = Enum.TryParse<ActivityKind>(reader.GetString(7), out var kind) ? kind : ActivityKind.App,
+            StartedAt = DateTimeOffset.Parse(reader.GetString(8)),
+            EndedAt = DateTimeOffset.Parse(reader.GetString(9)),
+            IsPinned = reader.GetInt32(10) == 1
         };
     }
 

@@ -370,6 +370,18 @@
                 </Grid>
 
                 <StackPanel Grid.Row="3">
+                    <Border x:Name="ScreenshotPreviewBorder"
+                            Height="150"
+                            Background="#EEF2F7"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            ClipToBounds="True"
+                            Margin="0,0,0,18"
+                            Visibility="Collapsed">
+                        <Image x:Name="ScreenshotPreviewImage" Stretch="UniformToFill" />
+                    </Border>
+
                     <Grid Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="105" />

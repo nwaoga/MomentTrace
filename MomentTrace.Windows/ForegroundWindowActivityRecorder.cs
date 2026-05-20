@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Text;
 using FlaUI.Core.Definitions;
@@ -114,6 +116,7 @@ public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IAc
             ProcessName = snapshot.ProcessName,
             ExecutablePath = snapshot.ExecutablePath,
             Resource = snapshot.Resource,
+            ScreenshotPath = snapshot.ScreenshotPath,
             Kind = ActivityClassifier.Classify(snapshot.ProcessName),
             StartedAt = now,
             EndedAt = now
@@ -134,7 +137,7 @@ public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IAc
         _currentSnapshot = null;
     }
 
-    private sealed record Snapshot(string ProcessName, string AppName, string WindowTitle, string? ExecutablePath, string? Resource)
+    private sealed record Snapshot(string ProcessName, string AppName, string WindowTitle, string? ExecutablePath, string? Resource, string? ScreenshotPath)
     {
         public bool SameActivity(Snapshot other)
         {
@@ -167,8 +170,9 @@ public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IAc
                 var appName = TryGetDisplayName(process, executablePath);
                 var kind = ActivityClassifier.Classify(processName);
                 var resource = kind == MomentTrace.Core.ActivityKind.Browser ? TryGetBrowserUrl(handle) : null;
+                var screenshotPath = kind == MomentTrace.Core.ActivityKind.Browser ? TryCaptureScreenshot(handle) : null;
 
-                return new Snapshot(processName, appName, title.Trim(), executablePath, resource);
+                return new Snapshot(processName, appName, title.Trim(), executablePath, resource, screenshotPath);
             }
             catch
             {
@@ -218,6 +222,45 @@ public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IAc
             }
 
             return null;
+        }
+
+        private static string? TryCaptureScreenshot(IntPtr handle)
+        {
+            try
+            {
+                if (!GetWindowRect(handle, out var rect))
+                {
+                    return null;
+                }
+
+                var width = rect.Right - rect.Left;
+                var height = rect.Bottom - rect.Top;
+                if (width <= 0 || height <= 0)
+                {
+                    return null;
+                }
+
+                var screenshotDirectory = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "MomentTrace",
+                    "screenshots");
+                Directory.CreateDirectory(screenshotDirectory);
+
+                var screenshotPath = Path.Combine(
+                    screenshotDirectory,
+                    $"{DateTimeOffset.Now:yyyyMMdd-HHmmss-fff}-{Guid.NewGuid():N}.png");
+
+                using var bitmap = new Bitmap(width, height);
+                using var graphics = Graphics.FromImage(bitmap);
+                graphics.CopyFromScreen(rect.Left, rect.Top, 0, 0, new Size(width, height));
+                bitmap.Save(screenshotPath, ImageFormat.Png);
+
+                return screenshotPath;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private static bool TryNormalizeUrl(string? value, out string url)
@@ -299,10 +342,23 @@ public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IAc
             ProcessName = activity.ProcessName,
             ExecutablePath = activity.ExecutablePath,
             Resource = activity.Resource,
+            ScreenshotPath = activity.ScreenshotPath,
             Kind = activity.Kind,
             StartedAt = activity.StartedAt,
             EndedAt = activity.EndedAt,
             IsPinned = activity.IsPinned
         };
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private readonly struct WindowRect
+    {
+        public readonly int Left;
+        public readonly int Top;
+        public readonly int Right;
+        public readonly int Bottom;
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool GetWindowRect(IntPtr hWnd, out WindowRect lpRect);
 }
