@@ -4,6 +4,16 @@ MomentTrace is a Windows-first desktop app that builds a private timeline of you
 
 The long-term goal is a cross-platform desktop timeline for Windows and macOS. The current implementation focuses on a shippable Windows MVP while keeping the core model and storage code separate from Windows-specific integrations.
 
+## Preview
+
+![MomentTrace main timeline view](docs/assets/momenttrace-main-timeline.png)
+
+MomentTrace runs quietly in the Windows tray and records foreground app/window activity with timestamps. The app stores the timeline locally in SQLite, then lets you search, filter, pin, and inspect each activity from the desktop UI.
+
+![MomentTrace timeline activity list](docs/assets/momenttrace-timeline-detail.png)
+
+When browser activity is detected, MomentTrace attempts to capture the active URL with Windows UI Automation. Browser activities can also save local PNG screenshots under `%AppData%\MomentTrace\screenshots`, which gives the future card view visual previews while keeping captured data on the user's machine.
+
 ## Current Features
 
 - Native Windows desktop UI built with WPF
