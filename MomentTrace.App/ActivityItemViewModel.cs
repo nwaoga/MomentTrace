@@ -12,6 +12,22 @@ public sealed class ActivityItemViewModel(TimelineActivity activity)
 {
     public TimelineActivity Activity { get; private set; } = activity;
 
+    private readonly DateTimeOffset _sessionStartedAt = activity.StartedAt;
+    private readonly DateTimeOffset _sessionEndedAt = activity.EndedAt;
+    private readonly int _occurrenceCount = 1;
+
+    public ActivityItemViewModel(
+        TimelineActivity activity,
+        DateTimeOffset sessionStartedAt,
+        DateTimeOffset sessionEndedAt,
+        int occurrenceCount)
+        : this(activity)
+    {
+        _sessionStartedAt = sessionStartedAt;
+        _sessionEndedAt = sessionEndedAt;
+        _occurrenceCount = Math.Max(1, occurrenceCount);
+    }
+
     public long Id => Activity.Id;
 
     public string Title => Activity.DisplayTitle;
@@ -121,22 +137,32 @@ public sealed class ActivityItemViewModel(TimelineActivity activity)
 
     public string StartTime => Activity.StartedAt.LocalDateTime.ToString("h:mm tt");
 
-    public string TimeRange => $"{Activity.StartedAt.LocalDateTime:t} - {Activity.EndedAt.LocalDateTime:t}";
+    public DateTimeOffset SessionStartedAt => _sessionStartedAt;
 
-    public string Timestamp => Activity.StartedAt.LocalDateTime.ToString("dddd, d MMM yyyy HH:mm:ss");
+    public DateTimeOffset SessionEndedAt => _sessionEndedAt;
+
+    public string TimeRange => $"{_sessionStartedAt.LocalDateTime:t} - {_sessionEndedAt.LocalDateTime:t}";
+
+    public string CardTime => _occurrenceCount > 1 ? TimeRange : StartTime;
+
+    public string Timestamp => _sessionStartedAt.LocalDateTime.ToString("dddd, d MMM yyyy HH:mm:ss");
 
     public string Duration
     {
         get
         {
-            if (Activity.Duration.TotalMinutes >= 1)
+            var duration = _sessionEndedAt > _sessionStartedAt ? _sessionEndedAt - _sessionStartedAt : Activity.Duration;
+
+            if (duration.TotalMinutes >= 1)
             {
-                return $"{Math.Max(1, (int)Math.Round(Activity.Duration.TotalMinutes))} min";
+                return $"{Math.Max(1, (int)Math.Round(duration.TotalMinutes))} min";
             }
 
-            return $"{Math.Max(1, (int)Math.Round(Activity.Duration.TotalSeconds))} sec";
+            return $"{Math.Max(1, (int)Math.Round(duration.TotalSeconds))} sec";
         }
     }
+
+    public string OccurrenceLabel => _occurrenceCount > 1 ? $"{_occurrenceCount} entries" : KindLabel;
 
     public string PinMark => Activity.IsPinned ? "PINNED" : string.Empty;
 

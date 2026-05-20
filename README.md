@@ -6,18 +6,19 @@ The long-term goal is a cross-platform desktop timeline for Windows and macOS. T
 
 ## Preview
 
-![MomentTrace main timeline view](docs/assets/momenttrace-main-timeline.png)
+![MomentTrace dark card timeline](docs/assets/momenttrace-dark-card-timeline.png)
 
-MomentTrace runs quietly in the Windows tray and records foreground app/window activity with timestamps. The app stores the timeline locally in SQLite, then lets you search, filter, pin, and inspect each activity from the desktop UI.
+MomentTrace now uses a dark Windows Timeline-inspired workspace: left navigation, search/filter controls, grouped horizontal activity sections, compact cards with app icons or website screenshots, and a right-hand detail rail.
 
 ![MomentTrace timeline activity list](docs/assets/momenttrace-timeline-detail.png)
 
-When browser activity is detected, MomentTrace attempts to capture the active URL with Windows UI Automation. Browser activities can also save local PNG screenshots under `%AppData%\MomentTrace\screenshots`, which gives the future card view visual previews while keeping captured data on the user's machine.
+The recorder is session based. It polls the foreground window, keeps the same activity open while the app/window/resource remains active, and collapses repeated sequential entries in the UI so noisy history reads as one continuous moment. When browser activity is detected, MomentTrace attempts to capture the active URL with Windows UI Automation and saves a local PNG screenshot only when a new browser session starts.
 
 ## Current Features
 
 - Native Windows desktop UI built with WPF
-- Foreground app/window activity recording
+- Dark grouped timeline with card and list view modes
+- Foreground app/window activity recording with session collapsing
 - Start recording when the app launches
 - Optional "Start with Windows" setting
 - Minimize-to-tray behavior
@@ -26,7 +27,11 @@ When browser activity is detected, MomentTrace attempts to capture the active UR
 - Local SQLite storage
 - Search, activity type filtering, pinning, and detail view
 - Real app icon extraction when executable metadata is available
-- Transparent desktop window with an in-app transparency slider
+- Browser URL capture and local screenshot previews
+- Single-instance behavior that brings the running app back when launched again
+- Settings modal with startup, recording, timeline view mode, and appearance controls
+- "Where I Live" diagnostics for install, database, settings, and screenshot locations
+- Dark surface tint control in settings
 
 ## Project Structure
 
@@ -77,9 +82,12 @@ MomentTrace stores user data locally:
 ```text
 %AppData%\MomentTrace\timeline.db
 %AppData%\MomentTrace\settings.json
+%AppData%\MomentTrace\screenshots\
 ```
 
 Older prototype data from `%AppData%\NwaogaTimeline` is copied into the new MomentTrace folder the first time the renamed app runs.
+
+The app currently keeps captured history on the local machine. The database and screenshots are intentionally stored under the user's AppData folder so future privacy controls can delete, export, or exclude activity without depending on a cloud service.
 
 ## Startup Behavior
 
@@ -90,6 +98,19 @@ HKCU\Software\Microsoft\Windows\CurrentVersion\Run
 ```
 
 The startup command launches MomentTrace with `--minimized`, so recording starts quietly and the app lives in the tray.
+
+MomentTrace also uses a single-instance guard. If the app is already running, launching it again signals the existing instance and brings the current window back instead of opening a duplicate recorder.
+
+## Recording Model
+
+The Windows recorder lives in `MomentTrace.Windows` and currently:
+
+- Polls the foreground window every few seconds
+- Opens a new timeline activity when the active app, title, or browser URL changes
+- Extends the current activity while the same item remains active
+- Throttles duration updates to reduce database writes
+- Captures browser screenshots only when a new browser session starts
+- Closes the active session cleanly when recording stops or the app exits
 
 ## Publish A Standalone Windows Build
 
@@ -127,17 +148,20 @@ The release workflow validates the `vMAJOR.MINOR.PATCH` tag format, publishes th
 
 You can also run the **Release** workflow manually in GitHub Actions and provide a version such as `v0.1.0`.
 
+For Azure DevOps planning, current implementation work is tracked in the MomentTrace project and commits can reference work items with `AB#<id>` in the commit message.
+
 ## Development Notes
 
 - Keep platform-neutral logic in `MomentTrace.Core` and `MomentTrace.Storage`.
 - Keep Windows API, registry, tray, and executable-icon behavior in `MomentTrace.Windows` or `MomentTrace.App`.
+- Keep captured user data local-first unless a future feature explicitly asks for sync.
 - Do not commit `bin`, `obj`, `.vs`, `publish`, or local user settings.
 - Treat privacy as a product feature: activity history is local-first, and future recording controls should make data capture obvious and user-controlled.
 
 ## Roadmap
 
-- Harden long-running Windows recording behavior
-- Improve the timeline and card-style views
+- Improve automatic session naming and related activity grouping
+- Add richer website/app card previews and selectable/collapsible timeline sections
 - Add privacy controls for deleting, exporting, and excluding activity
 - Create a proper Windows installer with icon, shortcuts, and uninstall support
 - Plan the cross-platform desktop path, likely with Avalonia for Windows/macOS UI reuse

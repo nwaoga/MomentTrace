@@ -9,6 +9,8 @@ public sealed class WindowPreferences
 
     public double Opacity { get; set; } = 1.0;
 
+    public string TimelineViewMode { get; set; } = "Cards";
+
     public static string PreferencesPath
     {
         get

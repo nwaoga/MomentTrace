@@ -49,6 +49,17 @@
                     <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,24,0,20" />
 
                     <TextBlock Text="Appearance" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,12" />
+                    <DockPanel Margin="0,0,0,10">
+                        <StackPanel DockPanel.Dock="Left">
+                            <TextBlock Text="Timeline view" Foreground="{StaticResource MutedTextBrush}" />
+                            <TextBlock Text="Choose compact rows or Windows Timeline-style cards." Margin="0,4,0,0" FontSize="12" Foreground="{StaticResource MutedTextBrush}" />
+                        </StackPanel>
+                        <ComboBox x:Name="TimelineViewModeComboBox" Width="190" HorizontalAlignment="Right" SelectionChanged="TimelineViewModeComboBox_SelectionChanged">
+                            <ComboBoxItem Content="Cards" />
+                            <ComboBoxItem Content="List" />
+                        </ComboBox>
+                    </DockPanel>
+
                     <DockPanel Margin="0,0,0,8">
                         <TextBlock Text="Transparency" Foreground="{StaticResource MutedTextBrush}" DockPanel.Dock="Left" />
                         <TextBlock x:Name="OpacityValueText" Foreground="{StaticResource TextBrush}" HorizontalAlignment="Right" />

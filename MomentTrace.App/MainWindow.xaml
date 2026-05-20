@@ -2,10 +2,10 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MomentTrace"
-        Height="760"
-        Width="1320"
-        MinHeight="650"
-        MinWidth="1080"
+        Height="900"
+        Width="1500"
+        MinHeight="720"
+        MinWidth="1180"
         Background="Transparent"
         AllowsTransparency="True"
         WindowStyle="None"
@@ -13,36 +13,57 @@
         FontFamily="Segoe UI"
         Closing="Window_Closing">
     <Window.Resources>
+        <SolidColorBrush x:Key="PageBackgroundBrush" Color="#08111F" />
+        <SolidColorBrush x:Key="RailBrush" Color="#101B2C" />
+        <SolidColorBrush x:Key="PanelBrush" Color="#121D2F" />
+        <SolidColorBrush x:Key="SubtlePanelBrush" Color="#172337" />
+        <SolidColorBrush x:Key="BorderBrush" Color="#26344D" />
+        <SolidColorBrush x:Key="TextBrush" Color="#F4F7FB" />
+        <SolidColorBrush x:Key="MutedTextBrush" Color="#A5B0C3" />
+        <SolidColorBrush x:Key="AccentBrush" Color="#8B5CF6" />
+        <SolidColorBrush x:Key="AccentSoftBrush" Color="#2C2154" />
+
         <Style x:Key="ChromeButton" TargetType="Button">
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Padding" Value="14,8" />
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="BorderBrush" Value="#34425C" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Background" Value="#F2FFFFFF" />
+            <Setter Property="Background" Value="#1A263A" />
             <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                        <Border x:Name="ButtonRoot"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="7"
+                                Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonRoot" Property="Background" Value="#24334C" />
+                                <Setter TargetName="ButtonRoot" Property="BorderBrush" Value="#50617E" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
 
         <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource ChromeButton}">
-            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+            <Setter Property="Background" Value="#7C5CFF" />
+            <Setter Property="BorderBrush" Value="#8B6DFF" />
             <Setter Property="Foreground" Value="#FFFFFF" />
         </Style>
 
         <Style x:Key="RailButton" TargetType="Button">
             <Setter Property="FontSize" Value="14" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
-            <Setter Property="Padding" Value="14,10" />
+            <Setter Property="Padding" Value="12,10" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
@@ -50,9 +71,17 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                        <Border x:Name="RailButtonRoot"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="7"
+                                Padding="{TemplateBinding Padding}">
                             <ContentPresenter />
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="RailButtonRoot" Property="Background" Value="#1A2941" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -60,17 +89,19 @@
 
         <Style TargetType="TextBox">
             <Setter Property="FontSize" Value="14" />
-            <Setter Property="Padding" Value="14,10" />
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="Padding" Value="40,11,14,11" />
+            <Setter Property="BorderBrush" Value="#293751" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Background" Value="#F2FFFFFF" />
+            <Setter Property="Background" Value="#101A2B" />
             <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+            <Setter Property="CaretBrush" Value="{StaticResource TextBrush}" />
         </Style>
 
         <Style TargetType="ComboBox">
             <Setter Property="FontSize" Value="13" />
             <Setter Property="Padding" Value="10,7" />
-            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="Background" Value="#101A2B" />
+            <Setter Property="Foreground" Value="#111827" />
         </Style>
 
         <Style TargetType="ListBoxItem">
@@ -81,433 +112,463 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
-                        <Border x:Name="ItemRoot" Background="{TemplateBinding Background}">
+                        <Border Background="{TemplateBinding Background}">
                             <ContentPresenter />
                         </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="ItemRoot" Property="Background" Value="#F2F8FF" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-    </Window.Resources>
 
-    <Border x:Name="WindowSurface"
-            Background="#EAF6F8FB"
-            BorderBrush="#88D9E1EA"
-            BorderThickness="1"
-            CornerRadius="8"
-            ClipToBounds="True">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="220" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="360" />
-        </Grid.ColumnDefinitions>
+        <ItemsPanelTemplate x:Key="TimelineListItemsPanel">
+            <StackPanel />
+        </ItemsPanelTemplate>
 
-        <Border x:Name="RailSurface" Grid.Column="0" Background="#EAF1F5F9" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
-            <Grid Margin="16,20">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+        <ItemsPanelTemplate x:Key="TimelineCardItemsPanel">
+            <WrapPanel Orientation="Horizontal" />
+        </ItemsPanelTemplate>
 
-                <DockPanel>
-                    <Border Width="32" Height="32" CornerRadius="4" Background="{StaticResource AccentBrush}" DockPanel.Dock="Left">
-                        <TextBlock Text="▣" FontSize="17" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Border>
-                    <TextBlock Text="Timeline" Margin="12,5,0,0" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
-                </DockPanel>
-
-                <StackPanel Grid.Row="1" Margin="0,34,0,0">
-                    <Border Background="#E8EEF6" CornerRadius="4" Padding="0" Margin="0,0,0,8">
-                        <Button Style="{StaticResource RailButton}" Click="TodayButton_Click">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="▣" Width="28" Foreground="{StaticResource AccentBrush}" />
-                                <TextBlock Text="Timeline" FontWeight="SemiBold" />
-                            </StackPanel>
-                        </Button>
-                    </Border>
-                    <Button Style="{StaticResource RailButton}" Click="TodayButton_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="◎" Width="28" />
-                            <TextBlock Text="Overview" />
-                        </StackPanel>
-                    </Button>
-                    <Button Style="{StaticResource RailButton}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="☑" Width="28" />
-                            <TextBlock Text="Tasks" />
-                        </StackPanel>
-                    </Button>
-                    <Button Style="{StaticResource RailButton}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="◰" Width="28" />
-                            <TextBlock Text="Notes" />
-                        </StackPanel>
-                    </Button>
-                    <Button Style="{StaticResource RailButton}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="□" Width="28" />
-                            <TextBlock Text="Files" />
-                        </StackPanel>
-                    </Button>
-                    <Button Style="{StaticResource RailButton}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="◌" Width="28" />
-                            <TextBlock Text="Web" />
-                        </StackPanel>
-                    </Button>
-                    <Button Style="{StaticResource RailButton}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="▦" Width="28" />
-                            <TextBlock Text="Apps" />
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-
-                <StackPanel Grid.Row="2" Margin="0,22,0,0">
-                    <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,0,0,18" />
-                    <TextBlock Text="Pinned" FontSize="13" Foreground="{StaticResource MutedTextBrush}" Margin="8,0,0,12" />
-                    <Button Style="{StaticResource RailButton}" Click="PinnedButton_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="☁" Width="28" />
-                            <TextBlock Text="Pinned items" />
-                        </StackPanel>
-                    </Button>
-                    <Button Style="{StaticResource RailButton}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="▣" Width="28" Foreground="#185ABD" />
-                            <TextBlock Text="Documents" />
-                        </StackPanel>
-                    </Button>
-                    <Button Style="{StaticResource RailButton}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🌐" Width="28" />
-                            <TextBlock Text="Websites" />
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-
-                <StackPanel Grid.Row="3">
-                    <Button Style="{StaticResource RailButton}" Click="SettingsButton_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="⚙" Width="28" />
-                            <TextBlock Text="Settings" />
-                        </StackPanel>
-                    </Button>
-                    <DockPanel Margin="4,20,0,0">
-                        <Border Width="34" Height="34" CornerRadius="17" Background="#4C9A9A" DockPanel.Dock="Left">
-                            <TextBlock Text="AJ" FontSize="13" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                        <TextBlock Text="Avery Johnson" Margin="12,8,0,0" FontSize="13" Foreground="{StaticResource TextBrush}" />
-                    </DockPanel>
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="68" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <Border x:Name="TopCommandSurface" Grid.Row="0" Background="#EAFFFFFF" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown">
-                <Grid Margin="20,12">
+        <DataTemplate x:Key="TimelineListItemTemplate">
+            <Border Margin="0,0,10,10" Padding="12" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Background="#172337">
+                <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="34" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="132" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="120" />
                     </Grid.ColumnDefinitions>
-                    <Grid>
-                        <TextBox x:Name="SearchBox" TextChanged="SearchBox_TextChanged" VerticalAlignment="Center" />
-                        <TextBlock Text="Search activities" Margin="42,0,0,0" Foreground="#8A96A6" IsHitTestVisible="False" VerticalAlignment="Center">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
+                    <Image Source="{Binding ProgramIcon}" Width="24" Height="24" Stretch="Uniform" />
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding Location}" FontSize="12" Foreground="{StaticResource MutedTextBrush}" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Text="{Binding CardTime}" FontSize="12" Foreground="{StaticResource MutedTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TimelineCardItemTemplate">
+            <Border Width="218"
+                    Height="150"
+                    Margin="0,0,16,16"
+                    BorderBrush="#33435E"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Background="#182439"
+                    ClipToBounds="True"
+                    Cursor="Hand"
+                    MouseLeftButtonUp="TimelineCard_Click">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="82" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Background="#101A2B">
+                        <Image Source="{Binding ScreenshotPreview}" Stretch="UniformToFill">
+                            <Image.Style>
+                                <Style TargetType="Image">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ScreenshotPreview}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+
+                        <Grid>
+                            <Grid.Style>
+                                <Style TargetType="Grid">
                                     <Setter Property="Visibility" Value="Collapsed" />
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
+                                        <DataTrigger Binding="{Binding ScreenshotPreview}" Value="{x:Null}">
                                             <Setter Property="Visibility" Value="Visible" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                        <TextBlock Text="⌕" Margin="16,0,0,0" Foreground="#64748B" FontSize="20" IsHitTestVisible="False" VerticalAlignment="Center" />
-                    </Grid>
-                    <ComboBox x:Name="KindFilter" Grid.Column="1" Margin="12,0" SelectionChanged="KindFilter_SelectionChanged" VerticalAlignment="Center">
-                        <ComboBoxItem Content="All" IsSelected="True" />
-                        <ComboBoxItem Content="App" />
-                        <ComboBoxItem Content="Browser" />
-                        <ComboBoxItem Content="Document" />
-                        <ComboBoxItem Content="Development" />
-                    </ComboBox>
-                    <Button Grid.Column="2" Style="{StaticResource ChromeButton}" Content="Refresh" Click="RefreshButton_Click" VerticalAlignment="Center" Margin="0,0,10,0" />
-                    <Button Grid.Column="3" Style="{StaticResource ChromeButton}" Content="Settings" Click="SettingsButton_Click" VerticalAlignment="Center" />
-                </Grid>
-            </Border>
-
-            <Grid Grid.Row="1" Margin="26,20,22,20">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="28" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <Border Grid.Column="0" Width="2" Background="#C7D1DD" HorizontalAlignment="Center" Margin="0,16,0,20" />
-
-                <ListBox x:Name="TimelineList"
-                         Grid.Column="1"
-                         BorderThickness="0"
-                         Background="Transparent"
-                         SelectionChanged="TimelineList_SelectionChanged"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                    <ListBox.GroupStyle>
-                        <GroupStyle>
-                            <GroupStyle.HeaderTemplate>
-                                <DataTemplate>
-                                    <Grid Margin="-28,8,0,12">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="28" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <Ellipse Width="16" Height="16" Fill="#394150" Stroke="#FFFFFF" StrokeThickness="3" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                        <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                            <TextBlock Text="{Binding Name}" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
-                                            <TextBlock Text="  " />
-                                            <TextBlock Text="{Binding ItemCount, StringFormat={}{0} activities}" Margin="10,5,0,0" FontSize="13" Foreground="{StaticResource MutedTextBrush}" />
-                                        </StackPanel>
-                                    </Grid>
-                                </DataTemplate>
-                            </GroupStyle.HeaderTemplate>
-                        </GroupStyle>
-                    </ListBox.GroupStyle>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Border Margin="0,4,12,14"
-                                    BorderBrush="#D7E1EC"
-                                    BorderThickness="1"
-                                    CornerRadius="4"
-                                    Background="#F7FFFFFF"
-                                    ClipToBounds="True">
+                            </Grid.Style>
+                            <Border Width="48" Height="48" CornerRadius="8" Background="#23324B" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="190" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-
-                                    <Border Background="#E9EEF5" BorderBrush="#D7E1EC" BorderThickness="0,0,0,1">
-                                        <Grid>
-                                            <Image Source="{Binding ScreenshotPreview}" Stretch="UniformToFill">
-                                                <Image.Style>
-                                                    <Style TargetType="Image">
-                                                        <Setter Property="Visibility" Value="Visible" />
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding ScreenshotPreview}" Value="{x:Null}">
-                                                                <Setter Property="Visibility" Value="Collapsed" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Image.Style>
-                                            </Image>
-
-                                            <Grid>
-                                                <Grid.Style>
-                                                    <Style TargetType="Grid">
-                                                        <Setter Property="Visibility" Value="Collapsed" />
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding ScreenshotPreview}" Value="{x:Null}">
-                                                                <Setter Property="Visibility" Value="Visible" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Grid.Style>
-
-                                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    <Border Width="58" Height="58" CornerRadius="6" Background="{Binding IconBackground}" HorizontalAlignment="Center">
-                                                        <Grid>
-                                                            <TextBlock Text="{Binding IconGlyph}" Foreground="{Binding IconForeground}" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                            <Image Source="{Binding ProgramIcon}" Width="42" Height="42" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                        </Grid>
-                                                    </Border>
-                                                    <TextBlock Text="{Binding KindLabel}" Margin="0,14,0,0" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource MutedTextBrush}" HorizontalAlignment="Center" />
-                                                </StackPanel>
-                                            </Grid>
-
-                                            <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="14" Background="#EFFFFFFF" CornerRadius="4" Padding="8,4">
-                                                <TextBlock Text="{Binding StartTime}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
-                                            </Border>
-                                        </Grid>
-                                    </Border>
-
-                                    <Grid Grid.Row="1" Margin="16,14,16,16">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="42" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-
-                                        <Border Width="30" Height="30" CornerRadius="4" Background="{Binding IconBackground}" HorizontalAlignment="Left" VerticalAlignment="Top">
-                                            <Grid>
-                                                <TextBlock Text="{Binding IconGlyph}" Foreground="{Binding IconForeground}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                <Image Source="{Binding ProgramIcon}" Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                            </Grid>
-                                        </Border>
-
-                                        <StackPanel Grid.Column="1" Margin="0,-2,16,0">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" TextTrimming="CharacterEllipsis" MaxWidth="420" />
-                                                <TextBlock Text="{Binding PinMark}" Margin="10,3,0,0" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource AccentBrush}" />
-                                            </StackPanel>
-                                            <TextBlock Text="{Binding Location}" Margin="0,5,0,0" FontSize="12" Foreground="{StaticResource MutedTextBrush}" TextTrimming="CharacterEllipsis" />
-                                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                                <Border Background="{Binding KindBackground}" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
-                                                    <TextBlock Text="{Binding KindLabel}" Foreground="{Binding KindForeground}" FontSize="12" FontWeight="SemiBold" />
-                                                </Border>
-                                                <TextBlock Text="{Binding Duration}" FontSize="12" Foreground="{StaticResource MutedTextBrush}" VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </StackPanel>
-
-                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top">
-                                            <Button Style="{StaticResource ChromeButton}" Content="Open" Click="OpenActivityButton_Click" Tag="{Binding}" Margin="0,0,8,0" />
-                                            <Button Style="{StaticResource ChromeButton}" Content="{Binding PinActionLabel}" Click="PinActivityButton_Click" Tag="{Binding}" />
-                                        </StackPanel>
-                                    </Grid>
+                                    <TextBlock Text="{Binding IconGlyph}" Foreground="{Binding IconForeground}" FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    <Image Source="{Binding ProgramIcon}" Width="34" Height="34" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 </Grid>
                             </Border>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </Grid>
-        </Grid>
-
-        <Border x:Name="DetailSurface" Grid.Column="2" Background="#EAFFFFFF" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,0,0">
-            <Grid Margin="28,28,26,24">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <DockPanel>
-                    <Border Width="52" Height="52" CornerRadius="6" Background="{StaticResource AccentBrush}" DockPanel.Dock="Left">
-                        <Grid>
-                            <TextBlock x:Name="DetailIconFallbackText" Text="W" Foreground="White" FontSize="25" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            <Image x:Name="DetailIconImage" Width="38" Height="38" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Grid>
-                    </Border>
-                    <TextBlock x:Name="DetailTitleText" Text="No activity selected" Margin="14,6,0,0" TextWrapping="Wrap" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
-                    <TextBlock Text="×" DockPanel.Dock="Right" FontSize="22" Foreground="{StaticResource TextBrush}" />
-                </DockPanel>
 
-                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,28,0,24">
-                    <Button Style="{StaticResource PrimaryButton}" Content="↗ Open" Click="OpenAppButton_Click" Margin="0,0,10,0" />
-                    <Button x:Name="PinButton" Style="{StaticResource ChromeButton}" Content="Pin" Click="PinButton_Click" Margin="0,0,10,0" />
-                    <Button Style="{StaticResource ChromeButton}" Content="Minimize" Click="MinimizeButton_Click" />
-                </StackPanel>
-
-                <Grid Grid.Row="2" Margin="0,0,0,18">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Text="Details" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource AccentBrush}" Margin="0,0,28,9" />
-                    <TextBlock Grid.Column="1" Text="Activity" FontSize="13" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,28,9" />
-                    <TextBlock Grid.Column="2" Text="Related" FontSize="13" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,9" />
-                    <Border Grid.ColumnSpan="3" Height="1" Background="{StaticResource BorderBrush}" VerticalAlignment="Bottom" />
-                    <Border Width="42" Height="3" Background="{StaticResource AccentBrush}" CornerRadius="2" VerticalAlignment="Bottom" HorizontalAlignment="Left" />
-                </Grid>
-
-                <StackPanel Grid.Row="3">
-                    <Border x:Name="ScreenshotPreviewBorder"
-                            Height="150"
-                            Background="#EEF2F7"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="6"
-                            ClipToBounds="True"
-                            Margin="0,0,0,18"
-                            Visibility="Collapsed">
-                        <Image x:Name="ScreenshotPreviewImage" Stretch="UniformToFill" />
-                    </Border>
-
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="105" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Type" Foreground="{StaticResource MutedTextBrush}" />
-                        <Border Grid.Column="1" Background="{StaticResource AccentSoftBrush}" CornerRadius="4" Padding="8,3" HorizontalAlignment="Left">
-                            <TextBlock x:Name="DetailKindText" Text="Select an activity" Foreground="{StaticResource AccentBrush}" FontSize="12" FontWeight="SemiBold" />
+                        <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Background="#CC111827" CornerRadius="5" Padding="6,2">
+                            <TextBlock Text="{Binding CardTime}" Foreground="#F8FAFC" FontSize="11" FontWeight="SemiBold" />
+                        </Border>
+                        <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8" Background="#CC111827" CornerRadius="5" Padding="6,2">
+                            <TextBlock Text="{Binding Duration}" Foreground="#F8FAFC" FontSize="11" FontWeight="SemiBold" />
                         </Border>
                     </Grid>
 
-                    <Grid Margin="0,0,0,16">
+                    <Grid Grid.Row="1" Margin="10,8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{Binding ProgramIcon}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,7,0" />
+                            <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" TextTrimming="CharacterEllipsis" MaxWidth="154" />
+                            <TextBlock Text="⋮" Margin="8,-2,0,0" FontSize="18" Foreground="{StaticResource MutedTextBrush}" />
+                        </StackPanel>
+                        <TextBlock Grid.Row="1" Text="{Binding Location}" Margin="25,2,0,0" FontSize="12" Foreground="{StaticResource MutedTextBrush}" TextTrimming="CharacterEllipsis" />
+                    </Grid>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TimelineCardGroupTemplate">
+            <Grid Margin="0,0,0,24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="36" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid>
+                    <Ellipse Width="18" Height="18" Fill="#172337" Stroke="{Binding AccentBrush}" StrokeThickness="3" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5,0,0" />
+                </Grid>
+
+                <StackPanel Grid.Column="1">
+                    <Grid Margin="0,0,0,14">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="105" />
+                            <ColumnDefinition Width="92" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Location" Foreground="{StaticResource MutedTextBrush}" />
-                        <TextBlock x:Name="DetailAppText" Grid.Column="1" Foreground="{StaticResource TextBrush}" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding TimeRange}" FontSize="14" Foreground="{StaticResource TextBrush}" VerticalAlignment="Top" />
+                        <StackPanel Grid.Column="1">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                <Border Background="{StaticResource AccentSoftBrush}" CornerRadius="10" Padding="9,3" Margin="14,-1,0,0">
+                                    <TextBlock Text="{Binding ActivityCount, StringFormat={}{0} activities}" FontSize="11" FontWeight="SemiBold" Foreground="#B89CFF" />
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Text="{Binding Summary}" Margin="0,5,0,0" FontSize="12" Foreground="{StaticResource MutedTextBrush}" />
+                        </StackPanel>
+                        <Button Grid.Column="2" Style="{StaticResource ChromeButton}" Content="View all" Padding="18,7" Margin="16,0,16,0" />
+                        <TextBlock Grid.Column="3" Text="⌃" FontSize="18" Foreground="{StaticResource MutedTextBrush}" VerticalAlignment="Center" />
                     </Grid>
 
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="105" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Started" Foreground="{StaticResource MutedTextBrush}" />
-                        <TextBlock x:Name="DetailStartedText" Grid.Column="1" Foreground="{StaticResource TextBrush}" TextWrapping="Wrap" />
-                    </Grid>
-
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="105" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Ended" Foreground="{StaticResource MutedTextBrush}" />
-                        <TextBlock x:Name="DetailEndedText" Grid.Column="1" Foreground="{StaticResource TextBrush}" TextWrapping="Wrap" />
-                    </Grid>
-
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="105" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Duration" Foreground="{StaticResource MutedTextBrush}" />
-                        <TextBlock x:Name="DetailDurationText" Grid.Column="1" Foreground="{StaticResource TextBrush}" />
-                    </Grid>
-
-                    <Grid Margin="0,0,0,24">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="105" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Process" Foreground="{StaticResource MutedTextBrush}" />
-                        <TextBlock x:Name="DetailProcessText" Grid.Column="1" Foreground="{StaticResource TextBrush}" />
-                    </Grid>
-
-                    <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,4,0,22" />
-                    <TextBlock Text="Recent activity" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,14" />
-                    <TextBlock Text="Recorded by MomentTrace" FontSize="13" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
-                    <TextBlock x:Name="StatusText" Text="Recording foreground window activity with timestamps." FontSize="13" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" />
-                </StackPanel>
-
-                <StackPanel Grid.Row="4">
-                    <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,0,0,16" />
-                    <Button Style="{StaticResource ChromeButton}" Content="Open settings" Click="SettingsButton_Click" />
+                    <ItemsControl ItemsSource="{Binding Activities}" ItemTemplate="{StaticResource TimelineCardItemTemplate}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
                 </StackPanel>
             </Grid>
-        </Border>
-    </Grid>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Border x:Name="WindowSurface"
+            Background="{StaticResource PageBackgroundBrush}"
+            BorderBrush="#1E2B42"
+            BorderThickness="1"
+            CornerRadius="10"
+            ClipToBounds="True">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition x:Name="DetailColumn" Width="330" />
+            </Grid.ColumnDefinitions>
+
+            <Border x:Name="RailSurface" Grid.Column="0" Background="#121B2B" BorderBrush="#23314A" BorderThickness="0,0,1,0">
+                <Grid Margin="18,18">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <DockPanel>
+                        <Border Width="34" Height="34" CornerRadius="8" Background="#4C35A8" DockPanel.Dock="Left">
+                            <TextBlock Text="◆" FontSize="17" Foreground="#D9D0FF" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Text="MomentTrace" Margin="12,6,0,0" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                    </DockPanel>
+
+                    <StackPanel Grid.Row="1" Margin="0,36,0,0">
+                        <TextBlock Text="Workspace" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
+                        <Border Background="#3A286F" CornerRadius="7" Margin="0,0,0,6">
+                            <Button Style="{StaticResource RailButton}" Click="TodayButton_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="⌘" Width="28" Foreground="#BBA7FF" />
+                                    <TextBlock Text="Timeline" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Button>
+                        </Border>
+                        <Button Style="{StaticResource RailButton}" Click="TodayButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="◎" Width="28" />
+                                <TextBlock Text="Overview" />
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource RailButton}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="◴" Width="28" />
+                                <TextBlock Text="Insights" />
+                            </StackPanel>
+                        </Button>
+                        <Border Height="1" Background="#26344D" Margin="0,16,0,16" />
+                        <TextBlock Text="Library" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
+                        <Button Style="{StaticResource RailButton}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="☑" Width="28" />
+                                <TextBlock Text="Tasks" />
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource RailButton}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="▤" Width="28" />
+                                <TextBlock Text="Notes" />
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource RailButton}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="□" Width="28" />
+                                <TextBlock Text="Files" />
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource RailButton}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="◎" Width="28" />
+                                <TextBlock Text="Websites" />
+                            </StackPanel>
+                        </Button>
+                        <Border Height="1" Background="#26344D" Margin="0,16,0,16" />
+                        <TextBlock Text="Tools" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
+                        <Button Style="{StaticResource RailButton}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="▦" Width="28" />
+                                <TextBlock Text="Apps" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="3">
+                        <Border Height="1" Background="#26344D" Margin="0,0,0,16" />
+                        <DockPanel Margin="0,0,0,14">
+                            <Border Width="34" Height="34" CornerRadius="17" Background="#8B5CF6" DockPanel.Dock="Left">
+                                <TextBlock Text="AJ" FontSize="13" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel Margin="12,0,0,0">
+                                <TextBlock Text="Avery Johnson" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                <TextBlock Text="avery@example.com" FontSize="11" Foreground="{StaticResource MutedTextBrush}" />
+                            </StackPanel>
+                        </DockPanel>
+                        <Button Style="{StaticResource RailButton}" Click="SettingsButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⚙" Width="28" />
+                                <TextBlock Text="Settings" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="66" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Border x:Name="TopCommandSurface" Grid.Row="0" Background="#0D1728" BorderBrush="#23314A" BorderThickness="0,0,0,1" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown">
+                    <Grid Margin="28,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="108" />
+                            <ColumnDefinition Width="96" />
+                            <ColumnDefinition Width="48" />
+                        </Grid.ColumnDefinitions>
+                        <Grid>
+                            <TextBox x:Name="SearchBox" TextChanged="SearchBox_TextChanged" VerticalAlignment="Center" />
+                            <TextBlock Text="Search your activity..." Margin="40,0,0,0" Foreground="#8C98AD" IsHitTestVisible="False" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <TextBlock Text="⌕" Margin="16,0,0,0" Foreground="#A5B0C3" FontSize="20" IsHitTestVisible="False" VerticalAlignment="Center" />
+                        </Grid>
+                        <Button Grid.Column="1" Style="{StaticResource ChromeButton}" Content="▣ Today" Click="TodayButton_Click" VerticalAlignment="Center" Margin="14,0,0,0" />
+                        <ComboBox x:Name="KindFilter" Grid.Column="2" Margin="10,0,0,0" SelectionChanged="KindFilter_SelectionChanged" VerticalAlignment="Center">
+                            <ComboBoxItem Content="All" IsSelected="True" />
+                            <ComboBoxItem Content="App" />
+                            <ComboBoxItem Content="Browser" />
+                            <ComboBoxItem Content="Document" />
+                            <ComboBoxItem Content="Development" />
+                        </ComboBox>
+                        <Button x:Name="ToggleDetailsButton" Grid.Column="3" Style="{StaticResource ChromeButton}" Content="▤" Click="ToggleDetailsButton_Click" VerticalAlignment="Center" Margin="10,0,0,0" Padding="12,8" />
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="1" Margin="28,20,22,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="36" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Width="2" Background="#25334E" HorizontalAlignment="Center" Margin="0,58,0,0" />
+
+                    <ScrollViewer x:Name="TimelineCardScroller"
+                                  Grid.ColumnSpan="2"
+                                  Padding="0,0,10,22"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="8,0,0,20">
+                                <TextBlock Text="Today" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                <TextBlock x:Name="TodayActivityCountText" Text="0 activities" Margin="16,6,0,0" FontSize="13" Foreground="{StaticResource MutedTextBrush}" />
+                            </StackPanel>
+                            <ItemsControl x:Name="TimelineCardGroups" ItemTemplate="{StaticResource TimelineCardGroupTemplate}" />
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <ListBox x:Name="TimelineList"
+                             Grid.Column="1"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             ItemTemplate="{StaticResource TimelineCardItemTemplate}"
+                             ItemsPanel="{StaticResource TimelineCardItemsPanel}"
+                             SelectionChanged="TimelineList_SelectionChanged"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.GroupStyle>
+                            <GroupStyle>
+                                <GroupStyle.HeaderTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}" Margin="0,8,0,12" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                    </DataTemplate>
+                                </GroupStyle.HeaderTemplate>
+                            </GroupStyle>
+                        </ListBox.GroupStyle>
+                    </ListBox>
+                </Grid>
+            </Grid>
+
+            <Border x:Name="DetailSurface" Grid.Column="2" Background="#121B2B" BorderBrush="#23314A" BorderThickness="1,0,0,0">
+                <Grid Margin="24,30,22,24">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Style="{StaticResource ChromeButton}" Content="×" Click="ToggleDetailsButton_Click" Padding="9,3" BorderThickness="0" Background="Transparent" FontSize="20" />
+                        <Border Width="62" Height="62" CornerRadius="9" Background="#19263B" DockPanel.Dock="Left">
+                            <Grid>
+                                <TextBlock x:Name="DetailIconFallbackText" Text="W" Foreground="#C9D4E6" FontSize="25" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Image x:Name="DetailIconImage" Width="44" Height="44" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                        <StackPanel Margin="14,5,0,0">
+                            <TextBlock x:Name="DetailTitleText" Text="No activity selected" TextWrapping="Wrap" FontSize="17" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                            <TextBlock x:Name="DetailAppText" Text="" Margin="0,5,0,0" FontSize="12" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,24,0,28">
+                        <Button Style="{StaticResource PrimaryButton}" Content="↗ Open" Click="OpenAppButton_Click" Margin="0,0,10,0" />
+                        <Button x:Name="PinButton" Style="{StaticResource ChromeButton}" Content="Pin" Click="PinButton_Click" Margin="0,0,10,0" />
+                        <Button Style="{StaticResource ChromeButton}" Content="••• More" Click="RefreshButton_Click" />
+                    </StackPanel>
+
+                    <Grid Grid.Row="2" Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Details" FontSize="13" FontWeight="SemiBold" Foreground="#B89CFF" Margin="0,0,28,10" />
+                        <TextBlock Grid.Column="1" Text="Activity" FontSize="13" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,28,10" />
+                        <TextBlock Grid.Column="2" Text="Related" FontSize="13" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,10" />
+                        <Border Grid.ColumnSpan="3" Height="1" Background="#26344D" VerticalAlignment="Bottom" />
+                        <Border Width="42" Height="3" Background="#8B5CF6" CornerRadius="2" VerticalAlignment="Bottom" HorizontalAlignment="Left" />
+                    </Grid>
+
+                    <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <Border x:Name="ScreenshotPreviewBorder"
+                                    Height="150"
+                                    Background="#0D1728"
+                                    BorderBrush="#2B3A55"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    ClipToBounds="True"
+                                    Margin="0,0,0,18"
+                                    Visibility="Collapsed">
+                                <Image x:Name="ScreenshotPreviewImage" Stretch="UniformToFill" />
+                            </Border>
+
+                            <Border Background="#1A263A" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,18">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="76" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Text="Time" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
+                                    <TextBlock x:Name="DetailDurationText" Grid.Column="1" Foreground="{StaticResource TextBrush}" Margin="0,0,0,12" />
+
+                                    <TextBlock Grid.Row="1" Text="Started" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
+                                    <TextBlock x:Name="DetailStartedText" Grid.Row="1" Grid.Column="1" Foreground="{StaticResource TextBrush}" TextWrapping="Wrap" Margin="0,0,0,12" />
+
+                                    <TextBlock Grid.Row="2" Text="Ended" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
+                                    <TextBlock x:Name="DetailEndedText" Grid.Row="2" Grid.Column="1" Foreground="{StaticResource TextBrush}" TextWrapping="Wrap" Margin="0,0,0,12" />
+
+                                    <TextBlock Grid.Row="3" Text="Source" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
+                                    <TextBlock x:Name="DetailProcessText" Grid.Row="3" Grid.Column="1" Foreground="{StaticResource TextBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,12" />
+
+                                    <TextBlock Grid.Row="4" Text="Type" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
+                                    <Border Grid.Row="4" Grid.Column="1" Background="#2C2154" CornerRadius="5" Padding="8,3" HorizontalAlignment="Left" Margin="0,0,0,12">
+                                        <TextBlock x:Name="DetailKindText" Text="Select an activity" Foreground="#B89CFF" FontSize="12" FontWeight="SemiBold" />
+                                    </Border>
+
+                                    <TextBlock Grid.Row="5" Text="Captured" Foreground="{StaticResource MutedTextBrush}" />
+                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="Foreground activity" Foreground="{StaticResource TextBrush}" />
+                                </Grid>
+                            </Border>
+
+                            <Border Background="#231D45" BorderBrush="#4D3A8E" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,18">
+                                <StackPanel>
+                                    <TextBlock Text="✦ AI Summary" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,14" />
+                                    <TextBlock Text="Recorded while this window was active. Related sessions are grouped into the timeline so repeated activity reads as one continuous moment." FontSize="13" Foreground="#D6D1EA" TextWrapping="Wrap" LineHeight="19" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Background="#1A263A" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Padding="16">
+                                <StackPanel>
+                                    <TextBlock Text="Recent Activity" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,12" />
+                                    <TextBlock Text="Recorded by MomentTrace" FontSize="13" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,10" />
+                                    <TextBlock x:Name="StatusText" Text="Recording foreground window activity with timestamps." FontSize="13" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" LineHeight="19" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
     </Border>
 </Window>

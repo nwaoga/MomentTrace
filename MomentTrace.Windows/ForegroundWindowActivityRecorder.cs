@@ -11,13 +11,15 @@ namespace MomentTrace.Windows;
 
 public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IActivityRecorder
 {
-    private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(2);
+    private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan EndUpdateInterval = TimeSpan.FromSeconds(15);
 
     private readonly IActivityStore _store = store;
     private CancellationTokenSource? _recordingCts;
     private Task? _recordingTask;
     private long? _currentActivityId;
     private Snapshot? _currentSnapshot;
+    private DateTimeOffset _currentActivityLastWrittenAt;
 
     public bool IsRecording => _recordingTask is { IsCompleted: false };
 
@@ -100,15 +102,15 @@ public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IAc
             return;
         }
 
-        if (_currentActivityId is not null)
-        {
-            await _store.UpdateEndAsync(_currentActivityId.Value, now, cancellationToken);
-        }
+        await ExtendCurrentActivityAsync(now, cancellationToken);
     }
 
     private async Task OpenActivityAsync(Snapshot snapshot, DateTimeOffset now, CancellationToken cancellationToken)
     {
         _currentSnapshot = snapshot;
+        _currentActivityLastWrittenAt = now;
+        var screenshotPath = snapshot.Kind == MomentTrace.Core.ActivityKind.Browser ? Snapshot.TryCaptureScreenshot(snapshot.WindowHandle) : null;
+
         var activity = new TimelineActivity
         {
             AppName = snapshot.AppName,
@@ -116,14 +118,25 @@ public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IAc
             ProcessName = snapshot.ProcessName,
             ExecutablePath = snapshot.ExecutablePath,
             Resource = snapshot.Resource,
-            ScreenshotPath = snapshot.ScreenshotPath,
-            Kind = ActivityClassifier.Classify(snapshot.ProcessName),
+            ScreenshotPath = screenshotPath,
+            Kind = snapshot.Kind,
             StartedAt = now,
             EndedAt = now
         };
 
         _currentActivityId = await _store.AddAsync(activity, cancellationToken);
         ActivityChanged?.Invoke(this, WithId(activity, _currentActivityId.Value));
+    }
+
+    private async Task ExtendCurrentActivityAsync(DateTimeOffset endedAt, CancellationToken cancellationToken)
+    {
+        if (_currentActivityId is null || endedAt - _currentActivityLastWrittenAt < EndUpdateInterval)
+        {
+            return;
+        }
+
+        await _store.UpdateEndAsync(_currentActivityId.Value, endedAt, cancellationToken);
+        _currentActivityLastWrittenAt = endedAt;
     }
 
     private async Task CloseCurrentActivityAsync(DateTimeOffset endedAt, CancellationToken cancellationToken)
@@ -135,9 +148,17 @@ public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IAc
         }
 
         _currentSnapshot = null;
+        _currentActivityLastWrittenAt = default;
     }
 
-    private sealed record Snapshot(string ProcessName, string AppName, string WindowTitle, string? ExecutablePath, string? Resource, string? ScreenshotPath)
+    private sealed record Snapshot(
+        IntPtr WindowHandle,
+        string ProcessName,
+        string AppName,
+        string WindowTitle,
+        string? ExecutablePath,
+        string? Resource,
+        MomentTrace.Core.ActivityKind Kind)
     {
         public bool SameActivity(Snapshot other)
         {
@@ -170,9 +191,8 @@ public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IAc
                 var appName = TryGetDisplayName(process, executablePath);
                 var kind = ActivityClassifier.Classify(processName);
                 var resource = kind == MomentTrace.Core.ActivityKind.Browser ? TryGetBrowserUrl(handle) : null;
-                var screenshotPath = kind == MomentTrace.Core.ActivityKind.Browser ? TryCaptureScreenshot(handle) : null;
 
-                return new Snapshot(processName, appName, title.Trim(), executablePath, resource, screenshotPath);
+                return new Snapshot(handle, processName, appName, title.Trim(), executablePath, resource, kind);
             }
             catch
             {
@@ -224,7 +244,7 @@ public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IAc
             return null;
         }
 
-        private static string? TryCaptureScreenshot(IntPtr handle)
+        public static string? TryCaptureScreenshot(IntPtr handle)
         {
             try
             {
