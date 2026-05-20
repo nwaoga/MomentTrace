@@ -139,6 +139,8 @@ public sealed class ActivityItemViewModel(TimelineActivity activity)
     }
 
     public string PinMark => Activity.IsPinned ? "PINNED" : string.Empty;
+
+    public string PinActionLabel => Activity.IsPinned ? "Unpin" : "Pin";
 }
 
 file static class IconCache

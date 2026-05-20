@@ -290,37 +290,95 @@
                     </ListBox.GroupStyle>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Border Margin="0,3,6,4" Padding="12,9" BorderBrush="#DCE5EF" BorderThickness="1" CornerRadius="4" Background="#F4FFFFFF">
+                            <Border Margin="0,4,12,14"
+                                    BorderBrush="#D7E1EC"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Background="#F7FFFFFF"
+                                    ClipToBounds="True">
                                 <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="36" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="170" />
-                                        <ColumnDefinition Width="92" />
-                                        <ColumnDefinition Width="92" />
-                                        <ColumnDefinition Width="30" />
-                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="190" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
 
-                                    <Border Width="24" Height="24" CornerRadius="4" Background="{Binding IconBackground}" HorizontalAlignment="Left">
+                                    <Border Background="#E9EEF5" BorderBrush="#D7E1EC" BorderThickness="0,0,0,1">
                                         <Grid>
-                                            <TextBlock Text="{Binding IconGlyph}" Foreground="{Binding IconForeground}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                            <Image Source="{Binding ProgramIcon}" Width="20" Height="20" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <Image Source="{Binding ScreenshotPreview}" Stretch="UniformToFill">
+                                                <Image.Style>
+                                                    <Style TargetType="Image">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding ScreenshotPreview}" Value="{x:Null}">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Image.Style>
+                                            </Image>
+
+                                            <Grid>
+                                                <Grid.Style>
+                                                    <Style TargetType="Grid">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding ScreenshotPreview}" Value="{x:Null}">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Grid.Style>
+
+                                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Border Width="58" Height="58" CornerRadius="6" Background="{Binding IconBackground}" HorizontalAlignment="Center">
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding IconGlyph}" Foreground="{Binding IconForeground}" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            <Image Source="{Binding ProgramIcon}" Width="42" Height="42" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                        </Grid>
+                                                    </Border>
+                                                    <TextBlock Text="{Binding KindLabel}" Margin="0,14,0,0" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource MutedTextBrush}" HorizontalAlignment="Center" />
+                                                </StackPanel>
+                                            </Grid>
+
+                                            <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="14" Background="#EFFFFFFF" CornerRadius="4" Padding="8,4">
+                                                <TextBlock Text="{Binding StartTime}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                            </Border>
                                         </Grid>
                                     </Border>
 
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" TextTrimming="CharacterEllipsis" MaxWidth="340" />
-                                        <TextBlock Text="{Binding PinMark}" Margin="10,1,0,0" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource AccentBrush}" />
-                                    </StackPanel>
+                                    <Grid Grid.Row="1" Margin="16,14,16,16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="42" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Column="2" Text="{Binding Location}" FontSize="12" Foreground="{StaticResource MutedTextBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Grid.Column="3" Text="{Binding StartTime}" FontSize="12" Foreground="{StaticResource MutedTextBrush}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                                        <Border Width="30" Height="30" CornerRadius="4" Background="{Binding IconBackground}" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                            <Grid>
+                                                <TextBlock Text="{Binding IconGlyph}" Foreground="{Binding IconForeground}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                <Image Source="{Binding ProgramIcon}" Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </Border>
 
-                                    <Border Grid.Column="4" Background="{Binding KindBackground}" CornerRadius="4" Padding="8,3" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding KindLabel}" Foreground="{Binding KindForeground}" FontSize="12" FontWeight="SemiBold" />
-                                    </Border>
+                                        <StackPanel Grid.Column="1" Margin="0,-2,16,0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" TextTrimming="CharacterEllipsis" MaxWidth="420" />
+                                                <TextBlock Text="{Binding PinMark}" Margin="10,3,0,0" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource AccentBrush}" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Location}" Margin="0,5,0,0" FontSize="12" Foreground="{StaticResource MutedTextBrush}" TextTrimming="CharacterEllipsis" />
+                                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                                <Border Background="{Binding KindBackground}" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
+                                                    <TextBlock Text="{Binding KindLabel}" Foreground="{Binding KindForeground}" FontSize="12" FontWeight="SemiBold" />
+                                                </Border>
+                                                <TextBlock Text="{Binding Duration}" FontSize="12" Foreground="{StaticResource MutedTextBrush}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </StackPanel>
 
-                                    <TextBlock Grid.Column="5" Text="•••" Foreground="{StaticResource MutedTextBrush}" FontSize="16" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top">
+                                            <Button Style="{StaticResource ChromeButton}" Content="Open" Click="OpenActivityButton_Click" Tag="{Binding}" Margin="0,0,8,0" />
+                                            <Button Style="{StaticResource ChromeButton}" Content="{Binding PinActionLabel}" Click="PinActivityButton_Click" Tag="{Binding}" />
+                                        </StackPanel>
+                                    </Grid>
                                 </Grid>
                             </Border>
                         </DataTemplate>

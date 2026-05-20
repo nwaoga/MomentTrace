@@ -186,8 +186,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        await _store.SetPinnedAsync(selected.Id, !selected.Activity.IsPinned);
-        await LoadActivitiesAsync();
+        await TogglePinnedAsync(selected);
     }
 
     private void OpenAppButton_Click(object sender, RoutedEventArgs e)
@@ -197,9 +196,37 @@ public partial class MainWindow : Window
             return;
         }
 
+        OpenActivity(selected);
+    }
+
+    private void OpenActivityButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is System.Windows.Controls.Button { Tag: ActivityItemViewModel activity })
+        {
+            OpenActivity(activity);
+        }
+    }
+
+    private async void PinActivityButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is System.Windows.Controls.Button { Tag: ActivityItemViewModel activity })
+        {
+            TimelineList.SelectedItem = activity;
+            await TogglePinnedAsync(activity);
+        }
+    }
+
+    private async Task TogglePinnedAsync(ActivityItemViewModel activity)
+    {
+        await _store.SetPinnedAsync(activity.Id, !activity.Activity.IsPinned);
+        await LoadActivitiesAsync();
+    }
+
+    private static void OpenActivity(ActivityItemViewModel activity)
+    {
         try
         {
-            var target = GetOpenTarget(selected);
+            var target = GetOpenTarget(activity);
             Process.Start(new ProcessStartInfo(target) { UseShellExecute = true });
         }
         catch
