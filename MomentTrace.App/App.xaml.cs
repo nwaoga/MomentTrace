@@ -39,7 +39,7 @@ public partial class App : System.Windows.Application
         var store = new SqliteActivityStore(SqliteActivityStore.DefaultDatabasePath);
         await store.InitializeAsync();
 
-        _recorder = new ForegroundWindowActivityRecorder(store);
+        _recorder = new ForegroundWindowActivityRecorder(store, () => WindowPreferences.Load().ToPrivacyFilterOptions());
         var startupRegistration = new WindowsStartupRegistration("MomentTrace", GetExecutablePath(), "Nwaoga Timeline");
 
         _mainWindow = new MainWindow(store, _recorder, startupRegistration);

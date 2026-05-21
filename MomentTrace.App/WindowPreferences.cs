@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text.Json;
+using MomentTrace.Core;
 
 namespace MomentTrace.App;
 
@@ -7,9 +8,44 @@ public sealed class WindowPreferences
 {
     private static readonly JsonSerializerOptions SerializerOptions = new() { WriteIndented = true };
 
+    public static readonly string[] BuiltInAdultDomains =
+    [
+        "pornhub.com",
+        "xvideos.com",
+        "xnxx.com",
+        "xhamster.com",
+        "redtube.com",
+        "youporn.com",
+        "tube8.com",
+        "spankbang.com",
+        "beeg.com",
+        "eporner.com"
+    ];
+
+    private string[] _adultBlocklistDomains = [];
+
     public double Opacity { get; set; } = 1.0;
 
     public string TimelineViewMode { get; set; } = "Cards";
+
+    public bool ExcludeAdultWebsites { get; set; } = true;
+
+    public string[] AdultBlocklistDomains
+    {
+        get => _adultBlocklistDomains.Length == 0 ? BuiltInAdultDomains : _adultBlocklistDomains;
+        set => _adultBlocklistDomains = value ?? [];
+    }
+
+    public string[] CustomBlockedDomains { get; set; } = [];
+
+    public string[] CustomAllowedDomains { get; set; } = [];
+
+    public DateTimeOffset? AdultBlocklistUpdatedAt { get; set; }
+
+    public static string PrivacyBlocklistDirectory =>
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MomentTrace", "privacy-blocklists");
+
+    public static string AdultBlocklistCachePath => Path.Combine(PrivacyBlocklistDirectory, "adult-domains.txt");
 
     public static string PreferencesPath
     {
@@ -51,5 +87,16 @@ public sealed class WindowPreferences
     {
         Directory.CreateDirectory(Path.GetDirectoryName(PreferencesPath)!);
         File.WriteAllText(PreferencesPath, JsonSerializer.Serialize(this, SerializerOptions));
+    }
+
+    public PrivacyFilterOptions ToPrivacyFilterOptions()
+    {
+        return new PrivacyFilterOptions
+        {
+            ExcludeAdultWebsites = ExcludeAdultWebsites,
+            AdultDomains = AdultBlocklistDomains,
+            CustomBlockedDomains = CustomBlockedDomains,
+            CustomAllowedDomains = CustomAllowedDomains
+        };
     }
 }

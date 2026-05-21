@@ -9,12 +9,15 @@ using MomentTrace.Core;
 
 namespace MomentTrace.Windows;
 
-public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IActivityRecorder
+public sealed class ForegroundWindowActivityRecorder(
+    IActivityStore store,
+    Func<PrivacyFilterOptions>? privacyOptionsProvider = null) : IActivityRecorder
 {
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan EndUpdateInterval = TimeSpan.FromSeconds(15);
 
     private readonly IActivityStore _store = store;
+    private readonly Func<PrivacyFilterOptions>? _privacyOptionsProvider = privacyOptionsProvider;
     private CancellationTokenSource? _recordingCts;
     private Task? _recordingTask;
     private long? _currentActivityId;
@@ -101,6 +104,12 @@ public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IAc
             return;
         }
 
+        if (ShouldExcludeByPrivacyFilter(snapshot.Resource))
+        {
+            await CloseCurrentActivityAsync(now, cancellationToken);
+            return;
+        }
+
         if (_currentSnapshot is null || !_currentSnapshot.SameActivity(snapshot))
         {
             await CloseCurrentActivityAsync(now, cancellationToken);
@@ -132,6 +141,23 @@ public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IAc
 
         _currentActivityId = await _store.AddAsync(activity, cancellationToken);
         ActivityChanged?.Invoke(this, WithId(activity, _currentActivityId.Value));
+    }
+
+    private bool ShouldExcludeByPrivacyFilter(string? resource)
+    {
+        if (_privacyOptionsProvider is null)
+        {
+            return false;
+        }
+
+        try
+        {
+            return new DomainPrivacyFilter(_privacyOptionsProvider()).ShouldExclude(resource);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private async Task ExtendCurrentActivityAsync(DateTimeOffset endedAt, CancellationToken cancellationToken)

@@ -1,4 +1,5 @@
 using System.IO;
+using System.Net.Http;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,8 +10,11 @@ namespace MomentTrace.App;
 
 public partial class SettingsWindow : Window
 {
+    private const string AdultBlocklistUrl = "https://raw.githubusercontent.com/blocklistproject/Lists/master/porn.txt";
+
     private readonly IActivityRecorder _recorder;
     private readonly IStartupRegistration _startupRegistration;
+    private readonly WindowPreferences _preferences;
     private readonly Action<double> _opacityChanged;
     private readonly Action<string> _timelineViewModeChanged;
     private readonly Action _recordingChanged;
@@ -29,12 +33,14 @@ public partial class SettingsWindow : Window
     {
         _recorder = recorder;
         _startupRegistration = startupRegistration;
+        _preferences = WindowPreferences.Load();
         _opacityChanged = opacityChanged;
         _timelineViewModeChanged = timelineViewModeChanged;
         _recordingChanged = recordingChanged;
 
         InitializeComponent();
         LoadCurrentSettings(currentOpacity, currentTimelineViewMode);
+        LoadPrivacySettings();
         LoadWhereILive();
     }
 
@@ -54,6 +60,16 @@ public partial class SettingsWindow : Window
         _isUpdatingOpacitySlider = false;
 
         UpdateRecordingButton();
+    }
+
+    private void LoadPrivacySettings()
+    {
+        ExcludeAdultWebsitesCheckBox.IsChecked = _preferences.ExcludeAdultWebsites;
+        CustomBlockedDomainsTextBox.Text = string.Join(Environment.NewLine, _preferences.CustomBlockedDomains);
+        CustomAllowedDomainsTextBox.Text = string.Join(Environment.NewLine, _preferences.CustomAllowedDomains);
+        AdultBlocklistStatusText.Text = _preferences.AdultBlocklistUpdatedAt is null
+            ? $"Built-in starter list ({_preferences.AdultBlocklistDomains.Length} domains)"
+            : $"Cached list updated {_preferences.AdultBlocklistUpdatedAt.Value.LocalDateTime:g} ({_preferences.AdultBlocklistDomains.Length:N0} domains)";
     }
 
     private void LoadWhereILive()
@@ -123,6 +139,68 @@ public partial class SettingsWindow : Window
         }
 
         _timelineViewModeChanged(viewMode);
+    }
+
+    private void ExcludeAdultWebsitesCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        _preferences.ExcludeAdultWebsites = ExcludeAdultWebsitesCheckBox.IsChecked == true;
+        _preferences.Save();
+    }
+
+    private void SavePrivacyFiltersButton_Click(object sender, RoutedEventArgs e)
+    {
+        _preferences.CustomBlockedDomains = ParseDomainText(CustomBlockedDomainsTextBox.Text);
+        _preferences.CustomAllowedDomains = ParseDomainText(CustomAllowedDomainsTextBox.Text);
+        _preferences.ExcludeAdultWebsites = ExcludeAdultWebsitesCheckBox.IsChecked == true;
+        _preferences.Save();
+        LoadPrivacySettings();
+    }
+
+    private async void UpdateAdultBlocklistButton_Click(object sender, RoutedEventArgs e)
+    {
+        UpdateAdultBlocklistButton.IsEnabled = false;
+        AdultBlocklistStatusText.Text = "Updating local cache...";
+
+        try
+        {
+            using var httpClient = new HttpClient();
+            var content = await httpClient.GetStringAsync(AdultBlocklistUrl);
+            var domains = content
+                .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(DomainPrivacyFilter.ParseDomainLine)
+                .Where(domain => !string.IsNullOrWhiteSpace(domain))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Order(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            Directory.CreateDirectory(WindowPreferences.PrivacyBlocklistDirectory);
+            await File.WriteAllLinesAsync(WindowPreferences.AdultBlocklistCachePath, domains);
+
+            _preferences.AdultBlocklistDomains = domains;
+            _preferences.AdultBlocklistUpdatedAt = DateTimeOffset.Now;
+            _preferences.Save();
+            LoadPrivacySettings();
+        }
+        catch
+        {
+            AdultBlocklistStatusText.Text = "Update failed. Keeping current local list.";
+            System.Media.SystemSounds.Exclamation.Play();
+        }
+        finally
+        {
+            UpdateAdultBlocklistButton.IsEnabled = true;
+        }
+    }
+
+    private static string[] ParseDomainText(string text)
+    {
+        return text
+            .Split(new[] { '\r', '\n', ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(DomainPrivacyFilter.ParseDomainLine)
+            .Where(domain => !string.IsNullOrWhiteSpace(domain))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)

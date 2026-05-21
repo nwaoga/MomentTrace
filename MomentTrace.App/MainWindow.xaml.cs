@@ -96,9 +96,11 @@ public partial class MainWindow : Window
             Kind = GetSelectedKind(),
             Limit = 1000
         };
+        var privacyFilter = CurrentPrivacyFilter();
 
         var activities = (await _store.QueryAsync(query))
             .Where(activity => !ActivityExclusionFilter.IsExcluded(activity))
+            .Where(activity => !privacyFilter.ShouldExclude(activity))
             .Where(activity => selectedDate is null || activity.StartedAt.LocalDateTime.Date == selectedDate.Value)
             .ToList();
         var sessions = BuildTimelineSessions(activities).ToList();
@@ -125,8 +127,10 @@ public partial class MainWindow : Window
     private async Task LoadOverviewAsync()
     {
         var selectedDate = GetSelectedDate() ?? DateTime.Today;
+        var privacyFilter = CurrentPrivacyFilter();
         var activities = (await _store.QueryAsync(new TimelineQuery { Limit = 1000 }))
             .Where(activity => !ActivityExclusionFilter.IsExcluded(activity))
+            .Where(activity => !privacyFilter.ShouldExclude(activity))
             .ToList();
         var todayActivities = activities
             .Where(activity => activity.StartedAt.LocalDateTime.Date == selectedDate)
@@ -178,8 +182,10 @@ public partial class MainWindow : Window
 
     private async Task LoadDateFiltersAsync()
     {
+        var privacyFilter = CurrentPrivacyFilter();
         var activities = (await _store.QueryAsync(new TimelineQuery { Limit = 2000 }))
             .Where(activity => !ActivityExclusionFilter.IsExcluded(activity))
+            .Where(activity => !privacyFilter.ShouldExclude(activity))
             .ToList();
         var dates = activities
             .Select(activity => activity.StartedAt.LocalDateTime.Date)
@@ -350,6 +356,11 @@ public partial class MainWindow : Window
         }
 
         return date.ToString("ddd, d MMM");
+    }
+
+    private static DomainPrivacyFilter CurrentPrivacyFilter()
+    {
+        return new DomainPrivacyFilter(WindowPreferences.Load().ToPrivacyFilterOptions());
     }
 
     private static IEnumerable<ActivityItemViewModel> BuildTimelineSessions(IReadOnlyList<TimelineActivity> activities)
