@@ -9,17 +9,72 @@
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResize"
         FontFamily="Segoe UI"
-        Background="{StaticResource PageBackgroundBrush}">
+        Background="#08111F">
     <Window.Resources>
+        <SolidColorBrush x:Key="PageBackgroundBrush" Color="#08111F" />
+        <SolidColorBrush x:Key="PanelBrush" Color="#121D2F" />
+        <SolidColorBrush x:Key="SubtlePanelBrush" Color="#172337" />
+        <SolidColorBrush x:Key="BorderBrush" Color="#26344D" />
+        <SolidColorBrush x:Key="TextBrush" Color="#F4F7FB" />
+        <SolidColorBrush x:Key="MutedTextBrush" Color="#A5B0C3" />
+        <SolidColorBrush x:Key="AccentBrush" Color="#8B5CF6" />
+        <SolidColorBrush x:Key="AccentSoftBrush" Color="#2C2154" />
+
         <Style x:Key="SettingsButton" TargetType="Button">
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Padding" Value="14,8" />
             <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="Background" Value="#1A263A" />
             <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
             <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="7"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#24334C" />
+                                <Setter TargetName="Root" Property="BorderBrush" Value="#50617E" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="Background" Value="#101A2B" />
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+            <Setter Property="BorderBrush" Value="#34425C" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Background" Value="#101A2B" />
+                        <Setter Property="Foreground" Value="#F4F7FB" />
+                        <Setter Property="Padding" Value="10,7" />
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        </Style>
+
+        <Style TargetType="Slider">
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
         </Style>
     </Window.Resources>
 
@@ -61,7 +116,10 @@
                     </DockPanel>
 
                     <DockPanel Margin="0,0,0,8">
-                        <TextBlock Text="Transparency" Foreground="{StaticResource MutedTextBrush}" DockPanel.Dock="Left" />
+                        <StackPanel DockPanel.Dock="Left">
+                            <TextBlock Text="Transparency" Foreground="{StaticResource MutedTextBrush}" />
+                            <TextBlock Text="Adjusts how clear the dark shell is while keeping the same colour." Margin="0,4,0,0" FontSize="12" Foreground="{StaticResource MutedTextBrush}" />
+                        </StackPanel>
                         <TextBlock x:Name="OpacityValueText" Foreground="{StaticResource TextBrush}" HorizontalAlignment="Right" />
                     </DockPanel>
                     <Slider x:Name="OpacitySlider" Minimum="55" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="False" ValueChanged="OpacitySlider_ValueChanged" />

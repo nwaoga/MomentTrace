@@ -17,18 +17,28 @@ public partial class MainWindow : Window
     private readonly IActivityRecorder _recorder;
     private readonly IStartupRegistration _startupRegistration;
     private readonly WindowPreferences _preferences = WindowPreferences.Load();
+    private readonly IAiProvider? _aiProvider;
     private readonly ObservableCollection<ActivityItemViewModel> _activities = [];
     private readonly ObservableCollection<TimelineSessionGroupViewModel> _activityGroups = [];
+    private readonly ObservableCollection<SummaryMetricViewModel> _summaryMetrics = [];
+    private readonly ObservableCollection<HeatmapSegmentViewModel> _heatmapSegments = [];
+    private readonly ObservableCollection<TopApplicationViewModel> _topApplications = [];
+    private readonly ObservableCollection<FocusBlockViewModel> _focusBlocks = [];
+    private readonly ObservableCollection<LegendItemViewModel> _overviewLegend = [];
+    private readonly ObservableCollection<DateFilterOption> _dateFilters = [];
     private readonly ICollectionView _activityView;
+    private string _overviewSort = "Duration";
+    private bool _isUpdatingDateFilter;
     private bool _allowClose;
     private bool _isDetailVisible = true;
     private ActivityItemViewModel? _selectedDetailActivity;
 
-    public MainWindow(IActivityStore store, IActivityRecorder recorder, IStartupRegistration startupRegistration)
+    public MainWindow(IActivityStore store, IActivityRecorder recorder, IStartupRegistration startupRegistration, IAiProvider? aiProvider = null)
     {
         _store = store;
         _recorder = recorder;
         _startupRegistration = startupRegistration;
+        _aiProvider = aiProvider;
 
         InitializeComponent();
 
@@ -37,6 +47,14 @@ public partial class MainWindow : Window
         _activityView.GroupDescriptions.Add(new PropertyGroupDescription(nameof(ActivityItemViewModel.DateGroup)));
         TimelineList.ItemsSource = _activityView;
         TimelineCardGroups.ItemsSource = _activityGroups;
+        SummaryCards.ItemsSource = _summaryMetrics;
+        ActivityHeatmap.ItemsSource = _heatmapSegments;
+        TopApplicationsTable.ItemsSource = _topApplications;
+        FocusTimeline.ItemsSource = _focusBlocks;
+        OverviewLegend.ItemsSource = _overviewLegend;
+        DateFilter.ItemsSource = _dateFilters;
+        AiSummaryPanel.Visibility = _aiProvider is null ? Visibility.Collapsed : Visibility.Visible;
+        InsightsButton.Visibility = _aiProvider is null ? Visibility.Collapsed : Visibility.Visible;
         ApplyTimelineViewMode(_preferences.TimelineViewMode);
 
         _recorder.ActivityChanged += Recorder_ActivityChanged;
@@ -52,26 +70,37 @@ public partial class MainWindow : Window
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
         ApplySavedOpacity();
+        ApplyCurrentUser();
         await _recorder.StartAsync();
         UpdateRecordingStatus();
+        await LoadDateFiltersAsync();
         await LoadActivitiesAsync();
+        await LoadOverviewAsync();
     }
 
     private async void Recorder_ActivityChanged(object? sender, TimelineActivity e)
     {
-        await Dispatcher.InvokeAsync(async () => await LoadActivitiesAsync());
+        await Dispatcher.InvokeAsync(async () =>
+        {
+            await LoadActivitiesAsync();
+            await LoadOverviewAsync();
+        });
     }
 
     private async Task LoadActivitiesAsync()
     {
+        var selectedDate = GetSelectedDate();
         var query = new TimelineQuery
         {
             SearchText = SearchBox.Text,
             Kind = GetSelectedKind(),
-            Limit = 300
+            Limit = 1000
         };
 
-        var activities = await _store.QueryAsync(query);
+        var activities = (await _store.QueryAsync(query))
+            .Where(activity => !ActivityExclusionFilter.IsExcluded(activity))
+            .Where(activity => selectedDate is null || activity.StartedAt.LocalDateTime.Date == selectedDate.Value)
+            .ToList();
         var sessions = BuildTimelineSessions(activities).ToList();
         TodayActivityCountText.Text = $"{sessions.Count} activities";
         _activities.Clear();
@@ -93,6 +122,205 @@ public partial class MainWindow : Window
         }
     }
 
+    private async Task LoadOverviewAsync()
+    {
+        var selectedDate = GetSelectedDate() ?? DateTime.Today;
+        var activities = (await _store.QueryAsync(new TimelineQuery { Limit = 1000 }))
+            .Where(activity => !ActivityExclusionFilter.IsExcluded(activity))
+            .ToList();
+        var todayActivities = activities
+            .Where(activity => activity.StartedAt.LocalDateTime.Date == selectedDate)
+            .OrderBy(activity => activity.StartedAt)
+            .ToList();
+
+        var totalActive = todayActivities.Aggregate(TimeSpan.Zero, (total, activity) => total + activity.Duration);
+        var sessions = BuildTimelineSessions(todayActivities).OrderBy(activity => activity.SessionStartedAt).ToList();
+        var topApps = BuildTopApplications(todayActivities, totalActive).ToList();
+        var longestFocus = BuildFocusBlocks(sessions).Where(block => !block.IsGap).OrderByDescending(block => block.Duration).FirstOrDefault();
+
+        _summaryMetrics.Clear();
+        _summaryMetrics.Add(new SummaryMetricViewModel("Total Active Time", FormatDuration(totalActive), "Recorded foreground activity"));
+        _summaryMetrics.Add(new SummaryMetricViewModel("Number of Sessions", sessions.Count.ToString(), "Collapsed continuous moments"));
+        _summaryMetrics.Add(new SummaryMetricViewModel("Most Used App", topApps.FirstOrDefault()?.AppName ?? "No activity yet", topApps.FirstOrDefault()?.Duration ?? "Waiting for activity"));
+        _summaryMetrics.Add(new SummaryMetricViewModel("Longest Focus Session", longestFocus is null ? "No focus yet" : FormatDuration(longestFocus.Duration), longestFocus?.Label ?? "Active blocks appear here"));
+
+        _heatmapSegments.Clear();
+        foreach (var segment in BuildHeatmap(todayActivities))
+        {
+            _heatmapSegments.Add(segment);
+        }
+
+        _topApplications.Clear();
+        foreach (var app in SortTopApplications(topApps))
+        {
+            _topApplications.Add(app);
+        }
+
+        _focusBlocks.Clear();
+        foreach (var block in BuildFocusBlocks(sessions))
+        {
+            _focusBlocks.Add(block);
+        }
+
+        _overviewLegend.Clear();
+        _overviewLegend.Add(new LegendItemViewModel("Apps and tools", "#6E56CF"));
+        _overviewLegend.Add(new LegendItemViewModel("Web browsing", "#2F80ED"));
+        _overviewLegend.Add(new LegendItemViewModel("Development work", "#55B867"));
+        _overviewLegend.Add(new LegendItemViewModel("Gaps or idle space", "#22304A"));
+
+        OverviewDateText.Text = FormatDateLabel(selectedDate);
+        OverviewSidebarDateText.Text = selectedDate.ToString("dddd, d MMMM yyyy");
+        OverviewTotalActiveText.Text = FormatDuration(totalActive);
+        OverviewSessionsText.Text = sessions.Count.ToString();
+        OverviewAppsText.Text = topApps.Count.ToString();
+        OverviewFocusText.Text = longestFocus is null ? "None yet" : FormatDuration(longestFocus.Duration);
+    }
+
+    private async Task LoadDateFiltersAsync()
+    {
+        var activities = (await _store.QueryAsync(new TimelineQuery { Limit = 2000 }))
+            .Where(activity => !ActivityExclusionFilter.IsExcluded(activity))
+            .ToList();
+        var dates = activities
+            .Select(activity => activity.StartedAt.LocalDateTime.Date)
+            .Append(DateTime.Today)
+            .Append(DateTime.Today.AddDays(-1))
+            .Distinct()
+            .OrderByDescending(date => date)
+            .ToList();
+
+        _isUpdatingDateFilter = true;
+        _dateFilters.Clear();
+        foreach (var date in dates)
+        {
+            _dateFilters.Add(new DateFilterOption(date, FormatDateLabel(date)));
+        }
+
+        DateFilter.SelectedItem = _dateFilters.FirstOrDefault(option => option.Date == DateTime.Today) ?? _dateFilters.FirstOrDefault();
+        _isUpdatingDateFilter = false;
+    }
+
+    private static IEnumerable<HeatmapSegmentViewModel> BuildHeatmap(IReadOnlyList<TimelineActivity> activities)
+    {
+        var day = DateTime.Today;
+        var blockLength = TimeSpan.FromMinutes(15);
+        var maxSeconds = blockLength.TotalSeconds;
+
+        for (var index = 0; index < 96; index++)
+        {
+            var start = day.AddTicks(blockLength.Ticks * index);
+            var end = start.Add(blockLength);
+            var overlapping = activities
+                .Select(activity => new
+                {
+                    Activity = activity,
+                    Seconds = GetOverlapSeconds(activity.StartedAt.LocalDateTime, activity.EndedAt.LocalDateTime, start, end)
+                })
+                .Where(item => item.Seconds > 0)
+                .ToList();
+
+            var activeSeconds = overlapping.Sum(item => item.Seconds);
+            var dominant = overlapping
+                .GroupBy(item => item.Activity.Kind)
+                .OrderByDescending(group => group.Sum(item => item.Seconds))
+                .FirstOrDefault()?.Key;
+            var topApp = overlapping
+                .GroupBy(item => item.Activity.AppName)
+                .OrderByDescending(group => group.Sum(item => item.Seconds))
+                .FirstOrDefault()?.Key ?? "No activity";
+            var intensity = Math.Clamp(activeSeconds / maxSeconds, 0, 1);
+            var tooltip = $"{start:HH:mm} - {end:HH:mm}\n{topApp}\n{FormatDuration(TimeSpan.FromSeconds(activeSeconds))}\n{overlapping.Count} activities";
+
+            yield return new HeatmapSegmentViewModel(GetHeatmapFill(dominant, intensity), tooltip);
+        }
+    }
+
+    private static IEnumerable<TopApplicationViewModel> BuildTopApplications(IReadOnlyList<TimelineActivity> activities, TimeSpan totalActive)
+    {
+        return activities
+            .GroupBy(activity => activity.AppName)
+            .Select(group =>
+            {
+                var duration = group.Aggregate(TimeSpan.Zero, (total, activity) => total + activity.Duration);
+                var representative = group.OrderByDescending(activity => activity.EndedAt).First();
+                var percent = totalActive.TotalSeconds <= 0 ? 0 : duration.TotalSeconds / totalActive.TotalSeconds;
+                return new TopApplicationViewModel(representative, duration, group.Count(), percent);
+            })
+            .OrderByDescending(app => app.ActiveDuration)
+            .Take(8);
+    }
+
+    private IEnumerable<TopApplicationViewModel> SortTopApplications(IEnumerable<TopApplicationViewModel> apps)
+    {
+        return _overviewSort switch
+        {
+            "Sessions" => apps.OrderByDescending(app => app.SessionCount),
+            "Percent" => apps.OrderByDescending(app => app.Percent),
+            _ => apps.OrderByDescending(app => app.ActiveDuration)
+        };
+    }
+
+    private static IReadOnlyList<FocusBlockViewModel> BuildFocusBlocks(IReadOnlyList<ActivityItemViewModel> sessions)
+    {
+        var blocks = new List<FocusBlockViewModel>();
+        ActivityItemViewModel? previous = null;
+
+        foreach (var session in sessions)
+        {
+            if (previous is not null)
+            {
+                var gap = session.SessionStartedAt - previous.SessionEndedAt;
+                if (gap.TotalMinutes >= 5)
+                {
+                    blocks.Add(FocusBlockViewModel.Gap(gap));
+                }
+            }
+
+            blocks.Add(FocusBlockViewModel.Active(session.AppName, session.SessionEndedAt - session.SessionStartedAt, session.Activity.Kind));
+            previous = session;
+        }
+
+        return blocks.Take(26).ToList();
+    }
+
+    private static double GetOverlapSeconds(DateTime activityStart, DateTime activityEnd, DateTime blockStart, DateTime blockEnd)
+    {
+        var start = activityStart > blockStart ? activityStart : blockStart;
+        var end = activityEnd < blockEnd ? activityEnd : blockEnd;
+        return end > start ? (end - start).TotalSeconds : 0;
+    }
+
+    private static string GetHeatmapFill(MomentTrace.Core.ActivityKind? kind, double intensity)
+    {
+        if (intensity <= 0)
+        {
+            return "#142033";
+        }
+
+        return kind switch
+        {
+            MomentTrace.Core.ActivityKind.Browser => intensity > 0.66 ? "#2F80ED" : intensity > 0.33 ? "#2363B8" : "#1B3D72",
+            MomentTrace.Core.ActivityKind.Development => intensity > 0.66 ? "#55B867" : intensity > 0.33 ? "#3E854C" : "#244E32",
+            MomentTrace.Core.ActivityKind.Document => intensity > 0.66 ? "#D8A84F" : intensity > 0.33 ? "#9B793D" : "#594727",
+            _ => intensity > 0.66 ? "#8B5CF6" : intensity > 0.33 ? "#6E56CF" : "#3A286F"
+        };
+    }
+
+    private static string FormatDuration(TimeSpan duration)
+    {
+        if (duration.TotalHours >= 1)
+        {
+            return $"{(int)duration.TotalHours}h {duration.Minutes}m";
+        }
+
+        if (duration.TotalMinutes >= 1)
+        {
+            return $"{Math.Max(1, (int)Math.Round(duration.TotalMinutes))}m";
+        }
+
+        return duration.TotalSeconds > 0 ? $"{Math.Max(1, (int)Math.Round(duration.TotalSeconds))}s" : "0m";
+    }
+
     private MomentTrace.Core.ActivityKind? GetSelectedKind()
     {
         if (KindFilter.SelectedItem is not ComboBoxItem item || item.Content is not string content || content == "All")
@@ -101,6 +329,27 @@ public partial class MainWindow : Window
         }
 
         return Enum.TryParse<MomentTrace.Core.ActivityKind>(content, out var kind) ? kind : null;
+    }
+
+    private DateTime? GetSelectedDate()
+    {
+        return DateFilter.SelectedItem is DateFilterOption option ? option.Date : DateTime.Today;
+    }
+
+    private static string FormatDateLabel(DateTime date)
+    {
+        var today = DateTime.Today;
+        if (date == today)
+        {
+            return "Today";
+        }
+
+        if (date == today.AddDays(-1))
+        {
+            return "Yesterday";
+        }
+
+        return date.ToString("ddd, d MMM");
     }
 
     private static IEnumerable<ActivityItemViewModel> BuildTimelineSessions(IReadOnlyList<TimelineActivity> activities)
@@ -310,22 +559,92 @@ public partial class MainWindow : Window
         await LoadActivitiesAsync();
     }
 
+    private async void DateFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!IsLoaded || _isUpdatingDateFilter)
+        {
+            return;
+        }
+
+        await LoadActivitiesAsync();
+        await LoadOverviewAsync();
+    }
+
     private async void RefreshButton_Click(object sender, RoutedEventArgs e)
     {
+        await LoadDateFiltersAsync();
         await LoadActivitiesAsync();
+        await LoadOverviewAsync();
     }
 
     private async void TodayButton_Click(object sender, RoutedEventArgs e)
     {
+        ShowTimelinePage();
         SearchBox.Text = string.Empty;
         KindFilter.SelectedIndex = 0;
+        DateFilter.SelectedItem = _dateFilters.FirstOrDefault(option => option.Date == DateTime.Today);
         await LoadActivitiesAsync();
+        await LoadOverviewAsync();
+    }
+
+    private async void TimelineButton_Click(object sender, RoutedEventArgs e)
+    {
+        ShowTimelinePage();
+        await LoadActivitiesAsync();
+    }
+
+    private async void OverviewButton_Click(object sender, RoutedEventArgs e)
+    {
+        ShowOverviewPage();
+        await LoadOverviewAsync();
+    }
+
+    private void OverviewSort_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.Button { Tag: string sortKey })
+        {
+            return;
+        }
+
+        _overviewSort = sortKey;
+        var sorted = SortTopApplications(_topApplications.ToList()).ToList();
+        _topApplications.Clear();
+        foreach (var app in sorted)
+        {
+            _topApplications.Add(app);
+        }
+    }
+
+    private void ShowTimelinePage()
+    {
+        TimelinePage.Visibility = Visibility.Visible;
+        OverviewPage.Visibility = Visibility.Collapsed;
+        TimelineDetailContent.Visibility = Visibility.Visible;
+        OverviewSidebarContent.Visibility = Visibility.Collapsed;
+        SearchBox.Visibility = Visibility.Visible;
+        KindFilter.Visibility = Visibility.Visible;
+        TimelineNavHighlight.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(58, 40, 111));
+        OverviewNavHighlight.Background = System.Windows.Media.Brushes.Transparent;
+    }
+
+    private void ShowOverviewPage()
+    {
+        TimelinePage.Visibility = Visibility.Collapsed;
+        OverviewPage.Visibility = Visibility.Visible;
+        TimelineDetailContent.Visibility = Visibility.Collapsed;
+        OverviewSidebarContent.Visibility = Visibility.Visible;
+        SearchBox.Visibility = Visibility.Collapsed;
+        KindFilter.Visibility = Visibility.Collapsed;
+        TimelineNavHighlight.Background = System.Windows.Media.Brushes.Transparent;
+        OverviewNavHighlight.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(58, 40, 111));
     }
 
     private async void PinnedButton_Click(object sender, RoutedEventArgs e)
     {
+        ShowTimelinePage();
         SearchBox.Text = string.Empty;
         KindFilter.SelectedIndex = 0;
+        DateFilter.SelectedItem = _dateFilters.FirstOrDefault(option => option.Date == DateTime.Today);
         await LoadActivitiesAsync();
 
         var pinned = _activities.FirstOrDefault(activity => activity.Activity.IsPinned);
@@ -499,6 +818,11 @@ public partial class MainWindow : Window
         Hide();
     }
 
+    private void CloseWindowButton_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
     private void ToggleDetailsButton_Click(object sender, RoutedEventArgs e)
     {
         _isDetailVisible = !_isDetailVisible;
@@ -514,35 +838,42 @@ public partial class MainWindow : Window
         ApplySurfaceTransparency(opacity);
     }
 
+    private void ApplyCurrentUser()
+    {
+        var userName = Environment.UserName;
+        var domain = Environment.UserDomainName;
+        var displayName = string.IsNullOrWhiteSpace(userName) ? "Windows user" : userName;
+
+        UserDisplayNameText.Text = displayName;
+        UserAccountText.Text = string.IsNullOrWhiteSpace(domain) ? Environment.MachineName : $"{domain}\\{userName}";
+        UserInitialsText.Text = GetInitials(displayName);
+    }
+
+    private static string GetInitials(string displayName)
+    {
+        var parts = displayName
+            .Split([' ', '.', '_', '-'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Take(2)
+            .ToArray();
+
+        if (parts.Length == 0)
+        {
+            return "U";
+        }
+
+        return string.Concat(parts.Select(part => char.ToUpperInvariant(part[0])));
+    }
+
     private void ApplySurfaceTransparency(double opacity)
     {
         var strength = Math.Clamp(opacity, 0.55, 1.0);
+        var shellAlpha = (byte)Math.Round(strength * 255);
+        var panelAlpha = (byte)Math.Round(Math.Clamp(strength + 0.04, 0.55, 1.0) * 255);
 
-        WindowSurface.Background = new SolidColorBrush(TintDarkSurface(strength, 8, 17, 31, 28, 38, 54));
-        RailSurface.Background = new SolidColorBrush(TintDarkSurface(strength, 18, 27, 43, 35, 45, 63));
-        TopCommandSurface.Background = new SolidColorBrush(TintDarkSurface(strength, 13, 23, 40, 32, 43, 61));
-        DetailSurface.Background = new SolidColorBrush(TintDarkSurface(strength, 18, 27, 43, 35, 45, 63));
-    }
-
-    private static System.Windows.Media.Color TintDarkSurface(
-        double strength,
-        byte darkRed,
-        byte darkGreen,
-        byte darkBlue,
-        byte lightRed,
-        byte lightGreen,
-        byte lightBlue)
-    {
-        var t = (1.0 - strength) / 0.45;
-        return System.Windows.Media.Color.FromRgb(
-            Blend(darkRed, lightRed, t),
-            Blend(darkGreen, lightGreen, t),
-            Blend(darkBlue, lightBlue, t));
-    }
-
-    private static byte Blend(byte from, byte to, double amount)
-    {
-        return (byte)Math.Round(from + ((to - from) * Math.Clamp(amount, 0.0, 1.0)));
+        WindowSurface.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(shellAlpha, 8, 17, 31));
+        RailSurface.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(panelAlpha, 18, 27, 43));
+        TopCommandSurface.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(panelAlpha, 13, 23, 40));
+        DetailSurface.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(panelAlpha, 18, 27, 43));
     }
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
@@ -597,6 +928,86 @@ public partial class MainWindow : Window
     {
         return string.Equals(viewMode, "Cards", StringComparison.OrdinalIgnoreCase);
     }
+
+    private sealed record SummaryMetricViewModel(string Label, string Value, string Detail);
+
+    private sealed record HeatmapSegmentViewModel(string Fill, string Tooltip);
+
+    private sealed record DateFilterOption(DateTime Date, string Label);
+
+    private sealed class TopApplicationViewModel
+    {
+        private readonly TimelineActivity _representative;
+
+        public TopApplicationViewModel(TimelineActivity representative, TimeSpan activeDuration, int sessionCount, double percent)
+        {
+            _representative = representative;
+            ActiveDuration = activeDuration;
+            SessionCount = sessionCount;
+            Percent = percent;
+        }
+
+        public string AppName => _representative.AppName;
+
+        public ImageSource? ProgramIcon => new ActivityItemViewModel(_representative).ProgramIcon;
+
+        public TimeSpan ActiveDuration { get; }
+
+        public int SessionCount { get; }
+
+        public double Percent { get; }
+
+        public string Duration => FormatDuration(ActiveDuration);
+
+        public string Sessions => SessionCount.ToString();
+
+        public string PercentOfDay => $"{Percent:P0}";
+
+        public string Trend => "stable";
+    }
+
+    private sealed class FocusBlockViewModel
+    {
+        private FocusBlockViewModel(string label, TimeSpan duration, string fill, bool isGap)
+        {
+            Label = label;
+            Duration = duration;
+            Fill = fill;
+            IsGap = isGap;
+        }
+
+        public string Label { get; }
+
+        public TimeSpan Duration { get; }
+
+        public string Fill { get; }
+
+        public bool IsGap { get; }
+
+        public double Width => Math.Clamp(Duration.TotalMinutes * 1.8, 18, 96);
+
+        public string Tooltip => $"{Label}\n{FormatDuration(Duration)}";
+
+        public static FocusBlockViewModel Active(string appName, TimeSpan duration, MomentTrace.Core.ActivityKind kind)
+        {
+            var fill = kind switch
+            {
+                MomentTrace.Core.ActivityKind.Browser => "#2F80ED",
+                MomentTrace.Core.ActivityKind.Development => "#55B867",
+                MomentTrace.Core.ActivityKind.Document => "#D8A84F",
+                _ => "#8B5CF6"
+            };
+
+            return new FocusBlockViewModel(appName, duration, fill, isGap: false);
+        }
+
+        public static FocusBlockViewModel Gap(TimeSpan duration)
+        {
+            return new FocusBlockViewModel("Gap or idle space", duration, "#22304A", isGap: true);
+        }
+    }
+
+    private sealed record LegendItemViewModel(string Label, string Fill);
 
     private sealed class TimelineSessionGroupViewModel(
         DateTimeOffset startedAt,
@@ -669,6 +1080,37 @@ public partial class MainWindow : Window
         }
 
         DragMove();
+    }
+
+    private void SectionSurface_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton != MouseButton.Left
+            || sender is not FrameworkElement surface
+            || e.GetPosition(surface).Y > 92
+            || IsInsideInteractiveControl((DependencyObject)e.OriginalSource))
+        {
+            return;
+        }
+
+        DragMove();
+        e.Handled = true;
+    }
+
+    private static bool IsInsideInteractiveControl(DependencyObject source)
+    {
+        for (var current = source; current is not null; current = VisualTreeHelper.GetParent(current))
+        {
+            if (current is System.Windows.Controls.Button
+                or System.Windows.Controls.TextBox
+                or System.Windows.Controls.ComboBox
+                or System.Windows.Controls.Slider
+                or System.Windows.Controls.CheckBox)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void Window_Closing(object sender, CancelEventArgs e)

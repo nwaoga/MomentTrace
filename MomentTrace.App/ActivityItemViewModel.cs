@@ -126,11 +126,6 @@ public sealed class ActivityItemViewModel(TimelineActivity activity)
                 return "Yesterday";
             }
 
-            if (localDate >= today.AddDays(-7))
-            {
-                return "Earlier this week";
-            }
-
             return Activity.StartedAt.LocalDateTime.ToString("dddd, d MMMM yyyy");
         }
     }

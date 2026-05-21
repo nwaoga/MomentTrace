@@ -99,9 +99,100 @@
 
         <Style TargetType="ComboBox">
             <Setter Property="FontSize" Value="13" />
-            <Setter Property="Padding" Value="10,7" />
+            <Setter Property="Padding" Value="10,8" />
             <Setter Property="Background" Value="#101A2B" />
-            <Setter Property="Foreground" Value="#111827" />
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+            <Setter Property="BorderBrush" Value="#34425C" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Background" Value="#101A2B" />
+                        <Setter Property="Foreground" Value="#F4F7FB" />
+                        <Setter Property="Padding" Value="10,7" />
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TopComboBox" TargetType="ComboBox">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="#8C98AD" />
+            <Setter Property="Background" Value="#121D2F" />
+            <Setter Property="BorderBrush" Value="#34425C" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Background" Value="#101A2B" />
+                        <Setter Property="Foreground" Value="#F4F7FB" />
+                        <Setter Property="Padding" Value="12,8" />
+                    </Style>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="ToggleButton"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          Background="{Binding Background, RelativeSource={RelativeSource TemplatedParent}}"
+                                          BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource TemplatedParent}}"
+                                          BorderThickness="{Binding BorderThickness, RelativeSource={RelativeSource TemplatedParent}}"
+                                          Padding="{Binding Padding, RelativeSource={RelativeSource TemplatedParent}}"
+                                          Foreground="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}"
+                                          Focusable="False"
+                                          ClickMode="Press">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="Root"
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="8"
+                                                Padding="{TemplateBinding Padding}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <ContentPresenter Content="{Binding SelectionBoxItem, RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                                                  TextElement.Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                                                  VerticalAlignment="Center"
+                                                                  RecognizesAccessKey="True" />
+                                                <TextBlock Grid.Column="1" Text="⌄" FontSize="14" Foreground="#A5B0C3" Margin="10,-2,0,0" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Root" Property="Background" Value="#1A2941" />
+                                                <Setter TargetName="Root" Property="BorderBrush" Value="#5A6A88" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <Popup x:Name="PART_Popup"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True"
+                                   Placement="Bottom"
+                                   PopupAnimation="Fade">
+                                <Border Background="#101A2B"
+                                        BorderBrush="#34425C"
+                                        BorderThickness="1"
+                                        CornerRadius="8"
+                                        Margin="0,4,0,0"
+                                        MinWidth="{TemplateBinding ActualWidth}">
+                                    <ScrollViewer MaxHeight="260">
+                                        <ItemsPresenter />
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style TargetType="ListBoxItem">
@@ -263,6 +354,79 @@
                 </StackPanel>
             </Grid>
         </DataTemplate>
+
+        <DataTemplate x:Key="SummaryMetricTemplate">
+            <Border Background="#142033" BorderBrush="#293A57" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,12,0">
+                <StackPanel>
+                    <TextBlock Text="{Binding Label}" FontSize="12" Foreground="{StaticResource MutedTextBrush}" />
+                    <TextBlock Text="{Binding Value}" Margin="0,8,0,0" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding Detail}" Margin="0,5,0,0" FontSize="12" Foreground="#8290A6" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="HeatmapSegmentTemplate">
+            <Border Height="24"
+                    MinWidth="5"
+                    Margin="1"
+                    Background="{Binding Fill}"
+                    CornerRadius="2"
+                    ToolTip="{Binding Tooltip}">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="BorderBrush" Value="#1E2B42" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="BorderBrush" Value="#B89CFF" />
+                                <Setter Property="BorderThickness" Value="1" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TopApplicationTemplate">
+            <Grid Margin="0,0,0,2" Background="#101A2B">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="38" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="108" />
+                    <ColumnDefinition Width="80" />
+                    <ColumnDefinition Width="74" />
+                    <ColumnDefinition Width="64" />
+                </Grid.ColumnDefinitions>
+                <Border Width="26" Height="26" CornerRadius="6" Background="#1E2B42" VerticalAlignment="Center">
+                    <Image Source="{Binding ProgramIcon}" Width="20" Height="20" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <TextBlock Grid.Column="1" Text="{Binding AppName}" Foreground="{StaticResource TextBrush}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="2" Text="{Binding Duration}" Foreground="{StaticResource TextBrush}" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                <TextBlock Grid.Column="3" Text="{Binding Sessions}" Foreground="{StaticResource MutedTextBrush}" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                <TextBlock Grid.Column="4" Text="{Binding PercentOfDay}" Foreground="{StaticResource MutedTextBrush}" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                <TextBlock Grid.Column="5" Text="{Binding Trend}" Foreground="#8FD17F" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Right" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="FocusBlockTemplate">
+            <Border Width="{Binding Width}"
+                    Height="36"
+                    Margin="2,0"
+                    CornerRadius="5"
+                    Background="{Binding Fill}"
+                    ToolTip="{Binding Tooltip}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="LegendItemTemplate">
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="22" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Width="12" Height="12" CornerRadius="3" Background="{Binding Fill}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="{Binding Label}" Foreground="{StaticResource MutedTextBrush}" FontSize="12" />
+            </Grid>
+        </DataTemplate>
     </Window.Resources>
 
     <Border x:Name="WindowSurface"
@@ -278,7 +442,7 @@
                 <ColumnDefinition x:Name="DetailColumn" Width="330" />
             </Grid.ColumnDefinitions>
 
-            <Border x:Name="RailSurface" Grid.Column="0" Background="#121B2B" BorderBrush="#23314A" BorderThickness="0,0,1,0">
+            <Border x:Name="RailSurface" Grid.Column="0" Background="#121B2B" BorderBrush="#23314A" BorderThickness="0,0,1,0" PreviewMouseLeftButtonDown="SectionSurface_PreviewMouseLeftButtonDown">
                 <Grid Margin="18,18">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -287,7 +451,8 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <DockPanel>
+                    <Border Grid.Row="0" Background="Transparent" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown" />
+                    <DockPanel Grid.Row="0" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown">
                         <Border Width="34" Height="34" CornerRadius="8" Background="#4C35A8" DockPanel.Dock="Left">
                             <TextBlock Text="◆" FontSize="17" Foreground="#D9D0FF" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
@@ -296,21 +461,23 @@
 
                     <StackPanel Grid.Row="1" Margin="0,36,0,0">
                         <TextBlock Text="Workspace" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
-                        <Border Background="#3A286F" CornerRadius="7" Margin="0,0,0,6">
-                            <Button Style="{StaticResource RailButton}" Click="TodayButton_Click">
+                        <Border x:Name="TimelineNavHighlight" Background="#3A286F" CornerRadius="7" Margin="0,0,0,6">
+                            <Button Style="{StaticResource RailButton}" Click="TimelineButton_Click">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="⌘" Width="28" Foreground="#BBA7FF" />
                                     <TextBlock Text="Timeline" FontWeight="SemiBold" />
                                 </StackPanel>
                             </Button>
                         </Border>
-                        <Button Style="{StaticResource RailButton}" Click="TodayButton_Click">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="◎" Width="28" />
-                                <TextBlock Text="Overview" />
-                            </StackPanel>
-                        </Button>
-                        <Button Style="{StaticResource RailButton}">
+                        <Border x:Name="OverviewNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
+                            <Button Style="{StaticResource RailButton}" Click="OverviewButton_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="◎" Width="28" />
+                                    <TextBlock Text="Overview" />
+                                </StackPanel>
+                            </Button>
+                        </Border>
+                        <Button x:Name="InsightsButton" Style="{StaticResource RailButton}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="◴" Width="28" />
                                 <TextBlock Text="Insights" />
@@ -356,11 +523,11 @@
                         <Border Height="1" Background="#26344D" Margin="0,0,0,16" />
                         <DockPanel Margin="0,0,0,14">
                             <Border Width="34" Height="34" CornerRadius="17" Background="#8B5CF6" DockPanel.Dock="Left">
-                                <TextBlock Text="AJ" FontSize="13" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <TextBlock x:Name="UserInitialsText" Text="U" FontSize="13" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <StackPanel Margin="12,0,0,0">
-                                <TextBlock Text="Avery Johnson" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
-                                <TextBlock Text="avery@example.com" FontSize="11" Foreground="{StaticResource MutedTextBrush}" />
+                                <TextBlock x:Name="UserDisplayNameText" Text="User" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                <TextBlock x:Name="UserAccountText" Text="" FontSize="11" Foreground="{StaticResource MutedTextBrush}" />
                             </StackPanel>
                         </DockPanel>
                         <Button Style="{StaticResource RailButton}" Click="SettingsButton_Click">
@@ -383,8 +550,10 @@
                     <Grid Margin="28,12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="108" />
+                            <ColumnDefinition Width="142" />
                             <ColumnDefinition Width="96" />
+                            <ColumnDefinition Width="48" />
+                            <ColumnDefinition Width="48" />
                             <ColumnDefinition Width="48" />
                         </Grid.ColumnDefinitions>
                         <Grid>
@@ -403,8 +572,14 @@
                             </TextBlock>
                             <TextBlock Text="⌕" Margin="16,0,0,0" Foreground="#A5B0C3" FontSize="20" IsHitTestVisible="False" VerticalAlignment="Center" />
                         </Grid>
-                        <Button Grid.Column="1" Style="{StaticResource ChromeButton}" Content="▣ Today" Click="TodayButton_Click" VerticalAlignment="Center" Margin="14,0,0,0" />
-                        <ComboBox x:Name="KindFilter" Grid.Column="2" Margin="10,0,0,0" SelectionChanged="KindFilter_SelectionChanged" VerticalAlignment="Center">
+                        <ComboBox x:Name="DateFilter"
+                                  Style="{StaticResource TopComboBox}"
+                                  Grid.Column="1"
+                                  Margin="14,0,0,0"
+                                  DisplayMemberPath="Label"
+                                  SelectionChanged="DateFilter_SelectionChanged"
+                                  VerticalAlignment="Center" />
+                        <ComboBox x:Name="KindFilter" Style="{StaticResource TopComboBox}" Grid.Column="2" Margin="10,0,0,0" SelectionChanged="KindFilter_SelectionChanged" VerticalAlignment="Center">
                             <ComboBoxItem Content="All" IsSelected="True" />
                             <ComboBoxItem Content="App" />
                             <ComboBoxItem Content="Browser" />
@@ -412,10 +587,12 @@
                             <ComboBoxItem Content="Development" />
                         </ComboBox>
                         <Button x:Name="ToggleDetailsButton" Grid.Column="3" Style="{StaticResource ChromeButton}" Content="▤" Click="ToggleDetailsButton_Click" VerticalAlignment="Center" Margin="10,0,0,0" Padding="12,8" />
+                        <Button Grid.Column="4" Style="{StaticResource ChromeButton}" Content="–" Click="MinimizeButton_Click" VerticalAlignment="Center" Margin="10,0,0,0" Padding="12,8" FontSize="16" />
+                        <Button Grid.Column="5" Style="{StaticResource ChromeButton}" Content="×" Click="CloseWindowButton_Click" VerticalAlignment="Center" Margin="10,0,0,0" Padding="12,8" FontSize="16" />
                     </Grid>
                 </Border>
 
-                <Grid Grid.Row="1" Margin="28,20,22,0">
+                <Grid x:Name="TimelinePage" Grid.Row="1" Margin="28,20,22,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="36" />
                         <ColumnDefinition Width="*" />
@@ -456,10 +633,112 @@
                         </ListBox.GroupStyle>
                     </ListBox>
                 </Grid>
+
+                <ScrollViewer x:Name="OverviewPage"
+                              Grid.Row="1"
+                              Margin="28,20,22,0"
+                              Visibility="Collapsed"
+                              HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Overview" FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                <TextBlock Text="A quiet read on how your day is taking shape." Margin="0,6,0,0" FontSize="13" Foreground="{StaticResource MutedTextBrush}" />
+                            </StackPanel>
+                            <TextBlock x:Name="OverviewDateText" Grid.Column="1" Text="Today" Foreground="{StaticResource MutedTextBrush}" FontSize="13" VerticalAlignment="Center" />
+                        </Grid>
+
+                        <ItemsControl x:Name="SummaryCards" ItemTemplate="{StaticResource SummaryMetricTemplate}" Margin="0,0,0,22">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Rows="1" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+
+                        <Border Background="#111B2C" BorderBrush="#293A57" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,0,0,20">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,14">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Daily activity heatmap" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                        <TextBlock Text="15-minute blocks, colored by activity density and type." Margin="0,4,0,0" FontSize="12" Foreground="{StaticResource MutedTextBrush}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="00:00" FontSize="11" Foreground="#718096" />
+                                        <TextBlock Text="  ·  06:00  ·  12:00  ·  18:00  ·  " FontSize="11" Foreground="#718096" />
+                                        <TextBlock Text="24:00" FontSize="11" Foreground="#718096" />
+                                    </StackPanel>
+                                </Grid>
+                                <ItemsControl x:Name="ActivityHeatmap" ItemTemplate="{StaticResource HeatmapSegmentTemplate}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Rows="1" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="22" />
+                                <ColumnDefinition Width="360" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Background="#111B2C" BorderBrush="#293A57" BorderThickness="1" CornerRadius="12" Padding="18">
+                                <StackPanel>
+                                    <Grid Margin="0,0,0,14">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="108" />
+                                            <ColumnDefinition Width="80" />
+                                            <ColumnDefinition Width="74" />
+                                            <ColumnDefinition Width="64" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Top applications" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                        <Button Grid.Column="1" Style="{StaticResource ChromeButton}" Content="Duration" Tag="Duration" Click="OverviewSort_Click" Padding="8,4" FontSize="11" />
+                                        <Button Grid.Column="2" Style="{StaticResource ChromeButton}" Content="Sessions" Tag="Sessions" Click="OverviewSort_Click" Padding="8,4" FontSize="11" Margin="6,0,0,0" />
+                                        <Button Grid.Column="3" Style="{StaticResource ChromeButton}" Content="%" Tag="Percent" Click="OverviewSort_Click" Padding="8,4" FontSize="11" Margin="6,0,0,0" />
+                                        <TextBlock Grid.Column="4" Text="Trend" Foreground="{StaticResource MutedTextBrush}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <ItemsControl x:Name="TopApplicationsTable" ItemTemplate="{StaticResource TopApplicationTemplate}" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="2" Background="#111B2C" BorderBrush="#293A57" BorderThickness="1" CornerRadius="12" Padding="18">
+                                <StackPanel>
+                                    <TextBlock Text="Focus timeline" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                    <TextBlock Text="Active runs and natural gaps across the day." Margin="0,4,0,16" FontSize="12" Foreground="{StaticResource MutedTextBrush}" />
+                                    <ItemsControl x:Name="FocusTimeline">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <StaticResource ResourceKey="FocusBlockTemplate" />
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
             </Grid>
 
-            <Border x:Name="DetailSurface" Grid.Column="2" Background="#121B2B" BorderBrush="#23314A" BorderThickness="1,0,0,0">
-                <Grid Margin="24,30,22,24">
+            <Border x:Name="DetailSurface" Grid.Column="2" Background="#121B2B" BorderBrush="#23314A" BorderThickness="1,0,0,0" PreviewMouseLeftButtonDown="SectionSurface_PreviewMouseLeftButtonDown">
+                <Grid>
+                <Grid x:Name="TimelineDetailContent" Margin="24,30,22,24">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -467,7 +746,8 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <DockPanel>
+                    <Border Grid.Row="0" Background="Transparent" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown" />
+                    <DockPanel Grid.Row="0" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown">
                         <Button DockPanel.Dock="Right" Style="{StaticResource ChromeButton}" Content="×" Click="ToggleDetailsButton_Click" Padding="9,3" BorderThickness="0" Background="Transparent" FontSize="20" />
                         <Border Width="62" Height="62" CornerRadius="9" Background="#19263B" DockPanel.Dock="Left">
                             <Grid>
@@ -551,7 +831,7 @@
                                 </Grid>
                             </Border>
 
-                            <Border Background="#231D45" BorderBrush="#4D3A8E" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,18">
+                            <Border x:Name="AiSummaryPanel" Background="#231D45" BorderBrush="#4D3A8E" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,18">
                                 <StackPanel>
                                     <TextBlock Text="✦ AI Summary" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,14" />
                                     <TextBlock Text="Recorded while this window was active. Related sessions are grouped into the timeline so repeated activity reads as one continuous moment." FontSize="13" Foreground="#D6D1EA" TextWrapping="Wrap" LineHeight="19" />
@@ -567,6 +847,75 @@
                             </Border>
                         </StackPanel>
                     </ScrollViewer>
+                </Grid>
+                <Grid x:Name="OverviewSidebarContent" Margin="24,30,22,24" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <DockPanel MouseLeftButtonDown="DragSurface_MouseLeftButtonDown">
+                        <Button DockPanel.Dock="Right" Style="{StaticResource ChromeButton}" Content="×" Click="ToggleDetailsButton_Click" Padding="9,3" BorderThickness="0" Background="Transparent" FontSize="20" />
+                        <StackPanel>
+                            <TextBlock Text="Day details" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                            <TextBlock x:Name="OverviewSidebarDateText" Text="Today" Margin="0,5,0,0" FontSize="12" Foreground="{StaticResource MutedTextBrush}" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <ScrollViewer Grid.Row="1" Margin="0,28,0,0" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <Border Background="#1A263A" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <TextBlock Text="Activity totals" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,14" />
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Text="Active time" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,10" />
+                                        <TextBlock x:Name="OverviewTotalActiveText" Grid.Column="1" Foreground="{StaticResource TextBrush}" Margin="0,0,0,10" />
+                                        <TextBlock Grid.Row="1" Text="Sessions" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,10" />
+                                        <TextBlock x:Name="OverviewSessionsText" Grid.Row="1" Grid.Column="1" Foreground="{StaticResource TextBrush}" Margin="0,0,0,10" />
+                                        <TextBlock Grid.Row="2" Text="Apps" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,10" />
+                                        <TextBlock x:Name="OverviewAppsText" Grid.Row="2" Grid.Column="1" Foreground="{StaticResource TextBrush}" Margin="0,0,0,10" />
+                                        <TextBlock Grid.Row="3" Text="Longest focus" Foreground="{StaticResource MutedTextBrush}" />
+                                        <TextBlock x:Name="OverviewFocusText" Grid.Row="3" Grid.Column="1" Foreground="{StaticResource TextBrush}" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Background="#1A263A" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <TextBlock Text="Quick filters" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,14" />
+                                    <WrapPanel>
+                                        <Border Background="#2C2154" CornerRadius="12" Padding="10,5" Margin="0,0,8,8">
+                                            <TextBlock Text="All activity" Foreground="#D8CCFF" FontSize="12" />
+                                        </Border>
+                                        <Border Background="#162B44" CornerRadius="12" Padding="10,5" Margin="0,0,8,8">
+                                            <TextBlock Text="Apps" Foreground="#AFC7E8" FontSize="12" />
+                                        </Border>
+                                        <Border Background="#172B29" CornerRadius="12" Padding="10,5" Margin="0,0,8,8">
+                                            <TextBlock Text="Focus blocks" Foreground="#BDECC0" FontSize="12" />
+                                        </Border>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Background="#1A263A" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Padding="16">
+                                <StackPanel>
+                                    <TextBlock Text="Category legend" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,14" />
+                                    <ItemsControl x:Name="OverviewLegend" ItemTemplate="{StaticResource LegendItemTemplate}" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
                 </Grid>
             </Border>
         </Grid>

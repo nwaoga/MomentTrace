@@ -95,6 +95,12 @@ public sealed class ForegroundWindowActivityRecorder(IActivityStore store) : IAc
             return;
         }
 
+        if (ActivityExclusionFilter.IsExcluded(snapshot.ProcessName, snapshot.AppName, snapshot.WindowTitle))
+        {
+            await CloseCurrentActivityAsync(now, cancellationToken);
+            return;
+        }
+
         if (_currentSnapshot is null || !_currentSnapshot.SameActivity(snapshot))
         {
             await CloseCurrentActivityAsync(now, cancellationToken);
