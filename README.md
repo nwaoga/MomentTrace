@@ -1,6 +1,6 @@
 # MomentTrace
 
-MomentTrace is a Windows-first desktop app that builds a private timeline of your computer activity. It records the foreground app/window with timestamps, stores the history locally in SQLite, and keeps running quietly from the Windows system tray.
+MomentTrace is a Windows-first desktop app that builds a private memory timeline of your computer activity. It helps you revisit and recover past work by grouping foreground apps, websites, screenshots, and documents into meaningful local "moments" instead of showing a raw stream of process events.
 
 The long-term goal is a cross-platform desktop timeline for Windows and macOS. The current implementation focuses on a shippable Windows MVP while keeping the core model and storage code separate from Windows-specific integrations.
 
@@ -8,11 +8,13 @@ The long-term goal is a cross-platform desktop timeline for Windows and macOS. T
 
 ![MomentTrace dark card timeline](docs/assets/momenttrace-dark-card-timeline.png)
 
-MomentTrace now uses a dark Windows Timeline-inspired workspace: left navigation, date and type filters, grouped horizontal activity sections, compact cards with app icons or website screenshots, and a right-hand detail rail. The window has custom chrome with draggable top regions across the main shell, left rail, and details rail, plus minimize and close-to-tray controls.
+MomentTrace now uses a dark Windows Timeline-inspired workspace: left navigation, date and type filters, grouped horizontal moment sections, compact cards with app icons or website screenshots, and a right-hand detail rail. The window has custom chrome with draggable top regions across the main shell, left rail, and details rail, plus minimize and close-to-tray controls.
 
 ![MomentTrace timeline activity list](docs/assets/momenttrace-timeline-detail.png)
 
-The recorder is session based. It polls the foreground window, keeps the same activity open while the app/window/resource remains active, and collapses repeated sequential entries in the UI so noisy history reads as one continuous moment. When browser activity is detected, MomentTrace attempts to capture the active URL with Windows UI Automation and saves a local PNG screenshot only when a new browser session starts.
+The recorder is session based. It polls the foreground window, keeps the same activity open while the app/window/resource remains active, and collapses repeated sequential entries in the UI so noisy history reads as one continuous moment. Rule-based local classification then groups nearby activity into memory-oriented sessions such as Website browsing, Development work, Communication, Document review, Research session, and Screenshot capture.
+
+When browser activity is detected, MomentTrace attempts to capture the active URL with Windows UI Automation and saves a local PNG screenshot only when a new browser session starts.
 
 The **Overview** page gives a lightweight analytics view of the selected day without requiring AI features: summary cards, a 15-minute activity heatmap, top applications, a focus rhythm chart, and day metadata.
 
@@ -21,6 +23,8 @@ The **Overview** page gives a lightweight analytics view of the selected day wit
 - Native Windows desktop UI built with WPF
 - Dark grouped timeline with card and list view modes
 - Overview page with daily activity heatmap and lightweight productivity analytics
+- Memory-oriented session grouping into moments rather than raw activity rows
+- Rule-based local activity classification for browsing, development, communication, documents, research, and screenshot capture
 - Foreground app/window activity recording with session collapsing
 - Start recording when the app launches
 - Optional "Start with Windows" setting
@@ -32,6 +36,7 @@ The **Overview** page gives a lightweight analytics view of the selected day wit
 - Date filtering with Today, Yesterday, then concrete activity dates
 - Real app icon extraction when executable metadata is available
 - Browser URL capture and local screenshot previews
+- Adult website privacy filter with built-in starter domains, optional cached blocklist updates, and manual allow/block lists
 - Single-instance behavior that brings the running app back when launched again
 - Noise filtering for MomentTrace itself and Windows lock-screen activity
 - Settings modal with startup, recording, timeline view mode, and appearance controls
@@ -44,7 +49,7 @@ The **Overview** page gives a lightweight analytics view of the selected day wit
 ```text
 MomentTrace.slnx
 ├─ MomentTrace.App       WPF app shell, UI, tray icon, settings wiring
-├─ MomentTrace.Core      Shared models, interfaces, activity classification
+├─ MomentTrace.Core      Shared models, interfaces, local classification/search/session services
 ├─ MomentTrace.Storage   SQLite persistence
 └─ MomentTrace.Windows   Windows foreground recorder and startup registration
 ```
@@ -89,11 +94,12 @@ MomentTrace stores user data locally:
 %AppData%\MomentTrace\timeline.db
 %AppData%\MomentTrace\settings.json
 %AppData%\MomentTrace\screenshots\
+%AppData%\MomentTrace\privacy-blocklists\
 ```
 
 Older prototype data from `%AppData%\NwaogaTimeline` is copied into the new MomentTrace folder the first time the renamed app runs.
 
-The app currently keeps captured history on the local machine. The database and screenshots are intentionally stored under the user's AppData folder so future privacy controls can delete, export, or exclude activity without depending on a cloud service.
+The app currently keeps captured history on the local machine. The database, screenshots, settings, and cached privacy blocklists are intentionally stored under the user's AppData folder so privacy controls can delete, export, or exclude activity without depending on a cloud service.
 
 ## Startup Behavior
 
@@ -109,7 +115,11 @@ MomentTrace also uses a single-instance guard. If the app is already running, la
 
 ## Timeline And Overview
 
-The Timeline page is the memory explorer. It shows activities grouped by `Today`, `Yesterday`, then dated sections, with card and list modes controlled from Settings.
+The Timeline page is the memory explorer. It shows moments grouped by `Today`, `Yesterday`, then dated sections, with card and list modes controlled from Settings.
+
+Cards are organized into semantic sessions using deterministic local rules. For example, nearby browser pages can become `Website browsing` or `Research session`, code editors and terminals become `Development work`, messaging tools become `Communication`, document tools become `Document review`, and Snipping Tool activity becomes `Screenshot capture`.
+
+Large groups show a compact preview first. `View all` expands that session inline and changes to `Show less`, keeping the timeline readable while still allowing detailed recovery.
 
 The Overview page is the activity analytics view. It summarizes the selected date with:
 
@@ -120,6 +130,26 @@ The Overview page is the activity analytics view. It summarizes the selected dat
 - A right sidebar for day totals, quick filters, and category legend
 
 Overview intentionally avoids raw event lists so it does not duplicate Timeline.
+
+## Local Classification And Search
+
+MomentTrace is designed so AI can be layered in later, but the current MVP is fully local and deterministic. The Core project includes these extension points:
+
+```csharp
+IActivityClassifier
+ISessionSummarizer
+ISearchProvider
+IInsightProvider
+```
+
+Current implementations are rule-based:
+
+- `RuleBasedActivityClassifier` maps apps, processes, titles, and URLs to semantic categories.
+- `RuleBasedSessionSummarizer` gives sessions human-readable names and descriptions.
+- `LocalMetadataSearchProvider` searches local metadata, category labels, titles, apps, and URLs.
+- `LocalInsightProvider` returns simple local-only metadata insights.
+
+There are no LLM, embedding, vector database, or cloud dependencies in the app today.
 
 ## Recording Model
 
@@ -132,8 +162,20 @@ The Windows recorder lives in `MomentTrace.Windows` and currently:
 - Captures browser screenshots only when a new browser session starts
 - Closes the active session cleanly when recording stops or the app exits
 - Excludes MomentTrace itself and default Windows lock-screen activity from new recordings
+- Excludes configured adult websites before saving activity or capturing screenshots
 
 Existing stored MomentTrace and lock-screen rows are also filtered out of the Timeline and Overview views without requiring a database cleanup.
+
+## Privacy Controls
+
+MomentTrace treats privacy as part of the product experience:
+
+- Activity history is stored locally in SQLite.
+- Screenshots are stored locally under AppData.
+- Adult website filtering happens before data is saved or screenshotted.
+- Manual always-block and always-allow domain lists are available in Settings.
+- Optional adult blocklist updates are cached locally under `%AppData%\MomentTrace\privacy-blocklists\`.
+- Timeline and Overview hide matching privacy-filtered rows from existing history without deleting the database.
 
 ## AI Extensibility
 
@@ -144,7 +186,7 @@ Task<string> GetDailySummaryAsync(IReadOnlyList<TimelineActivity> activities, Ca
 Task<IReadOnlyList<string>> GetProductivityInsightsAsync(IReadOnlyList<TimelineActivity> activities, CancellationToken cancellationToken = default);
 ```
 
-No AI provider is registered today. AI summaries, recommendations, and conversational UI must only render when an AI provider exists. Without a provider, the app should feel complete and simply hide those surfaces.
+No AI provider is registered today. AI summaries, recommendations, and conversational UI must only render when an AI provider exists. Without a provider, the app should feel complete and simply hide those surfaces. Current classification, session naming, search, and local insights are deterministic.
 
 ## Publish A Standalone Windows Build
 
@@ -195,9 +237,9 @@ For Azure DevOps planning, current implementation work is tracked in the MomentT
 
 ## Roadmap
 
-- Improve automatic session naming and related activity grouping
-- Add richer website/app card previews and selectable/collapsible timeline sections
-- Add privacy controls for editing the activity exclusion list
+- Add clickable category/source filters for the new navigation sections
+- Add saved moments, notes, and bookmarks as real library features
+- Add richer website/app card previews and stronger related activity grouping
 - Add privacy controls for deleting, exporting, and excluding activity
 - Create a proper Windows installer with icon, shortcuts, and uninstall support
 - Plan the cross-platform desktop path, likely with Avalonia for Windows/macOS UI reuse
