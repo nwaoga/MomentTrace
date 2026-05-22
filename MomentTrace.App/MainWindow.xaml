@@ -23,6 +23,75 @@
         <SolidColorBrush x:Key="AccentBrush" Color="#8B5CF6" />
         <SolidColorBrush x:Key="AccentSoftBrush" Color="#2C2154" />
 
+        <Style x:Key="InvisibleScrollButton" TargetType="RepeatButton">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="IsTabStop" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Border Background="Transparent" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="Thumb">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Border x:Name="ThumbRoot"
+                                Background="#526179"
+                                CornerRadius="4"
+                                Opacity="0.58" />
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ThumbRoot" Property="Background" Value="#7A8AA6" />
+                                <Setter TargetName="ThumbRoot" Property="Opacity" Value="0.9" />
+                            </Trigger>
+                            <Trigger Property="IsDragging" Value="True">
+                                <Setter TargetName="ThumbRoot" Property="Background" Value="#A78BFA" />
+                                <Setter TargetName="ThumbRoot" Property="Opacity" Value="1" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ScrollBar">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Width" Value="8" />
+            <Setter Property="MinWidth" Value="8" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid Background="{TemplateBinding Background}">
+                            <Track x:Name="PART_Track"
+                                   IsDirectionReversed="True"
+                                   Orientation="{TemplateBinding Orientation}">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="ScrollBar.PageUpCommand" Style="{StaticResource InvisibleScrollButton}" />
+                                </Track.DecreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Margin="2" />
+                                </Track.Thumb>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="ScrollBar.PageDownCommand" Style="{StaticResource InvisibleScrollButton}" />
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Orientation" Value="Horizontal">
+                                <Setter Property="Width" Value="Auto" />
+                                <Setter Property="Height" Value="8" />
+                                <Setter Property="MinHeight" Value="8" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="ChromeButton" TargetType="Button">
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="SemiBold" />
@@ -335,16 +404,27 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
                                 <Border Background="{StaticResource AccentSoftBrush}" CornerRadius="10" Padding="9,3" Margin="14,-1,0,0">
-                                    <TextBlock Text="{Binding ActivityCount, StringFormat={}{0} activities}" FontSize="11" FontWeight="SemiBold" Foreground="#B89CFF" />
+                                    <TextBlock Text="{Binding ActivityCount, StringFormat={}{0} moments}" FontSize="11" FontWeight="SemiBold" Foreground="#B89CFF" />
                                 </Border>
                             </StackPanel>
                             <TextBlock Text="{Binding Summary}" Margin="0,5,0,0" FontSize="12" Foreground="{StaticResource MutedTextBrush}" />
                         </StackPanel>
-                        <Button Grid.Column="2" Style="{StaticResource ChromeButton}" Content="View all" Padding="18,7" Margin="16,0,16,0" />
-                        <TextBlock Grid.Column="3" Text="⌃" FontSize="18" Foreground="{StaticResource MutedTextBrush}" VerticalAlignment="Center" />
+                        <Button Grid.Column="2"
+                                Style="{StaticResource ChromeButton}"
+                                Content="{Binding ToggleText}"
+                                Visibility="{Binding ToggleVisibility}"
+                                Click="ToggleTimelineGroupButton_Click"
+                                Padding="18,7"
+                                Margin="16,0,16,0" />
+                        <TextBlock Grid.Column="3"
+                                   Text="{Binding ToggleGlyph}"
+                                   Visibility="{Binding ToggleVisibility}"
+                                   FontSize="18"
+                                   Foreground="{StaticResource MutedTextBrush}"
+                                   VerticalAlignment="Center" />
                     </Grid>
 
-                    <ItemsControl ItemsSource="{Binding Activities}" ItemTemplate="{StaticResource TimelineCardItemTemplate}">
+                    <ItemsControl ItemsSource="{Binding VisibleActivities}" ItemTemplate="{StaticResource TimelineCardItemTemplate}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel Orientation="Horizontal" />
@@ -459,65 +539,99 @@
                         <TextBlock Text="MomentTrace" Margin="12,6,0,0" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
                     </DockPanel>
 
-                    <StackPanel Grid.Row="1" Margin="0,36,0,0">
-                        <TextBlock Text="Workspace" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
-                        <Border x:Name="TimelineNavHighlight" Background="#3A286F" CornerRadius="7" Margin="0,0,0,6">
-                            <Button Style="{StaticResource RailButton}" Click="TimelineButton_Click">
+                    <ScrollViewer Grid.Row="1" Margin="0,36,0,10" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel>
+                            <TextBlock Text="Workspace" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
+                            <Border x:Name="TimelineNavHighlight" Background="#3A286F" CornerRadius="7" Margin="0,0,0,6">
+                                <Button Style="{StaticResource RailButton}" Click="TimelineButton_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="⌘" Width="28" Foreground="#BBA7FF" />
+                                        <TextBlock Text="Timeline" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                </Button>
+                            </Border>
+                            <Border x:Name="OverviewNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
+                                <Button Style="{StaticResource RailButton}" Click="OverviewButton_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="◎" Width="28" />
+                                        <TextBlock Text="Overview" />
+                                    </StackPanel>
+                                </Button>
+                            </Border>
+                            <Button x:Name="InsightsButton" Style="{StaticResource RailButton}">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="⌘" Width="28" Foreground="#BBA7FF" />
-                                    <TextBlock Text="Timeline" FontWeight="SemiBold" />
+                                    <TextBlock Text="◴" Width="28" />
+                                    <TextBlock Text="Insights" />
                                 </StackPanel>
                             </Button>
-                        </Border>
-                        <Border x:Name="OverviewNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
-                            <Button Style="{StaticResource RailButton}" Click="OverviewButton_Click">
+                            <Border Height="1" Background="#26344D" Margin="0,16,0,16" />
+                            <TextBlock Text="Activity" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
+                            <Button Style="{StaticResource RailButton}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="◎" Width="28" />
-                                    <TextBlock Text="Overview" />
+                                    <TextBlock Text="Browsing" />
                                 </StackPanel>
                             </Button>
-                        </Border>
-                        <Button x:Name="InsightsButton" Style="{StaticResource RailButton}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="◴" Width="28" />
-                                <TextBlock Text="Insights" />
-                            </StackPanel>
-                        </Button>
-                        <Border Height="1" Background="#26344D" Margin="0,16,0,16" />
-                        <TextBlock Text="Library" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
-                        <Button Style="{StaticResource RailButton}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="☑" Width="28" />
-                                <TextBlock Text="Tasks" />
-                            </StackPanel>
-                        </Button>
-                        <Button Style="{StaticResource RailButton}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="▤" Width="28" />
-                                <TextBlock Text="Notes" />
-                            </StackPanel>
-                        </Button>
-                        <Button Style="{StaticResource RailButton}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="□" Width="28" />
-                                <TextBlock Text="Files" />
-                            </StackPanel>
-                        </Button>
-                        <Button Style="{StaticResource RailButton}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="◎" Width="28" />
-                                <TextBlock Text="Websites" />
-                            </StackPanel>
-                        </Button>
-                        <Border Height="1" Background="#26344D" Margin="0,16,0,16" />
-                        <TextBlock Text="Tools" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
-                        <Button Style="{StaticResource RailButton}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="▦" Width="28" />
-                                <TextBlock Text="Apps" />
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
+                            <Button Style="{StaticResource RailButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&lt;/&gt;" Width="28" />
+                                    <TextBlock Text="Development" />
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource RailButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="◌" Width="28" />
+                                    <TextBlock Text="Communication" />
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource RailButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="▤" Width="28" />
+                                    <TextBlock Text="Documents" />
+                                </StackPanel>
+                            </Button>
+                            <Border Height="1" Background="#26344D" Margin="0,16,0,16" />
+                            <TextBlock Text="Library" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
+                            <Button Style="{StaticResource RailButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="★" Width="28" />
+                                    <TextBlock Text="Saved Moments" />
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource RailButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="☰" Width="28" />
+                                    <TextBlock Text="Notes" />
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource RailButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="⌑" Width="28" />
+                                    <TextBlock Text="Bookmarks" />
+                                </StackPanel>
+                            </Button>
+                            <Border Height="1" Background="#26344D" Margin="0,16,0,16" />
+                            <TextBlock Text="Sources" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
+                            <Button Style="{StaticResource RailButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="▦" Width="28" />
+                                    <TextBlock Text="Apps" />
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource RailButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="◎" Width="28" />
+                                    <TextBlock Text="Websites" />
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource RailButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="□" Width="28" />
+                                    <TextBlock Text="Files" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </ScrollViewer>
 
                     <StackPanel Grid.Row="3">
                         <Border Height="1" Background="#26344D" Margin="0,0,0,16" />
@@ -558,7 +672,7 @@
                         </Grid.ColumnDefinitions>
                         <Grid>
                             <TextBox x:Name="SearchBox" TextChanged="SearchBox_TextChanged" VerticalAlignment="Center" />
-                            <TextBlock Text="Search your activity..." Margin="40,0,0,0" Foreground="#8C98AD" IsHitTestVisible="False" VerticalAlignment="Center">
+                            <TextBlock Text="Search moments, sessions, apps, or websites..." Margin="40,0,0,0" Foreground="#8C98AD" IsHitTestVisible="False" VerticalAlignment="Center">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Visibility" Value="Collapsed" />
@@ -606,10 +720,13 @@
                                   HorizontalScrollBarVisibility="Disabled"
                                   VerticalScrollBarVisibility="Auto">
                         <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="8,0,0,20">
-                                <TextBlock Text="Today" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
-                                <TextBlock x:Name="TodayActivityCountText" Text="0 activities" Margin="16,6,0,0" FontSize="13" Foreground="{StaticResource MutedTextBrush}" />
-                            </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="8,0,0,20">
+                            <TextBlock Text="Today" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                            <TextBlock x:Name="TodayActivityCountText" Text="0 moments" Margin="16,6,0,0" FontSize="13" Foreground="{StaticResource MutedTextBrush}" />
+                            <Border Background="#142033" BorderBrush="#293A57" BorderThickness="1" CornerRadius="12" Padding="10,4" Margin="16,2,0,0">
+                                <TextBlock Text="Stored locally · Only visible to you" FontSize="11" Foreground="#A5B0C3" />
+                            </Border>
+                        </StackPanel>
                             <ItemsControl x:Name="TimelineCardGroups" ItemTemplate="{StaticResource TimelineCardGroupTemplate}" />
                         </StackPanel>
                     </ScrollViewer>
@@ -782,6 +899,13 @@
 
                     <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
                         <StackPanel>
+                            <Border Background="#18243A" BorderBrush="#33435E" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,18">
+                                <StackPanel>
+                                    <TextBlock Text="Moment overview" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,10" />
+                                    <TextBlock x:Name="DetailNarrativeText" Text="Select a moment to see the context around it." FontSize="13" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" LineHeight="19" />
+                                </StackPanel>
+                            </Border>
+
                             <Border x:Name="ScreenshotPreviewBorder"
                                     Height="150"
                                     Background="#0D1728"
@@ -809,25 +933,25 @@
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
 
-                                    <TextBlock Text="Time" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
+                                    <TextBlock Text="Duration" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
                                     <TextBlock x:Name="DetailDurationText" Grid.Column="1" Foreground="{StaticResource TextBrush}" Margin="0,0,0,12" />
 
-                                    <TextBlock Grid.Row="1" Text="Started" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
+                                    <TextBlock Grid.Row="1" Text="From" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
                                     <TextBlock x:Name="DetailStartedText" Grid.Row="1" Grid.Column="1" Foreground="{StaticResource TextBrush}" TextWrapping="Wrap" Margin="0,0,0,12" />
 
-                                    <TextBlock Grid.Row="2" Text="Ended" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
+                                    <TextBlock Grid.Row="2" Text="Until" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
                                     <TextBlock x:Name="DetailEndedText" Grid.Row="2" Grid.Column="1" Foreground="{StaticResource TextBrush}" TextWrapping="Wrap" Margin="0,0,0,12" />
 
                                     <TextBlock Grid.Row="3" Text="Source" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
                                     <TextBlock x:Name="DetailProcessText" Grid.Row="3" Grid.Column="1" Foreground="{StaticResource TextBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,12" />
 
-                                    <TextBlock Grid.Row="4" Text="Type" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
+                                    <TextBlock Grid.Row="4" Text="Category" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
                                     <Border Grid.Row="4" Grid.Column="1" Background="#2C2154" CornerRadius="5" Padding="8,3" HorizontalAlignment="Left" Margin="0,0,0,12">
                                         <TextBlock x:Name="DetailKindText" Text="Select an activity" Foreground="#B89CFF" FontSize="12" FontWeight="SemiBold" />
                                     </Border>
 
-                                    <TextBlock Grid.Row="5" Text="Captured" Foreground="{StaticResource MutedTextBrush}" />
-                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="Foreground activity" Foreground="{StaticResource TextBrush}" />
+                                    <TextBlock Grid.Row="5" Text="Privacy" Foreground="{StaticResource MutedTextBrush}" />
+                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="Stored locally" Foreground="{StaticResource TextBrush}" />
                                 </Grid>
                             </Border>
 

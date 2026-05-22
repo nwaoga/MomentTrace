@@ -18,6 +18,10 @@ public partial class MainWindow : Window
     private readonly IStartupRegistration _startupRegistration;
     private readonly WindowPreferences _preferences = WindowPreferences.Load();
     private readonly IAiProvider? _aiProvider;
+    private readonly IActivityClassifier _activityClassifier;
+    private readonly ISessionSummarizer _sessionSummarizer;
+    private readonly ISearchProvider _searchProvider;
+    private readonly IInsightProvider _insightProvider;
     private readonly ObservableCollection<ActivityItemViewModel> _activities = [];
     private readonly ObservableCollection<TimelineSessionGroupViewModel> _activityGroups = [];
     private readonly ObservableCollection<SummaryMetricViewModel> _summaryMetrics = [];
@@ -33,12 +37,24 @@ public partial class MainWindow : Window
     private bool _isDetailVisible = true;
     private ActivityItemViewModel? _selectedDetailActivity;
 
-    public MainWindow(IActivityStore store, IActivityRecorder recorder, IStartupRegistration startupRegistration, IAiProvider? aiProvider = null)
+    public MainWindow(
+        IActivityStore store,
+        IActivityRecorder recorder,
+        IStartupRegistration startupRegistration,
+        IAiProvider? aiProvider = null,
+        IActivityClassifier? activityClassifier = null,
+        ISessionSummarizer? sessionSummarizer = null,
+        ISearchProvider? searchProvider = null,
+        IInsightProvider? insightProvider = null)
     {
         _store = store;
         _recorder = recorder;
         _startupRegistration = startupRegistration;
         _aiProvider = aiProvider;
+        _activityClassifier = activityClassifier ?? RuleBasedActivityClassifier.Default;
+        _sessionSummarizer = sessionSummarizer ?? RuleBasedSessionSummarizer.Default;
+        _searchProvider = searchProvider ?? LocalMetadataSearchProvider.Default;
+        _insightProvider = insightProvider ?? LocalInsightProvider.Default;
 
         InitializeComponent();
 
@@ -92,7 +108,6 @@ public partial class MainWindow : Window
         var selectedDate = GetSelectedDate();
         var query = new TimelineQuery
         {
-            SearchText = SearchBox.Text,
             Kind = GetSelectedKind(),
             Limit = 1000
         };
@@ -101,10 +116,11 @@ public partial class MainWindow : Window
         var activities = (await _store.QueryAsync(query))
             .Where(activity => !ActivityExclusionFilter.IsExcluded(activity))
             .Where(activity => !privacyFilter.ShouldExclude(activity))
+            .Where(activity => _searchProvider.Matches(activity, SearchBox.Text, _activityClassifier))
             .Where(activity => selectedDate is null || activity.StartedAt.LocalDateTime.Date == selectedDate.Value)
             .ToList();
         var sessions = BuildTimelineSessions(activities).ToList();
-        TodayActivityCountText.Text = $"{sessions.Count} activities";
+        TodayActivityCountText.Text = $"{sessions.Count} moments";
         _activities.Clear();
         _activityGroups.Clear();
 
@@ -143,10 +159,10 @@ public partial class MainWindow : Window
         var longestFocus = BuildFocusBlocks(sessions).Where(block => !block.IsGap).OrderByDescending(block => block.Duration).FirstOrDefault();
 
         _summaryMetrics.Clear();
-        _summaryMetrics.Add(new SummaryMetricViewModel("Total Active Time", FormatDuration(totalActive), "Recorded foreground activity"));
-        _summaryMetrics.Add(new SummaryMetricViewModel("Number of Sessions", sessions.Count.ToString(), "Collapsed continuous moments"));
+        _summaryMetrics.Add(new SummaryMetricViewModel("Remembered Time", FormatDuration(totalActive), "Stored locally on this device"));
+        _summaryMetrics.Add(new SummaryMetricViewModel("Moments", sessions.Count.ToString(), "Grouped from related activity"));
         _summaryMetrics.Add(new SummaryMetricViewModel("Most Used App", topApps.FirstOrDefault()?.AppName ?? "No activity yet", topApps.FirstOrDefault()?.Duration ?? "Waiting for activity"));
-        _summaryMetrics.Add(new SummaryMetricViewModel("Longest Focus Session", longestFocus is null ? "No focus yet" : FormatDuration(longestFocus.Duration), longestFocus?.Label ?? "Active blocks appear here"));
+        _summaryMetrics.Add(new SummaryMetricViewModel("Longest Session", longestFocus is null ? "No focus yet" : FormatDuration(longestFocus.Duration), longestFocus?.Label ?? "Active blocks appear here"));
 
         _heatmapSegments.Clear();
         foreach (var segment in BuildHeatmap(todayActivities))
@@ -389,7 +405,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private static IEnumerable<TimelineSessionGroupViewModel> BuildTimelineGroups(IReadOnlyList<ActivityItemViewModel> sessions)
+    private IEnumerable<TimelineSessionGroupViewModel> BuildTimelineGroups(IReadOnlyList<ActivityItemViewModel> sessions)
     {
         TimelineGroupBuilder? group = null;
 
@@ -406,7 +422,7 @@ public partial class MainWindow : Window
                 yield return group.ToViewModel();
             }
 
-            group = new TimelineGroupBuilder(session);
+            group = new TimelineGroupBuilder(session, _activityClassifier, _sessionSummarizer);
         }
 
         if (group is not null)
@@ -506,16 +522,20 @@ public partial class MainWindow : Window
     private sealed class TimelineGroupBuilder
     {
         private static readonly TimeSpan GroupGap = TimeSpan.FromMinutes(25);
+        private readonly IActivityClassifier _classifier;
+        private readonly ISessionSummarizer _summarizer;
         private readonly List<ActivityItemViewModel> _activities = [];
         private readonly DateTime _date;
-        private readonly MomentTrace.Core.ActivityKind _kind;
+        private readonly ActivityCategory _category;
         private DateTimeOffset _startedAt;
         private DateTimeOffset _endedAt;
 
-        public TimelineGroupBuilder(ActivityItemViewModel activity)
+        public TimelineGroupBuilder(ActivityItemViewModel activity, IActivityClassifier classifier, ISessionSummarizer summarizer)
         {
+            _classifier = classifier;
+            _summarizer = summarizer;
             _date = activity.SessionStartedAt.LocalDateTime.Date;
-            _kind = activity.Activity.Kind;
+            _category = classifier.Classify(activity.Activity).Category;
             _startedAt = activity.SessionStartedAt;
             _endedAt = activity.SessionEndedAt;
             _activities.Add(activity);
@@ -523,8 +543,9 @@ public partial class MainWindow : Window
 
         public bool CanInclude(ActivityItemViewModel activity)
         {
+            var category = _classifier.Classify(activity.Activity).Category;
             return activity.SessionStartedAt.LocalDateTime.Date == _date
-                && activity.Activity.Kind == _kind
+                && category == _category
                 && _startedAt - activity.SessionEndedAt <= GroupGap
                 && _activities.Count < 8;
         }
@@ -546,7 +567,7 @@ public partial class MainWindow : Window
 
         public TimelineSessionGroupViewModel ToViewModel()
         {
-            return new TimelineSessionGroupViewModel(_startedAt, _endedAt, _kind, _activities.ToList());
+            return new TimelineSessionGroupViewModel(_startedAt, _endedAt, _category, _activities.ToList(), _summarizer);
         }
     }
 
@@ -717,6 +738,7 @@ public partial class MainWindow : Window
         DetailKindText.Text = "Select an activity";
         DetailTitleText.Text = "No activity selected";
         DetailAppText.Text = string.Empty;
+        DetailNarrativeText.Text = "Select a moment to see the context around it.";
         DetailStartedText.Text = string.Empty;
         DetailEndedText.Text = string.Empty;
         DetailDurationText.Text = string.Empty;
@@ -732,20 +754,33 @@ public partial class MainWindow : Window
         _selectedDetailActivity = selected;
         var activity = selected.Activity;
         DetailKindText.Text = selected.KindLabel;
-        DetailTitleText.Text = activity.DisplayTitle;
+        DetailTitleText.Text = selected.Title;
         DetailAppText.Text = selected.Location;
+        DetailNarrativeText.Text = GetDetailNarrative(selected);
         DetailStartedText.Text = $"{selected.SessionStartedAt.LocalDateTime:dddd, d MMM yyyy HH:mm:ss}";
         DetailEndedText.Text = $"{selected.SessionEndedAt.LocalDateTime:dddd, d MMM yyyy HH:mm:ss}";
         DetailDurationText.Text = selected.Duration;
-        DetailProcessText.Text = string.IsNullOrWhiteSpace(activity.ExecutablePath)
-            ? activity.ProcessName
-            : $"{activity.ProcessName} · {activity.ExecutablePath}";
+        DetailProcessText.Text = selected.TechnicalSource;
         DetailIconImage.Source = selected.ProgramIcon;
         DetailIconFallbackText.Text = selected.IconGlyph;
         DetailIconFallbackText.Visibility = selected.ProgramIcon is null ? Visibility.Visible : Visibility.Collapsed;
         ScreenshotPreviewImage.Source = selected.ScreenshotPreview;
         ScreenshotPreviewBorder.Visibility = selected.ScreenshotPreview is null ? Visibility.Collapsed : Visibility.Visible;
         PinButton.Content = activity.IsPinned ? "Unpin" : "Pin";
+    }
+
+    private static string GetDetailNarrative(ActivityItemViewModel selected)
+    {
+        return selected.Category switch
+        {
+            ActivityCategory.Browsing => $"Browsed {selected.Location} during this remembered moment.",
+            ActivityCategory.Research => $"Reviewed and compared web context around {selected.Location}.",
+            ActivityCategory.Development => "Worked in a development context with code, tooling, or project windows.",
+            ActivityCategory.Communication => "Moved through communication context, messages, or collaboration tools.",
+            ActivityCategory.Documents => "Reviewed or edited document-based work.",
+            ActivityCategory.ScreenshotCapture => "Captured a screenshot or visual reference for later recall.",
+            _ => selected.MemoryDescription
+        };
     }
 
     private async void PinButton_Click(object sender, RoutedEventArgs e)
@@ -784,6 +819,14 @@ public partial class MainWindow : Window
         {
             TimelineList.SelectedItem = activity;
             await TogglePinnedAsync(activity);
+        }
+    }
+
+    private void ToggleTimelineGroupButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: TimelineSessionGroupViewModel group })
+        {
+            group.ToggleExpanded();
         }
     }
 
@@ -1023,20 +1066,29 @@ public partial class MainWindow : Window
     private sealed class TimelineSessionGroupViewModel(
         DateTimeOffset startedAt,
         DateTimeOffset endedAt,
-        MomentTrace.Core.ActivityKind kind,
-        IReadOnlyList<ActivityItemViewModel> activities)
+        ActivityCategory category,
+        IReadOnlyList<ActivityItemViewModel> activities,
+        ISessionSummarizer summarizer) : INotifyPropertyChanged
     {
-        public string Name { get; } = GetName(kind, activities);
+        private const int PreviewActivityCount = 4;
+        private bool _isExpanded;
 
-        public string Summary { get; } = GetSummary(kind, activities);
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public string Name { get; } = summarizer.GetSessionTitle(category, activities.Select(activity => activity.Activity).ToList());
+
+        public string Summary { get; } = summarizer.GetSessionDescription(category, activities.Select(activity => activity.Activity).ToList());
 
         public string TimeRange { get; } = $"{startedAt.LocalDateTime:HH:mm} - {endedAt.LocalDateTime:HH:mm}";
 
-        public string AccentBrush { get; } = kind switch
+        public string AccentBrush { get; } = category switch
         {
-            MomentTrace.Core.ActivityKind.Browser => "#7C5CFF",
-            MomentTrace.Core.ActivityKind.Development => "#71C562",
-            MomentTrace.Core.ActivityKind.Document => "#E7B84E",
+            ActivityCategory.Browsing => "#5CA8FF",
+            ActivityCategory.Research => "#7C5CFF",
+            ActivityCategory.Development => "#71C562",
+            ActivityCategory.Communication => "#67D4B1",
+            ActivityCategory.Documents => "#E7B84E",
+            ActivityCategory.ScreenshotCapture => "#B89CFF",
             _ => "#8D9BB0"
         };
 
@@ -1044,38 +1096,28 @@ public partial class MainWindow : Window
 
         public int ActivityCount => Activities.Count;
 
-        private static string GetName(MomentTrace.Core.ActivityKind kind, IReadOnlyList<ActivityItemViewModel> activities)
+        public IReadOnlyList<ActivityItemViewModel> VisibleActivities =>
+            _isExpanded ? Activities : Activities.Take(PreviewActivityCount).ToList();
+
+        public string ToggleText => _isExpanded ? "Show less" : "View all";
+
+        public string ToggleGlyph => _isExpanded ? "⌃" : "⌄";
+
+        public Visibility ToggleVisibility => Activities.Count > PreviewActivityCount
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+
+        public void ToggleExpanded()
         {
-            if (kind == MomentTrace.Core.ActivityKind.Browser)
-            {
-                return "Website browsing";
-            }
-
-            if (kind == MomentTrace.Core.ActivityKind.Development)
-            {
-                return "Development work";
-            }
-
-            if (kind == MomentTrace.Core.ActivityKind.Document)
-            {
-                return "Document activity";
-            }
-
-            var appName = activities.FirstOrDefault()?.AppName;
-            return string.IsNullOrWhiteSpace(appName) ? "App activity" : $"{appName} activity";
+            _isExpanded = !_isExpanded;
+            OnPropertyChanged(nameof(VisibleActivities));
+            OnPropertyChanged(nameof(ToggleText));
+            OnPropertyChanged(nameof(ToggleGlyph));
         }
 
-        private static string GetSummary(MomentTrace.Core.ActivityKind kind, IReadOnlyList<ActivityItemViewModel> activities)
+        private void OnPropertyChanged(string propertyName)
         {
-            var first = activities.FirstOrDefault();
-            return kind switch
-            {
-                MomentTrace.Core.ActivityKind.Browser => "Browsed pages and websites with captured timestamps.",
-                MomentTrace.Core.ActivityKind.Development => "Worked across code windows, tools and debugging sessions.",
-                MomentTrace.Core.ActivityKind.Document => "Reviewed or edited documents and files.",
-                _ when first is not null => $"Used {first.AppName} and related windows.",
-                _ => "Recorded foreground activity with timestamps."
-            };
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 

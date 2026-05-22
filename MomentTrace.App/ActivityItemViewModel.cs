@@ -15,6 +15,7 @@ public sealed class ActivityItemViewModel(TimelineActivity activity)
     private readonly DateTimeOffset _sessionStartedAt = activity.StartedAt;
     private readonly DateTimeOffset _sessionEndedAt = activity.EndedAt;
     private readonly int _occurrenceCount = 1;
+    private readonly ActivityClassification _classification = RuleBasedActivityClassifier.Default.Classify(activity);
 
     public ActivityItemViewModel(
         TimelineActivity activity,
@@ -30,7 +31,7 @@ public sealed class ActivityItemViewModel(TimelineActivity activity)
 
     public long Id => Activity.Id;
 
-    public string Title => Activity.DisplayTitle;
+    public string Title => GetMemoryTitle();
 
     public string AppName => Activity.AppName;
 
@@ -48,21 +49,15 @@ public sealed class ActivityItemViewModel(TimelineActivity activity)
 
     public string Kind => Activity.Kind.ToString();
 
-    public string KindLabel => Activity.Kind switch
-    {
-        ActivityKind.Browser => "Website",
-        ActivityKind.Development => "Dev",
-        _ => Activity.Kind.ToString()
-    };
+    public ActivityCategory Category => _classification.Category;
 
-    public string IconGlyph => Activity.Kind switch
-    {
-        ActivityKind.Browser => "🌐",
-        ActivityKind.Document => "W",
-        ActivityKind.Development => "</>",
-        ActivityKind.System => "⚙",
-        _ => "□"
-    };
+    public string CategoryLabel => _classification.Title;
+
+    public string MemoryDescription => _classification.Description;
+
+    public string KindLabel => CategoryLabel;
+
+    public string IconGlyph => _classification.Icon;
 
     public string IconBackground => Activity.Kind switch
     {
@@ -100,14 +95,7 @@ public sealed class ActivityItemViewModel(TimelineActivity activity)
         _ => "#5B3DB3"
     };
 
-    public string Location => Activity.Kind switch
-    {
-        ActivityKind.Browser => string.IsNullOrWhiteSpace(Activity.Resource) ? "Web activity" : Activity.Resource,
-        ActivityKind.Document => "Documents",
-        ActivityKind.Development => "Developer workspace",
-        ActivityKind.System => "Windows",
-        _ => Activity.ProcessName
-    };
+    public string Location => GetMemoryLocation();
 
     public string DateGroup
     {
@@ -162,6 +150,74 @@ public sealed class ActivityItemViewModel(TimelineActivity activity)
     public string PinMark => Activity.IsPinned ? "PINNED" : string.Empty;
 
     public string PinActionLabel => Activity.IsPinned ? "Unpin" : "Pin";
+
+    public string TechnicalSource => string.IsNullOrWhiteSpace(Activity.ExecutablePath)
+        ? Activity.ProcessName
+        : $"{Activity.ProcessName} · {Activity.ExecutablePath}";
+
+    private string GetMemoryTitle()
+    {
+        if (Category is ActivityCategory.Browsing or ActivityCategory.Research && TryGetHost(Activity.Resource, out var host))
+        {
+            return string.IsNullOrWhiteSpace(Activity.WindowTitle) ? host : CleanTitle(Activity.WindowTitle);
+        }
+
+        if (Category == ActivityCategory.Development && !string.IsNullOrWhiteSpace(Activity.WindowTitle))
+        {
+            return CleanTitle(Activity.WindowTitle);
+        }
+
+        if (Category == ActivityCategory.ScreenshotCapture)
+        {
+            return "Screenshot moment";
+        }
+
+        return string.IsNullOrWhiteSpace(Activity.DisplayTitle) ? _classification.Title : CleanTitle(Activity.DisplayTitle);
+    }
+
+    private string GetMemoryLocation()
+    {
+        if (TryGetHost(Activity.Resource, out var host))
+        {
+            return host;
+        }
+
+        return Category switch
+        {
+            ActivityCategory.Development => "Development workspace",
+            ActivityCategory.Communication => "Messages and conversations",
+            ActivityCategory.Documents => "Documents and notes",
+            ActivityCategory.ScreenshotCapture => "Visual capture",
+            ActivityCategory.System => "Windows",
+            _ => Activity.AppName
+        };
+    }
+
+    private static bool TryGetHost(string? resource, out string host)
+    {
+        host = string.Empty;
+        if (string.IsNullOrWhiteSpace(resource))
+        {
+            return false;
+        }
+
+        var candidate = resource.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? resource : $"https://{resource}";
+        if (!Uri.TryCreate(candidate, UriKind.Absolute, out var uri) || string.IsNullOrWhiteSpace(uri.Host))
+        {
+            return false;
+        }
+
+        host = uri.Host.StartsWith("www.", StringComparison.OrdinalIgnoreCase) ? uri.Host[4..] : uri.Host;
+        return true;
+    }
+
+    private static string CleanTitle(string title)
+    {
+        return title.Replace(" - Microsoft Edge", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace(" - Google Chrome", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace(" - Visual Studio Code", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Trim();
+    }
 }
 
 file static class IconCache
