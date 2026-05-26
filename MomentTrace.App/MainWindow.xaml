@@ -566,30 +566,38 @@
                             </Button>
                             <Border Height="1" Background="#26344D" Margin="0,16,0,16" />
                             <TextBlock Text="Activity" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
-                            <Button Style="{StaticResource RailButton}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="◎" Width="28" />
-                                    <TextBlock Text="Browsing" />
-                                </StackPanel>
-                            </Button>
-                            <Button Style="{StaticResource RailButton}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&lt;/&gt;" Width="28" />
-                                    <TextBlock Text="Development" />
-                                </StackPanel>
-                            </Button>
-                            <Button Style="{StaticResource RailButton}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="◌" Width="28" />
-                                    <TextBlock Text="Communication" />
-                                </StackPanel>
-                            </Button>
-                            <Button Style="{StaticResource RailButton}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="▤" Width="28" />
-                                    <TextBlock Text="Documents" />
-                                </StackPanel>
-                            </Button>
+                            <Border x:Name="BrowsingNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
+                                <Button Style="{StaticResource RailButton}" Click="TimelineSemanticFilter_Click" Tag="Browsing">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="◎" Width="28" />
+                                        <TextBlock Text="Browsing" />
+                                    </StackPanel>
+                                </Button>
+                            </Border>
+                            <Border x:Name="DevelopmentNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
+                                <Button Style="{StaticResource RailButton}" Click="TimelineSemanticFilter_Click" Tag="Development">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&lt;/&gt;" Width="28" />
+                                        <TextBlock Text="Development" />
+                                    </StackPanel>
+                                </Button>
+                            </Border>
+                            <Border x:Name="CommunicationNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
+                                <Button Style="{StaticResource RailButton}" Click="TimelineSemanticFilter_Click" Tag="Communication">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="◌" Width="28" />
+                                        <TextBlock Text="Communication" />
+                                    </StackPanel>
+                                </Button>
+                            </Border>
+                            <Border x:Name="DocumentsNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
+                                <Button Style="{StaticResource RailButton}" Click="TimelineSemanticFilter_Click" Tag="Documents">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="▤" Width="28" />
+                                        <TextBlock Text="Documents" />
+                                    </StackPanel>
+                                </Button>
+                            </Border>
                             <Border Height="1" Background="#26344D" Margin="0,16,0,16" />
                             <TextBlock Text="Library" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
                             <Button Style="{StaticResource RailButton}">
@@ -612,24 +620,30 @@
                             </Button>
                             <Border Height="1" Background="#26344D" Margin="0,16,0,16" />
                             <TextBlock Text="Sources" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
-                            <Button Style="{StaticResource RailButton}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="▦" Width="28" />
-                                    <TextBlock Text="Apps" />
-                                </StackPanel>
-                            </Button>
-                            <Button Style="{StaticResource RailButton}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="◎" Width="28" />
-                                    <TextBlock Text="Websites" />
-                                </StackPanel>
-                            </Button>
-                            <Button Style="{StaticResource RailButton}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="□" Width="28" />
-                                    <TextBlock Text="Files" />
-                                </StackPanel>
-                            </Button>
+                            <Border x:Name="AppsNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
+                                <Button Style="{StaticResource RailButton}" Click="TimelineSourceFilter_Click" Tag="Apps">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="▦" Width="28" />
+                                        <TextBlock Text="Apps" />
+                                    </StackPanel>
+                                </Button>
+                            </Border>
+                            <Border x:Name="WebsitesNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
+                                <Button Style="{StaticResource RailButton}" Click="TimelineSourceFilter_Click" Tag="Websites">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="◎" Width="28" />
+                                        <TextBlock Text="Websites" />
+                                    </StackPanel>
+                                </Button>
+                            </Border>
+                            <Border x:Name="FilesNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
+                                <Button Style="{StaticResource RailButton}" Click="TimelineSourceFilter_Click" Tag="Files">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="□" Width="28" />
+                                        <TextBlock Text="Files" />
+                                    </StackPanel>
+                                </Button>
+                            </Border>
                         </StackPanel>
                     </ScrollViewer>
 
@@ -723,6 +737,9 @@
                         <StackPanel Orientation="Horizontal" Margin="8,0,0,20">
                             <TextBlock Text="Today" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
                             <TextBlock x:Name="TodayActivityCountText" Text="0 moments" Margin="16,6,0,0" FontSize="13" Foreground="{StaticResource MutedTextBrush}" />
+                            <Border x:Name="ActiveFilterBadge" Background="#2C2154" BorderBrush="#4D3A8E" BorderThickness="1" CornerRadius="12" Padding="10,4" Margin="16,2,0,0" Visibility="Collapsed">
+                                <TextBlock x:Name="ActiveFilterText" Text="All moments" FontSize="11" Foreground="#D8CCFF" />
+                            </Border>
                             <Border Background="#142033" BorderBrush="#293A57" BorderThickness="1" CornerRadius="12" Padding="10,4" Margin="16,2,0,0">
                                 <TextBlock Text="Stored locally · Only visible to you" FontSize="11" Foreground="#A5B0C3" />
                             </Border>

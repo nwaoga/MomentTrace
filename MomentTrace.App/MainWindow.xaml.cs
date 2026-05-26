@@ -32,6 +32,8 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<DateFilterOption> _dateFilters = [];
     private readonly ICollectionView _activityView;
     private string _overviewSort = "Duration";
+    private TimelineSemanticFilter? _selectedSemanticFilter;
+    private TimelineSourceFilter? _selectedSourceFilter;
     private bool _isUpdatingDateFilter;
     private bool _allowClose;
     private bool _isDetailVisible = true;
@@ -117,6 +119,7 @@ public partial class MainWindow : Window
             .Where(activity => !ActivityExclusionFilter.IsExcluded(activity))
             .Where(activity => !privacyFilter.ShouldExclude(activity))
             .Where(activity => _searchProvider.Matches(activity, SearchBox.Text, _activityClassifier))
+            .Where(MatchesActiveTimelineFilter)
             .Where(activity => selectedDate is null || activity.StartedAt.LocalDateTime.Date == selectedDate.Value)
             .ToList();
         var sessions = BuildTimelineSessions(activities).ToList();
@@ -351,6 +354,53 @@ public partial class MainWindow : Window
         }
 
         return Enum.TryParse<MomentTrace.Core.ActivityKind>(content, out var kind) ? kind : null;
+    }
+
+    private bool MatchesActiveTimelineFilter(TimelineActivity activity)
+    {
+        if (_selectedSemanticFilter is not null && !MatchesSemanticFilter(activity, _selectedSemanticFilter.Value))
+        {
+            return false;
+        }
+
+        return _selectedSourceFilter is null || MatchesSourceFilter(activity, _selectedSourceFilter.Value);
+    }
+
+    private bool MatchesSemanticFilter(TimelineActivity activity, TimelineSemanticFilter filter)
+    {
+        var category = _activityClassifier.Classify(activity).Category;
+        return filter switch
+        {
+            TimelineSemanticFilter.Browsing => category is ActivityCategory.Browsing or ActivityCategory.Research,
+            TimelineSemanticFilter.Development => category == ActivityCategory.Development,
+            TimelineSemanticFilter.Communication => category == ActivityCategory.Communication,
+            TimelineSemanticFilter.Documents => category == ActivityCategory.Documents,
+            _ => true
+        };
+    }
+
+    private static bool MatchesSourceFilter(TimelineActivity activity, TimelineSourceFilter filter)
+    {
+        return filter switch
+        {
+            TimelineSourceFilter.Apps => activity.Kind != MomentTrace.Core.ActivityKind.Browser
+                && activity.Kind != MomentTrace.Core.ActivityKind.Document,
+            TimelineSourceFilter.Websites => activity.Kind == MomentTrace.Core.ActivityKind.Browser
+                || IsWebUrl(activity.Resource),
+            TimelineSourceFilter.Files => activity.Kind == MomentTrace.Core.ActivityKind.Document
+                || LooksLikeFileActivity(activity),
+            _ => true
+        };
+    }
+
+    private static bool LooksLikeFileActivity(TimelineActivity activity)
+    {
+        var value = $"{activity.WindowTitle} {activity.Resource} {activity.ExecutablePath}";
+        return value.Contains(".pdf", StringComparison.OrdinalIgnoreCase)
+            || value.Contains(".doc", StringComparison.OrdinalIgnoreCase)
+            || value.Contains(".xls", StringComparison.OrdinalIgnoreCase)
+            || value.Contains(".ppt", StringComparison.OrdinalIgnoreCase)
+            || value.Contains(".txt", StringComparison.OrdinalIgnoreCase);
     }
 
     private DateTime? GetSelectedDate()
@@ -612,6 +662,7 @@ public partial class MainWindow : Window
     private async void TodayButton_Click(object sender, RoutedEventArgs e)
     {
         ShowTimelinePage();
+        ClearTimelineRailFilters();
         SearchBox.Text = string.Empty;
         KindFilter.SelectedIndex = 0;
         DateFilter.SelectedItem = _dateFilters.FirstOrDefault(option => option.Date == DateTime.Today);
@@ -622,6 +673,39 @@ public partial class MainWindow : Window
     private async void TimelineButton_Click(object sender, RoutedEventArgs e)
     {
         ShowTimelinePage();
+        ClearTimelineRailFilters();
+        await LoadActivitiesAsync();
+    }
+
+    private async void TimelineSemanticFilter_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string tag }
+            || !Enum.TryParse<TimelineSemanticFilter>(tag, out var filter))
+        {
+            return;
+        }
+
+        ShowTimelinePage();
+        _selectedSemanticFilter = filter;
+        _selectedSourceFilter = null;
+        KindFilter.SelectedIndex = 0;
+        UpdateNavigationState();
+        await LoadActivitiesAsync();
+    }
+
+    private async void TimelineSourceFilter_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string tag }
+            || !Enum.TryParse<TimelineSourceFilter>(tag, out var filter))
+        {
+            return;
+        }
+
+        ShowTimelinePage();
+        _selectedSemanticFilter = null;
+        _selectedSourceFilter = filter;
+        KindFilter.SelectedIndex = 0;
+        UpdateNavigationState();
         await LoadActivitiesAsync();
     }
 
@@ -655,8 +739,7 @@ public partial class MainWindow : Window
         OverviewSidebarContent.Visibility = Visibility.Collapsed;
         SearchBox.Visibility = Visibility.Visible;
         KindFilter.Visibility = Visibility.Visible;
-        TimelineNavHighlight.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(58, 40, 111));
-        OverviewNavHighlight.Background = System.Windows.Media.Brushes.Transparent;
+        UpdateNavigationState();
     }
 
     private void ShowOverviewPage()
@@ -667,13 +750,13 @@ public partial class MainWindow : Window
         OverviewSidebarContent.Visibility = Visibility.Visible;
         SearchBox.Visibility = Visibility.Collapsed;
         KindFilter.Visibility = Visibility.Collapsed;
-        TimelineNavHighlight.Background = System.Windows.Media.Brushes.Transparent;
-        OverviewNavHighlight.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(58, 40, 111));
+        UpdateNavigationState(isOverviewActive: true);
     }
 
     private async void PinnedButton_Click(object sender, RoutedEventArgs e)
     {
         ShowTimelinePage();
+        ClearTimelineRailFilters();
         SearchBox.Text = string.Empty;
         KindFilter.SelectedIndex = 0;
         DateFilter.SelectedItem = _dateFilters.FirstOrDefault(option => option.Date == DateTime.Today);
@@ -692,6 +775,71 @@ public partial class MainWindow : Window
         StatusText.Text = _recorder.IsRecording
             ? "Recording foreground window activity with timestamps."
             : "Recording is paused.";
+    }
+
+    private void ClearTimelineRailFilters()
+    {
+        _selectedSemanticFilter = null;
+        _selectedSourceFilter = null;
+        UpdateNavigationState();
+    }
+
+    private void UpdateNavigationState(bool isOverviewActive = false)
+    {
+        var activeBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(58, 40, 111));
+        TimelineNavHighlight.Background = !isOverviewActive && _selectedSemanticFilter is null && _selectedSourceFilter is null
+            ? activeBrush
+            : System.Windows.Media.Brushes.Transparent;
+        OverviewNavHighlight.Background = isOverviewActive
+            ? activeBrush
+            : System.Windows.Media.Brushes.Transparent;
+
+        SetFilterHighlight(BrowsingNavHighlight, _selectedSemanticFilter == TimelineSemanticFilter.Browsing);
+        SetFilterHighlight(DevelopmentNavHighlight, _selectedSemanticFilter == TimelineSemanticFilter.Development);
+        SetFilterHighlight(CommunicationNavHighlight, _selectedSemanticFilter == TimelineSemanticFilter.Communication);
+        SetFilterHighlight(DocumentsNavHighlight, _selectedSemanticFilter == TimelineSemanticFilter.Documents);
+        SetFilterHighlight(AppsNavHighlight, _selectedSourceFilter == TimelineSourceFilter.Apps);
+        SetFilterHighlight(WebsitesNavHighlight, _selectedSourceFilter == TimelineSourceFilter.Websites);
+        SetFilterHighlight(FilesNavHighlight, _selectedSourceFilter == TimelineSourceFilter.Files);
+
+        var label = GetActiveTimelineFilterLabel();
+        ActiveFilterBadge.Visibility = label is null ? Visibility.Collapsed : Visibility.Visible;
+        ActiveFilterText.Text = label ?? string.Empty;
+    }
+
+    private static void SetFilterHighlight(Border border, bool isActive)
+    {
+        border.Background = isActive
+            ? new SolidColorBrush(System.Windows.Media.Color.FromRgb(44, 33, 84))
+            : System.Windows.Media.Brushes.Transparent;
+    }
+
+    private string? GetActiveTimelineFilterLabel()
+    {
+        if (_selectedSemanticFilter is not null)
+        {
+            return _selectedSemanticFilter.Value switch
+            {
+                TimelineSemanticFilter.Browsing => "Browsing moments",
+                TimelineSemanticFilter.Development => "Development moments",
+                TimelineSemanticFilter.Communication => "Communication moments",
+                TimelineSemanticFilter.Documents => "Document moments",
+                _ => null
+            };
+        }
+
+        if (_selectedSourceFilter is not null)
+        {
+            return _selectedSourceFilter.Value switch
+            {
+                TimelineSourceFilter.Apps => "Source: apps",
+                TimelineSourceFilter.Websites => "Source: websites",
+                TimelineSourceFilter.Files => "Source: files",
+                _ => null
+            };
+        }
+
+        return null;
     }
 
     private void TimelineList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1062,6 +1210,21 @@ public partial class MainWindow : Window
     }
 
     private sealed record LegendItemViewModel(string Label, string Fill);
+
+    private enum TimelineSemanticFilter
+    {
+        Browsing,
+        Development,
+        Communication,
+        Documents
+    }
+
+    private enum TimelineSourceFilter
+    {
+        Apps,
+        Websites,
+        Files
+    }
 
     private sealed class TimelineSessionGroupViewModel(
         DateTimeOffset startedAt,

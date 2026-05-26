@@ -33,6 +33,7 @@ The **Overview** page gives a lightweight analytics view of the selected day wit
 - Timestamped activity history
 - Local SQLite storage
 - Search, activity type filtering, pinning, and detail view
+- Left-rail semantic filters for browsing, development, communication, documents, apps, websites, and files
 - Date filtering with Today, Yesterday, then concrete activity dates
 - Real app icon extraction when executable metadata is available
 - Browser URL capture and local screenshot previews
@@ -120,6 +121,8 @@ The Timeline page is the memory explorer. It shows moments grouped by `Today`, `
 Cards are organized into semantic sessions using deterministic local rules. For example, nearby browser pages can become `Website browsing` or `Research session`, code editors and terminals become `Development work`, messaging tools become `Communication`, document tools become `Document review`, and Snipping Tool activity becomes `Screenshot capture`.
 
 Large groups show a compact preview first. `View all` expands that session inline and changes to `Show less`, keeping the timeline readable while still allowing detailed recovery.
+
+The left rail can filter the Timeline by semantic Activity views (`Browsing`, `Development`, `Communication`, `Documents`) or raw Sources (`Apps`, `Websites`, `Files`). Active filters are highlighted in the rail and echoed as a small badge in the Timeline header. Selecting `Timeline` clears the rail filter and returns to all moments.
 
 The Overview page is the activity analytics view. It summarizes the selected date with:
 
@@ -237,7 +240,7 @@ For Azure DevOps planning, current implementation work is tracked in the MomentT
 
 ## Roadmap
 
-- Add clickable category/source filters for the new navigation sections
+- Add filter counts, persisted filter preferences, and richer empty states
 - Add saved moments, notes, and bookmarks as real library features
 - Add richer website/app card previews and stronger related activity grouping
 - Add privacy controls for deleting, exporting, and excluding activity
