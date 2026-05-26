@@ -16,6 +16,8 @@ public sealed class TimelineActivity
 
     public string? ScreenshotPath { get; init; }
 
+    public string? ThumbnailPath { get; init; }
+
     public ActivityKind Kind { get; init; }
 
     public DateTimeOffset StartedAt { get; init; }

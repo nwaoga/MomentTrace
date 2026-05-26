@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -948,6 +949,7 @@ public partial class MainWindow : Window
         ScreenshotPreviewBorder.Visibility = Visibility.Collapsed;
         MomentNoteTextBox.Text = string.Empty;
         BookmarkButton.Content = "Bookmark";
+        DeleteMomentButton.IsEnabled = false;
     }
 
     private void ShowDetails(ActivityItemViewModel selected)
@@ -971,6 +973,7 @@ public partial class MainWindow : Window
         BookmarkButton.Content = activity.IsBookmarked ? "Remove bookmark" : "Bookmark";
         BookmarkButton.Visibility = IsWebUrl(activity.Resource) ? Visibility.Visible : Visibility.Collapsed;
         MomentNoteTextBox.Text = activity.Note ?? string.Empty;
+        DeleteMomentButton.IsEnabled = true;
     }
 
     private static string GetDetailNarrative(ActivityItemViewModel selected)
@@ -1022,6 +1025,35 @@ public partial class MainWindow : Window
         await _store.SetNoteAsync(selected.Id, MomentNoteTextBox.Text);
         await LoadActivitiesAsync();
         await ReselectDetailAsync(selected.Id);
+    }
+
+    private async void DeleteMomentButton_Click(object sender, RoutedEventArgs e)
+    {
+        var selected = _selectedDetailActivity ?? TimelineList.SelectedItem as ActivityItemViewModel;
+        if (selected is null)
+        {
+            return;
+        }
+
+        var result = System.Windows.MessageBox.Show(
+            this,
+            "Delete this moment from your local timeline? Cached MomentTrace previews for this moment will also be removed.",
+            "Delete moment",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (result != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        await _store.DeleteAsync(selected.Id);
+        DeleteCachedPreview(selected.Activity.ScreenshotPath);
+        DeleteCachedPreview(selected.Activity.ThumbnailPath);
+        ClearDetails();
+        await LoadDateFiltersAsync();
+        await LoadActivitiesAsync();
+        await LoadOverviewAsync();
     }
 
     private void OpenAppButton_Click(object sender, RoutedEventArgs e)
@@ -1103,6 +1135,47 @@ public partial class MainWindow : Window
         return !string.IsNullOrWhiteSpace(activity.ExecutablePath)
             ? activity.ExecutablePath
             : activity.ProcessName;
+    }
+
+    private static void DeleteCachedPreview(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return;
+        }
+
+        try
+        {
+            var fullPath = Path.GetFullPath(path);
+            if (!File.Exists(fullPath) || !IsMomentTracePreviewPath(fullPath))
+            {
+                return;
+            }
+
+            File.Delete(fullPath);
+        }
+        catch
+        {
+            // Deleting the timeline row matters more than failing on a locked cache file.
+        }
+    }
+
+    private static bool IsMomentTracePreviewPath(string fullPath)
+    {
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var momentTracePath = Path.Combine(appData, "MomentTrace");
+
+        return IsInsideDirectory(fullPath, Path.Combine(momentTracePath, "screenshots"))
+            || IsInsideDirectory(fullPath, Path.Combine(momentTracePath, "thumbnails"));
+    }
+
+    private static bool IsInsideDirectory(string fullPath, string directory)
+    {
+        var root = Path.GetFullPath(directory)
+            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+            + Path.DirectorySeparatorChar;
+
+        return fullPath.StartsWith(root, StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsWebUrl(string? value)

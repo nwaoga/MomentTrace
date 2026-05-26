@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using FlaUI.Core.Definitions;
 using FlaUI.UIA3;
@@ -125,6 +126,7 @@ public sealed class ForegroundWindowActivityRecorder(
         _currentSnapshot = snapshot;
         _currentActivityLastWrittenAt = now;
         var screenshotPath = snapshot.Kind == MomentTrace.Core.ActivityKind.Browser ? Snapshot.TryCaptureScreenshot(snapshot.WindowHandle) : null;
+        var thumbnailPath = Snapshot.TryCreateImageThumbnail(snapshot.ImageFilePath);
 
         var activity = new TimelineActivity
         {
@@ -134,6 +136,7 @@ public sealed class ForegroundWindowActivityRecorder(
             ExecutablePath = snapshot.ExecutablePath,
             Resource = snapshot.Resource,
             ScreenshotPath = screenshotPath,
+            ThumbnailPath = thumbnailPath,
             Kind = snapshot.Kind,
             StartedAt = now,
             EndedAt = now
@@ -190,6 +193,7 @@ public sealed class ForegroundWindowActivityRecorder(
         string WindowTitle,
         string? ExecutablePath,
         string? Resource,
+        string? ImageFilePath,
         MomentTrace.Core.ActivityKind Kind)
     {
         public bool SameActivity(Snapshot other)
@@ -223,8 +227,9 @@ public sealed class ForegroundWindowActivityRecorder(
                 var appName = TryGetDisplayName(process, executablePath);
                 var kind = ActivityClassifier.Classify(processName);
                 var resource = kind == MomentTrace.Core.ActivityKind.Browser ? TryGetBrowserUrl(handle) : null;
+                var imageFilePath = TryFindImageFile(title);
 
-                return new Snapshot(handle, processName, appName, title.Trim(), executablePath, resource, kind);
+                return new Snapshot(handle, processName, appName, title.Trim(), executablePath, resource, imageFilePath, kind);
             }
             catch
             {
@@ -315,6 +320,146 @@ public sealed class ForegroundWindowActivityRecorder(
             }
         }
 
+        public static string? TryCreateImageThumbnail(string? imagePath)
+        {
+            if (string.IsNullOrWhiteSpace(imagePath) || !File.Exists(imagePath))
+            {
+                return null;
+            }
+
+            try
+            {
+                var info = new FileInfo(imagePath);
+                var thumbnailDirectory = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "MomentTrace",
+                    "thumbnails");
+                Directory.CreateDirectory(thumbnailDirectory);
+
+                var cacheKey = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{info.FullName}|{info.LastWriteTimeUtc.Ticks}|{info.Length}")));
+                var thumbnailPath = Path.Combine(thumbnailDirectory, $"{cacheKey}.jpg");
+                if (File.Exists(thumbnailPath))
+                {
+                    return thumbnailPath;
+                }
+
+                using var source = Image.FromFile(info.FullName);
+                var maxWidth = 420;
+                var maxHeight = 260;
+                var scale = Math.Min((double)maxWidth / source.Width, (double)maxHeight / source.Height);
+                scale = Math.Min(1.0, scale);
+                var width = Math.Max(1, (int)Math.Round(source.Width * scale));
+                var height = Math.Max(1, (int)Math.Round(source.Height * scale));
+
+                using var thumbnail = new Bitmap(width, height);
+                using (var graphics = Graphics.FromImage(thumbnail))
+                {
+                    graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                    graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                    graphics.DrawImage(source, 0, 0, width, height);
+                }
+
+                thumbnail.Save(thumbnailPath, ImageFormat.Jpeg);
+                return thumbnailPath;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static string? TryFindImageFile(string windowTitle)
+        {
+            var fileName = TryExtractImageFileName(windowTitle);
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return null;
+            }
+
+            if (Path.IsPathRooted(fileName) && File.Exists(fileName))
+            {
+                return fileName;
+            }
+
+            foreach (var root in GetImageSearchRoots())
+            {
+                try
+                {
+                    var directPath = Path.Combine(root, fileName);
+                    if (File.Exists(directPath))
+                    {
+                        return directPath;
+                    }
+
+                    foreach (var path in Directory.EnumerateFiles(root, fileName, SearchOption.AllDirectories).Take(1))
+                    {
+                        return path;
+                    }
+                }
+                catch
+                {
+                }
+            }
+
+            return null;
+        }
+
+        private static string? TryExtractImageFileName(string windowTitle)
+        {
+            var extensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".tif", ".tiff" };
+            var parts = windowTitle
+                .Split([" - ", " – ", " — ", " | "], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Append(windowTitle);
+
+            foreach (var part in parts)
+            {
+                foreach (var extension in extensions)
+                {
+                    var index = part.LastIndexOf(extension, StringComparison.OrdinalIgnoreCase);
+                    if (index < 0)
+                    {
+                        continue;
+                    }
+
+                    var candidate = part[..(index + extension.Length)].Trim().Trim('"');
+                    var invalid = Path.GetInvalidFileNameChars();
+                    if (candidate.IndexOfAny(invalid) >= 0 && !Path.IsPathRooted(candidate))
+                    {
+                        continue;
+                    }
+
+                    return candidate;
+                }
+            }
+
+            return null;
+        }
+
+        private static IEnumerable<string> GetImageSearchRoots()
+        {
+            var roots = new List<string?>
+            {
+                Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
+                Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads")
+            };
+
+            var oneDrive = Environment.GetEnvironmentVariable("OneDrive");
+            if (!string.IsNullOrWhiteSpace(oneDrive))
+            {
+                roots.Add(Path.Combine(oneDrive, "Pictures"));
+                roots.Add(Path.Combine(oneDrive, "Desktop"));
+                roots.Add(Path.Combine(oneDrive, "Documents"));
+                roots.Add(Path.Combine(oneDrive, "Downloads"));
+            }
+
+            return roots
+                .Where(root => !string.IsNullOrWhiteSpace(root) && Directory.Exists(root))
+                .Distinct(StringComparer.OrdinalIgnoreCase)!;
+        }
+
         private static bool TryNormalizeUrl(string? value, out string url)
         {
             url = string.Empty;
@@ -395,10 +540,13 @@ public sealed class ForegroundWindowActivityRecorder(
             ExecutablePath = activity.ExecutablePath,
             Resource = activity.Resource,
             ScreenshotPath = activity.ScreenshotPath,
+            ThumbnailPath = activity.ThumbnailPath,
             Kind = activity.Kind,
             StartedAt = activity.StartedAt,
             EndedAt = activity.EndedAt,
-            IsPinned = activity.IsPinned
+            IsPinned = activity.IsPinned,
+            Note = activity.Note,
+            IsBookmarked = activity.IsBookmarked
         };
     }
 

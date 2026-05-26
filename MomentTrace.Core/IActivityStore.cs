@@ -14,5 +14,7 @@ public interface IActivityStore
 
     Task SetBookmarkedAsync(long id, bool isBookmarked, CancellationToken cancellationToken = default);
 
+    Task DeleteAsync(long id, CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<TimelineActivity>> QueryAsync(TimelineQuery query, CancellationToken cancellationToken = default);
 }

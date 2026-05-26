@@ -901,11 +901,28 @@
                         </StackPanel>
                     </DockPanel>
 
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,24,0,28">
-                        <Button Style="{StaticResource PrimaryButton}" Content="↗ Open" Click="OpenAppButton_Click" Margin="0,0,10,0" />
-                        <Button x:Name="PinButton" Style="{StaticResource ChromeButton}" Content="Pin" Click="PinButton_Click" Margin="0,0,10,0" />
-                        <Button x:Name="BookmarkButton" Style="{StaticResource ChromeButton}" Content="Bookmark" Click="BookmarkButton_Click" />
-                    </StackPanel>
+                    <WrapPanel Grid.Row="1" Margin="0,24,0,18">
+                        <Button Style="{StaticResource PrimaryButton}" Content="↗ Open" Click="OpenAppButton_Click" Margin="0,0,10,10" />
+                        <Button x:Name="PinButton" Style="{StaticResource ChromeButton}" Content="Pin" Click="PinButton_Click" Margin="0,0,10,10" />
+                        <Button x:Name="BookmarkButton" Style="{StaticResource ChromeButton}" Content="Bookmark" Click="BookmarkButton_Click" Margin="0,0,10,10" />
+                        <Button x:Name="DeleteMomentButton"
+                                Style="{StaticResource ChromeButton}"
+                                Click="DeleteMomentButton_Click"
+                                Width="42"
+                                Height="42"
+                                Padding="0"
+                                Margin="0,0,0,10"
+                                Background="#3A1824"
+                                BorderBrush="#653044"
+                                Foreground="#FFD5DF"
+                                ToolTip="Delete moment">
+                            <TextBlock Text="&#xE74D;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="15"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Button>
+                    </WrapPanel>
 
                     <Grid Grid.Row="2" Margin="0,0,0,14">
                         <Grid.ColumnDefinitions>

@@ -43,7 +43,9 @@ public sealed class ActivityItemViewModel(TimelineActivity activity)
 
     public string? ScreenshotPath => Activity.ScreenshotPath;
 
-    public ImageSource? ScreenshotPreview => ImageCache.GetImage(Activity.ScreenshotPath);
+    public string? ThumbnailPath => Activity.ThumbnailPath;
+
+    public ImageSource? ScreenshotPreview => ImageCache.GetImage(Activity.ThumbnailPath) ?? ImageCache.GetImage(Activity.ScreenshotPath);
 
     public ImageSource? ProgramIcon => IconCache.GetIcon(Activity.ExecutablePath);
 
