@@ -1135,7 +1135,13 @@ public partial class MainWindow : Window
 
     private sealed record HeatmapSegmentViewModel(string Fill, string Tooltip);
 
-    private sealed record DateFilterOption(DateTime Date, string Label);
+    private sealed record DateFilterOption(DateTime Date, string Label)
+    {
+        public override string ToString()
+        {
+            return Label;
+        }
+    }
 
     private sealed class TopApplicationViewModel
     {

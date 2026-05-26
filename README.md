@@ -10,7 +10,7 @@ The long-term goal is a cross-platform desktop timeline for Windows and macOS. T
 
 MomentTrace now uses a dark Windows Timeline-inspired workspace: left navigation, date and type filters, grouped horizontal moment sections, compact cards with app icons or website screenshots, and a right-hand detail rail. The window has custom chrome with draggable top regions across the main shell, left rail, and details rail, plus minimize and close-to-tray controls.
 
-![MomentTrace timeline activity list](docs/assets/momenttrace-timeline-detail.png)
+![MomentTrace overview analytics](docs/assets/momenttrace-timeline-detail.png)
 
 The recorder is session based. It polls the foreground window, keeps the same activity open while the app/window/resource remains active, and collapses repeated sequential entries in the UI so noisy history reads as one continuous moment. Rule-based local classification then groups nearby activity into memory-oriented sessions such as Website browsing, Development work, Communication, Document review, Research session, and Screenshot capture.
 
