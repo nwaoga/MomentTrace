@@ -10,5 +10,9 @@ public interface IActivityStore
 
     Task SetPinnedAsync(long id, bool isPinned, CancellationToken cancellationToken = default);
 
+    Task SetNoteAsync(long id, string? note, CancellationToken cancellationToken = default);
+
+    Task SetBookmarkedAsync(long id, bool isBookmarked, CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<TimelineActivity>> QueryAsync(TimelineQuery query, CancellationToken cancellationToken = default);
 }

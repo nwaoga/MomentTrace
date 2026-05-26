@@ -45,7 +45,9 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
                 kind TEXT NOT NULL,
                 started_at TEXT NOT NULL,
                 ended_at TEXT NOT NULL,
-                is_pinned INTEGER NOT NULL DEFAULT 0
+                is_pinned INTEGER NOT NULL DEFAULT 0,
+                note TEXT NULL,
+                is_bookmarked INTEGER NOT NULL DEFAULT 0
             );
 
             CREATE INDEX IF NOT EXISTS ix_activities_started_at ON activities(started_at DESC);
@@ -55,6 +57,8 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
         await command.ExecuteNonQueryAsync(cancellationToken);
         await EnsureColumnAsync(connection, "executable_path", "TEXT NULL", cancellationToken);
         await EnsureColumnAsync(connection, "screenshot_path", "TEXT NULL", cancellationToken);
+        await EnsureColumnAsync(connection, "note", "TEXT NULL", cancellationToken);
+        await EnsureColumnAsync(connection, "is_bookmarked", "INTEGER NOT NULL DEFAULT 0", cancellationToken);
     }
 
     public async Task<long> AddAsync(TimelineActivity activity, CancellationToken cancellationToken = default)
@@ -65,10 +69,10 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
         var command = connection.CreateCommand();
         command.CommandText = """
             INSERT INTO activities (
-                app_name, window_title, process_name, executable_path, resource, screenshot_path, kind, started_at, ended_at, is_pinned
+                app_name, window_title, process_name, executable_path, resource, screenshot_path, kind, started_at, ended_at, is_pinned, note, is_bookmarked
             )
             VALUES (
-                $app_name, $window_title, $process_name, $executable_path, $resource, $screenshot_path, $kind, $started_at, $ended_at, $is_pinned
+                $app_name, $window_title, $process_name, $executable_path, $resource, $screenshot_path, $kind, $started_at, $ended_at, $is_pinned, $note, $is_bookmarked
             );
             SELECT last_insert_rowid();
             """;
@@ -112,6 +116,40 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
+    public async Task SetNoteAsync(long id, string? note, CancellationToken cancellationToken = default)
+    {
+        await using var connection = CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        var command = connection.CreateCommand();
+        command.CommandText = """
+            UPDATE activities
+            SET note = $note
+            WHERE id = $id;
+            """;
+        command.Parameters.AddWithValue("$id", id);
+        command.Parameters.AddWithValue("$note", string.IsNullOrWhiteSpace(note) ? DBNull.Value : note.Trim());
+
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    public async Task SetBookmarkedAsync(long id, bool isBookmarked, CancellationToken cancellationToken = default)
+    {
+        await using var connection = CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        var command = connection.CreateCommand();
+        command.CommandText = """
+            UPDATE activities
+            SET is_bookmarked = $is_bookmarked
+            WHERE id = $id;
+            """;
+        command.Parameters.AddWithValue("$id", id);
+        command.Parameters.AddWithValue("$is_bookmarked", isBookmarked ? 1 : 0);
+
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<TimelineActivity>> QueryAsync(TimelineQuery query, CancellationToken cancellationToken = default)
     {
         await using var connection = CreateConnection();
@@ -132,9 +170,21 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
             command.Parameters.AddWithValue("$kind", query.Kind.Value.ToString());
         }
 
+        if (query.IsPinned is not null)
+        {
+            filters.Add("is_pinned = $is_pinned");
+            command.Parameters.AddWithValue("$is_pinned", query.IsPinned.Value ? 1 : 0);
+        }
+
+        if (query.IsBookmarked is not null)
+        {
+            filters.Add("is_bookmarked = $is_bookmarked");
+            command.Parameters.AddWithValue("$is_bookmarked", query.IsBookmarked.Value ? 1 : 0);
+        }
+
         command.Parameters.AddWithValue("$limit", Math.Clamp(query.Limit, 1, 1000));
         command.CommandText = $"""
-            SELECT id, app_name, window_title, process_name, executable_path, resource, screenshot_path, kind, started_at, ended_at, is_pinned
+            SELECT id, app_name, window_title, process_name, executable_path, resource, screenshot_path, kind, started_at, ended_at, is_pinned, note, is_bookmarked
             FROM activities
             {(filters.Count > 0 ? "WHERE " + string.Join(" AND ", filters) : string.Empty)}
             ORDER BY is_pinned DESC, started_at DESC
@@ -175,6 +225,8 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
         command.Parameters.AddWithValue("$started_at", activity.StartedAt.ToString("O"));
         command.Parameters.AddWithValue("$ended_at", activity.EndedAt.ToString("O"));
         command.Parameters.AddWithValue("$is_pinned", activity.IsPinned ? 1 : 0);
+        command.Parameters.AddWithValue("$note", (object?)activity.Note ?? DBNull.Value);
+        command.Parameters.AddWithValue("$is_bookmarked", activity.IsBookmarked ? 1 : 0);
     }
 
     private static TimelineActivity ReadActivity(SqliteDataReader reader)
@@ -191,7 +243,9 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
             Kind = Enum.TryParse<ActivityKind>(reader.GetString(7), out var kind) ? kind : ActivityKind.App,
             StartedAt = DateTimeOffset.Parse(reader.GetString(8)),
             EndedAt = DateTimeOffset.Parse(reader.GetString(9)),
-            IsPinned = reader.GetInt32(10) == 1
+            IsPinned = reader.GetInt32(10) == 1,
+            Note = reader.IsDBNull(11) ? null : reader.GetString(11),
+            IsBookmarked = reader.GetInt32(12) == 1
         };
     }
 

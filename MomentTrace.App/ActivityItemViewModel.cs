@@ -151,6 +151,12 @@ public sealed class ActivityItemViewModel(TimelineActivity activity)
 
     public string PinActionLabel => Activity.IsPinned ? "Unpin" : "Pin";
 
+    public string? Note => Activity.Note;
+
+    public bool IsBookmarked => Activity.IsBookmarked;
+
+    public string BookmarkActionLabel => Activity.IsBookmarked ? "Remove bookmark" : "Bookmark";
+
     public string TechnicalSource => string.IsNullOrWhiteSpace(Activity.ExecutablePath)
         ? Activity.ProcessName
         : $"{Activity.ProcessName} · {Activity.ExecutablePath}";

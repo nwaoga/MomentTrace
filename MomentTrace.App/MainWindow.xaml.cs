@@ -34,6 +34,7 @@ public partial class MainWindow : Window
     private string _overviewSort = "Duration";
     private TimelineSemanticFilter? _selectedSemanticFilter;
     private TimelineSourceFilter? _selectedSourceFilter;
+    private TimelineLibraryFilter? _selectedLibraryFilter;
     private bool _isUpdatingDateFilter;
     private bool _allowClose;
     private bool _isDetailVisible = true;
@@ -363,7 +364,12 @@ public partial class MainWindow : Window
             return false;
         }
 
-        return _selectedSourceFilter is null || MatchesSourceFilter(activity, _selectedSourceFilter.Value);
+        if (_selectedSourceFilter is not null && !MatchesSourceFilter(activity, _selectedSourceFilter.Value))
+        {
+            return false;
+        }
+
+        return _selectedLibraryFilter is null || MatchesLibraryFilter(activity, _selectedLibraryFilter.Value);
     }
 
     private bool MatchesSemanticFilter(TimelineActivity activity, TimelineSemanticFilter filter)
@@ -401,6 +407,17 @@ public partial class MainWindow : Window
             || value.Contains(".xls", StringComparison.OrdinalIgnoreCase)
             || value.Contains(".ppt", StringComparison.OrdinalIgnoreCase)
             || value.Contains(".txt", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool MatchesLibraryFilter(TimelineActivity activity, TimelineLibraryFilter filter)
+    {
+        return filter switch
+        {
+            TimelineLibraryFilter.SavedMoments => activity.IsPinned,
+            TimelineLibraryFilter.Notes => !string.IsNullOrWhiteSpace(activity.Note),
+            TimelineLibraryFilter.Bookmarks => activity.IsBookmarked,
+            _ => true
+        };
     }
 
     private DateTime? GetSelectedDate()
@@ -688,6 +705,7 @@ public partial class MainWindow : Window
         ShowTimelinePage();
         _selectedSemanticFilter = filter;
         _selectedSourceFilter = null;
+        _selectedLibraryFilter = null;
         KindFilter.SelectedIndex = 0;
         UpdateNavigationState();
         await LoadActivitiesAsync();
@@ -704,6 +722,24 @@ public partial class MainWindow : Window
         ShowTimelinePage();
         _selectedSemanticFilter = null;
         _selectedSourceFilter = filter;
+        _selectedLibraryFilter = null;
+        KindFilter.SelectedIndex = 0;
+        UpdateNavigationState();
+        await LoadActivitiesAsync();
+    }
+
+    private async void LibraryFilter_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string tag }
+            || !Enum.TryParse<TimelineLibraryFilter>(tag, out var filter))
+        {
+            return;
+        }
+
+        ShowTimelinePage();
+        _selectedSemanticFilter = null;
+        _selectedSourceFilter = null;
+        _selectedLibraryFilter = filter;
         KindFilter.SelectedIndex = 0;
         UpdateNavigationState();
         await LoadActivitiesAsync();
@@ -781,6 +817,7 @@ public partial class MainWindow : Window
     {
         _selectedSemanticFilter = null;
         _selectedSourceFilter = null;
+        _selectedLibraryFilter = null;
         UpdateNavigationState();
     }
 
@@ -801,6 +838,9 @@ public partial class MainWindow : Window
         SetFilterHighlight(AppsNavHighlight, _selectedSourceFilter == TimelineSourceFilter.Apps);
         SetFilterHighlight(WebsitesNavHighlight, _selectedSourceFilter == TimelineSourceFilter.Websites);
         SetFilterHighlight(FilesNavHighlight, _selectedSourceFilter == TimelineSourceFilter.Files);
+        SetFilterHighlight(SavedMomentsNavHighlight, _selectedLibraryFilter == TimelineLibraryFilter.SavedMoments);
+        SetFilterHighlight(NotesNavHighlight, _selectedLibraryFilter == TimelineLibraryFilter.Notes);
+        SetFilterHighlight(BookmarksNavHighlight, _selectedLibraryFilter == TimelineLibraryFilter.Bookmarks);
 
         var label = GetActiveTimelineFilterLabel();
         ActiveFilterBadge.Visibility = label is null ? Visibility.Collapsed : Visibility.Visible;
@@ -835,6 +875,17 @@ public partial class MainWindow : Window
                 TimelineSourceFilter.Apps => "Source: apps",
                 TimelineSourceFilter.Websites => "Source: websites",
                 TimelineSourceFilter.Files => "Source: files",
+                _ => null
+            };
+        }
+
+        if (_selectedLibraryFilter is not null)
+        {
+            return _selectedLibraryFilter.Value switch
+            {
+                TimelineLibraryFilter.SavedMoments => "Saved moments",
+                TimelineLibraryFilter.Notes => "Moments with notes",
+                TimelineLibraryFilter.Bookmarks => "Bookmarked moments",
                 _ => null
             };
         }
@@ -895,6 +946,8 @@ public partial class MainWindow : Window
         DetailIconFallbackText.Visibility = Visibility.Visible;
         ScreenshotPreviewImage.Source = null;
         ScreenshotPreviewBorder.Visibility = Visibility.Collapsed;
+        MomentNoteTextBox.Text = string.Empty;
+        BookmarkButton.Content = "Bookmark";
     }
 
     private void ShowDetails(ActivityItemViewModel selected)
@@ -915,6 +968,9 @@ public partial class MainWindow : Window
         ScreenshotPreviewImage.Source = selected.ScreenshotPreview;
         ScreenshotPreviewBorder.Visibility = selected.ScreenshotPreview is null ? Visibility.Collapsed : Visibility.Visible;
         PinButton.Content = activity.IsPinned ? "Unpin" : "Pin";
+        BookmarkButton.Content = activity.IsBookmarked ? "Remove bookmark" : "Bookmark";
+        BookmarkButton.Visibility = IsWebUrl(activity.Resource) ? Visibility.Visible : Visibility.Collapsed;
+        MomentNoteTextBox.Text = activity.Note ?? string.Empty;
     }
 
     private static string GetDetailNarrative(ActivityItemViewModel selected)
@@ -940,6 +996,32 @@ public partial class MainWindow : Window
         }
 
         await TogglePinnedAsync(selected);
+    }
+
+    private async void BookmarkButton_Click(object sender, RoutedEventArgs e)
+    {
+        var selected = _selectedDetailActivity ?? TimelineList.SelectedItem as ActivityItemViewModel;
+        if (selected is null)
+        {
+            return;
+        }
+
+        await _store.SetBookmarkedAsync(selected.Id, !selected.Activity.IsBookmarked);
+        await LoadActivitiesAsync();
+        await ReselectDetailAsync(selected.Id);
+    }
+
+    private async void SaveNoteButton_Click(object sender, RoutedEventArgs e)
+    {
+        var selected = _selectedDetailActivity ?? TimelineList.SelectedItem as ActivityItemViewModel;
+        if (selected is null)
+        {
+            return;
+        }
+
+        await _store.SetNoteAsync(selected.Id, MomentNoteTextBox.Text);
+        await LoadActivitiesAsync();
+        await ReselectDetailAsync(selected.Id);
     }
 
     private void OpenAppButton_Click(object sender, RoutedEventArgs e)
@@ -982,6 +1064,20 @@ public partial class MainWindow : Window
     {
         await _store.SetPinnedAsync(activity.Id, !activity.Activity.IsPinned);
         await LoadActivitiesAsync();
+        await ReselectDetailAsync(activity.Id);
+    }
+
+    private async Task ReselectDetailAsync(long activityId)
+    {
+        var refreshed = (await _store.QueryAsync(new TimelineQuery { Limit = 1000 }))
+            .FirstOrDefault(activity => activity.Id == activityId);
+        if (refreshed is null)
+        {
+            ClearDetails();
+            return;
+        }
+
+        ShowDetails(new ActivityItemViewModel(refreshed));
     }
 
     private static void OpenActivity(ActivityItemViewModel activity)
@@ -1230,6 +1326,13 @@ public partial class MainWindow : Window
         Apps,
         Websites,
         Files
+    }
+
+    private enum TimelineLibraryFilter
+    {
+        SavedMoments,
+        Notes,
+        Bookmarks
     }
 
     private sealed class TimelineSessionGroupViewModel(

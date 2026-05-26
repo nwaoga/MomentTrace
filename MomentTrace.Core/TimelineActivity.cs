@@ -24,6 +24,10 @@ public sealed class TimelineActivity
 
     public bool IsPinned { get; init; }
 
+    public string? Note { get; init; }
+
+    public bool IsBookmarked { get; init; }
+
     public string DisplayTitle => string.IsNullOrWhiteSpace(WindowTitle) ? AppName : WindowTitle;
 
     public TimeSpan Duration => EndedAt > StartedAt ? EndedAt - StartedAt : TimeSpan.Zero;

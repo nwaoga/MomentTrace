@@ -600,24 +600,30 @@
                             </Border>
                             <Border Height="1" Background="#26344D" Margin="0,16,0,16" />
                             <TextBlock Text="Library" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
-                            <Button Style="{StaticResource RailButton}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="★" Width="28" />
-                                    <TextBlock Text="Saved Moments" />
-                                </StackPanel>
-                            </Button>
-                            <Button Style="{StaticResource RailButton}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="☰" Width="28" />
-                                    <TextBlock Text="Notes" />
-                                </StackPanel>
-                            </Button>
-                            <Button Style="{StaticResource RailButton}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="⌑" Width="28" />
-                                    <TextBlock Text="Bookmarks" />
-                                </StackPanel>
-                            </Button>
+                            <Border x:Name="SavedMomentsNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
+                                <Button Style="{StaticResource RailButton}" Click="LibraryFilter_Click" Tag="SavedMoments">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="★" Width="28" />
+                                        <TextBlock Text="Saved Moments" />
+                                    </StackPanel>
+                                </Button>
+                            </Border>
+                            <Border x:Name="NotesNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
+                                <Button Style="{StaticResource RailButton}" Click="LibraryFilter_Click" Tag="Notes">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="☰" Width="28" />
+                                        <TextBlock Text="Notes" />
+                                    </StackPanel>
+                                </Button>
+                            </Border>
+                            <Border x:Name="BookmarksNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
+                                <Button Style="{StaticResource RailButton}" Click="LibraryFilter_Click" Tag="Bookmarks">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="⌑" Width="28" />
+                                        <TextBlock Text="Bookmarks" />
+                                    </StackPanel>
+                                </Button>
+                            </Border>
                             <Border Height="1" Background="#26344D" Margin="0,16,0,16" />
                             <TextBlock Text="Sources" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
                             <Border x:Name="AppsNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
@@ -898,7 +904,7 @@
                     <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,24,0,28">
                         <Button Style="{StaticResource PrimaryButton}" Content="↗ Open" Click="OpenAppButton_Click" Margin="0,0,10,0" />
                         <Button x:Name="PinButton" Style="{StaticResource ChromeButton}" Content="Pin" Click="PinButton_Click" Margin="0,0,10,0" />
-                        <Button Style="{StaticResource ChromeButton}" Content="••• More" Click="RefreshButton_Click" />
+                        <Button x:Name="BookmarkButton" Style="{StaticResource ChromeButton}" Content="Bookmark" Click="BookmarkButton_Click" />
                     </StackPanel>
 
                     <Grid Grid.Row="2" Margin="0,0,0,14">
@@ -970,6 +976,29 @@
                                     <TextBlock Grid.Row="5" Text="Privacy" Foreground="{StaticResource MutedTextBrush}" />
                                     <TextBlock Grid.Row="5" Grid.Column="1" Text="Stored locally" Foreground="{StaticResource TextBrush}" />
                                 </Grid>
+                            </Border>
+
+                            <Border Background="#1A263A" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,18">
+                                <StackPanel>
+                                    <Grid Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Personal note" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                        <Button Grid.Column="1" Style="{StaticResource ChromeButton}" Content="Save note" Click="SaveNoteButton_Click" Padding="10,5" FontSize="11" />
+                                    </Grid>
+                                    <TextBox x:Name="MomentNoteTextBox"
+                                             MinHeight="78"
+                                             Padding="12"
+                                             TextWrapping="Wrap"
+                                             AcceptsReturn="True"
+                                             VerticalScrollBarVisibility="Auto"
+                                             Background="#101A2B"
+                                             BorderBrush="#33435E"
+                                             Foreground="{StaticResource TextBrush}"
+                                             CaretBrush="{StaticResource TextBrush}" />
+                                </StackPanel>
                             </Border>
 
                             <Border x:Name="AiSummaryPanel" Background="#231D45" BorderBrush="#4D3A8E" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,18">
