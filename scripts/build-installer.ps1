@@ -38,9 +38,17 @@ dotnet publish $projectPath `
 $iscc = Get-Command iscc -ErrorAction SilentlyContinue
 $isccPath = if ($null -ne $iscc) { $iscc.Source } else { $null }
 if ($null -eq $isccPath) {
-    $defaultIscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
-    if (Test-Path $defaultIscc) {
-        $isccPath = $defaultIscc
+    $candidatePaths = @(
+        "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+        "$env:ProgramFiles\Inno Setup 6\ISCC.exe",
+        "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe"
+    )
+
+    foreach ($candidatePath in $candidatePaths) {
+        if (Test-Path $candidatePath) {
+            $isccPath = $candidatePath
+            break
+        }
     }
 }
 
