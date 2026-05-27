@@ -67,11 +67,24 @@ jobs:
           New-Item -ItemType Directory -Force -Path .\dist | Out-Null
           Compress-Archive -Path ".\artifacts\${{ env.ARTIFACT_NAME }}\*" -DestinationPath ".\dist\${{ env.ARTIFACT_NAME }}.zip" -Force
 
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Package installer
+        shell: pwsh
+        run: |
+          .\scripts\build-installer.ps1 `
+            -Version "${{ env.PACKAGE_VERSION }}" `
+            -PublishDir ".\artifacts\${{ env.ARTIFACT_NAME }}" `
+            -OutputDir ".\dist"
+
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT_NAME }}
-          path: .\dist\${{ env.ARTIFACT_NAME }}.zip
+          path: |
+            .\dist\${{ env.ARTIFACT_NAME }}.zip
+            .\dist\MomentTrace-${{ env.PACKAGE_VERSION }}-win-x64-setup.exe
 
       - name: Create GitHub Release
         shell: pwsh
@@ -81,10 +94,11 @@ jobs:
           $notes = @"
           MomentTrace ${{ env.RELEASE_TAG }}
 
-          Download the Windows build below and extract the zip to run MomentTrace.App.exe.
+          Download the Windows installer below to install MomentTrace into Program Files.
+          The portable zip is also attached if you prefer to extract and run MomentTrace.App.exe directly.
           "@
 
-          gh release create "${{ env.RELEASE_TAG }}" ".\dist\${{ env.ARTIFACT_NAME }}.zip" `
+          gh release create "${{ env.RELEASE_TAG }}" ".\dist\MomentTrace-${{ env.PACKAGE_VERSION }}-win-x64-setup.exe" ".\dist\${{ env.ARTIFACT_NAME }}.zip" `
             --title "MomentTrace ${{ env.RELEASE_TAG }}" `
             --notes $notes `
             --target "${{ github.sha }}"

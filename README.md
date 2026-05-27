@@ -209,12 +209,38 @@ The published executable is written to:
 publish\win-x64\MomentTrace.App.exe
 ```
 
+MomentTrace includes a project-owned app icon at `MomentTrace.App\Assets\MomentTrace.ico`. The icon is embedded into the published executable and is also used by the WPF window, tray icon, installer, Start Menu shortcut, and uninstall entry.
+
+## Build The Windows Installer
+
+MomentTrace uses Inno Setup for the Windows installer. The installer is machine-wide and installs to:
+
+```text
+C:\Program Files\MomentTrace
+```
+
+Because the installer writes to Program Files, installing or uninstalling requires administrator approval. Install [Inno Setup 6](https://jrsoftware.org/isinfo.php), then run:
+
+```powershell
+.\scripts\build-installer.ps1 -Version 0.1.0
+```
+
+The setup executable is written to:
+
+```text
+dist\MomentTrace-0.1.0-win-x64-setup.exe
+```
+
+The installer creates a Start Menu shortcut, optionally creates a Desktop shortcut, uses the MomentTrace icon, launches the app after install when selected, and registers a normal Windows uninstall entry. During uninstall it stops the running app if needed and removes MomentTrace startup registry values for `MomentTrace` and the legacy `Nwaoga Timeline` value.
+
+Local history and settings under `%AppData%\MomentTrace` are intentionally left in place for now so uninstalling the app does not accidentally delete the user's timeline. Full local data deletion should be handled by an explicit privacy cleanup control in the app rather than by default uninstall behavior.
+
 ## CI And Releases
 
 GitHub Actions are used for build checks and downloadable releases:
 
 - `.github/workflows/ci.yml` builds the solution on pushes and pull requests to `main`.
-- `.github/workflows/release.yml` creates a versioned Windows zip and attaches it to a GitHub Release.
+- `.github/workflows/release.yml` creates a versioned Windows installer plus a portable zip and attaches both to a GitHub Release.
 
 To create a release from Git:
 
@@ -223,7 +249,7 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
-The release workflow validates the `vMAJOR.MINOR.PATCH` tag format, publishes the app as a self-contained Windows `win-x64` build, stamps the assembly/file version, creates a zip named like `MomentTrace-0.1.0-win-x64.zip`, and uploads it to the GitHub Release.
+The release workflow validates the `vMAJOR.MINOR.PATCH` tag format, publishes the app as a self-contained Windows `win-x64` build, stamps the assembly/file version, creates a setup executable named like `MomentTrace-0.1.0-win-x64-setup.exe`, creates a portable zip named like `MomentTrace-0.1.0-win-x64.zip`, and uploads both to the GitHub Release.
 
 You can also run the **Release** workflow manually in GitHub Actions and provide a version such as `v0.1.0`.
 
@@ -244,5 +270,5 @@ For Azure DevOps planning, current implementation work is tracked in the MomentT
 - Add saved moments, notes, and bookmarks as real library features
 - Add richer website/app card previews and stronger related activity grouping
 - Add privacy controls for deleting, exporting, and excluding activity
-- Create a proper Windows installer with icon, shortcuts, and uninstall support
+- Add a settings option to delete local data when the user wants a full privacy cleanup
 - Plan the cross-platform desktop path, likely with Avalonia for Windows/macOS UI reuse

@@ -88,12 +88,24 @@ public partial class App : System.Windows.Application
 
         _notifyIcon = new Forms.NotifyIcon
         {
-            Icon = SystemIcons.Application,
+            Icon = LoadTrayIcon(),
             Text = "MomentTrace",
             ContextMenuStrip = menu,
             Visible = true
         };
         _notifyIcon.DoubleClick += (_, _) => ShowMainWindow();
+    }
+
+    private static Icon LoadTrayIcon()
+    {
+        try
+        {
+            return Icon.ExtractAssociatedIcon(GetExecutablePath()) ?? SystemIcons.Application;
+        }
+        catch
+        {
+            return SystemIcons.Application;
+        }
     }
 
     private static string GetExecutablePath()
