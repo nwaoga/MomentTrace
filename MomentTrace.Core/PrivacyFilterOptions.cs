@@ -9,4 +9,6 @@ public sealed class PrivacyFilterOptions
     public IReadOnlyCollection<string> CustomBlockedDomains { get; init; } = [];
 
     public IReadOnlyCollection<string> CustomAllowedDomains { get; init; } = [];
+
+    public IReadOnlyCollection<string> CustomBlockedApps { get; init; } = [];
 }

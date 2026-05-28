@@ -105,7 +105,7 @@ public sealed class ForegroundWindowActivityRecorder(
             return;
         }
 
-        if (ShouldExcludeByPrivacyFilter(snapshot.Resource))
+        if (ShouldExcludeByPrivacyFilter(snapshot))
         {
             await CloseCurrentActivityAsync(now, cancellationToken);
             return;
@@ -146,7 +146,7 @@ public sealed class ForegroundWindowActivityRecorder(
         ActivityChanged?.Invoke(this, WithId(activity, _currentActivityId.Value));
     }
 
-    private bool ShouldExcludeByPrivacyFilter(string? resource)
+    private bool ShouldExcludeByPrivacyFilter(Snapshot snapshot)
     {
         if (_privacyOptionsProvider is null)
         {
@@ -155,7 +155,11 @@ public sealed class ForegroundWindowActivityRecorder(
 
         try
         {
-            return new DomainPrivacyFilter(_privacyOptionsProvider()).ShouldExclude(resource);
+            return new UserPrivacyFilter(_privacyOptionsProvider()).ShouldExclude(
+                snapshot.Resource,
+                snapshot.ProcessName,
+                snapshot.AppName,
+                snapshot.ExecutablePath);
         }
         catch
         {

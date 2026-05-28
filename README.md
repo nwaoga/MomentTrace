@@ -37,12 +37,13 @@ The **Overview** page gives a lightweight analytics view of the selected day wit
 - Date filtering with Today, Yesterday, then concrete activity dates
 - Real app icon extraction when executable metadata is available
 - Browser URL capture and local screenshot previews
-- Adult website privacy filter with built-in starter domains, optional cached blocklist updates, and manual allow/block lists
+- Privacy filters with recent app/website selection, adult website filtering, optional cached blocklist updates, and manual allow/block lists
 - Single-instance behavior that brings the running app back when launched again
 - Noise filtering for MomentTrace itself and Windows lock-screen activity
-- Settings modal with startup, recording, timeline view mode, and appearance controls
+- Settings modal with startup, recording, timeline view mode, appearance, and privacy controls
 - "Where I Live" diagnostics for install, database, settings, and screenshot locations
 - Real alpha transparency control that keeps the dark colour palette while making the app more or less clear
+- Polished dark settings controls for timeline mode and transparency
 - Optional AI provider abstraction for future summaries and insights
 
 ## Project Structure
@@ -165,7 +166,7 @@ The Windows recorder lives in `MomentTrace.Windows` and currently:
 - Captures browser screenshots only when a new browser session starts
 - Closes the active session cleanly when recording stops or the app exits
 - Excludes MomentTrace itself and default Windows lock-screen activity from new recordings
-- Excludes configured adult websites before saving activity or capturing screenshots
+- Excludes configured private websites and blocked apps before saving activity or capturing screenshots
 
 Existing stored MomentTrace and lock-screen rows are also filtered out of the Timeline and Overview views without requiring a database cleanup.
 
@@ -177,6 +178,8 @@ MomentTrace treats privacy as part of the product experience:
 - Screenshots are stored locally under AppData.
 - Adult website filtering happens before data is saved or screenshotted.
 - Manual always-block and always-allow domain lists are available in Settings.
+- Recent apps and websites are shown as selectable privacy lists so the user can block future captures without typing exact process names or domains.
+- User-blocked apps are skipped before new activity rows are saved.
 - Optional adult blocklist updates are cached locally under `%AppData%\MomentTrace\privacy-blocklists\`.
 - Timeline and Overview hide matching privacy-filtered rows from existing history without deleting the database.
 
@@ -269,6 +272,6 @@ For Azure DevOps planning, current implementation work is tracked in the MomentT
 - Add filter counts, persisted filter preferences, and richer empty states
 - Add saved moments, notes, and bookmarks as real library features
 - Add richer website/app card previews and stronger related activity grouping
-- Add privacy controls for deleting, exporting, and excluding activity
+- Add privacy controls for deleting and exporting activity
 - Add a settings option to delete local data when the user wants a full privacy cleanup
 - Plan the cross-platform desktop path, likely with Avalonia for Windows/macOS UI reuse

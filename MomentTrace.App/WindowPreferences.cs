@@ -40,6 +40,8 @@ public sealed class WindowPreferences
 
     public string[] CustomAllowedDomains { get; set; } = [];
 
+    public string[] CustomBlockedApps { get; set; } = [];
+
     public DateTimeOffset? AdultBlocklistUpdatedAt { get; set; }
 
     public static string PrivacyBlocklistDirectory =>
@@ -96,7 +98,8 @@ public sealed class WindowPreferences
             ExcludeAdultWebsites = ExcludeAdultWebsites,
             AdultDomains = AdultBlocklistDomains,
             CustomBlockedDomains = CustomBlockedDomains,
-            CustomAllowedDomains = CustomAllowedDomains
+            CustomAllowedDomains = CustomAllowedDomains,
+            CustomBlockedApps = CustomBlockedApps
         };
     }
 }

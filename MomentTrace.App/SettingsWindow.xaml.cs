@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
@@ -12,9 +13,12 @@ public partial class SettingsWindow : Window
 {
     private const string AdultBlocklistUrl = "https://raw.githubusercontent.com/blocklistproject/Lists/master/porn.txt";
 
+    private readonly IActivityStore _store;
     private readonly IActivityRecorder _recorder;
     private readonly IStartupRegistration _startupRegistration;
     private readonly WindowPreferences _preferences;
+    private readonly ObservableCollection<PrivacyChoiceViewModel> _recentApps = [];
+    private readonly ObservableCollection<PrivacyChoiceViewModel> _recentWebsites = [];
     private readonly Action<double> _opacityChanged;
     private readonly Action<string> _timelineViewModeChanged;
     private readonly Action _recordingChanged;
@@ -23,6 +27,7 @@ public partial class SettingsWindow : Window
     private bool _isUpdatingTimelineViewMode;
 
     public SettingsWindow(
+        IActivityStore store,
         IActivityRecorder recorder,
         IStartupRegistration startupRegistration,
         double currentOpacity,
@@ -31,6 +36,7 @@ public partial class SettingsWindow : Window
         Action<string> timelineViewModeChanged,
         Action recordingChanged)
     {
+        _store = store;
         _recorder = recorder;
         _startupRegistration = startupRegistration;
         _preferences = WindowPreferences.Load();
@@ -39,9 +45,12 @@ public partial class SettingsWindow : Window
         _recordingChanged = recordingChanged;
 
         InitializeComponent();
+        RecentAppsList.ItemsSource = _recentApps;
+        RecentWebsitesList.ItemsSource = _recentWebsites;
         LoadCurrentSettings(currentOpacity, currentTimelineViewMode);
         LoadPrivacySettings();
         LoadWhereILive();
+        _ = LoadRecentPrivacyChoicesAsync();
     }
 
     private void LoadCurrentSettings(double currentOpacity, string currentTimelineViewMode)
@@ -149,11 +158,40 @@ public partial class SettingsWindow : Window
 
     private void SavePrivacyFiltersButton_Click(object sender, RoutedEventArgs e)
     {
-        _preferences.CustomBlockedDomains = ParseDomainText(CustomBlockedDomainsTextBox.Text);
+        var checkedDomains = _recentWebsites
+            .Where(item => item.IsBlocked)
+            .Select(item => item.Value);
+        var checkedApps = _recentApps
+            .Where(item => item.IsBlocked)
+            .Select(item => item.Value);
+        var visibleDomains = _recentWebsites
+            .Select(item => item.Value)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var visibleApps = _recentApps
+            .Select(item => item.Value)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        _preferences.CustomBlockedDomains = ParseDomainText(CustomBlockedDomainsTextBox.Text)
+            .Where(domain => !visibleDomains.Contains(domain))
+            .Concat(checkedDomains)
+            .Select(DomainPrivacyFilter.ParseDomainLine)
+            .Where(domain => !string.IsNullOrWhiteSpace(domain))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
         _preferences.CustomAllowedDomains = ParseDomainText(CustomAllowedDomainsTextBox.Text);
+        _preferences.CustomBlockedApps = ParseAppText(string.Join(Environment.NewLine, _preferences.CustomBlockedApps))
+            .Where(app => !visibleApps.Contains(app))
+            .Concat(checkedApps)
+            .Select(UserPrivacyFilter.NormalizeApp)
+            .Where(app => !string.IsNullOrWhiteSpace(app))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
         _preferences.ExcludeAdultWebsites = ExcludeAdultWebsitesCheckBox.IsChecked == true;
         _preferences.Save();
         LoadPrivacySettings();
+        _ = LoadRecentPrivacyChoicesAsync();
     }
 
     private async void UpdateAdultBlocklistButton_Click(object sender, RoutedEventArgs e)
@@ -203,8 +241,115 @@ public partial class SettingsWindow : Window
             .ToArray();
     }
 
+    private async Task LoadRecentPrivacyChoicesAsync()
+    {
+        IReadOnlyList<TimelineActivity> activities;
+        try
+        {
+            activities = await _store.QueryAsync(new TimelineQuery { Limit = 1000 });
+        }
+        catch
+        {
+            RecentAppsStatusText.Text = "Unavailable";
+            RecentWebsitesStatusText.Text = "Unavailable";
+            return;
+        }
+
+        var blockedApps = ParseAppText(string.Join(Environment.NewLine, _preferences.CustomBlockedApps))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var blockedDomains = ParseDomainText(CustomBlockedDomainsTextBox.Text)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var recentApps = activities
+            .Where(activity => !ActivityExclusionFilter.IsExcluded(activity))
+            .Where(activity => !string.IsNullOrWhiteSpace(activity.ProcessName) || !string.IsNullOrWhiteSpace(activity.AppName))
+            .GroupBy(activity => UserPrivacyFilter.NormalizeApp(string.IsNullOrWhiteSpace(activity.ProcessName) ? activity.AppName : activity.ProcessName))
+            .Where(group => !string.IsNullOrWhiteSpace(group.Key))
+            .Select(group =>
+            {
+                var representative = group.OrderByDescending(activity => activity.StartedAt).First();
+                var title = string.IsNullOrWhiteSpace(representative.AppName) ? representative.ProcessName : representative.AppName;
+                var subtitle = $"{representative.ProcessName} · {group.Count()} entries";
+                return new PrivacyChoiceViewModel(title, subtitle, group.Key, blockedApps.Contains(group.Key));
+            })
+            .OrderBy(item => item.Title, StringComparer.OrdinalIgnoreCase)
+            .Take(12)
+            .ToList();
+
+        var recentWebsites = activities
+            .Select(activity => TryGetHost(activity.Resource, out var host) ? host : string.Empty)
+            .Where(host => !string.IsNullOrWhiteSpace(host))
+            .GroupBy(host => host, StringComparer.OrdinalIgnoreCase)
+            .Select(group => new PrivacyChoiceViewModel(group.Key, $"{group.Count()} entries", group.Key, blockedDomains.Contains(group.Key)))
+            .OrderBy(item => item.Title, StringComparer.OrdinalIgnoreCase)
+            .Take(12)
+            .ToList();
+
+        _recentApps.Clear();
+        foreach (var app in recentApps)
+        {
+            _recentApps.Add(app);
+        }
+
+        _recentWebsites.Clear();
+        foreach (var website in recentWebsites)
+        {
+            _recentWebsites.Add(website);
+        }
+
+        RecentAppsStatusText.Text = recentApps.Count == 0 ? "No apps yet" : $"{recentApps.Count} shown";
+        RecentWebsitesStatusText.Text = recentWebsites.Count == 0 ? "No sites yet" : $"{recentWebsites.Count} shown";
+    }
+
+    private static string[] ParseAppText(string text)
+    {
+        return text
+            .Split(new[] { '\r', '\n', ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(UserPrivacyFilter.NormalizeApp)
+            .Where(app => !string.IsNullOrWhiteSpace(app))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
+
+    private static bool TryGetHost(string? resource, out string host)
+    {
+        host = string.Empty;
+        if (string.IsNullOrWhiteSpace(resource))
+        {
+            return false;
+        }
+
+        var candidate = resource.Trim();
+        if (!candidate.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            && !candidate.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            candidate = $"https://{candidate}";
+        }
+
+        if (!Uri.TryCreate(candidate, UriKind.Absolute, out var uri)
+            || string.IsNullOrWhiteSpace(uri.Host))
+        {
+            return false;
+        }
+
+        host = DomainPrivacyFilter.ParseDomainLine(uri.Host);
+        return !string.IsNullOrWhiteSpace(host);
+    }
+
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
         Close();
+    }
+
+    private sealed class PrivacyChoiceViewModel(string title, string subtitle, string value, bool isBlocked)
+    {
+        public string Title { get; } = title;
+
+        public string Subtitle { get; } = subtitle;
+
+        public string Value { get; } = value;
+
+        public bool IsBlocked { get; set; } = isBlocked;
     }
 }

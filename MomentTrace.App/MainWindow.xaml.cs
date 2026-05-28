@@ -447,9 +447,9 @@ public partial class MainWindow : Window
         return date.ToString("ddd, d MMM");
     }
 
-    private static DomainPrivacyFilter CurrentPrivacyFilter()
+    private static UserPrivacyFilter CurrentPrivacyFilter()
     {
-        return new DomainPrivacyFilter(WindowPreferences.Load().ToPrivacyFilterOptions());
+        return new UserPrivacyFilter(WindowPreferences.Load().ToPrivacyFilterOptions());
     }
 
     private static IEnumerable<ActivityItemViewModel> BuildTimelineSessions(IReadOnlyList<TimelineActivity> activities)
@@ -1406,6 +1406,7 @@ public partial class MainWindow : Window
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
     {
         var settingsWindow = new SettingsWindow(
+            _store,
             _recorder,
             _startupRegistration,
             _preferences.Opacity,
