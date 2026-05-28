@@ -31,6 +31,8 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<FocusBlockViewModel> _focusBlocks = [];
     private readonly ObservableCollection<LegendItemViewModel> _overviewLegend = [];
     private readonly ObservableCollection<DateFilterOption> _dateFilters = [];
+    private readonly ObservableCollection<DetailActivityRowViewModel> _detailActivityRows = [];
+    private readonly ObservableCollection<RelatedMomentViewModel> _relatedMomentRows = [];
     private readonly ICollectionView _activityView;
     private string _overviewSort = "Duration";
     private TimelineSemanticFilter? _selectedSemanticFilter;
@@ -39,6 +41,7 @@ public partial class MainWindow : Window
     private bool _isUpdatingDateFilter;
     private bool _allowClose;
     private bool _isDetailVisible = true;
+    private DetailTab _selectedDetailTab = DetailTab.Overview;
     private ActivityItemViewModel? _selectedDetailActivity;
 
     public MainWindow(
@@ -73,6 +76,8 @@ public partial class MainWindow : Window
         FocusTimeline.ItemsSource = _focusBlocks;
         OverviewLegend.ItemsSource = _overviewLegend;
         DateFilter.ItemsSource = _dateFilters;
+        DetailActivityRows.ItemsSource = _detailActivityRows;
+        RelatedMomentRows.ItemsSource = _relatedMomentRows;
         AiSummaryPanel.Visibility = _aiProvider is null ? Visibility.Collapsed : Visibility.Visible;
         InsightsButton.Visibility = _aiProvider is null ? Visibility.Collapsed : Visibility.Visible;
         ApplyTimelineViewMode(_preferences.TimelineViewMode);
@@ -950,6 +955,11 @@ public partial class MainWindow : Window
         MomentNoteTextBox.Text = string.Empty;
         BookmarkButton.Content = "Bookmark";
         DeleteMomentButton.IsEnabled = false;
+        ActivityTabSummaryText.Text = "Select a moment to inspect its raw captured entries.";
+        RelatedTabSummaryText.Text = "Select a moment to see nearby activity from the same app or category.";
+        _detailActivityRows.Clear();
+        _relatedMomentRows.Clear();
+        SelectDetailTab(DetailTab.Overview);
     }
 
     private void ShowDetails(ActivityItemViewModel selected)
@@ -974,6 +984,116 @@ public partial class MainWindow : Window
         BookmarkButton.Visibility = IsWebUrl(activity.Resource) ? Visibility.Visible : Visibility.Collapsed;
         MomentNoteTextBox.Text = activity.Note ?? string.Empty;
         DeleteMomentButton.IsEnabled = true;
+        _ = LoadDetailContextAsync(selected);
+    }
+
+    private async Task LoadDetailContextAsync(ActivityItemViewModel selected)
+    {
+        var selectedId = selected.Id;
+        var privacyFilter = CurrentPrivacyFilter();
+        var activities = (await _store.QueryAsync(new TimelineQuery { Limit = 1000 }))
+            .Where(activity => !ActivityExclusionFilter.IsExcluded(activity))
+            .Where(activity => !privacyFilter.ShouldExclude(activity))
+            .ToList();
+
+        if (_selectedDetailActivity?.Id != selectedId)
+        {
+            return;
+        }
+
+        var rawEntries = activities
+            .Where(activity => IsRawEntryForMoment(selected, activity))
+            .OrderBy(activity => activity.StartedAt)
+            .ToList();
+
+        if (rawEntries.Count == 0)
+        {
+            rawEntries.Add(selected.Activity);
+        }
+
+        _detailActivityRows.Clear();
+        foreach (var activity in rawEntries)
+        {
+            _detailActivityRows.Add(new DetailActivityRowViewModel(activity));
+        }
+
+        ActivityTabSummaryText.Text = rawEntries.Count == 1
+            ? "This moment currently has one captured entry."
+            : $"{rawEntries.Count} raw entries were grouped into this remembered moment.";
+
+        var selectedCategory = _activityClassifier.Classify(selected.Activity).Category;
+        var related = activities
+            .Where(activity => activity.Id != selected.Id)
+            .Select(activity => new
+            {
+                Activity = activity,
+                Category = _activityClassifier.Classify(activity).Category,
+                Distance = Math.Abs((activity.StartedAt - selected.SessionStartedAt).TotalSeconds)
+            })
+            .Where(item => string.Equals(item.Activity.AppName, selected.AppName, StringComparison.OrdinalIgnoreCase)
+                || item.Category == selectedCategory
+                || SameMomentTarget(item.Activity, selected.Activity))
+            .OrderBy(item => item.Distance)
+            .Take(6)
+            .Select(item => new RelatedMomentViewModel(new ActivityItemViewModel(item.Activity), item.Category == selectedCategory ? "Same activity type" : "Same source"))
+            .ToList();
+
+        _relatedMomentRows.Clear();
+        foreach (var item in related)
+        {
+            _relatedMomentRows.Add(item);
+        }
+
+        RelatedTabSummaryText.Text = related.Count == 0
+            ? "No related moments found yet."
+            : $"{related.Count} nearby moments from the same source or category.";
+    }
+
+    private static bool IsRawEntryForMoment(ActivityItemViewModel selected, TimelineActivity activity)
+    {
+        if (activity.Id == selected.Id)
+        {
+            return true;
+        }
+
+        return activity.StartedAt.LocalDateTime.Date == selected.SessionStartedAt.LocalDateTime.Date
+            && activity.StartedAt >= selected.SessionStartedAt.AddMinutes(-1)
+            && activity.EndedAt <= selected.SessionEndedAt.AddMinutes(1)
+            && SameMomentTarget(activity, selected.Activity);
+    }
+
+    private static bool SameMomentTarget(TimelineActivity left, TimelineActivity right)
+    {
+        if (!string.Equals(left.ProcessName, right.ProcessName, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var leftTarget = GetMomentTarget(left);
+        var rightTarget = GetMomentTarget(right);
+        return string.Equals(leftTarget, rightTarget, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string GetMomentTarget(TimelineActivity activity)
+    {
+        if (!string.IsNullOrWhiteSpace(activity.Resource))
+        {
+            return NormalizeResource(activity.Resource);
+        }
+
+        return string.IsNullOrWhiteSpace(activity.WindowTitle)
+            ? activity.AppName
+            : activity.WindowTitle.Trim();
+    }
+
+    private static string NormalizeResource(string resource)
+    {
+        if (!Uri.TryCreate(resource.Trim(), UriKind.Absolute, out var uri))
+        {
+            return resource.Trim().TrimEnd('/');
+        }
+
+        return $"{uri.Host}{uri.AbsolutePath.TrimEnd('/')}";
     }
 
     private static string GetDetailNarrative(ActivityItemViewModel selected)
@@ -1189,6 +1309,14 @@ public partial class MainWindow : Window
         Hide();
     }
 
+    private void MaximizeButton_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState == WindowState.Maximized
+            ? WindowState.Normal
+            : WindowState.Maximized;
+        MaximizeButton.Content = WindowState == WindowState.Maximized ? "❐" : "□";
+    }
+
     private void CloseWindowButton_Click(object sender, RoutedEventArgs e)
     {
         Close();
@@ -1197,9 +1325,37 @@ public partial class MainWindow : Window
     private void ToggleDetailsButton_Click(object sender, RoutedEventArgs e)
     {
         _isDetailVisible = !_isDetailVisible;
-        DetailColumn.Width = _isDetailVisible ? new GridLength(330) : new GridLength(0);
         DetailSurface.Visibility = _isDetailVisible ? Visibility.Visible : Visibility.Collapsed;
-        ToggleDetailsButton.Content = _isDetailVisible ? "▤" : "▥";
+        ToggleDetailsButton.Content = "☰";
+    }
+
+    private void DetailTab_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.Button button
+            || !Enum.TryParse<DetailTab>(button.Content?.ToString(), out var tab))
+        {
+            return;
+        }
+
+        SelectDetailTab(tab);
+    }
+
+    private void SelectDetailTab(DetailTab tab)
+    {
+        _selectedDetailTab = tab;
+
+        OverviewDetailTabContent.Visibility = tab == DetailTab.Overview ? Visibility.Visible : Visibility.Collapsed;
+        ActivityDetailTabContent.Visibility = tab == DetailTab.Activity ? Visibility.Visible : Visibility.Collapsed;
+        RelatedDetailTabContent.Visibility = tab == DetailTab.Related ? Visibility.Visible : Visibility.Collapsed;
+
+        SetDetailTabButton(OverviewDetailTabButton, tab == DetailTab.Overview);
+        SetDetailTabButton(ActivityDetailTabButton, tab == DetailTab.Activity);
+        SetDetailTabButton(RelatedDetailTabButton, tab == DetailTab.Related);
+    }
+
+    private static void SetDetailTabButton(System.Windows.Controls.Button button, bool isActive)
+    {
+        button.Tag = isActive ? "Active" : button.Content?.ToString();
     }
 
     private void ApplySavedOpacity()
@@ -1386,6 +1542,46 @@ public partial class MainWindow : Window
 
     private sealed record LegendItemViewModel(string Label, string Fill);
 
+    private sealed class DetailActivityRowViewModel
+    {
+        public DetailActivityRowViewModel(TimelineActivity activity)
+        {
+            var item = new ActivityItemViewModel(activity);
+            TimeRange = activity.StartedAt.LocalDateTime.ToString("t");
+            Title = item.Title;
+            Source = string.IsNullOrWhiteSpace(activity.Resource)
+                ? item.TechnicalSource
+                : activity.Resource;
+            Duration = item.Duration;
+        }
+
+        public string TimeRange { get; }
+
+        public string Title { get; }
+
+        public string Source { get; }
+
+        public string Duration { get; }
+    }
+
+    private sealed class RelatedMomentViewModel
+    {
+        private readonly ActivityItemViewModel _activity;
+
+        public RelatedMomentViewModel(ActivityItemViewModel activity, string reason)
+        {
+            _activity = activity;
+            Title = activity.Title;
+            Detail = $"{reason} · {activity.CardTime} · {activity.Duration}";
+        }
+
+        public string Title { get; }
+
+        public string Detail { get; }
+
+        public ImageSource? ProgramIcon => _activity.ProgramIcon;
+    }
+
     private enum TimelineSemanticFilter
     {
         Browsing,
@@ -1406,6 +1602,13 @@ public partial class MainWindow : Window
         SavedMoments,
         Notes,
         Bookmarks
+    }
+
+    private enum DetailTab
+    {
+        Overview,
+        Activity,
+        Related
     }
 
     private sealed class TimelineSessionGroupViewModel(

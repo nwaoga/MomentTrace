@@ -157,6 +157,38 @@
             </Setter>
         </Style>
 
+        <Style x:Key="DetailTabButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{StaticResource MutedTextBrush}" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Background="Transparent">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="32" />
+                                <RowDefinition Height="3" />
+                            </Grid.RowDefinitions>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <Border x:Name="ActiveIndicator" Grid.Row="1" Height="3" CornerRadius="2" Background="#8B5CF6" Visibility="Collapsed" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="#D8CCFF" />
+                            </Trigger>
+                            <Trigger Property="Tag" Value="Active">
+                                <Setter Property="Foreground" Value="#B89CFF" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                                <Setter TargetName="ActiveIndicator" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style TargetType="TextBox">
             <Setter Property="FontSize" Value="14" />
             <Setter Property="Padding" Value="40,11,14,11" />
@@ -508,6 +540,41 @@
                 <TextBlock Grid.Column="1" Text="{Binding Label}" Foreground="{StaticResource MutedTextBrush}" FontSize="12" />
             </Grid>
         </DataTemplate>
+
+        <DataTemplate x:Key="DetailActivityRowTemplate">
+            <Border Background="#172337" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="64" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{Binding TimeRange}" Foreground="#B89CFF" FontSize="12" FontWeight="SemiBold" />
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{Binding Title}" Foreground="{StaticResource TextBrush}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Source}" Margin="0,4,0,0" Foreground="{StaticResource MutedTextBrush}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding Duration}" Margin="0,4,0,0" Foreground="#8C98AD" FontSize="11" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="RelatedMomentTemplate">
+            <Border Background="#172337" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="34" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="24" Height="24" CornerRadius="6" Background="#22304A" VerticalAlignment="Top">
+                        <Image Source="{Binding ProgramIcon}" Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{Binding Title}" Foreground="{StaticResource TextBrush}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Detail}" Margin="0,4,0,0" Foreground="{StaticResource MutedTextBrush}" FontSize="12" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
     </Window.Resources>
 
     <Border x:Name="WindowSurface"
@@ -520,13 +587,11 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="220" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition x:Name="DetailColumn" Width="330" />
             </Grid.ColumnDefinitions>
 
             <Border x:Name="RailSurface" Grid.Column="0" Background="#121B2B" BorderBrush="#23314A" BorderThickness="0,0,1,0" PreviewMouseLeftButtonDown="SectionSurface_PreviewMouseLeftButtonDown">
                 <Grid Margin="18,18">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
@@ -534,8 +599,8 @@
 
                     <Border Grid.Row="0" Background="Transparent" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown" />
                     <DockPanel Grid.Row="0" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown">
-                        <Border Width="34" Height="34" CornerRadius="8" Background="#4C35A8" DockPanel.Dock="Left">
-                            <TextBlock Text="◆" FontSize="17" Foreground="#D9D0FF" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Border Width="34" Height="34" CornerRadius="8" DockPanel.Dock="Left" ClipToBounds="True">
+                            <Image Source="Assets/MomentTrace.ico" Stretch="UniformToFill" />
                         </Border>
                         <TextBlock Text="MomentTrace" Margin="12,6,0,0" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
                     </DockPanel>
@@ -654,7 +719,7 @@
                         </StackPanel>
                     </ScrollViewer>
 
-                    <StackPanel Grid.Row="3">
+                    <StackPanel Grid.Row="2" VerticalAlignment="Bottom">
                         <Border Height="1" Background="#26344D" Margin="0,0,0,16" />
                         <DockPanel Margin="0,0,0,14">
                             <Border Width="34" Height="34" CornerRadius="17" Background="#8B5CF6" DockPanel.Dock="Left">
@@ -690,6 +755,7 @@
                             <ColumnDefinition Width="48" />
                             <ColumnDefinition Width="48" />
                             <ColumnDefinition Width="48" />
+                            <ColumnDefinition Width="48" />
                         </Grid.ColumnDefinitions>
                         <Grid>
                             <TextBox x:Name="SearchBox" TextChanged="SearchBox_TextChanged" VerticalAlignment="Center" />
@@ -721,9 +787,10 @@
                             <ComboBoxItem Content="Document" />
                             <ComboBoxItem Content="Development" />
                         </ComboBox>
-                        <Button x:Name="ToggleDetailsButton" Grid.Column="3" Style="{StaticResource ChromeButton}" Content="▤" Click="ToggleDetailsButton_Click" VerticalAlignment="Center" Margin="10,0,0,0" Padding="12,8" />
+                        <Button x:Name="ToggleDetailsButton" Grid.Column="3" Style="{StaticResource ChromeButton}" Content="☰" Click="ToggleDetailsButton_Click" VerticalAlignment="Center" Margin="10,0,0,0" Padding="12,8" />
                         <Button Grid.Column="4" Style="{StaticResource ChromeButton}" Content="–" Click="MinimizeButton_Click" VerticalAlignment="Center" Margin="10,0,0,0" Padding="12,8" FontSize="16" />
-                        <Button Grid.Column="5" Style="{StaticResource ChromeButton}" Content="×" Click="CloseWindowButton_Click" VerticalAlignment="Center" Margin="10,0,0,0" Padding="12,8" FontSize="16" />
+                        <Button x:Name="MaximizeButton" Grid.Column="5" Style="{StaticResource ChromeButton}" Content="□" Click="MaximizeButton_Click" VerticalAlignment="Center" Margin="10,0,0,0" Padding="12,8" FontSize="14" />
+                        <Button Grid.Column="6" Style="{StaticResource ChromeButton}" Content="×" Click="CloseWindowButton_Click" VerticalAlignment="Center" Margin="10,0,0,0" Padding="12,8" FontSize="16" />
                     </Grid>
                 </Border>
 
@@ -877,7 +944,16 @@
                 </ScrollViewer>
             </Grid>
 
-            <Border x:Name="DetailSurface" Grid.Column="2" Background="#121B2B" BorderBrush="#23314A" BorderThickness="1,0,0,0" PreviewMouseLeftButtonDown="SectionSurface_PreviewMouseLeftButtonDown">
+            <Border x:Name="DetailSurface"
+                    Grid.Column="1"
+                    Width="380"
+                    Margin="0,66,0,0"
+                    HorizontalAlignment="Right"
+                    Panel.ZIndex="4"
+                    Background="#121B2B"
+                    BorderBrush="#23314A"
+                    BorderThickness="1,0,0,0"
+                    PreviewMouseLeftButtonDown="SectionSurface_PreviewMouseLeftButtonDown">
                 <Grid>
                 <Grid x:Name="TimelineDetailContent" Margin="24,30,22,24">
                     <Grid.RowDefinitions>
@@ -889,7 +965,6 @@
 
                     <Border Grid.Row="0" Background="Transparent" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown" />
                     <DockPanel Grid.Row="0" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown">
-                        <Button DockPanel.Dock="Right" Style="{StaticResource ChromeButton}" Content="×" Click="ToggleDetailsButton_Click" Padding="9,3" BorderThickness="0" Background="Transparent" FontSize="20" />
                         <Border Width="62" Height="62" CornerRadius="9" Background="#19263B" DockPanel.Dock="Left">
                             <Grid>
                                 <TextBlock x:Name="DetailIconFallbackText" Text="W" Foreground="#C9D4E6" FontSize="25" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -925,20 +1000,20 @@
                         </Button>
                     </WrapPanel>
 
-                    <Grid Grid.Row="2" Margin="0,0,0,14">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Details" FontSize="13" FontWeight="SemiBold" Foreground="#B89CFF" Margin="0,0,28,10" />
-                        <TextBlock Grid.Column="1" Text="Activity" FontSize="13" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,28,10" />
-                        <TextBlock Grid.Column="2" Text="Related" FontSize="13" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,10" />
-                        <Border Grid.ColumnSpan="3" Height="1" Background="#26344D" VerticalAlignment="Bottom" />
-                        <Border Width="42" Height="3" Background="#8B5CF6" CornerRadius="2" VerticalAlignment="Bottom" HorizontalAlignment="Left" />
+                    <Grid Grid.Row="2" Margin="0,0,0,16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="35" />
+                            <RowDefinition Height="1" />
+                        </Grid.RowDefinitions>
+                        <UniformGrid Rows="1" Columns="3">
+                            <Button x:Name="OverviewDetailTabButton" Style="{StaticResource DetailTabButton}" Content="Overview" Tag="Active" Click="DetailTab_Click" FontSize="13" />
+                            <Button x:Name="ActivityDetailTabButton" Style="{StaticResource DetailTabButton}" Content="Activity" Tag="Activity" Click="DetailTab_Click" FontSize="13" />
+                            <Button x:Name="RelatedDetailTabButton" Style="{StaticResource DetailTabButton}" Content="Related" Tag="Related" Click="DetailTab_Click" FontSize="13" />
+                        </UniformGrid>
+                        <Border Grid.Row="1" Height="1" Background="#26344D" />
                     </Grid>
 
-                    <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer x:Name="OverviewDetailTabContent" Grid.Row="3" VerticalScrollBarVisibility="Auto">
                         <StackPanel>
                             <Border Background="#18243A" BorderBrush="#33435E" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,18">
                                 <StackPanel>
@@ -1035,6 +1110,30 @@
                             </Border>
                         </StackPanel>
                     </ScrollViewer>
+
+                    <ScrollViewer x:Name="ActivityDetailTabContent" Grid.Row="3" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+                        <StackPanel>
+                            <Border Background="#18243A" BorderBrush="#33435E" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,18">
+                                <StackPanel>
+                                    <TextBlock Text="Captured activity" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,10" />
+                                    <TextBlock x:Name="ActivityTabSummaryText" Text="Select a moment to inspect its raw captured entries." FontSize="13" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" LineHeight="19" />
+                                </StackPanel>
+                            </Border>
+                            <ItemsControl x:Name="DetailActivityRows" ItemTemplate="{StaticResource DetailActivityRowTemplate}" />
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <ScrollViewer x:Name="RelatedDetailTabContent" Grid.Row="3" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+                        <StackPanel>
+                            <Border Background="#18243A" BorderBrush="#33435E" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,18">
+                                <StackPanel>
+                                    <TextBlock Text="Related moments" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,10" />
+                                    <TextBlock x:Name="RelatedTabSummaryText" Text="Select a moment to see nearby activity from the same app or category." FontSize="13" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" LineHeight="19" />
+                                </StackPanel>
+                            </Border>
+                            <ItemsControl x:Name="RelatedMomentRows" ItemTemplate="{StaticResource RelatedMomentTemplate}" />
+                        </StackPanel>
+                    </ScrollViewer>
                 </Grid>
                 <Grid x:Name="OverviewSidebarContent" Margin="24,30,22,24" Visibility="Collapsed">
                     <Grid.RowDefinitions>
@@ -1043,7 +1142,6 @@
                     </Grid.RowDefinitions>
 
                     <DockPanel MouseLeftButtonDown="DragSurface_MouseLeftButtonDown">
-                        <Button DockPanel.Dock="Right" Style="{StaticResource ChromeButton}" Content="×" Click="ToggleDetailsButton_Click" Padding="9,3" BorderThickness="0" Background="Transparent" FontSize="20" />
                         <StackPanel>
                             <TextBlock Text="Day details" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
                             <TextBlock x:Name="OverviewSidebarDateText" Text="Today" Margin="0,5,0,0" FontSize="12" Foreground="{StaticResource MutedTextBrush}" />
