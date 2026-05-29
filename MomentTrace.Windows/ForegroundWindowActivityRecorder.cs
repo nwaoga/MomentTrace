@@ -16,6 +16,7 @@ public sealed class ForegroundWindowActivityRecorder(
 {
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan EndUpdateInterval = TimeSpan.FromSeconds(15);
+    private static readonly TimeSpan ActivityGapThreshold = TimeSpan.FromMinutes(5);
 
     private readonly IActivityStore _store = store;
     private readonly Func<PrivacyFilterOptions>? _privacyOptionsProvider = privacyOptionsProvider;
@@ -23,6 +24,7 @@ public sealed class ForegroundWindowActivityRecorder(
     private Task? _recordingTask;
     private long? _currentActivityId;
     private Snapshot? _currentSnapshot;
+    private DateTimeOffset _currentActivityStartedAt;
     private DateTimeOffset _currentActivityLastWrittenAt;
 
     public bool IsRecording => _recordingTask is { IsCompleted: false };
@@ -118,12 +120,20 @@ public sealed class ForegroundWindowActivityRecorder(
             return;
         }
 
+        if (ShouldSplitCurrentActivity(now))
+        {
+            await CloseCurrentActivityAsync(_currentActivityLastWrittenAt, cancellationToken);
+            await OpenActivityAsync(snapshot, now, cancellationToken);
+            return;
+        }
+
         await ExtendCurrentActivityAsync(now, cancellationToken);
     }
 
     private async Task OpenActivityAsync(Snapshot snapshot, DateTimeOffset now, CancellationToken cancellationToken)
     {
         _currentSnapshot = snapshot;
+        _currentActivityStartedAt = now;
         _currentActivityLastWrittenAt = now;
         var screenshotPath = snapshot.Kind == MomentTrace.Core.ActivityKind.Browser ? Snapshot.TryCaptureScreenshot(snapshot.WindowHandle) : null;
         var thumbnailPath = Snapshot.TryCreateImageThumbnail(snapshot.ImageFilePath);
@@ -144,6 +154,12 @@ public sealed class ForegroundWindowActivityRecorder(
 
         _currentActivityId = await _store.AddAsync(activity, cancellationToken);
         ActivityChanged?.Invoke(this, WithId(activity, _currentActivityId.Value));
+    }
+
+    private bool ShouldSplitCurrentActivity(DateTimeOffset now)
+    {
+        return now.LocalDateTime.Date != _currentActivityStartedAt.LocalDateTime.Date
+            || now - _currentActivityLastWrittenAt > ActivityGapThreshold;
     }
 
     private bool ShouldExcludeByPrivacyFilter(Snapshot snapshot)

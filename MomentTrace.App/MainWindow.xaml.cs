@@ -6,6 +6,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
+using Microsoft.Win32;
 using MomentTrace.Core;
 using Process = System.Diagnostics.Process;
 using ProcessStartInfo = System.Diagnostics.ProcessStartInfo;
@@ -33,6 +35,7 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<DateFilterOption> _dateFilters = [];
     private readonly ObservableCollection<DetailActivityRowViewModel> _detailActivityRows = [];
     private readonly ObservableCollection<RelatedMomentViewModel> _relatedMomentRows = [];
+    private readonly DispatcherTimer _dateRolloverTimer;
     private readonly ICollectionView _activityView;
     private string _overviewSort = "Duration";
     private TimelineSemanticFilter? _selectedSemanticFilter;
@@ -41,6 +44,8 @@ public partial class MainWindow : Window
     private bool _isUpdatingDateFilter;
     private bool _allowClose;
     private bool _isDetailVisible = true;
+    private bool _isRefreshingForClockChange;
+    private DateTime _lastObservedDate = DateTime.Today;
     private DetailTab _selectedDetailTab = DetailTab.Overview;
     private ActivityItemViewModel? _selectedDetailActivity;
 
@@ -82,6 +87,11 @@ public partial class MainWindow : Window
         InsightsButton.Visibility = _aiProvider is null ? Visibility.Collapsed : Visibility.Visible;
         ApplyTimelineViewMode(_preferences.TimelineViewMode);
 
+        _dateRolloverTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMinutes(1)
+        };
+        _dateRolloverTimer.Tick += DateRolloverTimer_Tick;
         _recorder.ActivityChanged += Recorder_ActivityChanged;
         Loaded += MainWindow_Loaded;
     }
@@ -101,15 +111,56 @@ public partial class MainWindow : Window
         await LoadDateFiltersAsync();
         await LoadActivitiesAsync();
         await LoadOverviewAsync();
+        _lastObservedDate = DateTime.Today;
+        _dateRolloverTimer.Start();
+        SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
     }
 
     private async void Recorder_ActivityChanged(object? sender, TimelineActivity e)
     {
         await Dispatcher.InvokeAsync(async () =>
         {
+            await RefreshForClockChangeAsync();
             await LoadActivitiesAsync();
             await LoadOverviewAsync();
         });
+    }
+
+    private async void DateRolloverTimer_Tick(object? sender, EventArgs e)
+    {
+        await RefreshForClockChangeAsync();
+    }
+
+    private async void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+    {
+        if (e.Mode != PowerModes.Resume)
+        {
+            return;
+        }
+
+        await Dispatcher.InvokeAsync(async () => await RefreshForClockChangeAsync(force: true));
+    }
+
+    private async Task RefreshForClockChangeAsync(bool force = false)
+    {
+        var currentDate = DateTime.Today;
+        if (_isRefreshingForClockChange || (!force && currentDate == _lastObservedDate))
+        {
+            return;
+        }
+
+        _isRefreshingForClockChange = true;
+        try
+        {
+            _lastObservedDate = currentDate;
+            await LoadDateFiltersAsync(currentDate);
+            await LoadActivitiesAsync();
+            await LoadOverviewAsync();
+        }
+        finally
+        {
+            _isRefreshingForClockChange = false;
+        }
     }
 
     private async Task LoadActivitiesAsync()
@@ -175,7 +226,7 @@ public partial class MainWindow : Window
         _summaryMetrics.Add(new SummaryMetricViewModel("Longest Session", longestFocus is null ? "No focus yet" : FormatDuration(longestFocus.Duration), longestFocus?.Label ?? "Active blocks appear here"));
 
         _heatmapSegments.Clear();
-        foreach (var segment in BuildHeatmap(todayActivities))
+        foreach (var segment in BuildHeatmap(todayActivities, selectedDate))
         {
             _heatmapSegments.Add(segment);
         }
@@ -206,7 +257,7 @@ public partial class MainWindow : Window
         OverviewFocusText.Text = longestFocus is null ? "None yet" : FormatDuration(longestFocus.Duration);
     }
 
-    private async Task LoadDateFiltersAsync()
+    private async Task LoadDateFiltersAsync(DateTime? selectedDate = null)
     {
         var privacyFilter = CurrentPrivacyFilter();
         var activities = (await _store.QueryAsync(new TimelineQuery { Limit = 2000 }))
@@ -228,13 +279,13 @@ public partial class MainWindow : Window
             _dateFilters.Add(new DateFilterOption(date, FormatDateLabel(date)));
         }
 
-        DateFilter.SelectedItem = _dateFilters.FirstOrDefault(option => option.Date == DateTime.Today) ?? _dateFilters.FirstOrDefault();
+        var dateToSelect = selectedDate ?? DateTime.Today;
+        DateFilter.SelectedItem = _dateFilters.FirstOrDefault(option => option.Date == dateToSelect) ?? _dateFilters.FirstOrDefault();
         _isUpdatingDateFilter = false;
     }
 
-    private static IEnumerable<HeatmapSegmentViewModel> BuildHeatmap(IReadOnlyList<TimelineActivity> activities)
+    private static IEnumerable<HeatmapSegmentViewModel> BuildHeatmap(IReadOnlyList<TimelineActivity> activities, DateTime day)
     {
-        var day = DateTime.Today;
         var blockLength = TimeSpan.FromMinutes(15);
         var maxSeconds = blockLength.TotalSeconds;
 
@@ -1719,6 +1770,8 @@ public partial class MainWindow : Window
     {
         if (_allowClose)
         {
+            _dateRolloverTimer.Stop();
+            SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
             return;
         }
 
