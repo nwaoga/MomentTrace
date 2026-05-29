@@ -1,0 +1,40 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" rx="28" fill="#08111F"/>
+  <rect x="60" y="56" width="1160" height="608" rx="24" fill="#121D2F" stroke="#26344D"/>
+  <text x="100" y="118" fill="#F4F7FB" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">Recording model</text>
+  <text x="100" y="154" fill="#A5B0C3" font-family="Segoe UI, Arial, sans-serif" font-size="18">Foreground activity is grouped into moments, then split cleanly across sleep and day changes.</text>
+
+  <line x1="140" y1="348" x2="1110" y2="348" stroke="#34425C" stroke-width="4" stroke-linecap="round"/>
+  <line x1="342" y1="348" x2="342" y2="508" stroke="#26344D" stroke-width="2"/>
+  <line x1="644" y1="348" x2="644" y2="508" stroke="#26344D" stroke-width="2"/>
+  <line x1="910" y1="348" x2="910" y2="508" stroke="#26344D" stroke-width="2"/>
+
+  <rect x="160" y="260" width="260" height="94" rx="18" fill="#172337" stroke="#34425C"/>
+  <text x="190" y="300" fill="#F4F7FB" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700">Active window</text>
+  <text x="190" y="330" fill="#A5B0C3" font-family="Segoe UI, Arial, sans-serif" font-size="16">Same app, title, URL</text>
+
+  <rect x="464" y="260" width="260" height="94" rx="18" fill="#172337" stroke="#34425C"/>
+  <text x="494" y="300" fill="#F4F7FB" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700">Sleep gap</text>
+  <text x="494" y="330" fill="#A5B0C3" font-family="Segoe UI, Arial, sans-serif" font-size="16">Split after 5 minutes idle</text>
+
+  <rect x="768" y="260" width="260" height="94" rx="18" fill="#231B42" stroke="#8B5CF6"/>
+  <text x="798" y="300" fill="#F4F7FB" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700">New day</text>
+  <text x="798" y="330" fill="#CDBDFF" font-family="Segoe UI, Arial, sans-serif" font-size="16">Today refreshes automatically</text>
+
+  <circle cx="160" cy="348" r="12" fill="#8B5CF6"/>
+  <circle cx="464" cy="348" r="12" fill="#8B5CF6"/>
+  <circle cx="768" cy="348" r="12" fill="#8B5CF6"/>
+  <circle cx="1028" cy="348" r="12" fill="#8B5CF6"/>
+
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <text x="132" y="396" fill="#F4F7FB" font-size="17" font-weight="700">22:15</text>
+    <text x="432" y="396" fill="#F4F7FB" font-size="17" font-weight="700">Laptop sleeps</text>
+    <text x="738" y="396" fill="#F4F7FB" font-size="17" font-weight="700">09:05</text>
+    <text x="990" y="396" fill="#F4F7FB" font-size="17" font-weight="700">Today</text>
+  </g>
+
+  <rect x="184" y="470" width="252" height="54" rx="12" fill="#101A2B" stroke="#26344D"/>
+  <text x="210" y="504" fill="#A5B0C3" font-family="Segoe UI, Arial, sans-serif" font-size="16">Yesterday moment closes</text>
+  <rect x="768" y="470" width="252" height="54" rx="12" fill="#101A2B" stroke="#26344D"/>
+  <text x="796" y="504" fill="#A5B0C3" font-family="Segoe UI, Arial, sans-serif" font-size="16">Fresh moment starts</text>
+</svg>

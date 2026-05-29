@@ -28,6 +28,8 @@ public sealed class WindowPreferences
 
     public string TimelineViewMode { get; set; } = "Cards";
 
+    public string Theme { get; set; } = "Midnight";
+
     public bool ExcludeAdultWebsites { get; set; } = true;
 
     public string[] AdultBlocklistDomains

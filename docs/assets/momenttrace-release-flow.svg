@@ -1,0 +1,36 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" rx="28" fill="#08111F"/>
+  <rect x="64" y="56" width="1152" height="608" rx="24" fill="#121D2F" stroke="#26344D"/>
+  <text x="104" y="118" fill="#F4F7FB" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">Build and release flow</text>
+  <text x="104" y="154" fill="#A5B0C3" font-family="Segoe UI, Arial, sans-serif" font-size="18">A Windows installer can be built locally or attached to a GitHub Release.</text>
+
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <rect x="116" y="240" width="220" height="160" rx="20" fill="#172337" stroke="#34425C"/>
+    <text x="154" y="292" fill="#F4F7FB" font-size="24" font-weight="700">Source</text>
+    <text x="154" y="328" fill="#A5B0C3" font-size="16">WPF app</text>
+    <text x="154" y="354" fill="#A5B0C3" font-size="16">Core and storage</text>
+
+    <rect x="396" y="240" width="220" height="160" rx="20" fill="#172337" stroke="#34425C"/>
+    <text x="434" y="292" fill="#F4F7FB" font-size="24" font-weight="700">Publish</text>
+    <text x="434" y="328" fill="#A5B0C3" font-size="16">Self contained</text>
+    <text x="434" y="354" fill="#A5B0C3" font-size="16">win-x64 build</text>
+
+    <rect x="676" y="240" width="220" height="160" rx="20" fill="#231B42" stroke="#8B5CF6"/>
+    <text x="714" y="292" fill="#F4F7FB" font-size="24" font-weight="700">Installer</text>
+    <text x="714" y="328" fill="#CDBDFF" font-size="16">Inno Setup</text>
+    <text x="714" y="354" fill="#CDBDFF" font-size="16">Program Files</text>
+
+    <rect x="956" y="240" width="220" height="160" rx="20" fill="#172337" stroke="#34425C"/>
+    <text x="994" y="292" fill="#F4F7FB" font-size="24" font-weight="700">Release</text>
+    <text x="994" y="328" fill="#A5B0C3" font-size="16">Setup exe</text>
+    <text x="994" y="354" fill="#A5B0C3" font-size="16">Portable zip</text>
+
+    <path d="M340 320H388" stroke="#8B5CF6" stroke-width="5" stroke-linecap="round"/>
+    <path d="M612 320H668" stroke="#8B5CF6" stroke-width="5" stroke-linecap="round"/>
+    <path d="M892 320H948" stroke="#8B5CF6" stroke-width="5" stroke-linecap="round"/>
+
+    <rect x="188" y="482" width="904" height="66" rx="16" fill="#101A2B" stroke="#26344D"/>
+    <text x="228" y="523" fill="#F4F7FB" font-size="18" font-weight="700">.\scripts\build-installer.ps1 -Version 0.1.2</text>
+    <text x="768" y="523" fill="#A5B0C3" font-size="16">dist\MomentTrace-0.1.2-win-x64-setup.exe</text>
+  </g>
+</svg>

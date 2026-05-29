@@ -6,26 +6,41 @@ The long-term goal is a cross-platform desktop timeline for Windows and macOS. T
 
 ## Preview
 
-![MomentTrace dark card timeline](docs/assets/momenttrace-dark-card-timeline.png)
+![MomentTrace card timeline](docs/assets/momenttrace-dark-card-timeline.png)
 
-MomentTrace now uses a dark Windows Timeline-inspired workspace: left navigation, date and type filters, grouped horizontal moment sections, compact cards with app icons or website screenshots, and a right-hand detail rail. The window has custom chrome with draggable top regions across the main shell, left rail, and details rail, plus minimize and close-to-tray controls.
+MomentTrace uses a Windows Timeline-inspired workspace: left navigation, date and type filters, grouped horizontal moment sections, compact cards with app icons or website screenshots, and a contextual detail surface. The window has custom chrome with draggable top regions across the shell, plus minimize, taskbar-safe maximize, close-to-tray, and detail-pane controls.
 
 ![MomentTrace overview analytics](docs/assets/momenttrace-timeline-detail.png)
 
 The recorder is session based. It polls the foreground window, keeps the same activity open while the app/window/resource remains active, and collapses repeated sequential entries in the UI so noisy history reads as one continuous moment. Rule-based local classification then groups nearby activity into memory-oriented sessions such as Website browsing, Development work, Communication, Document review, Research session, and Screenshot capture.
 
+![MomentTrace recording rollover model](docs/assets/momenttrace-recording-rollover.svg)
+
+MomentTrace now splits recording across long sleep gaps and local day changes, so leaving the app running overnight should start a fresh current-day moment instead of appending indefinitely to yesterday. The UI also refreshes after Windows resumes and checks for date rollover while running.
+
 When browser activity is detected, MomentTrace attempts to capture the active URL with Windows UI Automation and saves a local PNG screenshot only when a new browser session starts.
 
-The **Overview** page gives a lightweight analytics view of the selected day without requiring AI features: summary cards, a 15-minute activity heatmap, top applications, a focus rhythm chart, and day metadata.
+The **Overview** page gives a lightweight analytics view of the selected day without requiring AI features: summary cards, a 15-minute activity heatmap, top applications, a focus rhythm chart, and day metadata. Activity colours use a fixed semantic palette so browsing, development, documents, apps, system activity, and gaps remain easy to scan across every app theme.
+
+![MomentTrace privacy controls](docs/assets/momenttrace-privacy-controls.svg)
+
+Privacy controls are part of Settings rather than hidden configuration. Recent apps and websites can be selected into block lists, adult-site filtering can be enabled, and manual allow/block domains remain available for fine control.
+
+![MomentTrace release flow](docs/assets/momenttrace-release-flow.svg)
+
+The Windows installer is built with Inno Setup from a self-contained `win-x64` publish. GitHub Actions can create a downloadable release from a version tag, while the same installer script works locally for test builds.
 
 ## Current Features
 
 - Native Windows desktop UI built with WPF
-- Dark grouped timeline with card and list view modes
+- Grouped timeline with card and list view modes
+- Theme system with Midnight, Coffee, Amazon Green, and White Light palettes
+- Real alpha transparency control that keeps theme colours while making the app more or less clear
 - Overview page with daily activity heatmap and lightweight productivity analytics
 - Memory-oriented session grouping into moments rather than raw activity rows
 - Rule-based local activity classification for browsing, development, communication, documents, research, and screenshot capture
 - Foreground app/window activity recording with session collapsing
+- Sleep/resume and day-rollover handling so long-running sessions split cleanly
 - Start recording when the app launches
 - Optional "Start with Windows" setting
 - Minimize-to-tray behavior
@@ -35,15 +50,16 @@ The **Overview** page gives a lightweight analytics view of the selected day wit
 - Search, activity type filtering, pinning, and detail view
 - Left-rail semantic filters for browsing, development, communication, documents, apps, websites, and files
 - Date filtering with Today, Yesterday, then concrete activity dates
+- Auto-refreshing date filters after Windows resume and local day changes
 - Real app icon extraction when executable metadata is available
 - Browser URL capture and local screenshot previews
 - Privacy filters with recent app/website selection, adult website filtering, optional cached blocklist updates, and manual allow/block lists
+- Local activity export and delete controls for user-owned history cleanup
 - Single-instance behavior that brings the running app back when launched again
 - Noise filtering for MomentTrace itself and Windows lock-screen activity
-- Settings modal with startup, recording, timeline view mode, appearance, and privacy controls
+- Themed Settings modal with startup, recording, timeline view mode, appearance, and privacy controls
 - "Where I Live" diagnostics for install, database, settings, and screenshot locations
-- Real alpha transparency control that keeps the dark colour palette while making the app more or less clear
-- Polished dark settings controls for timeline mode and transparency
+- Custom title bars for the main app and Settings, including taskbar-safe maximize behavior
 - Optional AI provider abstraction for future summaries and insights
 
 ## Project Structure
@@ -127,13 +143,28 @@ The left rail can filter the Timeline by semantic Activity views (`Browsing`, `D
 
 The Overview page is the activity analytics view. It summarizes the selected date with:
 
-- Total active time, session count, most-used app, and longest focus session
+- Remembered/foreground span, session count, most-seen app, and longest visible run
 - A horizontal 15-minute heatmap inspired by GitHub contribution graphs and screen-time tools
-- Top applications with duration, session count, percentage of the day, and a simple trend column
+- Top applications with seen time, session count, percentage of captured foreground time, and a simple trend column
 - A lightweight focus timeline showing active blocks and gaps
 - A right sidebar for day totals, quick filters, and category legend
 
 Overview intentionally avoids raw event lists so it does not duplicate Timeline.
+
+## Themes And Appearance
+
+MomentTrace currently ships with four app themes:
+
+- `Midnight (Dark)`
+- `Coffee (Light)`
+- `Amazon Green (Dark)`
+- `White Light`
+
+Themes use six base colour roles: `Base`, `Surface`, `Text`, `MutedText`, `Accent`, and `Stroke`. The app derives supporting colours such as raised surfaces, soft accent, rail/detail surfaces, and contrast-aware accent text from those roles. This keeps the current themes consistent and leaves a clear path for future custom theme creation.
+
+Overview activity colours are intentionally separate from the app theme. They use a fixed semantic palette for activity types so the heatmap, focus rhythm, quick filters, and legend remain readable in both dark and light themes.
+
+The transparency slider changes real window alpha rather than merely lightening or darkening colours. Custom chrome is used for a cleaner desktop shell, and maximize behavior is constrained to the Windows work area so the app does not cover the taskbar.
 
 ## Local Classification And Search
 
@@ -164,6 +195,7 @@ The Windows recorder lives in `MomentTrace.Windows` and currently:
 - Extends the current activity while the same item remains active
 - Throttles duration updates to reduce database writes
 - Captures browser screenshots only when a new browser session starts
+- Splits active sessions when the date changes or the machine resumes after a long gap
 - Closes the active session cleanly when recording stops or the app exits
 - Excludes MomentTrace itself and default Windows lock-screen activity from new recordings
 - Excludes configured private websites and blocked apps before saving activity or capturing screenshots
@@ -182,6 +214,8 @@ MomentTrace treats privacy as part of the product experience:
 - User-blocked apps are skipped before new activity rows are saved.
 - Optional adult blocklist updates are cached locally under `%AppData%\MomentTrace\privacy-blocklists\`.
 - Timeline and Overview hide matching privacy-filtered rows from existing history without deleting the database.
+- Local activity can be exported to JSON from Settings before cleanup.
+- Local activity can be deleted from Settings, including cached MomentTrace screenshot and thumbnail previews. Settings and privacy blocklists are kept.
 
 ## AI Extensibility
 
@@ -269,9 +303,11 @@ For Azure DevOps planning, current implementation work is tracked in the MomentT
 
 ## Roadmap
 
+- Refresh README screenshots so every preview reflects the current themed UI
 - Add filter counts, persisted filter preferences, and richer empty states
 - Add saved moments, notes, and bookmarks as real library features
-- Add richer website/app card previews and stronger related activity grouping
 - Add privacy controls for deleting and exporting activity
 - Add a settings option to delete local data when the user wants a full privacy cleanup
+- Add app health/status checks for recorder, screenshot capture, browser URL capture, and database writes
+- Add first-run onboarding for privacy, startup behavior, and local storage
 - Plan the cross-platform desktop path, likely with Avalonia for Windows/macOS UI reuse

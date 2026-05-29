@@ -16,5 +16,7 @@ public interface IActivityStore
 
     Task DeleteAsync(long id, CancellationToken cancellationToken = default);
 
+    Task DeleteAllAsync(CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<TimelineActivity>> QueryAsync(TimelineQuery query, CancellationToken cancellationToken = default);
 }

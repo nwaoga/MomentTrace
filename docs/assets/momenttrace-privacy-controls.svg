@@ -1,0 +1,51 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" rx="28" fill="#08111F"/>
+  <rect x="56" y="48" width="1168" height="624" rx="24" fill="#121D2F" stroke="#26344D"/>
+  <text x="96" y="104" fill="#F4F7FB" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">Privacy controls</text>
+  <text x="96" y="140" fill="#A5B0C3" font-family="Segoe UI, Arial, sans-serif" font-size="18">Choose what MomentTrace should skip before it is saved locally.</text>
+
+  <rect x="96" y="184" width="336" height="396" rx="18" fill="#172337" stroke="#34425C"/>
+  <text x="128" y="232" fill="#F4F7FB" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">Recent apps</text>
+  <text x="128" y="260" fill="#A5B0C3" font-family="Segoe UI, Arial, sans-serif" font-size="15">Tick apps to block future captures.</text>
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="18">
+    <rect x="128" y="304" width="272" height="58" rx="12" fill="#231B42" stroke="#8B5CF6"/>
+    <rect x="150" y="323" width="20" height="20" rx="5" fill="#8B5CF6"/>
+    <text x="184" y="340" fill="#F4F7FB" font-weight="600">Private Browser</text>
+    <rect x="128" y="380" width="272" height="58" rx="12" fill="#101A2B" stroke="#26344D"/>
+    <rect x="150" y="399" width="20" height="20" rx="5" fill="#0B1424" stroke="#526179"/>
+    <text x="184" y="416" fill="#F4F7FB" font-weight="600">Word</text>
+    <rect x="128" y="456" width="272" height="58" rx="12" fill="#101A2B" stroke="#26344D"/>
+    <rect x="150" y="475" width="20" height="20" rx="5" fill="#0B1424" stroke="#526179"/>
+    <text x="184" y="492" fill="#F4F7FB" font-weight="600">VS Code</text>
+  </g>
+
+  <rect x="472" y="184" width="336" height="396" rx="18" fill="#172337" stroke="#34425C"/>
+  <text x="504" y="232" fill="#F4F7FB" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">Recent websites</text>
+  <text x="504" y="260" fill="#A5B0C3" font-family="Segoe UI, Arial, sans-serif" font-size="15">Block domains without typing them.</text>
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="18">
+    <rect x="504" y="304" width="272" height="58" rx="12" fill="#231B42" stroke="#8B5CF6"/>
+    <rect x="526" y="323" width="20" height="20" rx="5" fill="#8B5CF6"/>
+    <text x="560" y="340" fill="#F4F7FB" font-weight="600">private.example</text>
+    <rect x="504" y="380" width="272" height="58" rx="12" fill="#101A2B" stroke="#26344D"/>
+    <rect x="526" y="399" width="20" height="20" rx="5" fill="#0B1424" stroke="#526179"/>
+    <text x="560" y="416" fill="#F4F7FB" font-weight="600">docs.example</text>
+    <rect x="504" y="456" width="272" height="58" rx="12" fill="#101A2B" stroke="#26344D"/>
+    <rect x="526" y="475" width="20" height="20" rx="5" fill="#0B1424" stroke="#526179"/>
+    <text x="560" y="492" fill="#F4F7FB" font-weight="600">search.example</text>
+  </g>
+
+  <rect x="848" y="184" width="280" height="396" rx="18" fill="#172337" stroke="#34425C"/>
+  <text x="880" y="232" fill="#F4F7FB" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">Local first</text>
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#F4F7FB">
+    <circle cx="894" cy="305" r="8" fill="#8B5CF6"/>
+    <text x="916" y="311">Skipped before save</text>
+    <circle cx="894" cy="365" r="8" fill="#8B5CF6"/>
+    <text x="916" y="371">No cloud required</text>
+    <circle cx="894" cy="425" r="8" fill="#8B5CF6"/>
+    <text x="916" y="431">Existing history hidden</text>
+    <circle cx="894" cy="485" r="8" fill="#8B5CF6"/>
+    <text x="916" y="491">User controlled lists</text>
+  </g>
+  <rect x="880" y="532" width="216" height="44" rx="12" fill="#8B5CF6"/>
+  <text x="934" y="561" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">Save filters</text>
+</svg>

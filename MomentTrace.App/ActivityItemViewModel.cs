@@ -147,6 +147,10 @@ public sealed class ActivityItemViewModel(TimelineActivity activity)
         }
     }
 
+    public string SeenDuration => $"Seen {Duration}";
+
+    public string CapturedSpan => _sessionEndedAt > _sessionStartedAt ? TimeRange : StartTime;
+
     public string OccurrenceLabel => _occurrenceCount > 1 ? $"{_occurrenceCount} entries" : KindLabel;
 
     public string PinMark => Activity.IsPinned ? "PINNED" : string.Empty;

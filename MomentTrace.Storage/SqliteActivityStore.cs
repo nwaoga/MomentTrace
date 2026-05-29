@@ -167,6 +167,16 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
+    public async Task DeleteAllAsync(CancellationToken cancellationToken = default)
+    {
+        await using var connection = CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        var command = connection.CreateCommand();
+        command.CommandText = "DELETE FROM activities;";
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<TimelineActivity>> QueryAsync(TimelineQuery query, CancellationToken cancellationToken = default)
     {
         await using var connection = CreateConnection();
@@ -199,7 +209,7 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
             command.Parameters.AddWithValue("$is_bookmarked", query.IsBookmarked.Value ? 1 : 0);
         }
 
-        command.Parameters.AddWithValue("$limit", Math.Clamp(query.Limit, 1, 1000));
+        command.Parameters.AddWithValue("$limit", Math.Clamp(query.Limit, 1, 100000));
         command.CommandText = $"""
             SELECT id, app_name, window_title, process_name, executable_path, resource, screenshot_path, thumbnail_path, kind, started_at, ended_at, is_pinned, note, is_bookmarked
             FROM activities

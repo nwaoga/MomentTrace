@@ -25,6 +25,7 @@ public partial class MainWindow : Window
     private readonly ISessionSummarizer _sessionSummarizer;
     private readonly ISearchProvider _searchProvider;
     private readonly IInsightProvider _insightProvider;
+    private AppThemePalette _currentTheme;
     private readonly ObservableCollection<ActivityItemViewModel> _activities = [];
     private readonly ObservableCollection<TimelineSessionGroupViewModel> _activityGroups = [];
     private readonly ObservableCollection<SummaryMetricViewModel> _summaryMetrics = [];
@@ -67,8 +68,10 @@ public partial class MainWindow : Window
         _sessionSummarizer = sessionSummarizer ?? RuleBasedSessionSummarizer.Default;
         _searchProvider = searchProvider ?? LocalMetadataSearchProvider.Default;
         _insightProvider = insightProvider ?? LocalInsightProvider.Default;
+        _currentTheme = AppThemePalette.Find(_preferences.Theme);
 
         InitializeComponent();
+        ApplyTheme(_preferences.Theme);
 
         SearchBox.Text = string.Empty;
         _activityView = CollectionViewSource.GetDefaultView(_activities);
@@ -220,10 +223,10 @@ public partial class MainWindow : Window
         var longestFocus = BuildFocusBlocks(sessions).Where(block => !block.IsGap).OrderByDescending(block => block.Duration).FirstOrDefault();
 
         _summaryMetrics.Clear();
-        _summaryMetrics.Add(new SummaryMetricViewModel("Remembered Time", FormatDuration(totalActive), "Stored locally on this device"));
+        _summaryMetrics.Add(new SummaryMetricViewModel("Remembered Span", FormatDuration(totalActive), "Foreground time captured locally"));
         _summaryMetrics.Add(new SummaryMetricViewModel("Moments", sessions.Count.ToString(), "Grouped from related activity"));
-        _summaryMetrics.Add(new SummaryMetricViewModel("Most Used App", topApps.FirstOrDefault()?.AppName ?? "No activity yet", topApps.FirstOrDefault()?.Duration ?? "Waiting for activity"));
-        _summaryMetrics.Add(new SummaryMetricViewModel("Longest Session", longestFocus is null ? "No focus yet" : FormatDuration(longestFocus.Duration), longestFocus?.Label ?? "Active blocks appear here"));
+        _summaryMetrics.Add(new SummaryMetricViewModel("Most Seen App", topApps.FirstOrDefault()?.AppName ?? "No activity yet", topApps.FirstOrDefault()?.Duration ?? "Waiting for activity"));
+        _summaryMetrics.Add(new SummaryMetricViewModel("Longest Visible Run", longestFocus is null ? "No run yet" : FormatDuration(longestFocus.Duration), longestFocus?.Label ?? "Visible blocks appear here"));
 
         _heatmapSegments.Clear();
         foreach (var segment in BuildHeatmap(todayActivities, selectedDate))
@@ -244,10 +247,11 @@ public partial class MainWindow : Window
         }
 
         _overviewLegend.Clear();
-        _overviewLegend.Add(new LegendItemViewModel("Apps and tools", "#6E56CF"));
-        _overviewLegend.Add(new LegendItemViewModel("Web browsing", "#2F80ED"));
-        _overviewLegend.Add(new LegendItemViewModel("Development work", "#55B867"));
-        _overviewLegend.Add(new LegendItemViewModel("Gaps or idle space", "#22304A"));
+        _overviewLegend.Add(new LegendItemViewModel("Apps and tools", ActivityPalette.Apps));
+        _overviewLegend.Add(new LegendItemViewModel("Web browsing", ActivityPalette.Web));
+        _overviewLegend.Add(new LegendItemViewModel("Development work", ActivityPalette.Development));
+        _overviewLegend.Add(new LegendItemViewModel("Documents", ActivityPalette.Documents));
+        _overviewLegend.Add(new LegendItemViewModel("Gaps or idle space", ActivityPalette.Gap));
 
         OverviewDateText.Text = FormatDateLabel(selectedDate);
         OverviewSidebarDateText.Text = selectedDate.ToString("dddd, d MMMM yyyy");
@@ -312,7 +316,7 @@ public partial class MainWindow : Window
                 .OrderByDescending(group => group.Sum(item => item.Seconds))
                 .FirstOrDefault()?.Key ?? "No activity";
             var intensity = Math.Clamp(activeSeconds / maxSeconds, 0, 1);
-            var tooltip = $"{start:HH:mm} - {end:HH:mm}\n{topApp}\n{FormatDuration(TimeSpan.FromSeconds(activeSeconds))}\n{overlapping.Count} activities";
+            var tooltip = $"{start:HH:mm} - {end:HH:mm}\n{topApp}\nSeen {FormatDuration(TimeSpan.FromSeconds(activeSeconds))}\n{overlapping.Count} captures";
 
             yield return new HeatmapSegmentViewModel(GetHeatmapFill(dominant, intensity), tooltip);
         }
@@ -377,15 +381,16 @@ public partial class MainWindow : Window
     {
         if (intensity <= 0)
         {
-            return "#142033";
+            return ActivityPalette.Empty;
         }
 
         return kind switch
         {
-            MomentTrace.Core.ActivityKind.Browser => intensity > 0.66 ? "#2F80ED" : intensity > 0.33 ? "#2363B8" : "#1B3D72",
-            MomentTrace.Core.ActivityKind.Development => intensity > 0.66 ? "#55B867" : intensity > 0.33 ? "#3E854C" : "#244E32",
-            MomentTrace.Core.ActivityKind.Document => intensity > 0.66 ? "#D8A84F" : intensity > 0.33 ? "#9B793D" : "#594727",
-            _ => intensity > 0.66 ? "#8B5CF6" : intensity > 0.33 ? "#6E56CF" : "#3A286F"
+            MomentTrace.Core.ActivityKind.Browser => ActivityPalette.Scale(ActivityPalette.Web, intensity),
+            MomentTrace.Core.ActivityKind.Development => ActivityPalette.Scale(ActivityPalette.Development, intensity),
+            MomentTrace.Core.ActivityKind.Document => ActivityPalette.Scale(ActivityPalette.Documents, intensity),
+            MomentTrace.Core.ActivityKind.System => ActivityPalette.Scale(ActivityPalette.SystemActivity, intensity),
+            _ => ActivityPalette.Scale(ActivityPalette.Apps, intensity)
         };
     }
 
@@ -880,13 +885,8 @@ public partial class MainWindow : Window
 
     private void UpdateNavigationState(bool isOverviewActive = false)
     {
-        var activeBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(58, 40, 111));
-        TimelineNavHighlight.Background = !isOverviewActive && _selectedSemanticFilter is null && _selectedSourceFilter is null
-            ? activeBrush
-            : System.Windows.Media.Brushes.Transparent;
-        OverviewNavHighlight.Background = isOverviewActive
-            ? activeBrush
-            : System.Windows.Media.Brushes.Transparent;
+        SetFilterHighlight(TimelineNavHighlight, !isOverviewActive && _selectedSemanticFilter is null && _selectedSourceFilter is null);
+        SetFilterHighlight(OverviewNavHighlight, isOverviewActive);
 
         SetFilterHighlight(BrowsingNavHighlight, _selectedSemanticFilter == TimelineSemanticFilter.Browsing);
         SetFilterHighlight(DevelopmentNavHighlight, _selectedSemanticFilter == TimelineSemanticFilter.Development);
@@ -904,11 +904,26 @@ public partial class MainWindow : Window
         ActiveFilterText.Text = label ?? string.Empty;
     }
 
-    private static void SetFilterHighlight(Border border, bool isActive)
+    private void SetFilterHighlight(Border border, bool isActive)
     {
+        var accentBrush = GetThemeBrush("AccentBrush");
+        var textBrush = GetThemeBrush("TextBrush");
+        var accentTextBrush = GetThemeBrush("AccentTextBrush");
+
         border.Background = isActive
-            ? new SolidColorBrush(System.Windows.Media.Color.FromRgb(44, 33, 84))
+            ? accentBrush
             : System.Windows.Media.Brushes.Transparent;
+
+        if (border.Child is System.Windows.Controls.Button button)
+        {
+            button.Foreground = isActive ? accentTextBrush : textBrush;
+        }
+    }
+
+    private System.Windows.Media.Brush GetThemeBrush(string resourceKey)
+    {
+        return TryFindResource(resourceKey) as System.Windows.Media.Brush
+            ?? System.Windows.Media.Brushes.Transparent;
     }
 
     private string? GetActiveTimelineFilterLabel()
@@ -1362,10 +1377,25 @@ public partial class MainWindow : Window
 
     private void MaximizeButton_Click(object sender, RoutedEventArgs e)
     {
+        WindowWorkArea.Apply(this);
         WindowState = WindowState == WindowState.Maximized
             ? WindowState.Normal
             : WindowState.Maximized;
         MaximizeButton.Content = WindowState == WindowState.Maximized ? "❐" : "□";
+    }
+
+    private void Window_StateChanged(object sender, EventArgs e)
+    {
+        WindowWorkArea.Apply(this);
+        MaximizeButton.Content = WindowState == WindowState.Maximized ? "❐" : "□";
+    }
+
+    private void Window_LocationChanged(object? sender, EventArgs e)
+    {
+        if (WindowState == WindowState.Normal)
+        {
+            WindowWorkArea.Apply(this);
+        }
     }
 
     private void CloseWindowButton_Click(object sender, RoutedEventArgs e)
@@ -1445,13 +1475,12 @@ public partial class MainWindow : Window
     private void ApplySurfaceTransparency(double opacity)
     {
         var strength = Math.Clamp(opacity, 0.55, 1.0);
-        var shellAlpha = (byte)Math.Round(strength * 255);
-        var panelAlpha = (byte)Math.Round(Math.Clamp(strength + 0.04, 0.55, 1.0) * 255);
+        var panelStrength = Math.Clamp(strength + 0.04, 0.55, 1.0);
 
-        WindowSurface.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(shellAlpha, 8, 17, 31));
-        RailSurface.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(panelAlpha, 18, 27, 43));
-        TopCommandSurface.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(panelAlpha, 13, 23, 40));
-        DetailSurface.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(panelAlpha, 18, 27, 43));
+        WindowSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Base, strength));
+        RailSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Rail, panelStrength));
+        TopCommandSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.TopCommand, panelStrength));
+        DetailSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Detail, panelStrength));
     }
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
@@ -1462,14 +1491,24 @@ public partial class MainWindow : Window
             _startupRegistration,
             _preferences.Opacity,
             _preferences.TimelineViewMode,
+            _preferences.Theme,
             SaveOpacity,
             SaveTimelineViewMode,
-            UpdateRecordingStatus)
+            SaveTheme,
+            UpdateRecordingStatus,
+            RefreshAfterLocalDataChangedAsync)
         {
             Owner = this
         };
 
         settingsWindow.ShowDialog();
+    }
+
+    private async Task RefreshAfterLocalDataChangedAsync()
+    {
+        await LoadDateFiltersAsync();
+        await LoadActivitiesAsync();
+        await LoadOverviewAsync();
     }
 
     private void SaveOpacity(double opacity)
@@ -1484,6 +1523,22 @@ public partial class MainWindow : Window
         _preferences.TimelineViewMode = IsCardViewMode(viewMode) ? "Cards" : "List";
         ApplyTimelineViewMode(_preferences.TimelineViewMode);
         _preferences.Save();
+    }
+
+    private void SaveTheme(string theme)
+    {
+        _preferences.Theme = AppThemePalette.Find(theme).Key;
+        ApplyTheme(_preferences.Theme);
+        _preferences.Save();
+    }
+
+    private void ApplyTheme(string theme)
+    {
+        _currentTheme = AppThemePalette.Find(theme);
+        _currentTheme.ApplyTo(this);
+        Background = System.Windows.Media.Brushes.Transparent;
+        ApplySurfaceTransparency(_preferences.Opacity);
+        UpdateNavigationState(OverviewPage.Visibility == Visibility.Visible);
     }
 
     private void ApplyTimelineViewMode(string? viewMode)
@@ -1571,16 +1626,17 @@ public partial class MainWindow : Window
 
         public double Width => Math.Clamp(Duration.TotalMinutes * 1.8, 18, 96);
 
-        public string Tooltip => $"{Label}\n{FormatDuration(Duration)}";
+        public string Tooltip => $"{Label}\nSeen {FormatDuration(Duration)}";
 
         public static FocusBlockViewModel Active(string appName, TimeSpan duration, MomentTrace.Core.ActivityKind kind)
         {
             var fill = kind switch
             {
-                MomentTrace.Core.ActivityKind.Browser => "#2F80ED",
-                MomentTrace.Core.ActivityKind.Development => "#55B867",
-                MomentTrace.Core.ActivityKind.Document => "#D8A84F",
-                _ => "#8B5CF6"
+                MomentTrace.Core.ActivityKind.Browser => ActivityPalette.Web,
+                MomentTrace.Core.ActivityKind.Development => ActivityPalette.Development,
+                MomentTrace.Core.ActivityKind.Document => ActivityPalette.Documents,
+                MomentTrace.Core.ActivityKind.System => ActivityPalette.SystemActivity,
+                _ => ActivityPalette.Apps
             };
 
             return new FocusBlockViewModel(appName, duration, fill, isGap: false);
@@ -1588,11 +1644,44 @@ public partial class MainWindow : Window
 
         public static FocusBlockViewModel Gap(TimeSpan duration)
         {
-            return new FocusBlockViewModel("Gap or idle space", duration, "#22304A", isGap: true);
+            return new FocusBlockViewModel("Gap or idle space", duration, ActivityPalette.Gap, isGap: true);
         }
     }
 
     private sealed record LegendItemViewModel(string Label, string Fill);
+
+    private static class ActivityPalette
+    {
+        public const string Apps = "#8B5CF6";
+        public const string Web = "#2F80ED";
+        public const string Development = "#22C55E";
+        public const string Documents = "#F59E0B";
+        public const string SystemActivity = "#38BDF8";
+        public const string Gap = "#10233F";
+        public const string Empty = "#152033";
+
+        public static string Scale(string hex, double intensity)
+        {
+            var color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
+            var amount = intensity > 0.66 ? 1.0 : intensity > 0.33 ? 0.72 : 0.44;
+            var baseColor = System.Windows.Media.Color.FromRgb(21, 32, 51);
+            return ToHex(Mix(color, baseColor, amount));
+        }
+
+        private static System.Windows.Media.Color Mix(System.Windows.Media.Color foreground, System.Windows.Media.Color background, double foregroundAmount)
+        {
+            var inverse = 1 - foregroundAmount;
+            return System.Windows.Media.Color.FromRgb(
+                (byte)Math.Round((foreground.R * foregroundAmount) + (background.R * inverse)),
+                (byte)Math.Round((foreground.G * foregroundAmount) + (background.G * inverse)),
+                (byte)Math.Round((foreground.B * foregroundAmount) + (background.B * inverse)));
+        }
+
+        private static string ToHex(System.Windows.Media.Color color)
+        {
+            return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
+        }
+    }
 
     private sealed class DetailActivityRowViewModel
     {
@@ -1604,7 +1693,7 @@ public partial class MainWindow : Window
             Source = string.IsNullOrWhiteSpace(activity.Resource)
                 ? item.TechnicalSource
                 : activity.Resource;
-            Duration = item.Duration;
+            Duration = $"Seen {item.Duration}";
         }
 
         public string TimeRange { get; }
@@ -1624,7 +1713,7 @@ public partial class MainWindow : Window
         {
             _activity = activity;
             Title = activity.Title;
-            Detail = $"{reason} · {activity.CardTime} · {activity.Duration}";
+            Detail = $"{reason} · {activity.CardTime} · seen {activity.Duration}";
         }
 
         public string Title { get; }

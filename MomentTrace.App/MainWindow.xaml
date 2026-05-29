@@ -12,6 +12,8 @@
         WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
         FontFamily="Segoe UI"
+        StateChanged="Window_StateChanged"
+        LocationChanged="Window_LocationChanged"
         Closing="Window_Closing">
     <Window.Resources>
         <SolidColorBrush x:Key="PageBackgroundBrush" Color="#08111F" />
@@ -23,6 +25,7 @@
         <SolidColorBrush x:Key="MutedTextBrush" Color="#A5B0C3" />
         <SolidColorBrush x:Key="AccentBrush" Color="#8B5CF6" />
         <SolidColorBrush x:Key="AccentSoftBrush" Color="#2C2154" />
+        <SolidColorBrush x:Key="AccentTextBrush" Color="#FFFFFF" />
 
         <Style x:Key="InvisibleScrollButton" TargetType="RepeatButton">
             <Setter Property="Focusable" Value="False" />
@@ -97,10 +100,10 @@
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Padding" Value="14,8" />
-            <Setter Property="BorderBrush" Value="#34425C" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Background" Value="#1A263A" />
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+            <Setter Property="Background" Value="{DynamicResource SubtlePanelBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
                 <Setter.Value>
@@ -115,8 +118,8 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ButtonRoot" Property="Background" Value="#24334C" />
-                                <Setter TargetName="ButtonRoot" Property="BorderBrush" Value="#50617E" />
+                                <Setter TargetName="ButtonRoot" Property="Background" Value="{DynamicResource PanelBrush}" />
+                                <Setter TargetName="ButtonRoot" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -125,9 +128,9 @@
         </Style>
 
         <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource ChromeButton}">
-            <Setter Property="Background" Value="#7C5CFF" />
-            <Setter Property="BorderBrush" Value="#8B6DFF" />
-            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
         </Style>
 
         <Style x:Key="RailButton" TargetType="Button">
@@ -136,7 +139,7 @@
             <Setter Property="Padding" Value="12,10" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
                 <Setter.Value>
@@ -149,7 +152,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="RailButtonRoot" Property="Background" Value="#1A2941" />
+                                <Setter TargetName="RailButtonRoot" Property="Background" Value="{DynamicResource SubtlePanelBrush}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -160,7 +163,7 @@
         <Style x:Key="DetailTabButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Foreground" Value="{StaticResource MutedTextBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
             <Setter Property="Padding" Value="0" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
@@ -172,14 +175,14 @@
                                 <RowDefinition Height="3" />
                             </Grid.RowDefinitions>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            <Border x:Name="ActiveIndicator" Grid.Row="1" Height="3" CornerRadius="2" Background="#8B5CF6" Visibility="Collapsed" />
+                            <Border x:Name="ActiveIndicator" Grid.Row="1" Height="3" CornerRadius="2" Background="{DynamicResource AccentBrush}" Visibility="Collapsed" />
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="#D8CCFF" />
+                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
                             </Trigger>
                             <Trigger Property="Tag" Value="Active">
-                                <Setter Property="Foreground" Value="#B89CFF" />
+                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                                 <Setter Property="FontWeight" Value="SemiBold" />
                                 <Setter TargetName="ActiveIndicator" Property="Visibility" Value="Visible" />
                             </Trigger>
@@ -192,25 +195,25 @@
         <Style TargetType="TextBox">
             <Setter Property="FontSize" Value="14" />
             <Setter Property="Padding" Value="40,11,14,11" />
-            <Setter Property="BorderBrush" Value="#293751" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Background" Value="#101A2B" />
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-            <Setter Property="CaretBrush" Value="{StaticResource TextBrush}" />
+            <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource TextBrush}" />
         </Style>
 
         <Style TargetType="ComboBox">
             <Setter Property="FontSize" Value="13" />
             <Setter Property="Padding" Value="10,8" />
-            <Setter Property="Background" Value="#101A2B" />
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-            <Setter Property="BorderBrush" Value="#34425C" />
+            <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="ItemContainerStyle">
                 <Setter.Value>
                     <Style TargetType="ComboBoxItem">
-                        <Setter Property="Background" Value="#101A2B" />
-                        <Setter Property="Foreground" Value="#F4F7FB" />
+                        <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+                        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
                         <Setter Property="Padding" Value="10,7" />
                     </Style>
                 </Setter.Value>
@@ -219,16 +222,16 @@
 
         <Style x:Key="TopComboBox" TargetType="ComboBox">
             <Setter Property="FontSize" Value="13" />
-            <Setter Property="Foreground" Value="#8C98AD" />
-            <Setter Property="Background" Value="#121D2F" />
-            <Setter Property="BorderBrush" Value="#34425C" />
+            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+            <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Padding" Value="12,8" />
             <Setter Property="ItemContainerStyle">
                 <Setter.Value>
                     <Style TargetType="ComboBoxItem">
-                        <Setter Property="Background" Value="#101A2B" />
-                        <Setter Property="Foreground" Value="#F4F7FB" />
+                        <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+                        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
                         <Setter Property="Padding" Value="12,8" />
                     </Style>
                 </Setter.Value>
@@ -263,13 +266,13 @@
                                                                   TextElement.Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ComboBox}}"
                                                                   VerticalAlignment="Center"
                                                                   RecognizesAccessKey="True" />
-                                                <TextBlock Grid.Column="1" Text="⌄" FontSize="14" Foreground="#A5B0C3" Margin="10,-2,0,0" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" Text="⌄" FontSize="14" Foreground="{DynamicResource MutedTextBrush}" Margin="10,-2,0,0" VerticalAlignment="Center" />
                                             </Grid>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Root" Property="Background" Value="#1A2941" />
-                                                <Setter TargetName="Root" Property="BorderBrush" Value="#5A6A88" />
+                                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource SubtlePanelBrush}" />
+                                                <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
@@ -280,8 +283,8 @@
                                    AllowsTransparency="True"
                                    Placement="Bottom"
                                    PopupAnimation="Fade">
-                                <Border Background="#101A2B"
-                                        BorderBrush="#34425C"
+                                <Border Background="{DynamicResource PanelBrush}"
+                                        BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="1"
                                         CornerRadius="8"
                                         Margin="0,4,0,0"
@@ -322,7 +325,7 @@
         </ItemsPanelTemplate>
 
         <DataTemplate x:Key="TimelineListItemTemplate">
-            <Border Margin="0,0,10,10" Padding="12" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Background="#172337">
+            <Border Margin="0,0,10,10" Padding="12" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource SubtlePanelBrush}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="34" />
@@ -331,10 +334,10 @@
                     </Grid.ColumnDefinitions>
                     <Image Source="{Binding ProgramIcon}" Width="24" Height="24" Stretch="Uniform" />
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" TextTrimming="CharacterEllipsis" />
-                        <TextBlock Text="{Binding Location}" FontSize="12" Foreground="{StaticResource MutedTextBrush}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding Location}" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
-                    <TextBlock Grid.Column="2" Text="{Binding CardTime}" FontSize="12" Foreground="{StaticResource MutedTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" Text="{Binding CardTime}" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center" />
                 </Grid>
             </Border>
         </DataTemplate>
@@ -343,10 +346,10 @@
             <Border Width="218"
                     Height="150"
                     Margin="0,0,16,16"
-                    BorderBrush="#33435E"
+                    BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="1"
                     CornerRadius="8"
-                    Background="#182439"
+                    Background="{DynamicResource SubtlePanelBrush}"
                     ClipToBounds="True"
                     Cursor="Hand"
                     MouseLeftButtonUp="TimelineCard_Click">
@@ -356,7 +359,7 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <Grid Background="#101A2B">
+                    <Grid Background="{DynamicResource PanelBrush}">
                         <Image Source="{Binding ScreenshotPreview}" Stretch="UniformToFill">
                             <Image.Style>
                                 <Style TargetType="Image">
@@ -381,7 +384,7 @@
                                     </Style.Triggers>
                                 </Style>
                             </Grid.Style>
-                            <Border Width="48" Height="48" CornerRadius="8" Background="#23324B" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Border Width="48" Height="48" CornerRadius="8" Background="{DynamicResource PanelBrush}" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Grid>
                                     <TextBlock Text="{Binding IconGlyph}" Foreground="{Binding IconForeground}" FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     <Image Source="{Binding ProgramIcon}" Width="34" Height="34" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -389,11 +392,23 @@
                             </Border>
                         </Grid>
 
-                        <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Background="#CC111827" CornerRadius="5" Padding="6,2">
-                            <TextBlock Text="{Binding CardTime}" Foreground="#F8FAFC" FontSize="11" FontWeight="SemiBold" />
+                        <Border HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                Margin="8"
+                                Background="{DynamicResource SubtlePanelBrush}"
+                                Opacity="0.94"
+                                CornerRadius="5"
+                                Padding="6,2">
+                            <TextBlock Text="{Binding CardTime}" Foreground="{DynamicResource TextBrush}" FontSize="11" FontWeight="SemiBold" />
                         </Border>
-                        <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8" Background="#CC111827" CornerRadius="5" Padding="6,2">
-                            <TextBlock Text="{Binding Duration}" Foreground="#F8FAFC" FontSize="11" FontWeight="SemiBold" />
+                        <Border HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Margin="8"
+                                Background="{DynamicResource SubtlePanelBrush}"
+                                Opacity="0.94"
+                                CornerRadius="5"
+                                Padding="6,2">
+                            <TextBlock Text="{Binding SeenDuration}" Foreground="{DynamicResource TextBrush}" FontSize="11" FontWeight="SemiBold" />
                         </Border>
                     </Grid>
 
@@ -404,10 +419,10 @@
                         </Grid.RowDefinitions>
                         <StackPanel Orientation="Horizontal">
                             <Image Source="{Binding ProgramIcon}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,7,0" />
-                            <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" TextTrimming="CharacterEllipsis" MaxWidth="154" />
-                            <TextBlock Text="⋮" Margin="8,-2,0,0" FontSize="18" Foreground="{StaticResource MutedTextBrush}" />
+                            <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" TextTrimming="CharacterEllipsis" MaxWidth="154" />
+                            <TextBlock Text="⋮" Margin="8,-2,0,0" FontSize="18" Foreground="{DynamicResource MutedTextBrush}" />
                         </StackPanel>
-                        <TextBlock Grid.Row="1" Text="{Binding Location}" Margin="25,2,0,0" FontSize="12" Foreground="{StaticResource MutedTextBrush}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Row="1" Text="{Binding Location}" Margin="25,2,0,0" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" TextTrimming="CharacterEllipsis" />
                     </Grid>
                 </Grid>
             </Border>
@@ -421,7 +436,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Grid>
-                    <Ellipse Width="18" Height="18" Fill="#172337" Stroke="{Binding AccentBrush}" StrokeThickness="3" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5,0,0" />
+                    <Ellipse Width="18" Height="18" Fill="{DynamicResource SubtlePanelBrush}" Stroke="{Binding AccentBrush}" StrokeThickness="3" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5,0,0" />
                 </Grid>
 
                 <StackPanel Grid.Column="1">
@@ -432,15 +447,15 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="{Binding TimeRange}" FontSize="14" Foreground="{StaticResource TextBrush}" VerticalAlignment="Top" />
+                        <TextBlock Text="{Binding TimeRange}" FontSize="14" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Top" />
                         <StackPanel Grid.Column="1">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
-                                <Border Background="{StaticResource AccentSoftBrush}" CornerRadius="10" Padding="9,3" Margin="14,-1,0,0">
-                                    <TextBlock Text="{Binding ActivityCount, StringFormat={}{0} moments}" FontSize="11" FontWeight="SemiBold" Foreground="#B89CFF" />
+                                <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
+                                <Border Background="{DynamicResource AccentBrush}" CornerRadius="10" Padding="9,3" Margin="14,-1,0,0">
+                                    <TextBlock Text="{Binding ActivityCount, StringFormat={}{0} moments}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AccentTextBrush}" />
                                 </Border>
                             </StackPanel>
-                            <TextBlock Text="{Binding Summary}" Margin="0,5,0,0" FontSize="12" Foreground="{StaticResource MutedTextBrush}" />
+                            <TextBlock Text="{Binding Summary}" Margin="0,5,0,0" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" />
                         </StackPanel>
                         <Button Grid.Column="2"
                                 Style="{StaticResource ChromeButton}"
@@ -453,7 +468,7 @@
                                    Text="{Binding ToggleGlyph}"
                                    Visibility="{Binding ToggleVisibility}"
                                    FontSize="18"
-                                   Foreground="{StaticResource MutedTextBrush}"
+                                   Foreground="{DynamicResource MutedTextBrush}"
                                    VerticalAlignment="Center" />
                     </Grid>
 
@@ -469,11 +484,11 @@
         </DataTemplate>
 
         <DataTemplate x:Key="SummaryMetricTemplate">
-            <Border Background="#142033" BorderBrush="#293A57" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,12,0">
+            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,12,0">
                 <StackPanel>
-                    <TextBlock Text="{Binding Label}" FontSize="12" Foreground="{StaticResource MutedTextBrush}" />
-                    <TextBlock Text="{Binding Value}" Margin="0,8,0,0" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Text="{Binding Detail}" Margin="0,5,0,0" FontSize="12" Foreground="#8290A6" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding Label}" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" />
+                    <TextBlock Text="{Binding Value}" Margin="0,8,0,0" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding Detail}" Margin="0,5,0,0" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
             </Border>
         </DataTemplate>
@@ -487,11 +502,11 @@
                     ToolTip="{Binding Tooltip}">
                 <Border.Style>
                     <Style TargetType="Border">
-                        <Setter Property="BorderBrush" Value="#1E2B42" />
+                        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
                         <Setter Property="BorderThickness" Value="0" />
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="BorderBrush" Value="#B89CFF" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                 <Setter Property="BorderThickness" Value="1" />
                             </Trigger>
                         </Style.Triggers>
@@ -501,7 +516,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="TopApplicationTemplate">
-            <Grid Margin="0,0,0,2" Background="#101A2B">
+            <Grid Margin="0,0,0,2" Background="{DynamicResource PanelBrush}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="38" />
                     <ColumnDefinition Width="*" />
@@ -510,13 +525,13 @@
                     <ColumnDefinition Width="74" />
                     <ColumnDefinition Width="64" />
                 </Grid.ColumnDefinitions>
-                <Border Width="26" Height="26" CornerRadius="6" Background="#1E2B42" VerticalAlignment="Center">
+                <Border Width="26" Height="26" CornerRadius="6" Background="{DynamicResource SubtlePanelBrush}" VerticalAlignment="Center">
                     <Image Source="{Binding ProgramIcon}" Width="20" Height="20" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
-                <TextBlock Grid.Column="1" Text="{Binding AppName}" Foreground="{StaticResource TextBrush}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="2" Text="{Binding Duration}" Foreground="{StaticResource TextBrush}" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Right" />
-                <TextBlock Grid.Column="3" Text="{Binding Sessions}" Foreground="{StaticResource MutedTextBrush}" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Right" />
-                <TextBlock Grid.Column="4" Text="{Binding PercentOfDay}" Foreground="{StaticResource MutedTextBrush}" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                <TextBlock Grid.Column="1" Text="{Binding AppName}" Foreground="{DynamicResource TextBrush}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="2" Text="{Binding Duration}" Foreground="{DynamicResource TextBrush}" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                <TextBlock Grid.Column="3" Text="{Binding Sessions}" Foreground="{DynamicResource MutedTextBrush}" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                <TextBlock Grid.Column="4" Text="{Binding PercentOfDay}" Foreground="{DynamicResource MutedTextBrush}" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Right" />
                 <TextBlock Grid.Column="5" Text="{Binding Trend}" Foreground="#8FD17F" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Right" />
             </Grid>
         </DataTemplate>
@@ -536,41 +551,41 @@
                     <ColumnDefinition Width="22" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Border Width="12" Height="12" CornerRadius="3" Background="{Binding Fill}" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Text="{Binding Label}" Foreground="{StaticResource MutedTextBrush}" FontSize="12" />
+                <Border Width="14" Height="14" CornerRadius="4" Background="{Binding Fill}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="{Binding Label}" Foreground="{DynamicResource TextBrush}" FontSize="12" />
             </Grid>
         </DataTemplate>
 
         <DataTemplate x:Key="DetailActivityRowTemplate">
-            <Border Background="#172337" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,10">
+            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,10">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="64" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="{Binding TimeRange}" Foreground="#B89CFF" FontSize="12" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding TimeRange}" Foreground="{DynamicResource AccentBrush}" FontSize="12" FontWeight="SemiBold" />
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="{Binding Title}" Foreground="{StaticResource TextBrush}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
-                        <TextBlock Text="{Binding Source}" Margin="0,4,0,0" Foreground="{StaticResource MutedTextBrush}" FontSize="12" TextTrimming="CharacterEllipsis" />
-                        <TextBlock Text="{Binding Duration}" Margin="0,4,0,0" Foreground="#8C98AD" FontSize="11" />
+                        <TextBlock Text="{Binding Title}" Foreground="{DynamicResource TextBrush}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Source}" Margin="0,4,0,0" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding Duration}" Margin="0,4,0,0" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" />
                     </StackPanel>
                 </Grid>
             </Border>
         </DataTemplate>
 
         <DataTemplate x:Key="RelatedMomentTemplate">
-            <Border Background="#172337" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,10">
+            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,10">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="34" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Border Width="24" Height="24" CornerRadius="6" Background="#22304A" VerticalAlignment="Top">
+                    <Border Width="24" Height="24" CornerRadius="6" Background="{DynamicResource PanelBrush}" VerticalAlignment="Top">
                         <Image Source="{Binding ProgramIcon}" Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="{Binding Title}" Foreground="{StaticResource TextBrush}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
-                        <TextBlock Text="{Binding Detail}" Margin="0,4,0,0" Foreground="{StaticResource MutedTextBrush}" FontSize="12" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Title}" Foreground="{DynamicResource TextBrush}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Detail}" Margin="0,4,0,0" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" TextWrapping="Wrap" />
                     </StackPanel>
                 </Grid>
             </Border>
@@ -578,8 +593,8 @@
     </Window.Resources>
 
     <Border x:Name="WindowSurface"
-            Background="{StaticResource PageBackgroundBrush}"
-            BorderBrush="#1E2B42"
+            Background="{DynamicResource PageBackgroundBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
             BorderThickness="1"
             CornerRadius="10"
             ClipToBounds="True">
@@ -589,7 +604,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <Border x:Name="RailSurface" Grid.Column="0" Background="#121B2B" BorderBrush="#23314A" BorderThickness="0,0,1,0" PreviewMouseLeftButtonDown="SectionSurface_PreviewMouseLeftButtonDown">
+            <Border x:Name="RailSurface" Grid.Column="0" Background="{DynamicResource RailBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0" PreviewMouseLeftButtonDown="SectionSurface_PreviewMouseLeftButtonDown">
                 <Grid Margin="18,18">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -602,16 +617,16 @@
                         <Border Width="34" Height="34" CornerRadius="8" DockPanel.Dock="Left" ClipToBounds="True">
                             <Image Source="Assets/MomentTrace.ico" Stretch="UniformToFill" />
                         </Border>
-                        <TextBlock Text="MomentTrace" Margin="12,6,0,0" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                        <TextBlock Text="MomentTrace" Margin="12,6,0,0" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
                     </DockPanel>
 
                     <ScrollViewer Grid.Row="1" Margin="0,36,0,10" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                         <StackPanel>
-                            <TextBlock Text="Workspace" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
-                            <Border x:Name="TimelineNavHighlight" Background="#3A286F" CornerRadius="7" Margin="0,0,0,6">
+                            <TextBlock Text="Workspace" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" Margin="6,0,0,10" />
+                            <Border x:Name="TimelineNavHighlight" Background="{DynamicResource AccentSoftBrush}" CornerRadius="7" Margin="0,0,0,6">
                                 <Button Style="{StaticResource RailButton}" Click="TimelineButton_Click">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="⌘" Width="28" Foreground="#BBA7FF" />
+                                        <TextBlock Text="⌘" Width="28" />
                                         <TextBlock Text="Timeline" FontWeight="SemiBold" />
                                     </StackPanel>
                                 </Button>
@@ -630,8 +645,8 @@
                                     <TextBlock Text="Insights" />
                                 </StackPanel>
                             </Button>
-                            <Border Height="1" Background="#26344D" Margin="0,16,0,16" />
-                            <TextBlock Text="Activity" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
+                            <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,16,0,16" />
+                            <TextBlock Text="Activity" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" Margin="6,0,0,10" />
                             <Border x:Name="BrowsingNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
                                 <Button Style="{StaticResource RailButton}" Click="TimelineSemanticFilter_Click" Tag="Browsing">
                                     <StackPanel Orientation="Horizontal">
@@ -664,8 +679,8 @@
                                     </StackPanel>
                                 </Button>
                             </Border>
-                            <Border Height="1" Background="#26344D" Margin="0,16,0,16" />
-                            <TextBlock Text="Library" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
+                            <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,16,0,16" />
+                            <TextBlock Text="Library" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" Margin="6,0,0,10" />
                             <Border x:Name="SavedMomentsNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
                                 <Button Style="{StaticResource RailButton}" Click="LibraryFilter_Click" Tag="SavedMoments">
                                     <StackPanel Orientation="Horizontal">
@@ -690,8 +705,8 @@
                                     </StackPanel>
                                 </Button>
                             </Border>
-                            <Border Height="1" Background="#26344D" Margin="0,16,0,16" />
-                            <TextBlock Text="Sources" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Margin="6,0,0,10" />
+                            <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,16,0,16" />
+                            <TextBlock Text="Sources" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" Margin="6,0,0,10" />
                             <Border x:Name="AppsNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
                                 <Button Style="{StaticResource RailButton}" Click="TimelineSourceFilter_Click" Tag="Apps">
                                     <StackPanel Orientation="Horizontal">
@@ -720,14 +735,14 @@
                     </ScrollViewer>
 
                     <StackPanel Grid.Row="2" VerticalAlignment="Bottom">
-                        <Border Height="1" Background="#26344D" Margin="0,0,0,16" />
+                        <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,16" />
                         <DockPanel Margin="0,0,0,14">
-                            <Border Width="34" Height="34" CornerRadius="17" Background="#8B5CF6" DockPanel.Dock="Left">
+                            <Border Width="34" Height="34" CornerRadius="17" Background="{DynamicResource AccentBrush}" DockPanel.Dock="Left">
                                 <TextBlock x:Name="UserInitialsText" Text="U" FontSize="13" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <StackPanel Margin="12,0,0,0">
-                                <TextBlock x:Name="UserDisplayNameText" Text="User" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
-                                <TextBlock x:Name="UserAccountText" Text="" FontSize="11" Foreground="{StaticResource MutedTextBrush}" />
+                                <TextBlock x:Name="UserDisplayNameText" Text="User" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
+                                <TextBlock x:Name="UserAccountText" Text="" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" />
                             </StackPanel>
                         </DockPanel>
                         <Button Style="{StaticResource RailButton}" Click="SettingsButton_Click">
@@ -746,7 +761,7 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <Border x:Name="TopCommandSurface" Grid.Row="0" Background="#0D1728" BorderBrush="#23314A" BorderThickness="0,0,0,1" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown">
+                <Border x:Name="TopCommandSurface" Grid.Row="0" Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown">
                     <Grid Margin="28,12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -759,7 +774,7 @@
                         </Grid.ColumnDefinitions>
                         <Grid>
                             <TextBox x:Name="SearchBox" TextChanged="SearchBox_TextChanged" VerticalAlignment="Center" />
-                            <TextBlock Text="Search moments, sessions, apps, or websites..." Margin="40,0,0,0" Foreground="#8C98AD" IsHitTestVisible="False" VerticalAlignment="Center">
+                            <TextBlock Text="Search moments, sessions, apps, or websites..." Margin="40,0,0,0" Foreground="{DynamicResource MutedTextBrush}" IsHitTestVisible="False" VerticalAlignment="Center">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Visibility" Value="Collapsed" />
@@ -771,7 +786,7 @@
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
-                            <TextBlock Text="⌕" Margin="16,0,0,0" Foreground="#A5B0C3" FontSize="20" IsHitTestVisible="False" VerticalAlignment="Center" />
+                            <TextBlock Text="⌕" Margin="16,0,0,0" Foreground="{DynamicResource MutedTextBrush}" FontSize="20" IsHitTestVisible="False" VerticalAlignment="Center" />
                         </Grid>
                         <ComboBox x:Name="DateFilter"
                                   Style="{StaticResource TopComboBox}"
@@ -800,7 +815,7 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0" Width="2" Background="#25334E" HorizontalAlignment="Center" Margin="0,58,0,0" />
+                    <Border Grid.Column="0" Width="2" Background="{DynamicResource BorderBrush}" HorizontalAlignment="Center" Margin="0,58,0,0" />
 
                     <ScrollViewer x:Name="TimelineCardScroller"
                                   Grid.ColumnSpan="2"
@@ -809,13 +824,13 @@
                                   VerticalScrollBarVisibility="Auto">
                         <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="8,0,0,20">
-                            <TextBlock Text="Today" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
-                            <TextBlock x:Name="TodayActivityCountText" Text="0 moments" Margin="16,6,0,0" FontSize="13" Foreground="{StaticResource MutedTextBrush}" />
-                            <Border x:Name="ActiveFilterBadge" Background="#2C2154" BorderBrush="#4D3A8E" BorderThickness="1" CornerRadius="12" Padding="10,4" Margin="16,2,0,0" Visibility="Collapsed">
-                                <TextBlock x:Name="ActiveFilterText" Text="All moments" FontSize="11" Foreground="#D8CCFF" />
+                            <TextBlock Text="Today" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
+                            <TextBlock x:Name="TodayActivityCountText" Text="0 moments" Margin="16,6,0,0" FontSize="13" Foreground="{DynamicResource MutedTextBrush}" />
+                            <Border x:Name="ActiveFilterBadge" Background="{DynamicResource AccentBrush}" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1" CornerRadius="12" Padding="10,4" Margin="16,2,0,0" Visibility="Collapsed">
+                                <TextBlock x:Name="ActiveFilterText" Text="All moments" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AccentTextBrush}" />
                             </Border>
-                            <Border Background="#142033" BorderBrush="#293A57" BorderThickness="1" CornerRadius="12" Padding="10,4" Margin="16,2,0,0">
-                                <TextBlock Text="Stored locally · Only visible to you" FontSize="11" Foreground="#A5B0C3" />
+                            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="10,4" Margin="16,2,0,0">
+                                <TextBlock Text="Stored locally · Only visible to you" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" />
                             </Border>
                         </StackPanel>
                             <ItemsControl x:Name="TimelineCardGroups" ItemTemplate="{StaticResource TimelineCardGroupTemplate}" />
@@ -834,7 +849,7 @@
                             <GroupStyle>
                                 <GroupStyle.HeaderTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Name}" Margin="0,8,0,12" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                        <TextBlock Text="{Binding Name}" Margin="0,8,0,12" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
                                     </DataTemplate>
                                 </GroupStyle.HeaderTemplate>
                             </GroupStyle>
@@ -855,10 +870,10 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel>
-                                <TextBlock Text="Overview" FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
-                                <TextBlock Text="A quiet read on how your day is taking shape." Margin="0,6,0,0" FontSize="13" Foreground="{StaticResource MutedTextBrush}" />
+                                <TextBlock Text="Overview" FontSize="24" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
+                                <TextBlock Text="A quiet read on how your day is taking shape." Margin="0,6,0,0" FontSize="13" Foreground="{DynamicResource MutedTextBrush}" />
                             </StackPanel>
-                            <TextBlock x:Name="OverviewDateText" Grid.Column="1" Text="Today" Foreground="{StaticResource MutedTextBrush}" FontSize="13" VerticalAlignment="Center" />
+                            <TextBlock x:Name="OverviewDateText" Grid.Column="1" Text="Today" Foreground="{DynamicResource MutedTextBrush}" FontSize="13" VerticalAlignment="Center" />
                         </Grid>
 
                         <ItemsControl x:Name="SummaryCards" ItemTemplate="{StaticResource SummaryMetricTemplate}" Margin="0,0,0,22">
@@ -869,7 +884,7 @@
                             </ItemsControl.ItemsPanel>
                         </ItemsControl>
 
-                        <Border Background="#111B2C" BorderBrush="#293A57" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,0,0,20">
+                        <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,0,0,20">
                             <StackPanel>
                                 <Grid Margin="0,0,0,14">
                                     <Grid.ColumnDefinitions>
@@ -877,13 +892,13 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel>
-                                        <TextBlock Text="Daily activity heatmap" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
-                                        <TextBlock Text="15-minute blocks, colored by activity density and type." Margin="0,4,0,0" FontSize="12" Foreground="{StaticResource MutedTextBrush}" />
+                                        <TextBlock Text="Daily activity heatmap" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
+                                        <TextBlock Text="15-minute blocks, colored by activity density and type." Margin="0,4,0,0" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="00:00" FontSize="11" Foreground="#718096" />
-                                        <TextBlock Text="  ·  06:00  ·  12:00  ·  18:00  ·  " FontSize="11" Foreground="#718096" />
-                                        <TextBlock Text="24:00" FontSize="11" Foreground="#718096" />
+                                        <TextBlock Text="00:00" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" />
+                                        <TextBlock Text="  ·  06:00  ·  12:00  ·  18:00  ·  " FontSize="11" Foreground="{DynamicResource MutedTextBrush}" />
+                                        <TextBlock Text="24:00" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" />
                                     </StackPanel>
                                 </Grid>
                                 <ItemsControl x:Name="ActivityHeatmap" ItemTemplate="{StaticResource HeatmapSegmentTemplate}">
@@ -903,7 +918,7 @@
                                 <ColumnDefinition Width="360" />
                             </Grid.ColumnDefinitions>
 
-                            <Border Background="#111B2C" BorderBrush="#293A57" BorderThickness="1" CornerRadius="12" Padding="18">
+                            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="18">
                                 <StackPanel>
                                     <Grid Margin="0,0,0,14">
                                         <Grid.ColumnDefinitions>
@@ -913,20 +928,20 @@
                                             <ColumnDefinition Width="74" />
                                             <ColumnDefinition Width="64" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Top applications" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
-                                        <Button Grid.Column="1" Style="{StaticResource ChromeButton}" Content="Duration" Tag="Duration" Click="OverviewSort_Click" Padding="8,4" FontSize="11" />
+                                        <TextBlock Text="Top applications" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
+                                        <Button Grid.Column="1" Style="{StaticResource ChromeButton}" Content="Seen" Tag="Duration" Click="OverviewSort_Click" Padding="8,4" FontSize="11" />
                                         <Button Grid.Column="2" Style="{StaticResource ChromeButton}" Content="Sessions" Tag="Sessions" Click="OverviewSort_Click" Padding="8,4" FontSize="11" Margin="6,0,0,0" />
                                         <Button Grid.Column="3" Style="{StaticResource ChromeButton}" Content="%" Tag="Percent" Click="OverviewSort_Click" Padding="8,4" FontSize="11" Margin="6,0,0,0" />
-                                        <TextBlock Grid.Column="4" Text="Trend" Foreground="{StaticResource MutedTextBrush}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="4" Text="Trend" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center" />
                                     </Grid>
                                     <ItemsControl x:Name="TopApplicationsTable" ItemTemplate="{StaticResource TopApplicationTemplate}" />
                                 </StackPanel>
                             </Border>
 
-                            <Border Grid.Column="2" Background="#111B2C" BorderBrush="#293A57" BorderThickness="1" CornerRadius="12" Padding="18">
+                            <Border Grid.Column="2" Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="18">
                                 <StackPanel>
-                                    <TextBlock Text="Focus timeline" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
-                                    <TextBlock Text="Active runs and natural gaps across the day." Margin="0,4,0,16" FontSize="12" Foreground="{StaticResource MutedTextBrush}" />
+                                    <TextBlock Text="Foreground rhythm" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
+                                    <TextBlock Text="Visible runs and natural gaps across the day." Margin="0,4,0,16" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" />
                                     <ItemsControl x:Name="FocusTimeline">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
@@ -950,8 +965,8 @@
                     Margin="0,66,0,0"
                     HorizontalAlignment="Right"
                     Panel.ZIndex="4"
-                    Background="#121B2B"
-                    BorderBrush="#23314A"
+                    Background="{DynamicResource PanelBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="1,0,0,0"
                     PreviewMouseLeftButtonDown="SectionSurface_PreviewMouseLeftButtonDown">
                 <Grid>
@@ -965,15 +980,15 @@
 
                     <Border Grid.Row="0" Background="Transparent" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown" />
                     <DockPanel Grid.Row="0" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown">
-                        <Border Width="62" Height="62" CornerRadius="9" Background="#19263B" DockPanel.Dock="Left">
+                        <Border Width="62" Height="62" CornerRadius="9" Background="{DynamicResource SubtlePanelBrush}" DockPanel.Dock="Left">
                             <Grid>
-                                <TextBlock x:Name="DetailIconFallbackText" Text="W" Foreground="#C9D4E6" FontSize="25" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <TextBlock x:Name="DetailIconFallbackText" Text="W" Foreground="{DynamicResource MutedTextBrush}" FontSize="25" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 <Image x:Name="DetailIconImage" Width="44" Height="44" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Grid>
                         </Border>
                         <StackPanel Margin="14,5,0,0">
-                            <TextBlock x:Name="DetailTitleText" Text="No activity selected" TextWrapping="Wrap" FontSize="17" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
-                            <TextBlock x:Name="DetailAppText" Text="" Margin="0,5,0,0" FontSize="12" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" />
+                            <TextBlock x:Name="DetailTitleText" Text="No activity selected" TextWrapping="Wrap" FontSize="17" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
+                            <TextBlock x:Name="DetailAppText" Text="" Margin="0,5,0,0" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" TextWrapping="Wrap" />
                         </StackPanel>
                     </DockPanel>
 
@@ -1010,22 +1025,22 @@
                             <Button x:Name="ActivityDetailTabButton" Style="{StaticResource DetailTabButton}" Content="Activity" Tag="Activity" Click="DetailTab_Click" FontSize="13" />
                             <Button x:Name="RelatedDetailTabButton" Style="{StaticResource DetailTabButton}" Content="Related" Tag="Related" Click="DetailTab_Click" FontSize="13" />
                         </UniformGrid>
-                        <Border Grid.Row="1" Height="1" Background="#26344D" />
+                        <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderBrush}" />
                     </Grid>
 
                     <ScrollViewer x:Name="OverviewDetailTabContent" Grid.Row="3" VerticalScrollBarVisibility="Auto">
                         <StackPanel>
-                            <Border Background="#18243A" BorderBrush="#33435E" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,18">
+                            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,18">
                                 <StackPanel>
-                                    <TextBlock Text="Moment overview" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,10" />
-                                    <TextBlock x:Name="DetailNarrativeText" Text="Select a moment to see the context around it." FontSize="13" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" LineHeight="19" />
+                                    <TextBlock Text="Moment overview" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" Margin="0,0,0,10" />
+                                    <TextBlock x:Name="DetailNarrativeText" Text="Select a moment to see the context around it." FontSize="13" Foreground="{DynamicResource MutedTextBrush}" TextWrapping="Wrap" LineHeight="19" />
                                 </StackPanel>
                             </Border>
 
                             <Border x:Name="ScreenshotPreviewBorder"
                                     Height="150"
-                                    Background="#0D1728"
-                                    BorderBrush="#2B3A55"
+                                    Background="{DynamicResource PanelBrush}"
+                                    BorderBrush="{DynamicResource BorderBrush}"
                                     BorderThickness="1"
                                     CornerRadius="8"
                                     ClipToBounds="True"
@@ -1034,7 +1049,7 @@
                                 <Image x:Name="ScreenshotPreviewImage" Stretch="UniformToFill" />
                             </Border>
 
-                            <Border Background="#1A263A" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,18">
+                            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,18">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="76" />
@@ -1049,36 +1064,36 @@
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
 
-                                    <TextBlock Text="Duration" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
-                                    <TextBlock x:Name="DetailDurationText" Grid.Column="1" Foreground="{StaticResource TextBrush}" Margin="0,0,0,12" />
+                                    <TextBlock Text="Visible span" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,12" />
+                                    <TextBlock x:Name="DetailDurationText" Grid.Column="1" Foreground="{DynamicResource TextBrush}" Margin="0,0,0,12" />
 
-                                    <TextBlock Grid.Row="1" Text="From" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
-                                    <TextBlock x:Name="DetailStartedText" Grid.Row="1" Grid.Column="1" Foreground="{StaticResource TextBrush}" TextWrapping="Wrap" Margin="0,0,0,12" />
+                                    <TextBlock Grid.Row="1" Text="From" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,12" />
+                                    <TextBlock x:Name="DetailStartedText" Grid.Row="1" Grid.Column="1" Foreground="{DynamicResource TextBrush}" TextWrapping="Wrap" Margin="0,0,0,12" />
 
-                                    <TextBlock Grid.Row="2" Text="Until" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
-                                    <TextBlock x:Name="DetailEndedText" Grid.Row="2" Grid.Column="1" Foreground="{StaticResource TextBrush}" TextWrapping="Wrap" Margin="0,0,0,12" />
+                                    <TextBlock Grid.Row="2" Text="Until" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,12" />
+                                    <TextBlock x:Name="DetailEndedText" Grid.Row="2" Grid.Column="1" Foreground="{DynamicResource TextBrush}" TextWrapping="Wrap" Margin="0,0,0,12" />
 
-                                    <TextBlock Grid.Row="3" Text="Source" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
-                                    <TextBlock x:Name="DetailProcessText" Grid.Row="3" Grid.Column="1" Foreground="{StaticResource TextBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,12" />
+                                    <TextBlock Grid.Row="3" Text="Source" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,12" />
+                                    <TextBlock x:Name="DetailProcessText" Grid.Row="3" Grid.Column="1" Foreground="{DynamicResource TextBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,12" />
 
-                                    <TextBlock Grid.Row="4" Text="Category" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,12" />
-                                    <Border Grid.Row="4" Grid.Column="1" Background="#2C2154" CornerRadius="5" Padding="8,3" HorizontalAlignment="Left" Margin="0,0,0,12">
-                                        <TextBlock x:Name="DetailKindText" Text="Select an activity" Foreground="#B89CFF" FontSize="12" FontWeight="SemiBold" />
+                                    <TextBlock Grid.Row="4" Text="Category" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,12" />
+                                    <Border Grid.Row="4" Grid.Column="1" Background="{DynamicResource AccentBrush}" CornerRadius="5" Padding="8,3" HorizontalAlignment="Left" Margin="0,0,0,12">
+                                        <TextBlock x:Name="DetailKindText" Text="Select an activity" Foreground="{DynamicResource AccentTextBrush}" FontSize="12" FontWeight="SemiBold" />
                                     </Border>
 
-                                    <TextBlock Grid.Row="5" Text="Privacy" Foreground="{StaticResource MutedTextBrush}" />
-                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="Stored locally" Foreground="{StaticResource TextBrush}" />
+                                    <TextBlock Grid.Row="5" Text="Privacy" Foreground="{DynamicResource MutedTextBrush}" />
+                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="Stored locally" Foreground="{DynamicResource TextBrush}" />
                                 </Grid>
                             </Border>
 
-                            <Border Background="#1A263A" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,18">
+                            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,18">
                                 <StackPanel>
                                     <Grid Margin="0,0,0,10">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Personal note" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                        <TextBlock Text="Personal note" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
                                         <Button Grid.Column="1" Style="{StaticResource ChromeButton}" Content="Save note" Click="SaveNoteButton_Click" Padding="10,5" FontSize="11" />
                                     </Grid>
                                     <TextBox x:Name="MomentNoteTextBox"
@@ -1087,25 +1102,25 @@
                                              TextWrapping="Wrap"
                                              AcceptsReturn="True"
                                              VerticalScrollBarVisibility="Auto"
-                                             Background="#101A2B"
-                                             BorderBrush="#33435E"
-                                             Foreground="{StaticResource TextBrush}"
-                                             CaretBrush="{StaticResource TextBrush}" />
+                                             Background="{DynamicResource PanelBrush}"
+                                             BorderBrush="{DynamicResource BorderBrush}"
+                                             Foreground="{DynamicResource TextBrush}"
+                                             CaretBrush="{DynamicResource TextBrush}" />
                                 </StackPanel>
                             </Border>
 
                             <Border x:Name="AiSummaryPanel" Background="#231D45" BorderBrush="#4D3A8E" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,18">
                                 <StackPanel>
-                                    <TextBlock Text="✦ AI Summary" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,14" />
+                                    <TextBlock Text="✦ AI Summary" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" Margin="0,0,0,14" />
                                     <TextBlock Text="Recorded while this window was active. Related sessions are grouped into the timeline so repeated activity reads as one continuous moment." FontSize="13" Foreground="#D6D1EA" TextWrapping="Wrap" LineHeight="19" />
                                 </StackPanel>
                             </Border>
 
-                            <Border Background="#1A263A" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Padding="16">
+                            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
                                 <StackPanel>
-                                    <TextBlock Text="Recent Activity" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,12" />
-                                    <TextBlock Text="Recorded by MomentTrace" FontSize="13" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,10" />
-                                    <TextBlock x:Name="StatusText" Text="Recording foreground window activity with timestamps." FontSize="13" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" LineHeight="19" />
+                                    <TextBlock Text="Recent Activity" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" Margin="0,0,0,12" />
+                                    <TextBlock Text="Recorded by MomentTrace" FontSize="13" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,10" />
+                                    <TextBlock x:Name="StatusText" Text="Recording foreground window activity with timestamps." FontSize="13" Foreground="{DynamicResource MutedTextBrush}" TextWrapping="Wrap" LineHeight="19" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -1113,10 +1128,10 @@
 
                     <ScrollViewer x:Name="ActivityDetailTabContent" Grid.Row="3" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
                         <StackPanel>
-                            <Border Background="#18243A" BorderBrush="#33435E" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,18">
+                            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,18">
                                 <StackPanel>
-                                    <TextBlock Text="Captured activity" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,10" />
-                                    <TextBlock x:Name="ActivityTabSummaryText" Text="Select a moment to inspect its raw captured entries." FontSize="13" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" LineHeight="19" />
+                                    <TextBlock Text="Captured activity" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" Margin="0,0,0,10" />
+                                    <TextBlock x:Name="ActivityTabSummaryText" Text="Select a moment to inspect its raw captured entries." FontSize="13" Foreground="{DynamicResource MutedTextBrush}" TextWrapping="Wrap" LineHeight="19" />
                                 </StackPanel>
                             </Border>
                             <ItemsControl x:Name="DetailActivityRows" ItemTemplate="{StaticResource DetailActivityRowTemplate}" />
@@ -1125,10 +1140,10 @@
 
                     <ScrollViewer x:Name="RelatedDetailTabContent" Grid.Row="3" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
                         <StackPanel>
-                            <Border Background="#18243A" BorderBrush="#33435E" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,18">
+                            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,18">
                                 <StackPanel>
-                                    <TextBlock Text="Related moments" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,10" />
-                                    <TextBlock x:Name="RelatedTabSummaryText" Text="Select a moment to see nearby activity from the same app or category." FontSize="13" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" LineHeight="19" />
+                                    <TextBlock Text="Related moments" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" Margin="0,0,0,10" />
+                                    <TextBlock x:Name="RelatedTabSummaryText" Text="Select a moment to see nearby activity from the same app or category." FontSize="13" Foreground="{DynamicResource MutedTextBrush}" TextWrapping="Wrap" LineHeight="19" />
                                 </StackPanel>
                             </Border>
                             <ItemsControl x:Name="RelatedMomentRows" ItemTemplate="{StaticResource RelatedMomentTemplate}" />
@@ -1143,16 +1158,16 @@
 
                     <DockPanel MouseLeftButtonDown="DragSurface_MouseLeftButtonDown">
                         <StackPanel>
-                            <TextBlock Text="Day details" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
-                            <TextBlock x:Name="OverviewSidebarDateText" Text="Today" Margin="0,5,0,0" FontSize="12" Foreground="{StaticResource MutedTextBrush}" />
+                            <TextBlock Text="Day details" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
+                            <TextBlock x:Name="OverviewSidebarDateText" Text="Today" Margin="0,5,0,0" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" />
                         </StackPanel>
                     </DockPanel>
 
                     <ScrollViewer Grid.Row="1" Margin="0,28,0,0" VerticalScrollBarVisibility="Auto">
                         <StackPanel>
-                            <Border Background="#1A263A" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,16">
                                 <StackPanel>
-                                    <TextBlock Text="Activity totals" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,14" />
+                                    <TextBlock Text="Captured totals" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" Margin="0,0,0,14" />
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
@@ -1164,38 +1179,38 @@
                                             <RowDefinition Height="Auto" />
                                             <RowDefinition Height="Auto" />
                                         </Grid.RowDefinitions>
-                                        <TextBlock Text="Active time" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,10" />
-                                        <TextBlock x:Name="OverviewTotalActiveText" Grid.Column="1" Foreground="{StaticResource TextBrush}" Margin="0,0,0,10" />
-                                        <TextBlock Grid.Row="1" Text="Sessions" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,10" />
-                                        <TextBlock x:Name="OverviewSessionsText" Grid.Row="1" Grid.Column="1" Foreground="{StaticResource TextBrush}" Margin="0,0,0,10" />
-                                        <TextBlock Grid.Row="2" Text="Apps" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,10" />
-                                        <TextBlock x:Name="OverviewAppsText" Grid.Row="2" Grid.Column="1" Foreground="{StaticResource TextBrush}" Margin="0,0,0,10" />
-                                        <TextBlock Grid.Row="3" Text="Longest focus" Foreground="{StaticResource MutedTextBrush}" />
-                                        <TextBlock x:Name="OverviewFocusText" Grid.Row="3" Grid.Column="1" Foreground="{StaticResource TextBrush}" />
+                                        <TextBlock Text="Seen time" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,10" />
+                                        <TextBlock x:Name="OverviewTotalActiveText" Grid.Column="1" Foreground="{DynamicResource TextBrush}" Margin="0,0,0,10" />
+                                        <TextBlock Grid.Row="1" Text="Sessions" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,10" />
+                                        <TextBlock x:Name="OverviewSessionsText" Grid.Row="1" Grid.Column="1" Foreground="{DynamicResource TextBrush}" Margin="0,0,0,10" />
+                                        <TextBlock Grid.Row="2" Text="Apps" Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,10" />
+                                        <TextBlock x:Name="OverviewAppsText" Grid.Row="2" Grid.Column="1" Foreground="{DynamicResource TextBrush}" Margin="0,0,0,10" />
+                                        <TextBlock Grid.Row="3" Text="Longest run" Foreground="{DynamicResource MutedTextBrush}" />
+                                        <TextBlock x:Name="OverviewFocusText" Grid.Row="3" Grid.Column="1" Foreground="{DynamicResource TextBrush}" />
                                     </Grid>
                                 </StackPanel>
                             </Border>
 
-                            <Border Background="#1A263A" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,16">
                                 <StackPanel>
-                                    <TextBlock Text="Quick filters" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,14" />
+                                    <TextBlock Text="Quick filters" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" Margin="0,0,0,14" />
                                     <WrapPanel>
-                                        <Border Background="#2C2154" CornerRadius="12" Padding="10,5" Margin="0,0,8,8">
-                                            <TextBlock Text="All activity" Foreground="#D8CCFF" FontSize="12" />
+                                        <Border Background="#8B5CF6" CornerRadius="12" Padding="10,5" Margin="0,0,8,8">
+                                            <TextBlock Text="All activity" Foreground="White" FontSize="12" FontWeight="SemiBold" />
                                         </Border>
-                                        <Border Background="#162B44" CornerRadius="12" Padding="10,5" Margin="0,0,8,8">
-                                            <TextBlock Text="Apps" Foreground="#AFC7E8" FontSize="12" />
+                                        <Border Background="#2F80ED" CornerRadius="12" Padding="10,5" Margin="0,0,8,8">
+                                            <TextBlock Text="Apps" Foreground="White" FontSize="12" FontWeight="SemiBold" />
                                         </Border>
-                                        <Border Background="#172B29" CornerRadius="12" Padding="10,5" Margin="0,0,8,8">
-                                            <TextBlock Text="Focus blocks" Foreground="#BDECC0" FontSize="12" />
+                                        <Border Background="#22C55E" CornerRadius="12" Padding="10,5" Margin="0,0,8,8">
+                                            <TextBlock Text="Focus blocks" Foreground="#052E16" FontSize="12" FontWeight="SemiBold" />
                                         </Border>
                                     </WrapPanel>
                                 </StackPanel>
                             </Border>
 
-                            <Border Background="#1A263A" BorderBrush="#2B3A55" BorderThickness="1" CornerRadius="8" Padding="16">
+                            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
                                 <StackPanel>
-                                    <TextBlock Text="Category legend" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,14" />
+                                    <TextBlock Text="Category legend" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" Margin="0,0,0,14" />
                                     <ItemsControl x:Name="OverviewLegend" ItemTemplate="{StaticResource LegendItemTemplate}" />
                                 </StackPanel>
                             </Border>
