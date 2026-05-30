@@ -78,6 +78,20 @@ With a Mac linked to Visual Studio, there are two useful test loops:
 
 The first visible milestone should be a simple Mac recorder probe showing rows in SQLite. The second should be a thin Avalonia UI showing those rows as MomentTrace moments.
 
+## Current Probe
+
+The repository now includes `MomentTrace.MacProbe`, a minimal .NET console recorder that runs only on macOS and reuses the existing shared store.
+
+Run it on a Mac from the repository root:
+
+```bash
+dotnet run --project ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
+```
+
+The probe writes to the same SQLite schema as the Windows app. It captures active app name, process id as a local resource marker, active window title when macOS permissions allow it, and start/end timestamps.
+
+It is intentionally not the final macOS implementation. It uses `osascript` and System Events as a fast proof path so we can validate permissions, storage, grouping, and developer workflow before replacing the capture layer with native AppKit/Accessibility bindings in `MomentTrace.Mac`.
+
 ## Open Questions
 
 - Which macOS versions do we support for the first Mac preview?

@@ -68,6 +68,7 @@ The Windows installer is built with Inno Setup from a self-contained `win-x64` p
 MomentTrace.slnx
 ├─ MomentTrace.App       WPF app shell, UI, tray icon, settings wiring
 ├─ MomentTrace.Core      Shared models, interfaces, local classification/search/session services
+├─ MomentTrace.MacProbe  First macOS recorder probe for active app/window capture
 ├─ MomentTrace.Storage   SQLite persistence
 └─ MomentTrace.Windows   Windows foreground recorder and startup registration
 ```
@@ -103,6 +104,25 @@ dotnet run --project .\MomentTrace.App\MomentTrace.App.csproj -- --minimized
 ```
 
 In Visual Studio, open `MomentTrace.slnx`, set `MomentTrace.App` as the startup project, and press `F5`.
+
+## macOS Probe
+
+MomentTrace includes an early macOS recorder probe so the Mac capture model can be tested before the full UI is ported. It reuses `MomentTrace.Core` and `MomentTrace.Storage`, writes to the same SQLite schema, and records:
+
+- active app name
+- process id as a local resource marker
+- active window title when macOS permissions allow it
+- start/end timestamps
+
+Run it on a Mac from the repository root:
+
+```bash
+dotnet run --project ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
+```
+
+The first run may require macOS privacy approval for Terminal, Visual Studio, or the launched host process to control System Events and read accessibility metadata. The probe intentionally avoids screenshots and browser URL capture for now so we can prove the lowest-permission recorder path first.
+
+On non-macOS machines, the project builds but exits with a message instead of recording.
 
 ## Local Data
 
