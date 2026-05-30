@@ -124,6 +124,30 @@ The first run may require macOS privacy approval for Terminal, Visual Studio, or
 
 On non-macOS machines, the project builds but exits with a message instead of recording.
 
+### Pull And Run On A Mac
+
+Use GitHub as the bridge between Windows and macOS rather than building from a Windows network share. Local Mac builds are faster and avoid `bin`/`obj` file-locking problems across SMB.
+
+From Terminal on the Mac:
+
+```bash
+git clone https://github.com/nwaoga/MomentTrace.git
+cd MomentTrace
+dotnet build ./MomentTrace.slnx
+dotnet run --project ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
+```
+
+If the repo is already cloned:
+
+```bash
+cd MomentTrace
+git pull
+dotnet build ./MomentTrace.slnx
+dotnet run --project ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
+```
+
+For the first Mac spike, Terminal is the simplest way to run the probe because the output is immediate and permission prompts are easier to reason about. Visual Studio Code is the best lightweight IDE for editing and debugging on macOS. Visual Studio for Mac is discontinued, so do not plan the Mac workflow around it. If using a full JetBrains IDE, Rider is a good option once the cross-platform UI work starts.
+
 ## Local Data
 
 MomentTrace stores user data locally:
