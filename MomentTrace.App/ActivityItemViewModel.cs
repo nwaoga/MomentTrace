@@ -157,11 +157,41 @@ public sealed class ActivityItemViewModel(TimelineActivity activity)
 
     public string PinActionLabel => Activity.IsPinned ? "Unpin" : "Pin";
 
+    public bool IsPinned => Activity.IsPinned;
+
     public string? Note => Activity.Note;
+
+    public bool HasNote => !string.IsNullOrWhiteSpace(Activity.Note);
 
     public bool IsBookmarked => Activity.IsBookmarked;
 
     public string BookmarkActionLabel => Activity.IsBookmarked ? "Remove bookmark" : "Bookmark";
+
+    public bool HasSavedIndicator => IsPinned || IsBookmarked || HasNote;
+
+    public string SavedIndicatorText
+    {
+        get
+        {
+            var labels = new List<string>();
+            if (IsPinned)
+            {
+                labels.Add("Pinned");
+            }
+
+            if (IsBookmarked)
+            {
+                labels.Add("Bookmark");
+            }
+
+            if (HasNote)
+            {
+                labels.Add("Note");
+            }
+
+            return string.Join(" · ", labels);
+        }
+    }
 
     public string TechnicalSource => string.IsNullOrWhiteSpace(Activity.ExecutablePath)
         ? Activity.ProcessName

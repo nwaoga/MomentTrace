@@ -198,10 +198,35 @@ public partial class MainWindow : Window
             _activityGroups.Add(group);
         }
 
+        UpdateTimelineEmptyState(sessions.Count);
+
         if (TimelineList.SelectedItem is null && _activities.Count > 0)
         {
             TimelineList.SelectedIndex = 0;
         }
+    }
+
+    private void UpdateTimelineEmptyState(int visibleSessionCount)
+    {
+        TimelineEmptyState.Visibility = visibleSessionCount == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        if (visibleSessionCount > 0)
+        {
+            return;
+        }
+
+        var filterLabel = GetActiveTimelineFilterLabel();
+        TimelineEmptyTitleText.Text = filterLabel is null
+            ? "No moments found"
+            : $"No {filterLabel.ToLowerInvariant()} yet";
+        TimelineEmptyBodyText.Text = _selectedLibraryFilter switch
+        {
+            TimelineLibraryFilter.SavedMoments => "Pinned, bookmarked, or noted moments will appear here.",
+            TimelineLibraryFilter.Notes => "Add a personal note to a moment and it will appear here.",
+            TimelineLibraryFilter.Bookmarks => "Bookmark any moment to save it as a reusable Library reference.",
+            _ when !string.IsNullOrWhiteSpace(SearchBox.Text) => "Try a different search, date, or activity filter.",
+            _ => "MomentTrace will show captured moments here once there is activity for the selected date."
+        };
     }
 
     private async Task LoadOverviewAsync()
@@ -1028,8 +1053,10 @@ public partial class MainWindow : Window
         MomentNoteTextBox.Text = string.Empty;
         PinButton.Content = "Pin";
         PinButton.IsEnabled = false;
+        SetActionButtonActive(PinButton, false);
         BookmarkButton.Content = "Bookmark";
         BookmarkButton.IsEnabled = false;
+        SetActionButtonActive(BookmarkButton, false);
         DeleteMomentButton.IsEnabled = false;
         ActivityTabSummaryText.Text = "Select a moment to inspect its raw captured entries.";
         RelatedTabSummaryText.Text = "Select a moment to see nearby activity from the same app or category.";
@@ -1055,14 +1082,29 @@ public partial class MainWindow : Window
         DetailIconFallbackText.Visibility = selected.ProgramIcon is null ? Visibility.Visible : Visibility.Collapsed;
         ScreenshotPreviewImage.Source = selected.ScreenshotPreview;
         ScreenshotPreviewBorder.Visibility = selected.ScreenshotPreview is null ? Visibility.Collapsed : Visibility.Visible;
-        PinButton.Content = activity.IsPinned ? "Unpin" : "Pin";
+        PinButton.Content = activity.IsPinned ? "Pinned" : "Pin";
         PinButton.IsEnabled = true;
-        BookmarkButton.Content = activity.IsBookmarked ? "Remove bookmark" : "Bookmark";
+        PinButton.ToolTip = activity.IsPinned
+            ? "Pinned moments stay prominent in the Timeline. Click to unpin."
+            : "Keep this moment prominent in the Timeline.";
+        SetActionButtonActive(PinButton, activity.IsPinned);
+        BookmarkButton.Content = activity.IsBookmarked ? "Bookmarked" : "Bookmark";
         BookmarkButton.IsEnabled = true;
         BookmarkButton.Visibility = Visibility.Visible;
+        BookmarkButton.ToolTip = activity.IsBookmarked
+            ? "Saved as a Library reference. Click to remove bookmark."
+            : "Save this moment as a Library reference.";
+        SetActionButtonActive(BookmarkButton, activity.IsBookmarked);
         MomentNoteTextBox.Text = activity.Note ?? string.Empty;
         DeleteMomentButton.IsEnabled = true;
         _ = LoadDetailContextAsync(selected);
+    }
+
+    private void SetActionButtonActive(System.Windows.Controls.Button button, bool isActive)
+    {
+        button.Background = isActive ? GetThemeBrush("AccentBrush") : GetThemeBrush("SubtlePanelBrush");
+        button.BorderBrush = isActive ? GetThemeBrush("AccentBrush") : GetThemeBrush("BorderBrush");
+        button.Foreground = isActive ? GetThemeBrush("AccentTextBrush") : GetThemeBrush("TextBrush");
     }
 
     private async Task LoadDetailContextAsync(ActivityItemViewModel selected)

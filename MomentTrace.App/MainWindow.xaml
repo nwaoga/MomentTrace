@@ -410,6 +410,24 @@
                                 Padding="6,2">
                             <TextBlock Text="{Binding SeenDuration}" Foreground="{DynamicResource TextBrush}" FontSize="11" FontWeight="SemiBold" />
                         </Border>
+                        <Border HorizontalAlignment="Left"
+                                VerticalAlignment="Bottom"
+                                Margin="8"
+                                Background="{DynamicResource AccentBrush}"
+                                CornerRadius="5"
+                                Padding="6,2">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasSavedIndicator}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="{Binding SavedIndicatorText}" Foreground="{DynamicResource AccentTextBrush}" FontSize="10" FontWeight="SemiBold" />
+                        </Border>
                     </Grid>
 
                     <Grid Grid.Row="1" Margin="10,8">
@@ -843,6 +861,29 @@
                             </Border>
                         </StackPanel>
                             <ItemsControl x:Name="TimelineCardGroups" ItemTemplate="{StaticResource TimelineCardGroupTemplate}" />
+                            <Border x:Name="TimelineEmptyState"
+                                    Background="{DynamicResource SubtlePanelBrush}"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="12"
+                                    Padding="26"
+                                    Margin="8,20,20,0"
+                                    Visibility="Collapsed">
+                                <StackPanel MaxWidth="560">
+                                    <TextBlock x:Name="TimelineEmptyTitleText"
+                                               Text="No moments found"
+                                               FontSize="20"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextBrush}" />
+                                    <TextBlock x:Name="TimelineEmptyBodyText"
+                                               Text="Try a different date, search, or filter."
+                                               Margin="0,8,0,0"
+                                               FontSize="13"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap"
+                                               LineHeight="20" />
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </ScrollViewer>
 
