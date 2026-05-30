@@ -66,15 +66,26 @@ The Windows installer is built with Inno Setup from a self-contained `win-x64` p
 
 ```text
 MomentTrace.slnx
-├─ MomentTrace.App       WPF app shell, UI, tray icon, settings wiring
-├─ MomentTrace.Core      Shared models, interfaces, local classification/search/session services
-├─ MomentTrace.MacProbe  First macOS recorder probe for active app/window capture
-├─ MomentTrace.Presentation Shared memory/timeline view models and shell service contracts
-├─ MomentTrace.Storage   SQLite persistence
-└─ MomentTrace.Windows   Windows foreground recorder and startup registration
+├─ MomentTrace.App           WPF app shell, UI, tray icon, settings wiring
+├─ MomentTrace.Core          Shared models, interfaces, local classification/search/session services
+├─ MomentTrace.MacProbe      First macOS recorder probe for active app/window capture
+├─ MomentTrace.Presentation  Shared memory/timeline view models and shell service contracts
+├─ MomentTrace.Storage       SQLite persistence
+└─ MomentTrace.Windows       Windows foreground recorder and startup registration
 ```
 
 This split is intentional. Future macOS support should add platform-specific services beside `MomentTrace.Windows` while reusing `MomentTrace.Core`, `MomentTrace.Storage`, and the platform-neutral presentation models.
+
+`MomentTrace.Presentation` is the first major cross-platform extraction. It now owns the platform-neutral shaping for:
+
+- moment display text, categories, durations, and saved-state labels
+- timeline session collapsing and grouped session presentation
+- Overview analytics including summary metrics, heatmap segments, top applications, focus blocks, and activity legend colours
+- Today, Yesterday, and dated filter options
+- detail-panel narrative text, grouped raw entries, and related moment selection
+- shell contracts for app icons, local paths, and user profile metadata
+
+The WPF app now acts more like a Windows shell over shared timeline data. It still owns WPF controls, tray behavior, custom window chrome, Windows icons, screenshot previews, settings, and installer/startup wiring.
 
 ## Requirements
 
@@ -364,6 +375,7 @@ For Azure DevOps planning, current implementation work is tracked in the MomentT
 
 - Keep platform-neutral logic in `MomentTrace.Core` and `MomentTrace.Storage`.
 - Keep platform-neutral memory/timeline presentation logic in `MomentTrace.Presentation`.
+- Keep shell adapters thin: WPF should adapt icons, images, controls, and Windows behavior around shared presentation output rather than duplicating timeline or overview logic.
 - Keep Windows API, registry, tray, and executable-icon behavior in `MomentTrace.Windows` or `MomentTrace.App`.
 - Keep optional AI features behind `IAiProvider`; do not show AI panels when no provider is registered.
 - Keep captured user data local-first unless a future feature explicitly asks for sync.
@@ -379,4 +391,5 @@ For Azure DevOps planning, current implementation work is tracked in the MomentT
 - Add a settings option to delete local data when the user wants a full privacy cleanup
 - Add app health/status checks for recorder, screenshot capture, browser URL capture, and database writes
 - Add first-run onboarding for privacy, startup behavior, and local storage
-- Plan the cross-platform desktop path, likely with Avalonia for Windows/macOS UI reuse
+- Create the first Avalonia shell that reads the shared SQLite timeline through `MomentTrace.Storage` and binds to `MomentTrace.Presentation`
+- Replace the macOS probe capture path with a proper `MomentTrace.Mac` platform service using native AppKit/Accessibility APIs
