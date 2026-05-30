@@ -129,11 +129,13 @@ Current responsibilities:
 - `ActivityMomentViewModel` holds platform-neutral moment text, duration, category labels, saved-state labels, and cleaned display titles.
 - `TimelinePresentationBuilder` collapses raw activities into reusable sessions and groups.
 - `TimelineSessionGroup` holds platform-neutral grouped session presentation state.
+- `OverviewPresentationBuilder` shapes daily metrics, heatmap segments, top applications, focus rhythm blocks, and legend items.
+- `ActivityPalette` keeps semantic activity colours consistent across shells.
 - `IAppIconProvider<TIcon>` defines a shell-specific icon lookup contract.
 - `ILocalPathProvider` defines shell-specific local path reporting.
 - `IUserShellProfile` defines shell-specific user display metadata.
 
-The WPF app now adapts `ActivityMomentViewModel` through `ActivityItemViewModel` and keeps WPF-only image/icon loading in `MomentTrace.App`. A future Avalonia shell should reuse `MomentTrace.Presentation` and provide its own icon/path/user implementations.
+The WPF app now adapts `ActivityMomentViewModel` through `ActivityItemViewModel` and keeps WPF-only image/icon loading in `MomentTrace.App`. Overview still gets WPF icon adaptation for the top-app table, but the analytics calculations are shared. A future Avalonia shell should reuse `MomentTrace.Presentation` and provide its own icon/path/user implementations.
 
 ## Open Questions
 

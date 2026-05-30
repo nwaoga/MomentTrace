@@ -27,12 +27,13 @@ public partial class MainWindow : Window
     private readonly ISearchProvider _searchProvider;
     private readonly IInsightProvider _insightProvider;
     private readonly TimelinePresentationBuilder _timelinePresentationBuilder;
+    private readonly OverviewPresentationBuilder _overviewPresentationBuilder;
     private AppThemePalette _currentTheme;
     private readonly ObservableCollection<ActivityItemViewModel> _activities = [];
     private readonly ObservableCollection<TimelineSessionGroupViewModel> _activityGroups = [];
-    private readonly ObservableCollection<SummaryMetricViewModel> _summaryMetrics = [];
+    private readonly ObservableCollection<OverviewMetricViewModel> _summaryMetrics = [];
     private readonly ObservableCollection<HeatmapSegmentViewModel> _heatmapSegments = [];
-    private readonly ObservableCollection<TopApplicationViewModel> _topApplications = [];
+    private readonly ObservableCollection<TopApplicationRowViewModel> _topApplications = [];
     private readonly ObservableCollection<FocusBlockViewModel> _focusBlocks = [];
     private readonly ObservableCollection<LegendItemViewModel> _overviewLegend = [];
     private readonly ObservableCollection<DateFilterOption> _dateFilters = [];
@@ -71,6 +72,7 @@ public partial class MainWindow : Window
         _searchProvider = searchProvider ?? LocalMetadataSearchProvider.Default;
         _insightProvider = insightProvider ?? LocalInsightProvider.Default;
         _timelinePresentationBuilder = new TimelinePresentationBuilder(_activityClassifier, _sessionSummarizer);
+        _overviewPresentationBuilder = new OverviewPresentationBuilder(_timelinePresentationBuilder);
         _currentTheme = AppThemePalette.Find(_preferences.Theme);
 
         InitializeComponent();
@@ -242,56 +244,44 @@ public partial class MainWindow : Window
             .Where(activity => !ActivityExclusionFilter.IsExcluded(activity))
             .Where(activity => !privacyFilter.ShouldExclude(activity))
             .ToList();
-        var todayActivities = activities
-            .Where(activity => activity.StartedAt.LocalDateTime.Date == selectedDate)
-            .OrderBy(activity => activity.StartedAt)
-            .ToList();
-
-        var totalActive = todayActivities.Aggregate(TimeSpan.Zero, (total, activity) => total + activity.Duration);
-        var sessions = _timelinePresentationBuilder.BuildSessions(todayActivities)
-            .Select(ToActivityItemViewModel)
-            .OrderBy(activity => activity.SessionStartedAt)
-            .ToList();
-        var topApps = BuildTopApplications(todayActivities, totalActive).ToList();
-        var longestFocus = BuildFocusBlocks(sessions).Where(block => !block.IsGap).OrderByDescending(block => block.Duration).FirstOrDefault();
+        var overview = _overviewPresentationBuilder.Build(activities, selectedDate);
 
         _summaryMetrics.Clear();
-        _summaryMetrics.Add(new SummaryMetricViewModel("Remembered Span", FormatDuration(totalActive), "Foreground time captured locally"));
-        _summaryMetrics.Add(new SummaryMetricViewModel("Moments", sessions.Count.ToString(), "Grouped from related activity"));
-        _summaryMetrics.Add(new SummaryMetricViewModel("Most Seen App", topApps.FirstOrDefault()?.AppName ?? "No activity yet", topApps.FirstOrDefault()?.Duration ?? "Waiting for activity"));
-        _summaryMetrics.Add(new SummaryMetricViewModel("Longest Visible Run", longestFocus is null ? "No run yet" : FormatDuration(longestFocus.Duration), longestFocus?.Label ?? "Visible blocks appear here"));
+        foreach (var metric in overview.SummaryMetrics)
+        {
+            _summaryMetrics.Add(metric);
+        }
 
         _heatmapSegments.Clear();
-        foreach (var segment in BuildHeatmap(todayActivities, selectedDate))
+        foreach (var segment in overview.HeatmapSegments)
         {
             _heatmapSegments.Add(segment);
         }
 
         _topApplications.Clear();
-        foreach (var app in SortTopApplications(topApps))
+        foreach (var app in SortTopApplications(overview.TopApplications))
         {
-            _topApplications.Add(app);
+            _topApplications.Add(new TopApplicationRowViewModel(app));
         }
 
         _focusBlocks.Clear();
-        foreach (var block in BuildFocusBlocks(sessions))
+        foreach (var block in overview.FocusBlocks)
         {
             _focusBlocks.Add(block);
         }
 
         _overviewLegend.Clear();
-        _overviewLegend.Add(new LegendItemViewModel("Apps and tools", ActivityPalette.Apps));
-        _overviewLegend.Add(new LegendItemViewModel("Web browsing", ActivityPalette.Web));
-        _overviewLegend.Add(new LegendItemViewModel("Development work", ActivityPalette.Development));
-        _overviewLegend.Add(new LegendItemViewModel("Documents", ActivityPalette.Documents));
-        _overviewLegend.Add(new LegendItemViewModel("Gaps or idle space", ActivityPalette.Gap));
+        foreach (var item in overview.Legend)
+        {
+            _overviewLegend.Add(item);
+        }
 
         OverviewDateText.Text = FormatDateLabel(selectedDate);
         OverviewSidebarDateText.Text = selectedDate.ToString("dddd, d MMMM yyyy");
-        OverviewTotalActiveText.Text = FormatDuration(totalActive);
-        OverviewSessionsText.Text = sessions.Count.ToString();
-        OverviewAppsText.Text = topApps.Count.ToString();
-        OverviewFocusText.Text = longestFocus is null ? "None yet" : FormatDuration(longestFocus.Duration);
+        OverviewTotalActiveText.Text = OverviewPresentationBuilder.FormatDuration(overview.TotalActive);
+        OverviewSessionsText.Text = overview.Sessions.Count.ToString();
+        OverviewAppsText.Text = overview.TopApplications.Count.ToString();
+        OverviewFocusText.Text = overview.LongestFocusDuration;
     }
 
     private async Task LoadDateFiltersAsync(DateTime? selectedDate = null)
@@ -321,55 +311,6 @@ public partial class MainWindow : Window
         _isUpdatingDateFilter = false;
     }
 
-    private static IEnumerable<HeatmapSegmentViewModel> BuildHeatmap(IReadOnlyList<TimelineActivity> activities, DateTime day)
-    {
-        var blockLength = TimeSpan.FromMinutes(15);
-        var maxSeconds = blockLength.TotalSeconds;
-
-        for (var index = 0; index < 96; index++)
-        {
-            var start = day.AddTicks(blockLength.Ticks * index);
-            var end = start.Add(blockLength);
-            var overlapping = activities
-                .Select(activity => new
-                {
-                    Activity = activity,
-                    Seconds = GetOverlapSeconds(activity.StartedAt.LocalDateTime, activity.EndedAt.LocalDateTime, start, end)
-                })
-                .Where(item => item.Seconds > 0)
-                .ToList();
-
-            var activeSeconds = overlapping.Sum(item => item.Seconds);
-            var dominant = overlapping
-                .GroupBy(item => item.Activity.Kind)
-                .OrderByDescending(group => group.Sum(item => item.Seconds))
-                .FirstOrDefault()?.Key;
-            var topApp = overlapping
-                .GroupBy(item => item.Activity.AppName)
-                .OrderByDescending(group => group.Sum(item => item.Seconds))
-                .FirstOrDefault()?.Key ?? "No activity";
-            var intensity = Math.Clamp(activeSeconds / maxSeconds, 0, 1);
-            var tooltip = $"{start:HH:mm} - {end:HH:mm}\n{topApp}\nSeen {FormatDuration(TimeSpan.FromSeconds(activeSeconds))}\n{overlapping.Count} captures";
-
-            yield return new HeatmapSegmentViewModel(GetHeatmapFill(dominant, intensity), tooltip);
-        }
-    }
-
-    private static IEnumerable<TopApplicationViewModel> BuildTopApplications(IReadOnlyList<TimelineActivity> activities, TimeSpan totalActive)
-    {
-        return activities
-            .GroupBy(activity => activity.AppName)
-            .Select(group =>
-            {
-                var duration = group.Aggregate(TimeSpan.Zero, (total, activity) => total + activity.Duration);
-                var representative = group.OrderByDescending(activity => activity.EndedAt).First();
-                var percent = totalActive.TotalSeconds <= 0 ? 0 : duration.TotalSeconds / totalActive.TotalSeconds;
-                return new TopApplicationViewModel(representative, duration, group.Count(), percent);
-            })
-            .OrderByDescending(app => app.ActiveDuration)
-            .Take(8);
-    }
-
     private IEnumerable<TopApplicationViewModel> SortTopApplications(IEnumerable<TopApplicationViewModel> apps)
     {
         return _overviewSort switch
@@ -378,68 +319,6 @@ public partial class MainWindow : Window
             "Percent" => apps.OrderByDescending(app => app.Percent),
             _ => apps.OrderByDescending(app => app.ActiveDuration)
         };
-    }
-
-    private static IReadOnlyList<FocusBlockViewModel> BuildFocusBlocks(IReadOnlyList<ActivityItemViewModel> sessions)
-    {
-        var blocks = new List<FocusBlockViewModel>();
-        ActivityItemViewModel? previous = null;
-
-        foreach (var session in sessions)
-        {
-            if (previous is not null)
-            {
-                var gap = session.SessionStartedAt - previous.SessionEndedAt;
-                if (gap.TotalMinutes >= 5)
-                {
-                    blocks.Add(FocusBlockViewModel.Gap(gap));
-                }
-            }
-
-            blocks.Add(FocusBlockViewModel.Active(session.AppName, session.SessionEndedAt - session.SessionStartedAt, session.Activity.Kind));
-            previous = session;
-        }
-
-        return blocks.Take(26).ToList();
-    }
-
-    private static double GetOverlapSeconds(DateTime activityStart, DateTime activityEnd, DateTime blockStart, DateTime blockEnd)
-    {
-        var start = activityStart > blockStart ? activityStart : blockStart;
-        var end = activityEnd < blockEnd ? activityEnd : blockEnd;
-        return end > start ? (end - start).TotalSeconds : 0;
-    }
-
-    private static string GetHeatmapFill(MomentTrace.Core.ActivityKind? kind, double intensity)
-    {
-        if (intensity <= 0)
-        {
-            return ActivityPalette.Empty;
-        }
-
-        return kind switch
-        {
-            MomentTrace.Core.ActivityKind.Browser => ActivityPalette.Scale(ActivityPalette.Web, intensity),
-            MomentTrace.Core.ActivityKind.Development => ActivityPalette.Scale(ActivityPalette.Development, intensity),
-            MomentTrace.Core.ActivityKind.Document => ActivityPalette.Scale(ActivityPalette.Documents, intensity),
-            MomentTrace.Core.ActivityKind.System => ActivityPalette.Scale(ActivityPalette.SystemActivity, intensity),
-            _ => ActivityPalette.Scale(ActivityPalette.Apps, intensity)
-        };
-    }
-
-    private static string FormatDuration(TimeSpan duration)
-    {
-        if (duration.TotalHours >= 1)
-        {
-            return $"{(int)duration.TotalHours}h {duration.Minutes}m";
-        }
-
-        if (duration.TotalMinutes >= 1)
-        {
-            return $"{Math.Max(1, (int)Math.Round(duration.TotalMinutes))}m";
-        }
-
-        return duration.TotalSeconds > 0 ? $"{Math.Max(1, (int)Math.Round(duration.TotalSeconds))}s" : "0m";
     }
 
     private MomentTrace.Core.ActivityKind? GetSelectedKind()
@@ -669,7 +548,7 @@ public partial class MainWindow : Window
         await LoadOverviewAsync();
     }
 
-    private void OverviewSort_Click(object sender, RoutedEventArgs e)
+    private async void OverviewSort_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not System.Windows.Controls.Button { Tag: string sortKey })
         {
@@ -677,12 +556,7 @@ public partial class MainWindow : Window
         }
 
         _overviewSort = sortKey;
-        var sorted = SortTopApplications(_topApplications.ToList()).ToList();
-        _topApplications.Clear();
-        foreach (var app in sorted)
-        {
-            _topApplications.Add(app);
-        }
+        await LoadOverviewAsync();
     }
 
     private void ShowTimelinePage()
@@ -1446,10 +1320,6 @@ public partial class MainWindow : Window
         return new ActivityItemViewModel(activity.Activity, activity.SessionStartedAt, activity.SessionEndedAt, activity.OccurrenceCount);
     }
 
-    private sealed record SummaryMetricViewModel(string Label, string Value, string Detail);
-
-    private sealed record HeatmapSegmentViewModel(string Fill, string Tooltip);
-
     private sealed record DateFilterOption(DateTime Date, string Label)
     {
         public override string ToString()
@@ -1458,112 +1328,25 @@ public partial class MainWindow : Window
         }
     }
 
-    private sealed class TopApplicationViewModel
+    private sealed class TopApplicationRowViewModel(TopApplicationViewModel app)
     {
-        private readonly TimelineActivity _representative;
+        public string AppName => app.AppName;
 
-        public TopApplicationViewModel(TimelineActivity representative, TimeSpan activeDuration, int sessionCount, double percent)
-        {
-            _representative = representative;
-            ActiveDuration = activeDuration;
-            SessionCount = sessionCount;
-            Percent = percent;
-        }
+        public ImageSource? ProgramIcon => new ActivityItemViewModel(app.Representative).ProgramIcon;
 
-        public string AppName => _representative.AppName;
+        public TimeSpan ActiveDuration => app.ActiveDuration;
 
-        public ImageSource? ProgramIcon => new ActivityItemViewModel(_representative).ProgramIcon;
+        public int SessionCount => app.SessionCount;
 
-        public TimeSpan ActiveDuration { get; }
+        public double Percent => app.Percent;
 
-        public int SessionCount { get; }
+        public string Duration => app.Duration;
 
-        public double Percent { get; }
+        public string Sessions => app.Sessions;
 
-        public string Duration => FormatDuration(ActiveDuration);
+        public string PercentOfDay => app.PercentOfDay;
 
-        public string Sessions => SessionCount.ToString();
-
-        public string PercentOfDay => $"{Percent:P0}";
-
-        public string Trend => "stable";
-    }
-
-    private sealed class FocusBlockViewModel
-    {
-        private FocusBlockViewModel(string label, TimeSpan duration, string fill, bool isGap)
-        {
-            Label = label;
-            Duration = duration;
-            Fill = fill;
-            IsGap = isGap;
-        }
-
-        public string Label { get; }
-
-        public TimeSpan Duration { get; }
-
-        public string Fill { get; }
-
-        public bool IsGap { get; }
-
-        public double Width => Math.Clamp(Duration.TotalMinutes * 1.8, 18, 96);
-
-        public string Tooltip => $"{Label}\nSeen {FormatDuration(Duration)}";
-
-        public static FocusBlockViewModel Active(string appName, TimeSpan duration, MomentTrace.Core.ActivityKind kind)
-        {
-            var fill = kind switch
-            {
-                MomentTrace.Core.ActivityKind.Browser => ActivityPalette.Web,
-                MomentTrace.Core.ActivityKind.Development => ActivityPalette.Development,
-                MomentTrace.Core.ActivityKind.Document => ActivityPalette.Documents,
-                MomentTrace.Core.ActivityKind.System => ActivityPalette.SystemActivity,
-                _ => ActivityPalette.Apps
-            };
-
-            return new FocusBlockViewModel(appName, duration, fill, isGap: false);
-        }
-
-        public static FocusBlockViewModel Gap(TimeSpan duration)
-        {
-            return new FocusBlockViewModel("Gap or idle space", duration, ActivityPalette.Gap, isGap: true);
-        }
-    }
-
-    private sealed record LegendItemViewModel(string Label, string Fill);
-
-    private static class ActivityPalette
-    {
-        public const string Apps = "#8B5CF6";
-        public const string Web = "#2F80ED";
-        public const string Development = "#22C55E";
-        public const string Documents = "#F59E0B";
-        public const string SystemActivity = "#38BDF8";
-        public const string Gap = "#10233F";
-        public const string Empty = "#152033";
-
-        public static string Scale(string hex, double intensity)
-        {
-            var color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
-            var amount = intensity > 0.66 ? 1.0 : intensity > 0.33 ? 0.72 : 0.44;
-            var baseColor = System.Windows.Media.Color.FromRgb(21, 32, 51);
-            return ToHex(Mix(color, baseColor, amount));
-        }
-
-        private static System.Windows.Media.Color Mix(System.Windows.Media.Color foreground, System.Windows.Media.Color background, double foregroundAmount)
-        {
-            var inverse = 1 - foregroundAmount;
-            return System.Windows.Media.Color.FromRgb(
-                (byte)Math.Round((foreground.R * foregroundAmount) + (background.R * inverse)),
-                (byte)Math.Round((foreground.G * foregroundAmount) + (background.G * inverse)),
-                (byte)Math.Round((foreground.B * foregroundAmount) + (background.B * inverse)));
-        }
-
-        private static string ToHex(System.Windows.Media.Color color)
-        {
-            return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
-        }
+        public string Trend => app.Trend;
     }
 
     private sealed class DetailActivityRowViewModel
