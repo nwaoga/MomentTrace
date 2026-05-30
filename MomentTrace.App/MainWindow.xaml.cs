@@ -28,6 +28,7 @@ public partial class MainWindow : Window
     private readonly IInsightProvider _insightProvider;
     private readonly TimelinePresentationBuilder _timelinePresentationBuilder;
     private readonly OverviewPresentationBuilder _overviewPresentationBuilder;
+    private readonly DetailContextBuilder _detailContextBuilder;
     private AppThemePalette _currentTheme;
     private readonly ObservableCollection<ActivityItemViewModel> _activities = [];
     private readonly ObservableCollection<TimelineSessionGroupViewModel> _activityGroups = [];
@@ -38,7 +39,7 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<LegendItemViewModel> _overviewLegend = [];
     private readonly ObservableCollection<DateFilterOption> _dateFilters = [];
     private readonly ObservableCollection<DetailActivityRowViewModel> _detailActivityRows = [];
-    private readonly ObservableCollection<RelatedMomentViewModel> _relatedMomentRows = [];
+    private readonly ObservableCollection<RelatedMomentRowViewModel> _relatedMomentRows = [];
     private readonly DispatcherTimer _dateRolloverTimer;
     private readonly ICollectionView _activityView;
     private string _overviewSort = "Duration";
@@ -73,6 +74,7 @@ public partial class MainWindow : Window
         _insightProvider = insightProvider ?? LocalInsightProvider.Default;
         _timelinePresentationBuilder = new TimelinePresentationBuilder(_activityClassifier, _sessionSummarizer);
         _overviewPresentationBuilder = new OverviewPresentationBuilder(_timelinePresentationBuilder);
+        _detailContextBuilder = new DetailContextBuilder(_activityClassifier);
         _currentTheme = AppThemePalette.Find(_preferences.Theme);
 
         InitializeComponent();
@@ -276,7 +278,7 @@ public partial class MainWindow : Window
             _overviewLegend.Add(item);
         }
 
-        OverviewDateText.Text = FormatDateLabel(selectedDate);
+        OverviewDateText.Text = TimelineDateFilterBuilder.FormatDateLabel(selectedDate, DateTime.Today);
         OverviewSidebarDateText.Text = selectedDate.ToString("dddd, d MMMM yyyy");
         OverviewTotalActiveText.Text = OverviewPresentationBuilder.FormatDuration(overview.TotalActive);
         OverviewSessionsText.Text = overview.Sessions.Count.ToString();
@@ -291,19 +293,13 @@ public partial class MainWindow : Window
             .Where(activity => !ActivityExclusionFilter.IsExcluded(activity))
             .Where(activity => !privacyFilter.ShouldExclude(activity))
             .ToList();
-        var dates = activities
-            .Select(activity => activity.StartedAt.LocalDateTime.Date)
-            .Append(DateTime.Today)
-            .Append(DateTime.Today.AddDays(-1))
-            .Distinct()
-            .OrderByDescending(date => date)
-            .ToList();
+        var dateFilters = TimelineDateFilterBuilder.Build(activities, DateTime.Today);
 
         _isUpdatingDateFilter = true;
         _dateFilters.Clear();
-        foreach (var date in dates)
+        foreach (var option in dateFilters)
         {
-            _dateFilters.Add(new DateFilterOption(date, FormatDateLabel(date)));
+            _dateFilters.Add(option);
         }
 
         var dateToSelect = selectedDate ?? DateTime.Today;
@@ -404,22 +400,6 @@ public partial class MainWindow : Window
     private DateTime? GetSelectedDate()
     {
         return DateFilter.SelectedItem is DateFilterOption option ? option.Date : DateTime.Today;
-    }
-
-    private static string FormatDateLabel(DateTime date)
-    {
-        var today = DateTime.Today;
-        if (date == today)
-        {
-            return "Today";
-        }
-
-        if (date == today.AddDays(-1))
-        {
-            return "Yesterday";
-        }
-
-        return date.ToString("ddd, d MMM");
     }
 
     private static UserPrivacyFilter CurrentPrivacyFilter()
@@ -770,7 +750,7 @@ public partial class MainWindow : Window
         DetailKindText.Text = selected.KindLabel;
         DetailTitleText.Text = selected.Title;
         DetailAppText.Text = selected.Location;
-        DetailNarrativeText.Text = GetDetailNarrative(selected);
+        DetailNarrativeText.Text = _detailContextBuilder.Build(selected, [selected.Activity]).Narrative;
         DetailStartedText.Text = $"{selected.SessionStartedAt.LocalDateTime:dddd, d MMM yyyy HH:mm:ss}";
         DetailEndedText.Text = $"{selected.SessionEndedAt.LocalDateTime:dddd, d MMM yyyy HH:mm:ss}";
         DetailDurationText.Text = selected.Duration;
@@ -819,113 +799,23 @@ public partial class MainWindow : Window
             return;
         }
 
-        var rawEntries = activities
-            .Where(activity => IsRawEntryForMoment(selected, activity))
-            .OrderBy(activity => activity.StartedAt)
-            .ToList();
-
-        if (rawEntries.Count == 0)
-        {
-            rawEntries.Add(selected.Activity);
-        }
+        var detailContext = _detailContextBuilder.Build(selected, activities);
 
         _detailActivityRows.Clear();
-        foreach (var activity in rawEntries)
+        foreach (var activity in detailContext.RawEntries)
         {
-            _detailActivityRows.Add(new DetailActivityRowViewModel(activity));
+            _detailActivityRows.Add(activity);
         }
 
-        ActivityTabSummaryText.Text = rawEntries.Count == 1
-            ? "This moment currently has one captured entry."
-            : $"{rawEntries.Count} raw entries were grouped into this remembered moment.";
-
-        var selectedCategory = _activityClassifier.Classify(selected.Activity).Category;
-        var related = activities
-            .Where(activity => activity.Id != selected.Id)
-            .Select(activity => new
-            {
-                Activity = activity,
-                Category = _activityClassifier.Classify(activity).Category,
-                Distance = Math.Abs((activity.StartedAt - selected.SessionStartedAt).TotalSeconds)
-            })
-            .Where(item => string.Equals(item.Activity.AppName, selected.AppName, StringComparison.OrdinalIgnoreCase)
-                || item.Category == selectedCategory
-                || SameMomentTarget(item.Activity, selected.Activity))
-            .OrderBy(item => item.Distance)
-            .Take(6)
-            .Select(item => new RelatedMomentViewModel(new ActivityItemViewModel(item.Activity), item.Category == selectedCategory ? "Same activity type" : "Same source"))
-            .ToList();
+        ActivityTabSummaryText.Text = detailContext.RawEntriesSummary;
 
         _relatedMomentRows.Clear();
-        foreach (var item in related)
+        foreach (var item in detailContext.RelatedMoments)
         {
-            _relatedMomentRows.Add(item);
+            _relatedMomentRows.Add(new RelatedMomentRowViewModel(item));
         }
 
-        RelatedTabSummaryText.Text = related.Count == 0
-            ? "No related moments found yet."
-            : $"{related.Count} nearby moments from the same source or category.";
-    }
-
-    private static bool IsRawEntryForMoment(ActivityItemViewModel selected, TimelineActivity activity)
-    {
-        if (activity.Id == selected.Id)
-        {
-            return true;
-        }
-
-        return activity.StartedAt.LocalDateTime.Date == selected.SessionStartedAt.LocalDateTime.Date
-            && activity.StartedAt >= selected.SessionStartedAt.AddMinutes(-1)
-            && activity.EndedAt <= selected.SessionEndedAt.AddMinutes(1)
-            && SameMomentTarget(activity, selected.Activity);
-    }
-
-    private static bool SameMomentTarget(TimelineActivity left, TimelineActivity right)
-    {
-        if (!string.Equals(left.ProcessName, right.ProcessName, StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        var leftTarget = GetMomentTarget(left);
-        var rightTarget = GetMomentTarget(right);
-        return string.Equals(leftTarget, rightTarget, StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static string GetMomentTarget(TimelineActivity activity)
-    {
-        if (!string.IsNullOrWhiteSpace(activity.Resource))
-        {
-            return NormalizeResource(activity.Resource);
-        }
-
-        return string.IsNullOrWhiteSpace(activity.WindowTitle)
-            ? activity.AppName
-            : activity.WindowTitle.Trim();
-    }
-
-    private static string NormalizeResource(string resource)
-    {
-        if (!Uri.TryCreate(resource.Trim(), UriKind.Absolute, out var uri))
-        {
-            return resource.Trim().TrimEnd('/');
-        }
-
-        return $"{uri.Host}{uri.AbsolutePath.TrimEnd('/')}";
-    }
-
-    private static string GetDetailNarrative(ActivityItemViewModel selected)
-    {
-        return selected.Category switch
-        {
-            ActivityCategory.Browsing => $"Browsed {selected.Location} during this remembered moment.",
-            ActivityCategory.Research => $"Reviewed and compared web context around {selected.Location}.",
-            ActivityCategory.Development => "Worked in a development context with code, tooling, or project windows.",
-            ActivityCategory.Communication => "Moved through communication context, messages, or collaboration tools.",
-            ActivityCategory.Documents => "Reviewed or edited document-based work.",
-            ActivityCategory.ScreenshotCapture => "Captured a screenshot or visual reference for later recall.",
-            _ => selected.MemoryDescription
-        };
+        RelatedTabSummaryText.Text = detailContext.RelatedSummary;
     }
 
     private async void PinButton_Click(object sender, RoutedEventArgs e)
@@ -1320,14 +1210,6 @@ public partial class MainWindow : Window
         return new ActivityItemViewModel(activity.Activity, activity.SessionStartedAt, activity.SessionEndedAt, activity.OccurrenceCount);
     }
 
-    private sealed record DateFilterOption(DateTime Date, string Label)
-    {
-        public override string ToString()
-        {
-            return Label;
-        }
-    }
-
     private sealed class TopApplicationRowViewModel(TopApplicationViewModel app)
     {
         public string AppName => app.AppName;
@@ -1349,37 +1231,15 @@ public partial class MainWindow : Window
         public string Trend => app.Trend;
     }
 
-    private sealed class DetailActivityRowViewModel
-    {
-        public DetailActivityRowViewModel(TimelineActivity activity)
-        {
-            var item = new ActivityItemViewModel(activity);
-            TimeRange = activity.StartedAt.LocalDateTime.ToString("t");
-            Title = item.Title;
-            Source = string.IsNullOrWhiteSpace(activity.Resource)
-                ? item.TechnicalSource
-                : activity.Resource;
-            Duration = $"Seen {item.Duration}";
-        }
-
-        public string TimeRange { get; }
-
-        public string Title { get; }
-
-        public string Source { get; }
-
-        public string Duration { get; }
-    }
-
-    private sealed class RelatedMomentViewModel
+    private sealed class RelatedMomentRowViewModel
     {
         private readonly ActivityItemViewModel _activity;
 
-        public RelatedMomentViewModel(ActivityItemViewModel activity, string reason)
+        public RelatedMomentRowViewModel(RelatedMomentViewModel related)
         {
-            _activity = activity;
-            Title = activity.Title;
-            Detail = $"{reason} · {activity.CardTime} · seen {activity.Duration}";
+            _activity = ToActivityItemViewModel(related.Activity);
+            Title = related.Title;
+            Detail = related.Detail;
         }
 
         public string Title { get; }

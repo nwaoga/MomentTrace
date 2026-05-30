@@ -131,6 +131,8 @@ Current responsibilities:
 - `TimelineSessionGroup` holds platform-neutral grouped session presentation state.
 - `OverviewPresentationBuilder` shapes daily metrics, heatmap segments, top applications, focus rhythm blocks, and legend items.
 - `ActivityPalette` keeps semantic activity colours consistent across shells.
+- `TimelineDateFilterBuilder` creates Today, Yesterday, and dated filter options from captured activity.
+- `DetailContextBuilder` shapes detail-panel narrative text, raw grouped entries, and related moments.
 - `IAppIconProvider<TIcon>` defines a shell-specific icon lookup contract.
 - `ILocalPathProvider` defines shell-specific local path reporting.
 - `IUserShellProfile` defines shell-specific user display metadata.
