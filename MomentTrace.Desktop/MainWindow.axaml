@@ -1,0 +1,49 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="MomentTrace.Desktop.MainWindow"
+        Title="MomentTrace"
+        Width="1120"
+        Height="720"
+        Background="#0B1220">
+    <Grid RowDefinitions="Auto,*" ColumnDefinitions="260,*" Margin="24">
+        <StackPanel Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12" Margin="0,0,0,18">
+            <Border Width="36" Height="36" CornerRadius="8" Background="#1E2A44">
+                <TextBlock Text="MT" Foreground="#A78BFA" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <StackPanel>
+                <TextBlock Text="MomentTrace" Foreground="#F8FAFC" FontSize="18" FontWeight="SemiBold" />
+                <TextBlock x:Name="StatusText" Text="Loading local timeline..." Foreground="#94A3B8" FontSize="12" />
+            </StackPanel>
+        </StackPanel>
+
+        <Border Grid.Row="1" Grid.Column="0" Background="#111B2F" BorderBrush="#263653" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,0,18,0">
+            <StackPanel Spacing="16">
+                <TextBlock Text="Overview" Foreground="#F8FAFC" FontSize="16" FontWeight="SemiBold" />
+                <TextBlock x:Name="SummaryText" Text="Waiting for activity" Foreground="#CBD5E1" TextWrapping="Wrap" />
+                <Border Height="1" Background="#263653" />
+                <TextBlock Text="This is the first Avalonia shell spike reading MomentTrace.Core, Storage, and Presentation." Foreground="#94A3B8" TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="1" Grid.Column="1" Background="#111B2F" BorderBrush="#263653" BorderThickness="1" CornerRadius="12" Padding="18">
+            <Grid RowDefinitions="Auto,*">
+                <TextBlock Text="Recent moments" Foreground="#F8FAFC" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,14" />
+                <ListBox x:Name="MomentsList" Grid.Row="1" Background="Transparent" BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="#17233A" BorderBrush="#2C3E5E" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,10">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Title}" Foreground="#F8FAFC" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding Subtitle}" Foreground="#94A3B8" Margin="0,4,0,0" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

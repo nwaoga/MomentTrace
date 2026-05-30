@@ -68,6 +68,7 @@ The Windows installer is built with Inno Setup from a self-contained `win-x64` p
 MomentTrace.slnx
 ├─ MomentTrace.App           WPF app shell, UI, tray icon, settings wiring
 ├─ MomentTrace.Core          Shared models, interfaces, local classification/search/session services
+├─ MomentTrace.Desktop       First Avalonia shell spike for Windows/macOS UI reuse
 ├─ MomentTrace.MacProbe      First macOS recorder probe for active app/window capture
 ├─ MomentTrace.Presentation  Shared memory/timeline view models and shell service contracts
 ├─ MomentTrace.Storage       SQLite persistence
@@ -86,6 +87,8 @@ This split is intentional. Future macOS support should add platform-specific ser
 - shell contracts for app icons, local paths, and user profile metadata
 
 The WPF app now acts more like a Windows shell over shared timeline data. It still owns WPF controls, tray behavior, custom window chrome, Windows icons, screenshot previews, settings, and installer/startup wiring.
+
+`MomentTrace.Desktop` is the first Avalonia shell spike. It targets `net8.0`, reads the same local SQLite timeline through `MomentTrace.Storage`, and binds recent moments plus a small Overview summary from `MomentTrace.Presentation`. It is intentionally thin: no recorder, tray/menu bar, installer, screenshots, or platform startup behavior yet.
 
 ## Requirements
 
@@ -107,6 +110,12 @@ Run the desktop app:
 
 ```powershell
 dotnet run --project .\MomentTrace.App\MomentTrace.App.csproj
+```
+
+Run the Avalonia shell spike:
+
+```powershell
+dotnet run --project .\MomentTrace.Desktop\MomentTrace.Desktop.csproj
 ```
 
 Launch minimized to the tray:
