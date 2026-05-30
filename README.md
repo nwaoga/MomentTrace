@@ -124,6 +124,14 @@ The first run may require macOS privacy approval for Terminal, Visual Studio, or
 
 On non-macOS machines, the project builds but exits with a message instead of recording.
 
+Verified macOS probe result:
+
+- Tested from `/Users/blakboi/Documents/src/MomentTrace/MomentTrace`
+- .NET SDK `9.0.314`
+- .NET Runtime `8.0.27`
+- Shared timeline database: `~/Library/Application Support/MomentTrace/timeline.db`
+- Confirmed foreground app/window rows were written for Codex and System Settings
+
 ### Pull And Run On A Mac
 
 Use GitHub as the bridge between Windows and macOS rather than building from a Windows network share. Local Mac builds are faster and avoid `bin`/`obj` file-locking problems across SMB.
@@ -144,6 +152,12 @@ cd MomentTrace
 git pull
 dotnet build ./MomentTrace.slnx
 dotnet run --project ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
+```
+
+If building the whole solution on macOS, include Windows targeting because the solution still contains the Windows WPF project:
+
+```bash
+dotnet build ./MomentTrace.slnx -p:EnableWindowsTargeting=true
 ```
 
 For the first Mac spike, Terminal is the simplest way to run the probe because the output is immediate and permission prompts are easier to reason about. Visual Studio Code is the best lightweight IDE for editing and debugging on macOS. Visual Studio for Mac is discontinued, so do not plan the Mac workflow around it. If using a full JetBrains IDE, Rider is a good option once the cross-platform UI work starts.

@@ -92,6 +92,33 @@ The probe writes to the same SQLite schema as the Windows app. It captures activ
 
 It is intentionally not the final macOS implementation. It uses `osascript` and System Events as a fast proof path so we can validate permissions, storage, grouping, and developer workflow before replacing the capture layer with native AppKit/Accessibility bindings in `MomentTrace.Mac`.
 
+## Verified Result
+
+The probe has been tested successfully on a Mac clone at:
+
+```text
+/Users/blakboi/Documents/src/MomentTrace/MomentTrace
+```
+
+Verified local toolchain:
+
+- .NET SDK `9.0.314`
+- .NET Runtime `8.0.27`
+
+The full solution builds on macOS with Windows targeting enabled:
+
+```bash
+dotnet build MomentTrace.slnx -p:EnableWindowsTargeting=true
+```
+
+The probe runs and writes foreground app/window activity into:
+
+```text
+/Users/blakboi/Library/Application Support/MomentTrace/timeline.db
+```
+
+Observed foreground rows included Codex and System Settings, including the Accessibility window. Treat the macOS recorder spike as proven enough to move on to shared timeline viewing and the first cross-platform UI shell work.
+
 ## Open Questions
 
 - Which macOS versions do we support for the first Mac preview?
