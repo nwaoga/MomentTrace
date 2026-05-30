@@ -141,6 +141,8 @@ public class ActivityMomentViewModel(TimelineActivity activity)
 
     public string CapturedSpan => _sessionEndedAt > _sessionStartedAt ? TimeRange : StartTime;
 
+    public int OccurrenceCount => _occurrenceCount;
+
     public string OccurrenceLabel => _occurrenceCount > 1 ? $"{_occurrenceCount} entries" : KindLabel;
 
     public string PinMark => Activity.IsPinned ? "PINNED" : string.Empty;

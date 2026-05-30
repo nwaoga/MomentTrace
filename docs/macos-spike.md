@@ -127,6 +127,8 @@ The first cross-platform boundary has been added with `MomentTrace.Presentation`
 Current responsibilities:
 
 - `ActivityMomentViewModel` holds platform-neutral moment text, duration, category labels, saved-state labels, and cleaned display titles.
+- `TimelinePresentationBuilder` collapses raw activities into reusable sessions and groups.
+- `TimelineSessionGroup` holds platform-neutral grouped session presentation state.
 - `IAppIconProvider<TIcon>` defines a shell-specific icon lookup contract.
 - `ILocalPathProvider` defines shell-specific local path reporting.
 - `IUserShellProfile` defines shell-specific user display metadata.

@@ -9,6 +9,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using MomentTrace.Core;
+using MomentTrace.Presentation;
 using Process = System.Diagnostics.Process;
 using ProcessStartInfo = System.Diagnostics.ProcessStartInfo;
 
@@ -25,6 +26,7 @@ public partial class MainWindow : Window
     private readonly ISessionSummarizer _sessionSummarizer;
     private readonly ISearchProvider _searchProvider;
     private readonly IInsightProvider _insightProvider;
+    private readonly TimelinePresentationBuilder _timelinePresentationBuilder;
     private AppThemePalette _currentTheme;
     private readonly ObservableCollection<ActivityItemViewModel> _activities = [];
     private readonly ObservableCollection<TimelineSessionGroupViewModel> _activityGroups = [];
@@ -68,6 +70,7 @@ public partial class MainWindow : Window
         _sessionSummarizer = sessionSummarizer ?? RuleBasedSessionSummarizer.Default;
         _searchProvider = searchProvider ?? LocalMetadataSearchProvider.Default;
         _insightProvider = insightProvider ?? LocalInsightProvider.Default;
+        _timelinePresentationBuilder = new TimelinePresentationBuilder(_activityClassifier, _sessionSummarizer);
         _currentTheme = AppThemePalette.Find(_preferences.Theme);
 
         InitializeComponent();
@@ -183,7 +186,9 @@ public partial class MainWindow : Window
             .Where(MatchesActiveTimelineFilter)
             .Where(activity => selectedDate is null || activity.StartedAt.LocalDateTime.Date == selectedDate.Value)
             .ToList();
-        var sessions = BuildTimelineSessions(activities).ToList();
+        var sessions = _timelinePresentationBuilder.BuildSessions(activities)
+            .Select(ToActivityItemViewModel)
+            .ToList();
         TodayActivityCountText.Text = $"{sessions.Count} moments";
         _activities.Clear();
         _activityGroups.Clear();
@@ -243,7 +248,10 @@ public partial class MainWindow : Window
             .ToList();
 
         var totalActive = todayActivities.Aggregate(TimeSpan.Zero, (total, activity) => total + activity.Duration);
-        var sessions = BuildTimelineSessions(todayActivities).OrderBy(activity => activity.SessionStartedAt).ToList();
+        var sessions = _timelinePresentationBuilder.BuildSessions(todayActivities)
+            .Select(ToActivityItemViewModel)
+            .OrderBy(activity => activity.SessionStartedAt)
+            .ToList();
         var topApps = BuildTopApplications(todayActivities, totalActive).ToList();
         var longestFocus = BuildFocusBlocks(sessions).Where(block => !block.IsGap).OrderByDescending(block => block.Duration).FirstOrDefault();
 
@@ -540,195 +548,11 @@ public partial class MainWindow : Window
         return new UserPrivacyFilter(WindowPreferences.Load().ToPrivacyFilterOptions());
     }
 
-    private static IEnumerable<ActivityItemViewModel> BuildTimelineSessions(IReadOnlyList<TimelineActivity> activities)
-    {
-        TimelineSessionBuilder? session = null;
-
-        foreach (var activity in activities.OrderByDescending(activity => activity.StartedAt))
-        {
-            if (session is not null && session.CanInclude(activity))
-            {
-                session.Include(activity);
-                continue;
-            }
-
-            if (session is not null)
-            {
-                yield return session.ToViewModel();
-            }
-
-            session = new TimelineSessionBuilder(activity);
-        }
-
-        if (session is not null)
-        {
-            yield return session.ToViewModel();
-        }
-    }
-
     private IEnumerable<TimelineSessionGroupViewModel> BuildTimelineGroups(IReadOnlyList<ActivityItemViewModel> sessions)
     {
-        TimelineGroupBuilder? group = null;
-
-        foreach (var session in sessions)
+        foreach (var group in _timelinePresentationBuilder.BuildGroups(sessions))
         {
-            if (group is not null && group.CanInclude(session))
-            {
-                group.Include(session);
-                continue;
-            }
-
-            if (group is not null)
-            {
-                yield return group.ToViewModel();
-            }
-
-            group = new TimelineGroupBuilder(session, _activityClassifier, _sessionSummarizer);
-        }
-
-        if (group is not null)
-        {
-            yield return group.ToViewModel();
-        }
-    }
-
-    private sealed class TimelineSessionBuilder
-    {
-        private readonly string _key;
-        private readonly DateTime _date;
-        private TimelineActivity _representative;
-        private DateTimeOffset _startedAt;
-        private DateTimeOffset _endedAt;
-        private int _count;
-
-        public TimelineSessionBuilder(TimelineActivity activity)
-        {
-            _representative = activity;
-            _startedAt = activity.StartedAt;
-            _endedAt = activity.EndedAt;
-            _count = 1;
-            _date = activity.StartedAt.LocalDateTime.Date;
-            _key = GetSessionKey(activity);
-        }
-
-        public bool CanInclude(TimelineActivity activity)
-        {
-            return activity.StartedAt.LocalDateTime.Date == _date
-                && string.Equals(GetSessionKey(activity), _key, StringComparison.OrdinalIgnoreCase);
-        }
-
-        public void Include(TimelineActivity activity)
-        {
-            _count++;
-
-            if (activity.StartedAt < _startedAt)
-            {
-                _startedAt = activity.StartedAt;
-            }
-
-            if (activity.EndedAt > _endedAt)
-            {
-                _endedAt = activity.EndedAt;
-            }
-
-            if (activity.StartedAt > _representative.StartedAt)
-            {
-                _representative = activity;
-            }
-        }
-
-        public ActivityItemViewModel ToViewModel()
-        {
-            return new ActivityItemViewModel(_representative, _startedAt, _endedAt, _count);
-        }
-
-        private static string GetSessionKey(TimelineActivity activity)
-        {
-            return string.Join(
-                "|",
-                activity.Kind,
-                activity.ProcessName.Trim(),
-                NormalizeSessionTarget(activity));
-        }
-
-        private static string NormalizeSessionTarget(TimelineActivity activity)
-        {
-            if (activity.Kind == MomentTrace.Core.ActivityKind.Browser && !string.IsNullOrWhiteSpace(activity.Resource))
-            {
-                return NormalizeBrowserResource(activity.Resource);
-            }
-
-            if (!string.IsNullOrWhiteSpace(activity.ExecutablePath))
-            {
-                return activity.ExecutablePath.Trim();
-            }
-
-            return activity.ProcessName.Trim();
-        }
-
-        private static string NormalizeBrowserResource(string resource)
-        {
-            if (!Uri.TryCreate(resource.Trim(), UriKind.Absolute, out var uri))
-            {
-                return resource.Trim().TrimEnd('/');
-            }
-
-            var path = uri.AbsolutePath.TrimEnd('/');
-            return string.IsNullOrWhiteSpace(path)
-                ? uri.Host
-                : $"{uri.Host}{path}";
-        }
-    }
-
-    private sealed class TimelineGroupBuilder
-    {
-        private static readonly TimeSpan GroupGap = TimeSpan.FromMinutes(25);
-        private readonly IActivityClassifier _classifier;
-        private readonly ISessionSummarizer _summarizer;
-        private readonly List<ActivityItemViewModel> _activities = [];
-        private readonly DateTime _date;
-        private readonly ActivityCategory _category;
-        private DateTimeOffset _startedAt;
-        private DateTimeOffset _endedAt;
-
-        public TimelineGroupBuilder(ActivityItemViewModel activity, IActivityClassifier classifier, ISessionSummarizer summarizer)
-        {
-            _classifier = classifier;
-            _summarizer = summarizer;
-            _date = activity.SessionStartedAt.LocalDateTime.Date;
-            _category = classifier.Classify(activity.Activity).Category;
-            _startedAt = activity.SessionStartedAt;
-            _endedAt = activity.SessionEndedAt;
-            _activities.Add(activity);
-        }
-
-        public bool CanInclude(ActivityItemViewModel activity)
-        {
-            var category = _classifier.Classify(activity.Activity).Category;
-            return activity.SessionStartedAt.LocalDateTime.Date == _date
-                && category == _category
-                && _startedAt - activity.SessionEndedAt <= GroupGap
-                && _activities.Count < 8;
-        }
-
-        public void Include(ActivityItemViewModel activity)
-        {
-            _activities.Add(activity);
-
-            if (activity.SessionStartedAt < _startedAt)
-            {
-                _startedAt = activity.SessionStartedAt;
-            }
-
-            if (activity.SessionEndedAt > _endedAt)
-            {
-                _endedAt = activity.SessionEndedAt;
-            }
-        }
-
-        public TimelineSessionGroupViewModel ToViewModel()
-        {
-            return new TimelineSessionGroupViewModel(_startedAt, _endedAt, _category, _activities.ToList(), _summarizer);
+            yield return new TimelineSessionGroupViewModel(group);
         }
     }
 
@@ -1617,6 +1441,11 @@ public partial class MainWindow : Window
         return string.Equals(viewMode, "Cards", StringComparison.OrdinalIgnoreCase);
     }
 
+    private static ActivityItemViewModel ToActivityItemViewModel(ActivityMomentViewModel activity)
+    {
+        return new ActivityItemViewModel(activity.Activity, activity.SessionStartedAt, activity.SessionEndedAt, activity.OccurrenceCount);
+    }
+
     private sealed record SummaryMetricViewModel(string Label, string Value, string Detail);
 
     private sealed record HeatmapSegmentViewModel(string Fill, string Tooltip);
@@ -1806,53 +1635,33 @@ public partial class MainWindow : Window
         Related
     }
 
-    private sealed class TimelineSessionGroupViewModel(
-        DateTimeOffset startedAt,
-        DateTimeOffset endedAt,
-        ActivityCategory category,
-        IReadOnlyList<ActivityItemViewModel> activities,
-        ISessionSummarizer summarizer) : INotifyPropertyChanged
+    private sealed class TimelineSessionGroupViewModel(TimelineSessionGroup group) : INotifyPropertyChanged
     {
-        private const int PreviewActivityCount = 4;
-        private bool _isExpanded;
-
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public string Name { get; } = summarizer.GetSessionTitle(category, activities.Select(activity => activity.Activity).ToList());
+        public string Name { get; } = group.Name;
 
-        public string Summary { get; } = summarizer.GetSessionDescription(category, activities.Select(activity => activity.Activity).ToList());
+        public string Summary { get; } = group.Summary;
 
-        public string TimeRange { get; } = $"{startedAt.LocalDateTime:HH:mm} - {endedAt.LocalDateTime:HH:mm}";
+        public string TimeRange { get; } = group.TimeRange;
 
-        public string AccentBrush { get; } = category switch
-        {
-            ActivityCategory.Browsing => "#5CA8FF",
-            ActivityCategory.Research => "#7C5CFF",
-            ActivityCategory.Development => "#71C562",
-            ActivityCategory.Communication => "#67D4B1",
-            ActivityCategory.Documents => "#E7B84E",
-            ActivityCategory.ScreenshotCapture => "#B89CFF",
-            _ => "#8D9BB0"
-        };
+        public string AccentBrush { get; } = group.AccentBrush;
 
-        public IReadOnlyList<ActivityItemViewModel> Activities { get; } = activities;
+        public IReadOnlyList<ActivityItemViewModel> Activities { get; } = group.Activities.Select(ToActivityItemViewModel).ToList();
 
         public int ActivityCount => Activities.Count;
 
-        public IReadOnlyList<ActivityItemViewModel> VisibleActivities =>
-            _isExpanded ? Activities : Activities.Take(PreviewActivityCount).ToList();
+        public IReadOnlyList<ActivityItemViewModel> VisibleActivities => group.VisibleActivities.Select(ToActivityItemViewModel).ToList();
 
-        public string ToggleText => _isExpanded ? "Show less" : "View all";
+        public string ToggleText => group.ToggleText;
 
-        public string ToggleGlyph => _isExpanded ? "⌃" : "⌄";
+        public string ToggleGlyph => group.ToggleGlyph;
 
-        public Visibility ToggleVisibility => Activities.Count > PreviewActivityCount
-            ? Visibility.Visible
-            : Visibility.Collapsed;
+        public Visibility ToggleVisibility => group.HasMoreThanPreviewCount ? Visibility.Visible : Visibility.Collapsed;
 
         public void ToggleExpanded()
         {
-            _isExpanded = !_isExpanded;
+            group.ToggleExpanded();
             OnPropertyChanged(nameof(VisibleActivities));
             OnPropertyChanged(nameof(ToggleText));
             OnPropertyChanged(nameof(ToggleGlyph));
