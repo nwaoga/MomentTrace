@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MomentTrace.Core\MomentTrace.Core.csproj" />
+    <ProjectReference Include="..\MomentTrace.Presentation\MomentTrace.Presentation.csproj" />
     <ProjectReference Include="..\MomentTrace.Storage\MomentTrace.Storage.csproj" />
     <ProjectReference Include="..\MomentTrace.Windows\MomentTrace.Windows.csproj" />
   </ItemGroup>

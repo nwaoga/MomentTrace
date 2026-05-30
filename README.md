@@ -69,11 +69,12 @@ MomentTrace.slnx
 ├─ MomentTrace.App       WPF app shell, UI, tray icon, settings wiring
 ├─ MomentTrace.Core      Shared models, interfaces, local classification/search/session services
 ├─ MomentTrace.MacProbe  First macOS recorder probe for active app/window capture
+├─ MomentTrace.Presentation Shared memory/timeline view models and shell service contracts
 ├─ MomentTrace.Storage   SQLite persistence
 └─ MomentTrace.Windows   Windows foreground recorder and startup registration
 ```
 
-This split is intentional. Future macOS support should add platform-specific services beside `MomentTrace.Windows` while reusing `MomentTrace.Core` and `MomentTrace.Storage`.
+This split is intentional. Future macOS support should add platform-specific services beside `MomentTrace.Windows` while reusing `MomentTrace.Core`, `MomentTrace.Storage`, and the platform-neutral presentation models.
 
 ## Requirements
 
@@ -362,6 +363,7 @@ For Azure DevOps planning, current implementation work is tracked in the MomentT
 ## Development Notes
 
 - Keep platform-neutral logic in `MomentTrace.Core` and `MomentTrace.Storage`.
+- Keep platform-neutral memory/timeline presentation logic in `MomentTrace.Presentation`.
 - Keep Windows API, registry, tray, and executable-icon behavior in `MomentTrace.Windows` or `MomentTrace.App`.
 - Keep optional AI features behind `IAiProvider`; do not show AI panels when no provider is registered.
 - Keep captured user data local-first unless a future feature explicitly asks for sync.

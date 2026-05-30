@@ -8,6 +8,7 @@ Use an Avalonia desktop shell for the eventual cross-platform UI, while keeping 
 
 - `MomentTrace.Core`: shared models, classification, sessions, search, AI interfaces.
 - `MomentTrace.Storage`: shared SQLite persistence and migrations.
+- `MomentTrace.Presentation`: platform-neutral memory/timeline view models and shell service contracts.
 - `MomentTrace.Desktop`: future Avalonia UI.
 - `MomentTrace.Windows`: Windows recorder, startup, tray, screenshot, URL capture.
 - `MomentTrace.Mac`: macOS recorder, login item, menu bar, screenshot, URL capture.
@@ -118,6 +119,19 @@ The probe runs and writes foreground app/window activity into:
 ```
 
 Observed foreground rows included Codex and System Settings, including the Accessibility window. Treat the macOS recorder spike as proven enough to move on to shared timeline viewing and the first cross-platform UI shell work.
+
+## Shared Presentation Boundary
+
+The first cross-platform boundary has been added with `MomentTrace.Presentation`.
+
+Current responsibilities:
+
+- `ActivityMomentViewModel` holds platform-neutral moment text, duration, category labels, saved-state labels, and cleaned display titles.
+- `IAppIconProvider<TIcon>` defines a shell-specific icon lookup contract.
+- `ILocalPathProvider` defines shell-specific local path reporting.
+- `IUserShellProfile` defines shell-specific user display metadata.
+
+The WPF app now adapts `ActivityMomentViewModel` through `ActivityItemViewModel` and keeps WPF-only image/icon loading in `MomentTrace.App`. A future Avalonia shell should reuse `MomentTrace.Presentation` and provide its own icon/path/user implementations.
 
 ## Open Questions
 
