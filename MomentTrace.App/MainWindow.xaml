@@ -687,6 +687,9 @@
                                         <TextBlock Text="★" Width="28" />
                                         <TextBlock Text="Saved Moments" />
                                     </StackPanel>
+                                    <Button.ToolTip>
+                                        <ToolTip Content="Pinned, bookmarked, or noted moments" />
+                                    </Button.ToolTip>
                                 </Button>
                             </Border>
                             <Border x:Name="NotesNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
@@ -695,6 +698,9 @@
                                         <TextBlock Text="☰" Width="28" />
                                         <TextBlock Text="Notes" />
                                     </StackPanel>
+                                    <Button.ToolTip>
+                                        <ToolTip Content="Moments with personal notes" />
+                                    </Button.ToolTip>
                                 </Button>
                             </Border>
                             <Border x:Name="BookmarksNavHighlight" Background="Transparent" CornerRadius="7" Margin="0,0,0,6">
@@ -703,6 +709,9 @@
                                         <TextBlock Text="⌑" Width="28" />
                                         <TextBlock Text="Bookmarks" />
                                     </StackPanel>
+                                    <Button.ToolTip>
+                                        <ToolTip Content="Moments saved as reusable references" />
+                                    </Button.ToolTip>
                                 </Button>
                             </Border>
                             <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,16,0,16" />
@@ -994,8 +1003,18 @@
 
                     <WrapPanel Grid.Row="1" Margin="0,24,0,18">
                         <Button Style="{StaticResource PrimaryButton}" Content="↗ Open" Click="OpenAppButton_Click" Margin="0,0,10,10" />
-                        <Button x:Name="PinButton" Style="{StaticResource ChromeButton}" Content="Pin" Click="PinButton_Click" Margin="0,0,10,10" />
-                        <Button x:Name="BookmarkButton" Style="{StaticResource ChromeButton}" Content="Bookmark" Click="BookmarkButton_Click" Margin="0,0,10,10" />
+                        <Button x:Name="PinButton"
+                                Style="{StaticResource ChromeButton}"
+                                Content="Pin"
+                                Click="PinButton_Click"
+                                Margin="0,0,10,10"
+                                ToolTip="Keep this moment prominent in the Timeline" />
+                        <Button x:Name="BookmarkButton"
+                                Style="{StaticResource ChromeButton}"
+                                Content="Bookmark"
+                                Click="BookmarkButton_Click"
+                                Margin="0,0,10,10"
+                                ToolTip="Save this moment as a Library reference" />
                         <Button x:Name="DeleteMomentButton"
                                 Style="{StaticResource ChromeButton}"
                                 Click="DeleteMomentButton_Click"
@@ -1094,7 +1113,13 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Personal note" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
-                                        <Button Grid.Column="1" Style="{StaticResource ChromeButton}" Content="Save note" Click="SaveNoteButton_Click" Padding="10,5" FontSize="11" />
+                                        <Button Grid.Column="1"
+                                                Style="{StaticResource ChromeButton}"
+                                                Content="Save note"
+                                                Click="SaveNoteButton_Click"
+                                                Padding="10,5"
+                                                FontSize="11"
+                                                ToolTip="Save note text as context for this moment; clearing the box removes the note" />
                                     </Grid>
                                     <TextBox x:Name="MomentNoteTextBox"
                                              MinHeight="78"

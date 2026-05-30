@@ -141,6 +141,15 @@ Large groups show a compact preview first. `View all` expands that session inlin
 
 The left rail can filter the Timeline by semantic Activity views (`Browsing`, `Development`, `Communication`, `Documents`) or raw Sources (`Apps`, `Websites`, `Files`). Active filters are highlighted in the rail and echoed as a small badge in the Timeline header. Selecting `Timeline` clears the rail filter and returns to all moments.
 
+The Library section uses a simple saved-memory model:
+
+- `Pin` keeps a moment prominent in the Timeline.
+- `Bookmark` saves a moment as a reusable Library reference.
+- `Note` adds human context to a moment.
+- `Saved Moments` shows anything pinned, bookmarked, or noted.
+- `Notes` shows moments with notes.
+- `Bookmarks` shows bookmarked moments.
+
 The Overview page is the activity analytics view. It summarizes the selected date with:
 
 - Remembered/foreground span, session count, most-seen app, and longest visible run

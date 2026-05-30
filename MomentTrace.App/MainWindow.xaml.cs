@@ -475,11 +475,18 @@ public partial class MainWindow : Window
     {
         return filter switch
         {
-            TimelineLibraryFilter.SavedMoments => activity.IsPinned,
+            TimelineLibraryFilter.SavedMoments => IsSavedMoment(activity),
             TimelineLibraryFilter.Notes => !string.IsNullOrWhiteSpace(activity.Note),
             TimelineLibraryFilter.Bookmarks => activity.IsBookmarked,
             _ => true
         };
+    }
+
+    private static bool IsSavedMoment(TimelineActivity activity)
+    {
+        return activity.IsPinned
+            || activity.IsBookmarked
+            || !string.IsNullOrWhiteSpace(activity.Note);
     }
 
     private DateTime? GetSelectedDate()
@@ -1019,7 +1026,10 @@ public partial class MainWindow : Window
         ScreenshotPreviewImage.Source = null;
         ScreenshotPreviewBorder.Visibility = Visibility.Collapsed;
         MomentNoteTextBox.Text = string.Empty;
+        PinButton.Content = "Pin";
+        PinButton.IsEnabled = false;
         BookmarkButton.Content = "Bookmark";
+        BookmarkButton.IsEnabled = false;
         DeleteMomentButton.IsEnabled = false;
         ActivityTabSummaryText.Text = "Select a moment to inspect its raw captured entries.";
         RelatedTabSummaryText.Text = "Select a moment to see nearby activity from the same app or category.";
@@ -1046,8 +1056,10 @@ public partial class MainWindow : Window
         ScreenshotPreviewImage.Source = selected.ScreenshotPreview;
         ScreenshotPreviewBorder.Visibility = selected.ScreenshotPreview is null ? Visibility.Collapsed : Visibility.Visible;
         PinButton.Content = activity.IsPinned ? "Unpin" : "Pin";
+        PinButton.IsEnabled = true;
         BookmarkButton.Content = activity.IsBookmarked ? "Remove bookmark" : "Bookmark";
-        BookmarkButton.Visibility = IsWebUrl(activity.Resource) ? Visibility.Visible : Visibility.Collapsed;
+        BookmarkButton.IsEnabled = true;
+        BookmarkButton.Visibility = Visibility.Visible;
         MomentNoteTextBox.Text = activity.Note ?? string.Empty;
         DeleteMomentButton.IsEnabled = true;
         _ = LoadDetailContextAsync(selected);
