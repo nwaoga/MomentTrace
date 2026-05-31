@@ -22,6 +22,9 @@ public partial class MainWindow : Window
     private readonly DetailContextBuilder _detailContextBuilder = new(RuleBasedActivityClassifier.Default);
     private readonly List<TimelineActivity> _visibleActivities = [];
     private IReadOnlyList<ActivityMomentViewModel> _sessions = [];
+    private IReadOnlyList<TimelineSessionGroup> _timelineGroups = [];
+    private OverviewPresentationModel? _currentOverview;
+    private string _topAppsSort = "Duration";
 
     public MainWindow()
     {
@@ -61,27 +64,26 @@ public partial class MainWindow : Window
             _visibleActivities
                 .Where(activity => activity.StartedAt.LocalDateTime.Date == selectedDate)
                 .ToList());
+        _timelineGroups = _timelineBuilder.BuildGroups(_sessions);
 
-        var rows = _sessions
-            .Select(session => new MomentRow(
-                session.Title,
-                session.MemoryDescription,
-                $"{session.Location} · {session.AppName}",
-                session.CardTime,
-                session.IconGlyph,
-                session.IconBackground,
-                session.IconForeground))
+        var groups = _timelineGroups
+            .Select(group => new TimelineGroupRow(
+                group.Name,
+                group.Summary,
+                group.TimeRange,
+                group.AccentBrush,
+                group.VisibleActivities.Select(ToMomentRow).ToList()))
             .ToList();
 
-        TimelineListBox.ItemsSource = rows;
-        TimelineCountText.Text = $"{rows.Count} moments on {TimelineDateFilterBuilder.FormatDateLabel(selectedDate, DateTime.Today)}";
-        TimelineSubtitleText.Text = rows.Count == 0
+        TimelineGroupsItems.ItemsSource = groups;
+        TimelineCountText.Text = $"{_sessions.Count} moments on {TimelineDateFilterBuilder.FormatDateLabel(selectedDate, DateTime.Today)}";
+        TimelineSubtitleText.Text = _sessions.Count == 0
             ? "No activity captured for this day yet"
             : "Local moments grouped from the shared presentation layer";
 
-        if (rows.Count > 0)
+        if (_sessions.Count > 0)
         {
-            TimelineListBox.SelectedIndex = 0;
+            ShowDetail(_sessions[0]);
         }
         else
         {
@@ -94,7 +96,8 @@ public partial class MainWindow : Window
         await Task.Yield();
 
         var selectedDate = GetSelectedDate();
-        var overview = _overviewBuilder.Build(_visibleActivities, selectedDate);
+        _currentOverview = _overviewBuilder.Build(_visibleActivities, selectedDate);
+        var overview = _currentOverview;
 
         OverviewSubtitleText.Text = $"{overview.Sessions.Count} moments on {TimelineDateFilterBuilder.FormatDateLabel(selectedDate, DateTime.Today)}";
         ApplyMetric(MetricOneValue, MetricOneDetail, overview.SummaryMetrics.ElementAtOrDefault(0));
@@ -117,7 +120,7 @@ public partial class MainWindow : Window
             HeatmapPanel.Children.Add(cell);
         }
 
-        TopAppsItems.ItemsSource = overview.TopApplications
+        TopAppsItems.ItemsSource = SortTopApplications(overview.TopApplications)
             .Select(app => new TopAppRow(app.AppName, $"{app.Sessions} sessions", app.Duration, app.PercentOfDay))
             .ToList();
         FocusBlocksItems.ItemsSource = overview.FocusBlocks
@@ -157,17 +160,25 @@ public partial class MainWindow : Window
         await RefreshOverviewAsync();
     }
 
-    private void TimelineListBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    private void TimelineMomentButton_Click(object? sender, RoutedEventArgs e)
     {
-        if (TimelineListBox.SelectedIndex < 0 || TimelineListBox.SelectedIndex >= _sessions.Count)
+        if (sender is not Button { CommandParameter: MomentRow row })
         {
-            ClearDetailPanel();
             return;
         }
 
-        var selected = _sessions[TimelineListBox.SelectedIndex];
-        var detail = _detailContextBuilder.Build(selected, _visibleActivities);
+        var selected = _sessions.FirstOrDefault(session => session.Id == row.Id);
+        if (selected is null)
+        {
+            return;
+        }
 
+        ShowDetail(selected);
+    }
+
+    private void ShowDetail(ActivityMomentViewModel selected)
+    {
+        var detail = _detailContextBuilder.Build(selected, _visibleActivities);
         DetailTitleText.Text = selected.Title;
         DetailSubtitleText.Text = $"{selected.CardTime} · {selected.CategoryLabel} · {selected.Location}";
         DetailNarrativeText.Text = detail.Narrative;
@@ -175,6 +186,19 @@ public partial class MainWindow : Window
         RelatedSummaryText.Text = detail.RelatedSummary;
         RawEntriesItems.ItemsSource = detail.RawEntries;
         RelatedMomentsItems.ItemsSource = detail.RelatedMoments;
+    }
+
+    private void TopAppsSortButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { CommandParameter: string sortKey } || _currentOverview is null)
+        {
+            return;
+        }
+
+        _topAppsSort = sortKey;
+        TopAppsItems.ItemsSource = SortTopApplications(_currentOverview.TopApplications)
+            .Select(app => new TopAppRow(app.AppName, $"{app.Sessions} sessions", app.Duration, app.PercentOfDay))
+            .ToList();
     }
 
     private DateTime GetSelectedDate()
@@ -210,7 +234,31 @@ public partial class MainWindow : Window
         OverviewNavButton.Foreground = Brush.Parse(!isTimeline ? "#FFFFFF" : "#CBD5E1");
     }
 
+    private IEnumerable<TopApplicationViewModel> SortTopApplications(IEnumerable<TopApplicationViewModel> apps)
+    {
+        return _topAppsSort switch
+        {
+            "Sessions" => apps.OrderByDescending(app => app.SessionCount),
+            "Percent" => apps.OrderByDescending(app => app.Percent),
+            _ => apps.OrderByDescending(app => app.ActiveDuration)
+        };
+    }
+
+    private static MomentRow ToMomentRow(ActivityMomentViewModel session)
+    {
+        return new MomentRow(
+            session.Id,
+            session.Title,
+            session.MemoryDescription,
+            $"{session.Location} · {session.AppName}",
+            session.CardTime,
+            session.IconGlyph,
+            session.IconBackground,
+            session.IconForeground);
+    }
+
     private sealed record MomentRow(
+        long Id,
         string Title,
         string Subtitle,
         string Meta,
@@ -218,6 +266,13 @@ public partial class MainWindow : Window
         string Glyph,
         string GlyphBackground,
         string GlyphForeground);
+
+    private sealed record TimelineGroupRow(
+        string Name,
+        string Summary,
+        string TimeRange,
+        string AccentBrush,
+        IReadOnlyList<MomentRow> Moments);
 
     private sealed record TopAppRow(string AppName, string Meta, string Duration, string Percent);
 
