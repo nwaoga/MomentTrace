@@ -8,6 +8,7 @@ using MomentTrace.Presentation;
 using MomentTrace.Storage;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -32,6 +33,8 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         _overviewBuilder = new OverviewPresentationBuilder(_timelineBuilder);
+        TypeFilterComboBox.ItemsSource = new[] { "All" };
+        TypeFilterComboBox.SelectedIndex = 0;
         Opened += async (_, _) => await ReloadAsync();
     }
 
@@ -125,11 +128,19 @@ public partial class MainWindow : Window
         }
 
         TopAppsItems.ItemsSource = SortTopApplications(overview.TopApplications)
-            .Select(app => new TopAppRow(app.AppName, $"{app.Sessions} sessions", app.Duration, app.PercentOfDay))
+            .Select(app => ToTopAppRow(app))
             .ToList();
         FocusBlocksItems.ItemsSource = overview.FocusBlocks
             .Take(8)
-            .Select(block => new FocusRow(block.Label, OverviewPresentationBuilder.FormatDuration(block.Duration)))
+            .Select((block, index) => new FocusRow(
+                block.Label,
+                OverviewPresentationBuilder.FormatDuration(block.Duration),
+                (index % 3) switch
+                {
+                    0 => "#8B5CF6",
+                    1 => "#22C55E",
+                    _ => "#0EA5E9"
+                }))
             .ToList();
         LegendItems.ItemsSource = overview.Legend;
         UpdateTopAppSortButtons();
@@ -152,6 +163,21 @@ public partial class MainWindow : Window
     private async void RefreshButton_Click(object? sender, RoutedEventArgs e)
     {
         await ReloadAsync();
+    }
+
+    private void MinimizeShellButton_Click(object? sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState.Minimized;
+    }
+
+    private void MaximizeShellButton_Click(object? sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+    }
+
+    private void CloseShellButton_Click(object? sender, RoutedEventArgs e)
+    {
+        Close();
     }
 
     private async void DateFilterComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -198,8 +224,17 @@ public partial class MainWindow : Window
     private void ShowDetail(ActivityMomentViewModel selected)
     {
         var detail = _detailContextBuilder.Build(selected, _visibleActivities);
+        DetailGlyphHost.Background = Brush.Parse(selected.IconBackground);
+        DetailGlyphText.Text = selected.IconGlyph;
+        DetailGlyphText.Foreground = Brush.Parse(selected.IconForeground);
         DetailTitleText.Text = selected.Title;
-        DetailSubtitleText.Text = $"{selected.CardTime} · {selected.CategoryLabel} · {selected.Location}";
+        DetailSubtitleText.Text = $"{selected.Location} · {selected.AppName}";
+        DetailCategoryText.Text = selected.CategoryLabel;
+        DetailDurationText.Text = selected.SeenDuration;
+        DetailMetaSpanText.Text = selected.CapturedSpan;
+        DetailMetaSourceText.Text = selected.TechnicalSource;
+        DetailMetaCategoryText.Text = selected.CategoryLabel;
+        DetailMetaSavedText.Text = selected.HasSavedIndicator ? selected.SavedIndicatorText : "Not saved yet";
         DetailNarrativeText.Text = detail.Narrative;
         RawSummaryText.Text = detail.RawEntriesSummary;
         RelatedSummaryText.Text = detail.RelatedSummary;
@@ -216,7 +251,7 @@ public partial class MainWindow : Window
 
         _topAppsSort = sortKey;
         TopAppsItems.ItemsSource = SortTopApplications(_currentOverview.TopApplications)
-            .Select(app => new TopAppRow(app.AppName, $"{app.Sessions} sessions", app.Duration, app.PercentOfDay))
+            .Select(app => ToTopAppRow(app))
             .ToList();
         UpdateTopAppSortButtons();
     }
@@ -228,8 +263,17 @@ public partial class MainWindow : Window
 
     private void ClearDetailPanel()
     {
+        DetailGlyphHost.Background = Brush.Parse("#172743");
+        DetailGlyphText.Text = "MT";
+        DetailGlyphText.Foreground = Brush.Parse("#A78BFA");
         DetailTitleText.Text = "Select a moment";
         DetailSubtitleText.Text = "Timeline context appears here";
+        DetailCategoryText.Text = "Moment";
+        DetailDurationText.Text = "Local only";
+        DetailMetaSpanText.Text = "Local only";
+        DetailMetaSourceText.Text = "MomentTrace";
+        DetailMetaCategoryText.Text = "Moment";
+        DetailMetaSavedText.Text = "Not saved yet";
         DetailNarrativeText.Text = "Select a moment to inspect its grouped raw activity and nearby related work.";
         RawSummaryText.Text = "No moment selected";
         RelatedSummaryText.Text = "No related moments yet";
@@ -293,6 +337,21 @@ public partial class MainWindow : Window
         };
     }
 
+    private static TopAppRow ToTopAppRow(TopApplicationViewModel app)
+    {
+        var glyph = string.IsNullOrWhiteSpace(app.AppName) ? "?" : app.AppName[..1].ToUpperInvariant();
+        var accent = app.AppName.ToLowerInvariant() switch
+        {
+            var name when name.Contains("edge") => "#0EA5E9",
+            var name when name.Contains("code") => "#8B5CF6",
+            var name when name.Contains("teams") || name.Contains("slack") => "#22C55E",
+            var name when name.Contains("word") || name.Contains("docs") => "#F59E0B",
+            _ => "#64748B"
+        };
+
+        return new TopAppRow(app.AppName, $"{app.Sessions} sessions", app.Duration, app.PercentOfDay, glyph, accent);
+    }
+
     private bool MatchesSearch(ActivityMomentViewModel session)
     {
         if (string.IsNullOrWhiteSpace(_searchText))
@@ -320,6 +379,7 @@ public partial class MainWindow : Window
             $"{session.Location} · {session.AppName}",
             session.CardTime,
             session.SeenDuration,
+            GetPreviewUri(session.ThumbnailPath) ?? GetPreviewUri(session.ScreenshotPath),
             session.IconGlyph,
             session.IconBackground,
             session.IconForeground,
@@ -340,8 +400,20 @@ public partial class MainWindow : Window
         {
             IsSelected = isSelected,
             CardBackground = isSelected ? "#1B2742" : "#16233A",
-            BorderBrush = isSelected ? "#7C5CFF" : "#2C3E5E"
+            BorderBrush = isSelected ? "#7C5CFF" : "#2C3E5E",
+            ShowPreview = !string.IsNullOrWhiteSpace(row.PreviewUri),
+            ShowGlyphFallback = string.IsNullOrWhiteSpace(row.PreviewUri)
         };
+    }
+
+    private static string? GetPreviewUri(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+        {
+            return null;
+        }
+
+        return new Uri(path, UriKind.Absolute).AbsoluteUri;
     }
 
     private sealed record MomentRow(
@@ -351,6 +423,7 @@ public partial class MainWindow : Window
         string Meta,
         string TimeLabel,
         string SeenLabel,
+        string? PreviewUri,
         string Glyph,
         string GlyphBackground,
         string GlyphForeground,
@@ -361,7 +434,9 @@ public partial class MainWindow : Window
         bool HasSavedIndicator,
         bool IsSelected,
         string CardBackground,
-        string BorderBrush);
+        string BorderBrush,
+        bool ShowPreview = false,
+        bool ShowGlyphFallback = true);
 
     private sealed record TimelineGroupRow(
         string Name,
@@ -371,7 +446,7 @@ public partial class MainWindow : Window
         string CountLabel,
         IReadOnlyList<MomentRow> Moments);
 
-    private sealed record TopAppRow(string AppName, string Meta, string Duration, string Percent);
+    private sealed record TopAppRow(string AppName, string Meta, string Duration, string Percent, string Glyph, string AccentBrush);
 
-    private sealed record FocusRow(string Label, string Duration);
+    private sealed record FocusRow(string Label, string Duration, string AccentBrush);
 }
