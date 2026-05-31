@@ -10,6 +10,11 @@
         MinWidth="1120"
         MinHeight="720"
         Background="#08111F">
+    <Window.Styles>
+        <Style Selector="Button.momentCard:pointerover /template/ ContentPresenter">
+            <Setter Property="Opacity" Value="0.97" />
+        </Style>
+    </Window.Styles>
     <Grid ColumnDefinitions="240,*" Margin="18">
         <Border Grid.Column="0"
                 Background="#0F1A2E"
@@ -151,10 +156,23 @@
                                             <StackPanel Margin="0,0,0,18">
                                                 <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,10">
                                                     <StackPanel>
-                                                        <TextBlock Text="{Binding Name}"
-                                                                   Foreground="#F8FAFC"
-                                                                   FontSize="16"
-                                                                   FontWeight="SemiBold" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                                            <TextBlock Text="{Binding Name}"
+                                                                       Foreground="#F8FAFC"
+                                                                       FontSize="16"
+                                                                       FontWeight="SemiBold" />
+                                                            <Border Background="#16233A"
+                                                                    BorderBrush="#253653"
+                                                                    BorderThickness="1"
+                                                                    CornerRadius="999"
+                                                                    Padding="8,2"
+                                                                    VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding CountLabel}"
+                                                                           Foreground="#94A3B8"
+                                                                           FontSize="11"
+                                                                           FontWeight="SemiBold" />
+                                                            </Border>
+                                                        </StackPanel>
                                                         <TextBlock Text="{Binding Summary}"
                                                                    Foreground="#94A3B8"
                                                                    Margin="0,4,0,0"
@@ -175,13 +193,14 @@
                                                     <ItemsControl.ItemTemplate>
                                                         <DataTemplate>
                                                             <Button Click="TimelineMomentButton_Click"
+                                                                    Classes="momentCard"
                                                                     CommandParameter="{Binding}"
                                                                     Background="Transparent"
                                                                     BorderThickness="0"
                                                                     Padding="0"
                                                                     HorizontalAlignment="Stretch">
-                                                                <Border Background="#16233A"
-                                                                        BorderBrush="#2C3E5E"
+                                                                <Border Background="{Binding CardBackground}"
+                                                                        BorderBrush="{Binding BorderBrush}"
                                                                         BorderThickness="1"
                                                                         CornerRadius="12"
                                                                         Padding="14"
@@ -206,8 +225,17 @@
                                                                                         CornerRadius="999"
                                                                                         Padding="8,2">
                                                                                     <TextBlock Text="{Binding TimeLabel}"
-                                                                                               Foreground="#CBD5E1"
+                                                                                              Foreground="#CBD5E1"
                                                                                                FontSize="11" />
+                                                                                </Border>
+                                                                                <Border Background="#201A38"
+                                                                                        IsVisible="{Binding IsSelected}"
+                                                                                        CornerRadius="999"
+                                                                                        Padding="8,2">
+                                                                                    <TextBlock Text="Selected"
+                                                                                               Foreground="#C4B5FD"
+                                                                                               FontSize="11"
+                                                                                               FontWeight="SemiBold" />
                                                                                 </Border>
                                                                             </StackPanel>
                                                                             <TextBlock Text="{Binding Subtitle}"
@@ -259,7 +287,7 @@
                                     Padding="12"
                                     Margin="0,18,0,0">
                                 <StackPanel Spacing="6">
-                                    <TextBlock Text="Narrative"
+                                    <TextBlock Text="Moment context"
                                                Foreground="#CBD5E1"
                                                FontWeight="SemiBold" />
                                     <TextBlock x:Name="DetailNarrativeText"
@@ -409,14 +437,20 @@
                         <Border Grid.Column="0" Background="#0F1A2E" BorderBrush="#233653" BorderThickness="1" CornerRadius="14" Padding="16">
                             <StackPanel Spacing="10">
                                 <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8">
-                                    <TextBlock Text="Top applications" Foreground="#F8FAFC" FontSize="16" FontWeight="SemiBold" />
-                                    <Button Grid.Column="1" Click="TopAppsSortButton_Click" CommandParameter="Duration" Background="#172743" Foreground="#CBD5E1" BorderBrush="#2B3D5B" BorderThickness="1" Padding="10,6">
+                                    <StackPanel>
+                                        <TextBlock Text="Top applications" Foreground="#F8FAFC" FontSize="16" FontWeight="SemiBold" />
+                                        <TextBlock Text="Sorted from the local activity store"
+                                                   Foreground="#64748B"
+                                                   FontSize="11"
+                                                   Margin="0,4,0,0" />
+                                    </StackPanel>
+                                    <Button x:Name="TopAppsSeenSortButton" Grid.Column="1" Click="TopAppsSortButton_Click" CommandParameter="Duration" Background="#172743" Foreground="#CBD5E1" BorderBrush="#2B3D5B" BorderThickness="1" Padding="10,6">
                                         <TextBlock Text="Seen" FontSize="11" />
                                     </Button>
-                                    <Button Grid.Column="2" Click="TopAppsSortButton_Click" CommandParameter="Sessions" Background="#172743" Foreground="#CBD5E1" BorderBrush="#2B3D5B" BorderThickness="1" Padding="10,6">
+                                    <Button x:Name="TopAppsSessionsSortButton" Grid.Column="2" Click="TopAppsSortButton_Click" CommandParameter="Sessions" Background="#172743" Foreground="#CBD5E1" BorderBrush="#2B3D5B" BorderThickness="1" Padding="10,6">
                                         <TextBlock Text="Sessions" FontSize="11" />
                                     </Button>
-                                    <Button Grid.Column="3" Click="TopAppsSortButton_Click" CommandParameter="Percent" Background="#172743" Foreground="#CBD5E1" BorderBrush="#2B3D5B" BorderThickness="1" Padding="10,6">
+                                    <Button x:Name="TopAppsPercentSortButton" Grid.Column="3" Click="TopAppsSortButton_Click" CommandParameter="Percent" Background="#172743" Foreground="#CBD5E1" BorderBrush="#2B3D5B" BorderThickness="1" Padding="10,6">
                                         <TextBlock Text="Percent" FontSize="11" />
                                     </Button>
                                 </Grid>
