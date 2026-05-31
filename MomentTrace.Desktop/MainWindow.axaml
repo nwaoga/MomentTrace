@@ -2,48 +2,430 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d"
         x:Class="MomentTrace.Desktop.MainWindow"
         Title="MomentTrace"
-        Width="1120"
-        Height="720"
-        Background="#0B1220">
-    <Grid RowDefinitions="Auto,*" ColumnDefinitions="260,*" Margin="24">
-        <StackPanel Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12" Margin="0,0,0,18">
-            <Border Width="36" Height="36" CornerRadius="8" Background="#1E2A44">
-                <TextBlock Text="MT" Foreground="#A78BFA" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
-            </Border>
-            <StackPanel>
-                <TextBlock Text="MomentTrace" Foreground="#F8FAFC" FontSize="18" FontWeight="SemiBold" />
-                <TextBlock x:Name="StatusText" Text="Loading local timeline..." Foreground="#94A3B8" FontSize="12" />
-            </StackPanel>
-        </StackPanel>
+        Width="1360"
+        Height="840"
+        MinWidth="1120"
+        MinHeight="720"
+        Background="#08111F">
+    <Grid ColumnDefinitions="240,*" Margin="18">
+        <Border Grid.Column="0"
+                Background="#0F1A2E"
+                BorderBrush="#233653"
+                BorderThickness="1"
+                CornerRadius="14"
+                Padding="18"
+                Margin="0,0,18,0">
+            <Grid RowDefinitions="Auto,Auto,*,Auto">
+                <StackPanel Spacing="10">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Border Width="38" Height="38" CornerRadius="10" Background="#172743">
+                            <TextBlock Text="MT"
+                                       Foreground="#A78BFA"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel>
+                            <TextBlock Text="MomentTrace"
+                                       Foreground="#F8FAFC"
+                                       FontSize="18"
+                                       FontWeight="SemiBold" />
+                            <TextBlock x:Name="StatusText"
+                                       Text="Loading local timeline..."
+                                       Foreground="#94A3B8"
+                                       FontSize="12" />
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
 
-        <Border Grid.Row="1" Grid.Column="0" Background="#111B2F" BorderBrush="#263653" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,0,18,0">
-            <StackPanel Spacing="16">
-                <TextBlock Text="Overview" Foreground="#F8FAFC" FontSize="16" FontWeight="SemiBold" />
-                <TextBlock x:Name="SummaryText" Text="Waiting for activity" Foreground="#CBD5E1" TextWrapping="Wrap" />
-                <Border Height="1" Background="#263653" />
-                <TextBlock Text="This is the first Avalonia shell spike reading MomentTrace.Core, Storage, and Presentation." Foreground="#94A3B8" TextWrapping="Wrap" />
-            </StackPanel>
-        </Border>
+                <StackPanel Grid.Row="1" Margin="0,28,0,0" Spacing="8">
+                    <Button x:Name="TimelineNavButton"
+                            Click="TimelineNavButton_Click"
+                            HorizontalContentAlignment="Left"
+                            Background="#7C5CFF"
+                            Foreground="White"
+                            BorderBrush="#7C5CFF"
+                            BorderThickness="1"
+                            Padding="14,10">
+                        <TextBlock Text="Timeline" FontWeight="SemiBold" />
+                    </Button>
+                    <Button x:Name="OverviewNavButton"
+                            Click="OverviewNavButton_Click"
+                            HorizontalContentAlignment="Left"
+                            Background="#172743"
+                            Foreground="#CBD5E1"
+                            BorderBrush="#2B3D5B"
+                            BorderThickness="1"
+                            Padding="14,10">
+                        <TextBlock Text="Overview" FontWeight="SemiBold" />
+                    </Button>
+                </StackPanel>
 
-        <Border Grid.Row="1" Grid.Column="1" Background="#111B2F" BorderBrush="#263653" BorderThickness="1" CornerRadius="12" Padding="18">
-            <Grid RowDefinitions="Auto,*">
-                <TextBlock Text="Recent moments" Foreground="#F8FAFC" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,14" />
-                <ListBox x:Name="MomentsList" Grid.Row="1" Background="Transparent" BorderThickness="0">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Border Background="#17233A" BorderBrush="#2C3E5E" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,10">
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Title}" Foreground="#F8FAFC" FontWeight="SemiBold" />
-                                    <TextBlock Text="{Binding Subtitle}" Foreground="#94A3B8" Margin="0,4,0,0" />
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                <Border Grid.Row="2"
+                        Margin="0,24,0,0"
+                        Background="#111C31"
+                        BorderBrush="#233653"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="14">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Workspace"
+                                   Foreground="#F8FAFC"
+                                   FontSize="15"
+                                   FontWeight="SemiBold" />
+                        <TextBlock x:Name="ShellSummaryText"
+                                   Text="Connecting to local storage"
+                                   Foreground="#CBD5E1"
+                                   TextWrapping="Wrap" />
+                        <Border Height="1" Background="#233653" Margin="0,8,0,8" />
+                        <TextBlock Text="This cross-platform shell is reading the same local database and presentation layer as the Windows app."
+                                   Foreground="#94A3B8"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Grid.Row="3"
+                           Text="Local-only shell spike"
+                           Foreground="#64748B"
+                           FontSize="12"
+                           Margin="2,14,0,0" />
             </Grid>
         </Border>
+
+        <Grid Grid.Column="1">
+            <Grid x:Name="TimelinePage" RowDefinitions="Auto,*">
+                <Border Background="#0F1A2E"
+                        BorderBrush="#233653"
+                        BorderThickness="1"
+                        CornerRadius="14"
+                        Padding="16">
+                    <Grid ColumnDefinitions="*,220,Auto">
+                        <StackPanel>
+                            <TextBlock Text="Timeline"
+                                       Foreground="#F8FAFC"
+                                       FontSize="20"
+                                       FontWeight="SemiBold" />
+                            <TextBlock x:Name="TimelineSubtitleText"
+                                       Text="Reading local moments"
+                                       Foreground="#94A3B8"
+                                       Margin="0,4,0,0" />
+                        </StackPanel>
+                        <ComboBox x:Name="DateFilterComboBox"
+                                  Grid.Column="1"
+                                  SelectionChanged="DateFilterComboBox_SelectionChanged"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Center"
+                                  Margin="16,0,0,0" />
+                        <Button Grid.Column="2"
+                                Click="RefreshButton_Click"
+                                Background="#172743"
+                                Foreground="#E2E8F0"
+                                BorderBrush="#2B3D5B"
+                                BorderThickness="1"
+                                Padding="14,10"
+                                Margin="12,0,0,0">
+                            <TextBlock Text="Refresh" />
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="1" ColumnDefinitions="1.3*,0.9*" Margin="0,18,0,0">
+                    <Border Background="#0F1A2E"
+                            BorderBrush="#233653"
+                            BorderThickness="1"
+                            CornerRadius="14"
+                            Padding="16"
+                            Margin="0,0,18,0">
+                        <Grid RowDefinitions="Auto,*">
+                            <TextBlock x:Name="TimelineCountText"
+                                       Text="Moments"
+                                       Foreground="#CBD5E1"
+                                       Margin="0,0,0,14" />
+                            <ListBox x:Name="TimelineListBox"
+                                     Grid.Row="1"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     SelectionChanged="TimelineListBox_SelectionChanged">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#16233A"
+                                                BorderBrush="#2C3E5E"
+                                                BorderThickness="1"
+                                                CornerRadius="12"
+                                                Padding="14"
+                                                Margin="0,0,0,12">
+                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                                <Border Width="42"
+                                                        Height="42"
+                                                        CornerRadius="10"
+                                                        Background="{Binding GlyphBackground}">
+                                                    <TextBlock Text="{Binding Glyph}"
+                                                               Foreground="{Binding GlyphForeground}"
+                                                               FontWeight="Bold"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center" />
+                                                </Border>
+                                                <StackPanel Grid.Column="1">
+                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <TextBlock Text="{Binding Title}"
+                                                                   Foreground="#F8FAFC"
+                                                                   FontWeight="SemiBold" />
+                                                        <Border Background="#21324E"
+                                                                CornerRadius="999"
+                                                                Padding="8,2">
+                                                            <TextBlock Text="{Binding TimeLabel}"
+                                                                       Foreground="#CBD5E1"
+                                                                       FontSize="11" />
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <TextBlock Text="{Binding Subtitle}"
+                                                               Foreground="#94A3B8"
+                                                               Margin="0,6,0,0"
+                                                               TextWrapping="Wrap" />
+                                                    <TextBlock Text="{Binding Meta}"
+                                                               Foreground="#64748B"
+                                                               Margin="0,8,0,0"
+                                                               FontSize="11" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="1"
+                            Background="#0F1A2E"
+                            BorderBrush="#233653"
+                            BorderThickness="1"
+                            CornerRadius="14"
+                            Padding="16">
+                        <Grid RowDefinitions="Auto,Auto,Auto,*">
+                            <TextBlock x:Name="DetailTitleText"
+                                       Text="Select a moment"
+                                       Foreground="#F8FAFC"
+                                       FontSize="19"
+                                       FontWeight="SemiBold" />
+                            <TextBlock x:Name="DetailSubtitleText"
+                                       Grid.Row="1"
+                                       Text="Timeline context appears here"
+                                       Foreground="#94A3B8"
+                                       Margin="0,6,0,0"
+                                       TextWrapping="Wrap" />
+                            <Border Grid.Row="2"
+                                    Background="#152238"
+                                    BorderBrush="#233653"
+                                    BorderThickness="1"
+                                    CornerRadius="12"
+                                    Padding="12"
+                                    Margin="0,18,0,0">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Narrative"
+                                               Foreground="#CBD5E1"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock x:Name="DetailNarrativeText"
+                                               Text="Select a moment to inspect its grouped raw activity and nearby related work."
+                                               Foreground="#94A3B8"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+                            <ScrollViewer Grid.Row="3" Margin="0,18,0,0">
+                                <StackPanel Spacing="14">
+                                    <Border Background="#111C31"
+                                            BorderBrush="#233653"
+                                            BorderThickness="1"
+                                            CornerRadius="12"
+                                            Padding="12">
+                                        <StackPanel Spacing="8">
+                                            <TextBlock Text="Raw entries"
+                                                       Foreground="#CBD5E1"
+                                                       FontWeight="SemiBold" />
+                                            <TextBlock x:Name="RawSummaryText"
+                                                       Text="No moment selected"
+                                                       Foreground="#64748B"
+                                                       TextWrapping="Wrap" />
+                                            <ItemsControl x:Name="RawEntriesItems">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="#16233A"
+                                                                BorderBrush="#253653"
+                                                                BorderThickness="1"
+                                                                CornerRadius="10"
+                                                                Padding="10"
+                                                                Margin="0,0,0,8">
+                                                            <StackPanel>
+                                                                <TextBlock Text="{Binding Title}" Foreground="#F8FAFC" FontWeight="SemiBold" />
+                                                                <TextBlock Text="{Binding Source}" Foreground="#94A3B8" Margin="0,4,0,0" TextWrapping="Wrap" />
+                                                                <TextBlock Text="{Binding TimeRange}" Foreground="#64748B" Margin="0,6,0,0" FontSize="11" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Background="#111C31"
+                                            BorderBrush="#233653"
+                                            BorderThickness="1"
+                                            CornerRadius="12"
+                                            Padding="12">
+                                        <StackPanel Spacing="8">
+                                            <TextBlock Text="Related moments"
+                                                       Foreground="#CBD5E1"
+                                                       FontWeight="SemiBold" />
+                                            <TextBlock x:Name="RelatedSummaryText"
+                                                       Text="No related moments yet"
+                                                       Foreground="#64748B"
+                                                       TextWrapping="Wrap" />
+                                            <ItemsControl x:Name="RelatedMomentsItems">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="#16233A"
+                                                                BorderBrush="#253653"
+                                                                BorderThickness="1"
+                                                                CornerRadius="10"
+                                                                Padding="10"
+                                                                Margin="0,0,0,8">
+                                                            <StackPanel>
+                                                                <TextBlock Text="{Binding Title}" Foreground="#F8FAFC" FontWeight="SemiBold" />
+                                                                <TextBlock Text="{Binding Detail}" Foreground="#94A3B8" Margin="0,4,0,0" TextWrapping="Wrap" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <ScrollViewer x:Name="OverviewPage" IsVisible="False">
+                <StackPanel Spacing="18">
+                    <Border Background="#0F1A2E"
+                            BorderBrush="#233653"
+                            BorderThickness="1"
+                            CornerRadius="14"
+                            Padding="16">
+                        <StackPanel>
+                            <TextBlock Text="Overview"
+                                       Foreground="#F8FAFC"
+                                       FontSize="20"
+                                       FontWeight="SemiBold" />
+                            <TextBlock x:Name="OverviewSubtitleText"
+                                       Text="A local read on how the day is taking shape"
+                                       Foreground="#94A3B8"
+                                       Margin="0,4,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="14">
+                        <Border Grid.Column="0" Background="#0F1A2E" BorderBrush="#233653" BorderThickness="1" CornerRadius="14" Padding="14">
+                            <StackPanel>
+                                <TextBlock Text="Remembered span" Foreground="#94A3B8" />
+                                <TextBlock x:Name="MetricOneValue" Text="0m" Foreground="#F8FAFC" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
+                                <TextBlock x:Name="MetricOneDetail" Text="" Foreground="#64748B" Margin="0,6,0,0" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="1" Background="#0F1A2E" BorderBrush="#233653" BorderThickness="1" CornerRadius="14" Padding="14">
+                            <StackPanel>
+                                <TextBlock Text="Moments" Foreground="#94A3B8" />
+                                <TextBlock x:Name="MetricTwoValue" Text="0" Foreground="#F8FAFC" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
+                                <TextBlock x:Name="MetricTwoDetail" Text="" Foreground="#64748B" Margin="0,6,0,0" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Background="#0F1A2E" BorderBrush="#233653" BorderThickness="1" CornerRadius="14" Padding="14">
+                            <StackPanel>
+                                <TextBlock Text="Most seen app" Foreground="#94A3B8" />
+                                <TextBlock x:Name="MetricThreeValue" Text="Waiting" Foreground="#F8FAFC" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
+                                <TextBlock x:Name="MetricThreeDetail" Text="" Foreground="#64748B" Margin="0,6,0,0" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="3" Background="#0F1A2E" BorderBrush="#233653" BorderThickness="1" CornerRadius="14" Padding="14">
+                            <StackPanel>
+                                <TextBlock Text="Longest visible run" Foreground="#94A3B8" />
+                                <TextBlock x:Name="MetricFourValue" Text="0m" Foreground="#F8FAFC" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
+                                <TextBlock x:Name="MetricFourDetail" Text="" Foreground="#64748B" Margin="0,6,0,0" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Border Background="#0F1A2E" BorderBrush="#233653" BorderThickness="1" CornerRadius="14" Padding="16">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Daily activity heatmap" Foreground="#F8FAFC" FontSize="16" FontWeight="SemiBold" />
+                            <WrapPanel x:Name="HeatmapPanel" ItemWidth="10" ItemHeight="28" />
+                        </StackPanel>
+                    </Border>
+
+                    <Grid ColumnDefinitions="1.2*,0.8*" ColumnSpacing="18">
+                        <Border Grid.Column="0" Background="#0F1A2E" BorderBrush="#233653" BorderThickness="1" CornerRadius="14" Padding="16">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="Top applications" Foreground="#F8FAFC" FontSize="16" FontWeight="SemiBold" />
+                                <ItemsControl x:Name="TopAppsItems">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#16233A" BorderBrush="#253653" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,8">
+                                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding AppName}" Foreground="#F8FAFC" FontWeight="SemiBold" />
+                                                        <TextBlock Text="{Binding Meta}" Foreground="#94A3B8" Margin="0,4,0,0" />
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Duration}" Foreground="#CBD5E1" VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Column="2" Text="{Binding Percent}" Foreground="#64748B" VerticalAlignment="Center" />
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" Spacing="18">
+                            <Border Background="#0F1A2E" BorderBrush="#233653" BorderThickness="1" CornerRadius="14" Padding="16">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Text="Focus rhythm" Foreground="#F8FAFC" FontSize="16" FontWeight="SemiBold" />
+                                    <ItemsControl x:Name="FocusBlocksItems">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="#16233A" BorderBrush="#253653" BorderThickness="1" CornerRadius="10" Padding="10" Margin="0,0,0,8">
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Label}" Foreground="#F8FAFC" FontWeight="SemiBold" />
+                                                        <TextBlock Text="{Binding Duration}" Foreground="#94A3B8" Margin="0,4,0,0" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Background="#0F1A2E" BorderBrush="#233653" BorderThickness="1" CornerRadius="14" Padding="16">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Text="Legend" Foreground="#F8FAFC" FontSize="16" FontWeight="SemiBold" />
+                                    <ItemsControl x:Name="LegendItems">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,8">
+                                                    <Border Width="12" Height="12" CornerRadius="3" Background="{Binding Fill}" />
+                                                    <TextBlock Text="{Binding Label}" Foreground="#CBD5E1" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
     </Grid>
 </Window>
