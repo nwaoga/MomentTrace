@@ -26,6 +26,7 @@ public partial class MainWindow : Window
     private OverviewPresentationModel? _currentOverview;
     private string _topAppsSort = "Duration";
     private long? _selectedMomentId;
+    private string _searchText = string.Empty;
 
     public MainWindow()
     {
@@ -64,7 +65,9 @@ public partial class MainWindow : Window
         _sessions = _timelineBuilder.BuildSessions(
             _visibleActivities
                 .Where(activity => activity.StartedAt.LocalDateTime.Date == selectedDate)
-                .ToList());
+                .ToList())
+            .Where(MatchesSearch)
+            .ToList();
         _timelineGroups = _timelineBuilder.BuildGroups(_sessions);
         if (_sessions.Count == 0)
         {
@@ -160,6 +163,18 @@ public partial class MainWindow : Window
 
         await RefreshTimelineAsync();
         await RefreshOverviewAsync();
+    }
+
+    private async void SearchTextBox_TextChanged(object? sender, TextChangedEventArgs e)
+    {
+        _searchText = SearchTextBox.Text?.Trim() ?? string.Empty;
+
+        if (!IsLoaded)
+        {
+            return;
+        }
+
+        await RefreshTimelineAsync();
     }
 
     private void TimelineMomentButton_Click(object? sender, RoutedEventArgs e)
@@ -276,6 +291,24 @@ public partial class MainWindow : Window
             "Percent" => apps.OrderByDescending(app => app.Percent),
             _ => apps.OrderByDescending(app => app.ActiveDuration)
         };
+    }
+
+    private bool MatchesSearch(ActivityMomentViewModel session)
+    {
+        if (string.IsNullOrWhiteSpace(_searchText))
+        {
+            return true;
+        }
+
+        return Contains(session.Title)
+            || Contains(session.MemoryDescription)
+            || Contains(session.Location)
+            || Contains(session.AppName)
+            || Contains(session.CategoryLabel);
+
+        bool Contains(string? value) =>
+            !string.IsNullOrWhiteSpace(value)
+            && value.Contains(_searchText, StringComparison.OrdinalIgnoreCase);
     }
 
     private static MomentRow ToMomentRow(ActivityMomentViewModel session)

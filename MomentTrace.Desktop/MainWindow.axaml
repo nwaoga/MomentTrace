@@ -107,23 +107,26 @@
                         BorderThickness="1"
                         CornerRadius="14"
                         Padding="16">
-                    <Grid ColumnDefinitions="*,220,Auto">
-                        <StackPanel>
-                            <TextBlock Text="Timeline"
-                                       Foreground="#F8FAFC"
-                                       FontSize="20"
-                                       FontWeight="SemiBold" />
-                            <TextBlock x:Name="TimelineSubtitleText"
-                                       Text="Reading local moments"
-                                       Foreground="#94A3B8"
-                                       Margin="0,4,0,0" />
-                        </StackPanel>
+                    <Grid ColumnDefinitions="*,220,Auto" RowDefinitions="Auto,Auto" RowSpacing="12">
+                        <Border Background="#111C31"
+                                BorderBrush="#233653"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Padding="14,10">
+                            <TextBox x:Name="SearchTextBox"
+                                     TextChanged="SearchTextBox_TextChanged"
+                                     PlaceholderText="Search moments, sessions, apps, or websites..."
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     Foreground="#E2E8F0" />
+                        </Border>
                         <ComboBox x:Name="DateFilterComboBox"
                                   Grid.Column="1"
                                   SelectionChanged="DateFilterComboBox_SelectionChanged"
                                   HorizontalAlignment="Stretch"
                                   VerticalAlignment="Center"
-                                  Margin="16,0,0,0" />
+                                  Margin="16,0,0,0"
+                                  MinHeight="42" />
                         <Button Grid.Column="2"
                                 Click="RefreshButton_Click"
                                 Background="#172743"
@@ -134,6 +137,16 @@
                                 Margin="12,0,0,0">
                             <TextBlock Text="Refresh" />
                         </Button>
+                        <StackPanel Grid.Row="1" Grid.ColumnSpan="3">
+                            <TextBlock Text="Timeline"
+                                       Foreground="#F8FAFC"
+                                       FontSize="20"
+                                       FontWeight="SemiBold" />
+                            <TextBlock x:Name="TimelineSubtitleText"
+                                       Text="Reading local moments"
+                                       Foreground="#94A3B8"
+                                       Margin="0,4,0,0" />
+                        </StackPanel>
                     </Grid>
                 </Border>
 
@@ -153,107 +166,144 @@
                                 <ItemsControl x:Name="TimelineGroupsItems">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <StackPanel Margin="0,0,0,18">
-                                                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,10">
-                                                    <StackPanel>
-                                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                                            <TextBlock Text="{Binding Name}"
-                                                                       Foreground="#F8FAFC"
-                                                                       FontSize="16"
-                                                                       FontWeight="SemiBold" />
-                                                            <Border Background="#16233A"
-                                                                    BorderBrush="#253653"
-                                                                    BorderThickness="1"
-                                                                    CornerRadius="999"
-                                                                    Padding="8,2"
-                                                                    VerticalAlignment="Center">
-                                                                <TextBlock Text="{Binding CountLabel}"
-                                                                           Foreground="#94A3B8"
-                                                                           FontSize="11"
-                                                                           FontWeight="SemiBold" />
-                                                            </Border>
-                                                        </StackPanel>
-                                                        <TextBlock Text="{Binding Summary}"
-                                                                   Foreground="#94A3B8"
-                                                                   Margin="0,4,0,0"
-                                                                   TextWrapping="Wrap" />
-                                                    </StackPanel>
-                                                    <Border Grid.Column="1"
+                                            <Grid ColumnDefinitions="36,*" Margin="0,0,0,22">
+                                                <Grid>
+                                                    <Border Width="2"
+                                                            Background="#223756"
+                                                            HorizontalAlignment="Center"
+                                                            Margin="0,28,0,0" />
+                                                    <Border Width="16"
+                                                            Height="16"
+                                                            CornerRadius="8"
                                                             Background="{Binding AccentBrush}"
-                                                            CornerRadius="999"
-                                                            Padding="10,4"
-                                                            VerticalAlignment="Top">
-                                                        <TextBlock Text="{Binding TimeRange}"
-                                                                   Foreground="White"
-                                                                   FontSize="11"
-                                                                   FontWeight="SemiBold" />
-                                                    </Border>
+                                                            BorderBrush="#D8D4FF"
+                                                            BorderThickness="2"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Top"
+                                                            Margin="0,12,0,0" />
                                                 </Grid>
-                                                <ItemsControl ItemsSource="{Binding Moments}">
-                                                    <ItemsControl.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <Button Click="TimelineMomentButton_Click"
-                                                                    Classes="momentCard"
-                                                                    CommandParameter="{Binding}"
-                                                                    Background="Transparent"
-                                                                    BorderThickness="0"
-                                                                    Padding="0"
-                                                                    HorizontalAlignment="Stretch">
-                                                                <Border Background="{Binding CardBackground}"
-                                                                        BorderBrush="{Binding BorderBrush}"
+                                                <StackPanel Grid.Column="1" Spacing="12">
+                                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                                        <Border Background="{Binding AccentBrush}"
+                                                                CornerRadius="999"
+                                                                Padding="10,4"
+                                                                VerticalAlignment="Top">
+                                                            <TextBlock Text="{Binding TimeRange}"
+                                                                       Foreground="White"
+                                                                       FontSize="11"
+                                                                       FontWeight="SemiBold" />
+                                                        </Border>
+                                                        <StackPanel Grid.Column="1">
+                                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                                <TextBlock Text="{Binding Name}"
+                                                                           Foreground="#F8FAFC"
+                                                                           FontSize="17"
+                                                                           FontWeight="SemiBold" />
+                                                                <Border Background="#1C2540"
+                                                                        BorderBrush="#253653"
                                                                         BorderThickness="1"
-                                                                        CornerRadius="12"
-                                                                        Padding="14"
-                                                                        Margin="0,0,0,12">
-                                                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
-                                                                        <Border Width="42"
-                                                                                Height="42"
-                                                                                CornerRadius="10"
-                                                                                Background="{Binding GlyphBackground}">
-                                                                            <TextBlock Text="{Binding Glyph}"
-                                                                                       Foreground="{Binding GlyphForeground}"
-                                                                                       FontWeight="Bold"
-                                                                                       HorizontalAlignment="Center"
-                                                                                       VerticalAlignment="Center" />
-                                                                        </Border>
-                                                                        <StackPanel Grid.Column="1">
-                                                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                                                <TextBlock Text="{Binding Title}"
-                                                                                           Foreground="#F8FAFC"
-                                                                                           FontWeight="SemiBold" />
-                                                                                <Border Background="#21324E"
-                                                                                        CornerRadius="999"
-                                                                                        Padding="8,2">
-                                                                                    <TextBlock Text="{Binding TimeLabel}"
-                                                                                              Foreground="#CBD5E1"
-                                                                                               FontSize="11" />
-                                                                                </Border>
-                                                                                <Border Background="#201A38"
-                                                                                        IsVisible="{Binding IsSelected}"
-                                                                                        CornerRadius="999"
-                                                                                        Padding="8,2">
-                                                                                    <TextBlock Text="Selected"
-                                                                                               Foreground="#C4B5FD"
-                                                                                               FontSize="11"
-                                                                                               FontWeight="SemiBold" />
-                                                                                </Border>
-                                                                            </StackPanel>
-                                                                            <TextBlock Text="{Binding Subtitle}"
-                                                                                       Foreground="#94A3B8"
-                                                                                       Margin="0,6,0,0"
-                                                                                       TextWrapping="Wrap" />
-                                                                            <TextBlock Text="{Binding Meta}"
-                                                                                       Foreground="#64748B"
-                                                                                       Margin="0,8,0,0"
-                                                                                       FontSize="11" />
-                                                                        </StackPanel>
-                                                                    </Grid>
+                                                                        CornerRadius="999"
+                                                                        Padding="8,2"
+                                                                        VerticalAlignment="Center">
+                                                                    <TextBlock Text="{Binding CountLabel}"
+                                                                               Foreground="#A78BFA"
+                                                                               FontSize="11"
+                                                                               FontWeight="SemiBold" />
                                                                 </Border>
-                                                            </Button>
-                                                        </DataTemplate>
-                                                    </ItemsControl.ItemTemplate>
-                                                </ItemsControl>
-                                            </StackPanel>
+                                                            </StackPanel>
+                                                            <TextBlock Text="{Binding Summary}"
+                                                                       Foreground="#94A3B8"
+                                                                       Margin="0,5,0,0"
+                                                                       TextWrapping="Wrap" />
+                                                        </StackPanel>
+                                                    </Grid>
+                                                    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                                                  VerticalScrollBarVisibility="Disabled">
+                                                        <ItemsControl ItemsSource="{Binding Moments}">
+                                                            <ItemsControl.ItemsPanel>
+                                                                <ItemsPanelTemplate>
+                                                                    <StackPanel Orientation="Horizontal" Spacing="12" />
+                                                                </ItemsPanelTemplate>
+                                                            </ItemsControl.ItemsPanel>
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <Button Click="TimelineMomentButton_Click"
+                                                                            Classes="momentCard"
+                                                                            CommandParameter="{Binding}"
+                                                                            Background="Transparent"
+                                                                            BorderThickness="0"
+                                                                            Padding="0"
+                                                                            HorizontalAlignment="Stretch">
+                                                                        <Border Width="232"
+                                                                                MinHeight="170"
+                                                                                Background="{Binding CardBackground}"
+                                                                                BorderBrush="{Binding BorderBrush}"
+                                                                                BorderThickness="1"
+                                                                                CornerRadius="14"
+                                                                                Padding="14">
+                                                                            <Grid RowDefinitions="Auto,*,Auto">
+                                                                                <Grid ColumnDefinitions="Auto,*">
+                                                                                    <Border Width="42"
+                                                                                            Height="42"
+                                                                                            CornerRadius="10"
+                                                                                            Background="{Binding GlyphBackground}">
+                                                                                        <TextBlock Text="{Binding Glyph}"
+                                                                                                   Foreground="{Binding GlyphForeground}"
+                                                                                                   FontWeight="Bold"
+                                                                                                   HorizontalAlignment="Center"
+                                                                                                   VerticalAlignment="Center" />
+                                                                                    </Border>
+                                                                                    <StackPanel Grid.Column="1"
+                                                                                                Margin="12,0,0,0">
+                                                                                        <StackPanel Orientation="Horizontal"
+                                                                                                    Spacing="6">
+                                                                                            <Border Background="#21324E"
+                                                                                                    CornerRadius="999"
+                                                                                                    Padding="8,2">
+                                                                                                <TextBlock Text="{Binding TimeLabel}"
+                                                                                                           Foreground="#CBD5E1"
+                                                                                                           FontSize="11" />
+                                                                                            </Border>
+                                                                                            <Border Background="#201A38"
+                                                                                                    IsVisible="{Binding IsSelected}"
+                                                                                                    CornerRadius="999"
+                                                                                                    Padding="8,2">
+                                                                                                <TextBlock Text="Selected"
+                                                                                                           Foreground="#C4B5FD"
+                                                                                                           FontSize="11"
+                                                                                                           FontWeight="SemiBold" />
+                                                                                            </Border>
+                                                                                        </StackPanel>
+                                                                                    </StackPanel>
+                                                                                </Grid>
+                                                                                <StackPanel Grid.Row="1"
+                                                                                            Margin="0,14,0,0">
+                                                                                    <TextBlock Text="{Binding Title}"
+                                                                                               Foreground="#F8FAFC"
+                                                                                               FontWeight="SemiBold"
+                                                                                               TextWrapping="Wrap"
+                                                                                               MaxHeight="48" />
+                                                                                    <TextBlock Text="{Binding Subtitle}"
+                                                                                               Foreground="#94A3B8"
+                                                                                               Margin="0,8,0,0"
+                                                                                               TextWrapping="Wrap"
+                                                                                               MaxHeight="42" />
+                                                                                </StackPanel>
+                                                                                <TextBlock Grid.Row="2"
+                                                                                           Text="{Binding Meta}"
+                                                                                           Foreground="#64748B"
+                                                                                           Margin="0,12,0,0"
+                                                                                           FontSize="11"
+                                                                                           TextWrapping="Wrap" />
+                                                                            </Grid>
+                                                                        </Border>
+                                                                    </Button>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                    </ScrollViewer>
+                                                </StackPanel>
+                                            </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
@@ -297,74 +347,98 @@
                                 </StackPanel>
                             </Border>
                             <ScrollViewer Grid.Row="3" Margin="0,18,0,0">
-                                <StackPanel Spacing="14">
-                                    <Border Background="#111C31"
-                                            BorderBrush="#233653"
-                                            BorderThickness="1"
-                                            CornerRadius="12"
-                                            Padding="12">
-                                        <StackPanel Spacing="8">
-                                            <TextBlock Text="Raw entries"
-                                                       Foreground="#CBD5E1"
-                                                       FontWeight="SemiBold" />
-                                            <TextBlock x:Name="RawSummaryText"
-                                                       Text="No moment selected"
-                                                       Foreground="#64748B"
-                                                       TextWrapping="Wrap" />
-                                            <ItemsControl x:Name="RawEntriesItems">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Border Background="#16233A"
-                                                                BorderBrush="#253653"
-                                                                BorderThickness="1"
-                                                                CornerRadius="10"
-                                                                Padding="10"
-                                                                Margin="0,0,0,8">
-                                                            <StackPanel>
-                                                                <TextBlock Text="{Binding Title}" Foreground="#F8FAFC" FontWeight="SemiBold" />
-                                                                <TextBlock Text="{Binding Source}" Foreground="#94A3B8" Margin="0,4,0,0" TextWrapping="Wrap" />
-                                                                <TextBlock Text="{Binding TimeRange}" Foreground="#64748B" Margin="0,6,0,0" FontSize="11" />
-                                                            </StackPanel>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </StackPanel>
-                                    </Border>
-
-                                    <Border Background="#111C31"
-                                            BorderBrush="#233653"
-                                            BorderThickness="1"
-                                            CornerRadius="12"
-                                            Padding="12">
-                                        <StackPanel Spacing="8">
-                                            <TextBlock Text="Related moments"
-                                                       Foreground="#CBD5E1"
-                                                       FontWeight="SemiBold" />
-                                            <TextBlock x:Name="RelatedSummaryText"
-                                                       Text="No related moments yet"
-                                                       Foreground="#64748B"
-                                                       TextWrapping="Wrap" />
-                                            <ItemsControl x:Name="RelatedMomentsItems">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Border Background="#16233A"
-                                                                BorderBrush="#253653"
-                                                                BorderThickness="1"
-                                                                CornerRadius="10"
-                                                                Padding="10"
-                                                                Margin="0,0,0,8">
-                                                            <StackPanel>
-                                                                <TextBlock Text="{Binding Title}" Foreground="#F8FAFC" FontWeight="SemiBold" />
-                                                                <TextBlock Text="{Binding Detail}" Foreground="#94A3B8" Margin="0,4,0,0" TextWrapping="Wrap" />
-                                                            </StackPanel>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </StackPanel>
-                                    </Border>
-                                </StackPanel>
+                                <TabControl Background="Transparent"
+                                            BorderThickness="0">
+                                    <TabItem Header="Overview">
+                                        <Border Background="#111C31"
+                                                BorderBrush="#233653"
+                                                BorderThickness="1"
+                                                CornerRadius="12"
+                                                Padding="12"
+                                                Margin="0,12,0,0">
+                                            <StackPanel Spacing="10">
+                                                <TextBlock Text="Moment overview"
+                                                           Foreground="#CBD5E1"
+                                                           FontWeight="SemiBold" />
+                                                <TextBlock x:Name="RawSummaryText"
+                                                           Text="No moment selected"
+                                                           Foreground="#94A3B8"
+                                                           TextWrapping="Wrap" />
+                                                <TextBlock Text="Stored locally and assembled from grouped activity in the shared presentation layer."
+                                                           Foreground="#64748B"
+                                                           TextWrapping="Wrap"
+                                                           FontSize="11" />
+                                            </StackPanel>
+                                        </Border>
+                                    </TabItem>
+                                    <TabItem Header="Activity">
+                                        <Border Background="#111C31"
+                                                BorderBrush="#233653"
+                                                BorderThickness="1"
+                                                CornerRadius="12"
+                                                Padding="12"
+                                                Margin="0,12,0,0">
+                                            <StackPanel Spacing="8">
+                                                <TextBlock Text="Captured activity"
+                                                           Foreground="#CBD5E1"
+                                                           FontWeight="SemiBold" />
+                                                <ItemsControl x:Name="RawEntriesItems">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Background="#16233A"
+                                                                    BorderBrush="#253653"
+                                                                    BorderThickness="1"
+                                                                    CornerRadius="10"
+                                                                    Padding="10"
+                                                                    Margin="0,0,0,8">
+                                                                <StackPanel>
+                                                                    <TextBlock Text="{Binding Title}" Foreground="#F8FAFC" FontWeight="SemiBold" />
+                                                                    <TextBlock Text="{Binding Source}" Foreground="#94A3B8" Margin="0,4,0,0" TextWrapping="Wrap" />
+                                                                    <TextBlock Text="{Binding TimeRange}" Foreground="#64748B" Margin="0,6,0,0" FontSize="11" />
+                                                                </StackPanel>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                        </Border>
+                                    </TabItem>
+                                    <TabItem Header="Related">
+                                        <Border Background="#111C31"
+                                                BorderBrush="#233653"
+                                                BorderThickness="1"
+                                                CornerRadius="12"
+                                                Padding="12"
+                                                Margin="0,12,0,0">
+                                            <StackPanel Spacing="8">
+                                                <TextBlock Text="Related moments"
+                                                           Foreground="#CBD5E1"
+                                                           FontWeight="SemiBold" />
+                                                <TextBlock x:Name="RelatedSummaryText"
+                                                           Text="No related moments yet"
+                                                           Foreground="#64748B"
+                                                           TextWrapping="Wrap" />
+                                                <ItemsControl x:Name="RelatedMomentsItems">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Background="#16233A"
+                                                                    BorderBrush="#253653"
+                                                                    BorderThickness="1"
+                                                                    CornerRadius="10"
+                                                                    Padding="10"
+                                                                    Margin="0,0,0,8">
+                                                                <StackPanel>
+                                                                    <TextBlock Text="{Binding Title}" Foreground="#F8FAFC" FontWeight="SemiBold" />
+                                                                    <TextBlock Text="{Binding Detail}" Foreground="#94A3B8" Margin="0,4,0,0" TextWrapping="Wrap" />
+                                                                </StackPanel>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                        </Border>
+                                    </TabItem>
+                                </TabControl>
                             </ScrollViewer>
                         </Grid>
                     </Border>
