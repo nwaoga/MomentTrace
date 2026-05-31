@@ -33,6 +33,7 @@ The Windows installer is built with Inno Setup from a self-contained `win-x64` p
 ## Current Features
 
 - Native Windows desktop UI built with WPF
+- Avalonia desktop shell in active parity work, sharing timeline, overview, detail-pane, and shell presentation layers across Windows/macOS targets
 - Grouped timeline with card and list view modes
 - Theme system with Midnight, Coffee, Amazon Green, and White Light palettes
 - Real alpha transparency control that keeps theme colours while making the app more or less clear
@@ -68,7 +69,7 @@ The Windows installer is built with Inno Setup from a self-contained `win-x64` p
 MomentTrace.slnx
 ├─ MomentTrace.App           WPF app shell, UI, tray icon, settings wiring
 ├─ MomentTrace.Core          Shared models, interfaces, local classification/search/session services
-├─ MomentTrace.Desktop       First Avalonia shell spike for Windows/macOS UI reuse
+├─ MomentTrace.Desktop       Avalonia desktop shell for Windows/macOS UI reuse and parity work
 ├─ MomentTrace.MacProbe      First macOS recorder probe for active app/window capture
 ├─ MomentTrace.Presentation  Shared memory/timeline view models and shell service contracts
 ├─ MomentTrace.Storage       SQLite persistence
@@ -88,7 +89,7 @@ This split is intentional. Future macOS support should add platform-specific ser
 
 The WPF app now acts more like a Windows shell over shared timeline data. It still owns WPF controls, tray behavior, custom window chrome, Windows icons, screenshot previews, settings, and installer/startup wiring.
 
-`MomentTrace.Desktop` is the first Avalonia shell spike. It targets `net8.0`, reads the same local SQLite timeline through `MomentTrace.Storage`, and binds recent moments plus a small Overview summary from `MomentTrace.Presentation`. It is intentionally thin: no recorder, tray/menu bar, installer, screenshots, or platform startup behavior yet.
+`MomentTrace.Desktop` is the active Avalonia shell for cross-platform UI work. It targets `net8.0`, reads the same local SQLite timeline through `MomentTrace.Storage`, and binds timeline groups, Overview analytics, and the right-side detail surface from `MomentTrace.Presentation`. It now includes custom window chrome, shared search/filter controls, semantic rail navigation, grouped moment cards, and the WPF-inspired detail tabs. It is still a shell spike rather than the shipping app: the Windows recorder, tray behavior, installer, and startup integration remain owned by `MomentTrace.App` and `MomentTrace.Windows`.
 
 ## Requirements
 
@@ -112,7 +113,7 @@ Run the desktop app:
 dotnet run --project .\MomentTrace.App\MomentTrace.App.csproj
 ```
 
-Run the Avalonia shell spike:
+Run the Avalonia shell:
 
 ```powershell
 dotnet run --project .\MomentTrace.Desktop\MomentTrace.Desktop.csproj

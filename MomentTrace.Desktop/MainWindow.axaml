@@ -9,6 +9,9 @@
         Height="840"
         MinWidth="1120"
         MinHeight="720"
+        WindowDecorations="BorderOnly"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0"
         Background="{DynamicResource PageBackgroundBrush}">
     <Window.Resources>
         <SolidColorBrush x:Key="PageBackgroundBrush" Color="#08111F" />
@@ -31,18 +34,24 @@
         <SolidColorBrush x:Key="PositiveBrush" Color="#22C55E" />
         <SolidColorBrush x:Key="InfoBrush" Color="#0EA5E9" />
         <SolidColorBrush x:Key="WarningBrush" Color="#F59E0B" />
+        <SolidColorBrush x:Key="ScrollThumbBrush" Color="#304563" />
+        <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="#476285" />
+        <SolidColorBrush x:Key="ScrollTrackBrush" Color="#142038" />
     </Window.Resources>
     <Window.Styles>
         <Style Selector="Button.momentCard:pointerover /template/ ContentPresenter">
             <Setter Property="Opacity" Value="0.97" />
         </Style>
         <Style Selector="Button.nav">
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="12" />
-            <Setter Property="Padding" Value="14,10" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="7" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Height" Value="38" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Background" Value="Transparent" />
         </Style>
         <Style Selector="Button.nav:pointerover">
-            <Setter Property="Opacity" Value="0.94" />
+            <Setter Property="Background" Value="{DynamicResource SubtlePanelBrush}" />
         </Style>
         <Style Selector="Button.toolbar">
             <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
@@ -50,7 +59,11 @@
             <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeStrongBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="10" />
-            <Setter Property="Padding" Value="14,10" />
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="MinWidth" Value="40" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
         <Style Selector="Button.toolbar:pointerover">
             <Setter Property="Background" Value="{DynamicResource ToolbarHoverBrush}" />
@@ -107,7 +120,26 @@
             <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="10" />
-            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Padding" Value="12,7" />
+            <Setter Property="MinHeight" Value="40" />
+        </Style>
+        <Style Selector="TextBox.searchBox /template/ TextBlock#watermark">
+            <Setter Property="Foreground" Value="#8D9BB1" />
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="ScrollBar">
+            <Setter Property="Background" Value="{DynamicResource ScrollTrackBrush}" />
+            <Setter Property="Width" Value="10" />
+            <Setter Property="Height" Value="10" />
+        </Style>
+        <Style Selector="Thumb">
+            <Setter Property="Background" Value="{DynamicResource ScrollThumbBrush}" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="MinWidth" Value="8" />
+            <Setter Property="MinHeight" Value="28" />
+        </Style>
+        <Style Selector="Thumb:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ScrollThumbHoverBrush}" />
         </Style>
         <Style Selector="TabControl.detailTabs TabItem">
             <Setter Property="Background" Value="Transparent" />
@@ -122,229 +154,250 @@
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
         </Style>
     </Window.Styles>
-    <Border Margin="14"
+    <Border x:Name="OuterShell"
+            Margin="0"
             Background="{DynamicResource PageBackgroundBrush}"
-            BorderBrush="{DynamicResource OuterFrameBrush}"
-            BorderThickness="1"
-            CornerRadius="18"
-            Padding="18">
-    <Grid ColumnDefinitions="262,*">
+            BorderBrush="Transparent"
+            BorderThickness="0"
+            CornerRadius="0"
+            Padding="24,18,24,18"
+            PointerPressed="ToolbarDragRegion_PointerPressed">
+    <Grid ColumnDefinitions="220,*">
         <Border Grid.Column="0"
-                Background="#0F1A2E"
-                BorderBrush="#233653"
-                BorderThickness="1"
-                CornerRadius="16"
-                Padding="18"
-                Margin="0,0,18,0">
-            <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
+                Background="Transparent"
+                BorderBrush="Transparent"
+                BorderThickness="0"
+                CornerRadius="0"
+                Padding="16,16,18,16"
+                Margin="0,0,22,0">
+            <Grid RowDefinitions="Auto,Auto,Auto,* ,Auto,Auto">
                 <StackPanel Spacing="10">
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <Border Width="38" Height="38" CornerRadius="10" Background="#172743">
+                        <Border Width="34" Height="34" CornerRadius="9" Background="#172743">
                             <TextBlock Text="MT"
                                        Foreground="#A78BFA"
                                        FontWeight="Bold"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
                         </Border>
-                        <StackPanel>
-                            <TextBlock Text="MomentTrace"
-                                       Foreground="#F8FAFC"
-                                       FontSize="18"
-                                       FontWeight="SemiBold" />
-                            <TextBlock x:Name="StatusText"
-                                       Text="Loading local timeline..."
-                                       Foreground="#94A3B8"
-                                       FontSize="12" />
-                        </StackPanel>
+                        <TextBlock Text="MomentTrace"
+                                   Foreground="#F8FAFC"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
                     </StackPanel>
                 </StackPanel>
 
-                <StackPanel Grid.Row="1" Margin="0,28,0,0" Spacing="8">
-                    <TextBlock Text="WORKSPACE"
+                <StackPanel Grid.Row="1" Margin="0,28,0,0" Spacing="0">
+                    <TextBlock Text="Workspace"
                                Foreground="#64748B"
-                               FontSize="11"
-                               FontWeight="SemiBold"
-                               Margin="2,0,0,4" />
-                    <Button x:Name="TimelineNavButton"
-                            Classes="nav"
-                            Click="TimelineNavButton_Click"
-                            HorizontalContentAlignment="Left"
-                            Background="#7C5CFF"
-                            Foreground="White"
-                            BorderBrush="#7C5CFF"
-                            >
-                        <TextBlock Text="Timeline" FontWeight="SemiBold" />
-                    </Button>
-                    <Button x:Name="OverviewNavButton"
-                            Classes="nav"
-                            Click="OverviewNavButton_Click"
-                            HorizontalContentAlignment="Left"
-                            Background="#172743"
-                            Foreground="#CBD5E1"
-                            BorderBrush="#2B3D5B"
-                            >
-                        <TextBlock Text="Overview" FontWeight="SemiBold" />
-                    </Button>
+                               FontSize="12"
+                               Margin="6,0,0,10" />
+                    <Border x:Name="TimelineNavHighlight"
+                            Background="#2C2154"
+                            CornerRadius="7"
+                            Margin="0,0,0,6">
+                        <Button x:Name="TimelineNavButton"
+                                Classes="nav"
+                                Click="TimelineNavButton_Click"
+                                HorizontalContentAlignment="Left"
+                                Foreground="White">
+                            <StackPanel Orientation="Horizontal" Spacing="0">
+                                <TextBlock Text="⌘"
+                                           Width="28"
+                                           TextAlignment="Center"
+                                           FontSize="12"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Text="Timeline"
+                                           Margin="10,0,0,0"
+                                           FontWeight="SemiBold"
+                                           FontSize="14"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </Border>
+                    <Border x:Name="OverviewNavHighlight"
+                            Background="Transparent"
+                            CornerRadius="7"
+                            Margin="0,0,0,6">
+                        <Button x:Name="OverviewNavButton"
+                                Classes="nav"
+                                Click="OverviewNavButton_Click"
+                                HorizontalContentAlignment="Left"
+                                Foreground="#CBD5E1">
+                            <StackPanel Orientation="Horizontal" Spacing="0">
+                                <TextBlock Text="◎"
+                                           Width="28"
+                                           TextAlignment="Center"
+                                           FontSize="12"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Text="Overview"
+                                           Margin="10,0,0,0"
+                                           FontSize="14"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </Border>
                 </StackPanel>
 
                 <Border Grid.Row="2"
-                        Margin="0,24,0,0"
-                        Background="#111C31"
-                        BorderBrush="#233653"
-                        BorderThickness="1"
-                        CornerRadius="12"
-                        Padding="14">
-                    <StackPanel Spacing="10">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="Workspace"
-                                       Foreground="#F8FAFC"
-                                       FontSize="15"
-                                       FontWeight="SemiBold" />
-                                <Border Classes="infoChip"
-                                        Padding="8,2"
-                                        VerticalAlignment="Center">
-                                    <TextBlock Text="Private by default"
-                                               Foreground="#C4B5FD"
-                                               FontSize="11"
-                                           FontWeight="SemiBold" />
+                        Height="1"
+                        Background="#233653"
+                        Margin="0,18,0,18" />
+
+                <ScrollViewer Grid.Row="3"
+                              Margin="0,0,0,10"
+                              HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="18">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Activity"
+                                       Foreground="#64748B"
+                                       FontSize="12"
+                                       Margin="2,0,0,4" />
+                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
+                                <TextBlock Text="◎" Foreground="#E2E8F0" FontSize="12" Width="28" TextAlignment="Center" />
+                                <TextBlock Text="Browsing" Margin="10,0,0,0" Foreground="#E2E8F0" FontSize="14" FontWeight="SemiBold" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
+                                <TextBlock Text="&lt;/&gt;" Foreground="#94A3B8" FontSize="11" Width="28" TextAlignment="Center" />
+                                <TextBlock Text="Development" Margin="10,0,0,0" Foreground="#94A3B8" FontSize="14" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
+                                <TextBlock Text="◌" Foreground="#94A3B8" FontSize="12" Width="28" TextAlignment="Center" />
+                                <TextBlock Text="Communication" Margin="10,0,0,0" Foreground="#94A3B8" FontSize="14" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
+                                <TextBlock Text="▤" Foreground="#94A3B8" FontSize="12" Width="28" TextAlignment="Center" />
+                                <TextBlock Text="Documents" Margin="10,0,0,0" Foreground="#94A3B8" FontSize="14" />
+                            </StackPanel>
+                        </StackPanel>
+                        <Border Height="1" Background="#233653" />
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Library"
+                                       Foreground="#64748B"
+                                       FontSize="12"
+                                       Margin="2,0,0,4" />
+                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
+                                <TextBlock Text="★" Foreground="#E2E8F0" FontSize="12" Width="28" TextAlignment="Center" />
+                                <TextBlock Text="Saved Moments" Margin="10,0,0,0" Foreground="#E2E8F0" FontSize="14" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
+                                <TextBlock Text="☰" Foreground="#94A3B8" FontSize="12" Width="28" TextAlignment="Center" />
+                                <TextBlock Text="Notes" Margin="10,0,0,0" Foreground="#94A3B8" FontSize="14" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
+                                <TextBlock Text="⌑" Foreground="#94A3B8" FontSize="12" Width="28" TextAlignment="Center" />
+                                <TextBlock Text="Bookmarks" Margin="10,0,0,0" Foreground="#94A3B8" FontSize="14" />
+                            </StackPanel>
+                        </StackPanel>
+                        <Border Height="1" Background="#233653" />
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Sources"
+                                       Foreground="#64748B"
+                                       FontSize="12"
+                                       Margin="2,0,0,4" />
+                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
+                                <TextBlock Text="▦" Foreground="#E2E8F0" FontSize="12" Width="28" TextAlignment="Center" />
+                                <TextBlock Text="Apps" Margin="10,0,0,0" Foreground="#E2E8F0" FontSize="14" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
+                                <TextBlock Text="◎" Foreground="#94A3B8" FontSize="12" Width="28" TextAlignment="Center" />
+                                <TextBlock Text="Websites" Margin="10,0,0,0" Foreground="#94A3B8" FontSize="14" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
+                                <TextBlock Text="□" Foreground="#94A3B8" FontSize="12" Width="28" TextAlignment="Center" />
+                                <TextBlock Text="Files" Margin="10,0,0,0" Foreground="#94A3B8" FontSize="14" />
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <StackPanel Grid.Row="4"
+                            Margin="0,0,0,14">
+                    <Border Height="1" Background="#233653" Margin="0,0,0,16" />
+                    <DockPanel Margin="0,0,0,14">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <Border Width="34"
+                                    Height="34"
+                                    Background="#8B5CF6"
+                                    CornerRadius="17">
+                                <TextBlock Text="B"
+                                           Foreground="White"
+                                           FontSize="13"
+                                           FontWeight="SemiBold"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
                             </Border>
-                        </StackPanel>
-                        <TextBlock x:Name="ShellSummaryText"
-                                   Text="Connecting to local storage"
-                                   Foreground="#CBD5E1"
-                                   TextWrapping="Wrap" />
-                        <Border Height="1" Background="#233653" Margin="0,8,0,8" />
-                        <TextBlock Text="This cross-platform shell is reading the same local database and presentation layer as the Windows app."
-                                   Foreground="#94A3B8"
-                                   TextWrapping="Wrap" />
-                    </StackPanel>
-                </Border>
-
-                <StackPanel Grid.Row="3" Margin="0,22,0,0" Spacing="18">
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="ACTIVITY"
-                                   Foreground="#64748B"
-                                   FontSize="11"
-                                   FontWeight="SemiBold"
-                                   Margin="2,0,0,0" />
-                        <Border Background="#101A2C"
-                                BorderBrush="#233653"
-                                BorderThickness="1"
-                                CornerRadius="12"
-                                Padding="12">
-                            <StackPanel Spacing="10">
-                                <TextBlock Text="Browsing"
-                                           Foreground="#E2E8F0"
+                            <StackPanel Grid.Column="1"
+                                        Margin="12,0,0,0">
+                                <TextBlock Text="blakb"
+                                           Foreground="#F8FAFC"
+                                           FontSize="12"
                                            FontWeight="SemiBold" />
-                                <TextBlock Text="Development"
-                                           Foreground="#94A3B8" />
-                                <TextBlock Text="Communication"
-                                           Foreground="#94A3B8" />
-                                <TextBlock Text="Documents"
-                                           Foreground="#94A3B8" />
+                                <TextBlock Text="GREENMONKEY\\blakb"
+                                           Foreground="#94A3B8"
+                                           FontSize="11" />
                             </StackPanel>
-                        </Border>
-                    </StackPanel>
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="SOURCES"
-                                   Foreground="#64748B"
-                                   FontSize="11"
-                                   FontWeight="SemiBold"
-                                   Margin="2,0,0,0" />
-                        <Border Background="#101A2C"
-                                BorderBrush="#233653"
-                                BorderThickness="1"
-                                CornerRadius="12"
-                                Padding="12">
-                            <StackPanel Spacing="10">
-                                <TextBlock Text="Apps"
-                                           Foreground="#E2E8F0"
-                                           FontWeight="SemiBold" />
-                                <TextBlock Text="Websites"
-                                           Foreground="#94A3B8" />
-                                <TextBlock Text="Files"
-                                           Foreground="#94A3B8" />
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </StackPanel>
+                        </Grid>
+                    </DockPanel>
 
-                <Border Grid.Row="4"
-                        Background="#0B1424"
-                        BorderBrush="#233653"
-                        BorderThickness="1"
-                        CornerRadius="12"
-                        Padding="12"
-                        Margin="0,14,0,0">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Cross-platform reader spike"
-                                   Foreground="#CBD5E1"
-                                   FontSize="12"
-                                   FontWeight="SemiBold" />
-                        <TextBlock Text="Reading local moments without recorder or tray features yet."
-                                   Foreground="#64748B"
-                                   FontSize="11"
-                                   TextWrapping="Wrap" />
-                    </StackPanel>
-                </Border>
-
-                <Border Grid.Row="4"
-                        Background="#101A2C"
-                        BorderBrush="#233653"
-                        BorderThickness="1"
-                        CornerRadius="12"
-                        Padding="12"
-                        Margin="0,116,0,0"
-                        VerticalAlignment="Bottom">
-                    <Grid ColumnDefinitions="Auto,*">
-                        <Border Width="34"
-                                Height="34"
-                                Background="#8B5CF6"
-                                CornerRadius="17">
-                            <TextBlock Text="B"
-                                       Foreground="White"
-                                       FontSize="13"
-                                       FontWeight="SemiBold"
-                                       HorizontalAlignment="Center"
+                    <Button Classes="nav"
+                            HorizontalContentAlignment="Left"
+                            Background="Transparent"
+                            Foreground="#CBD5E1"
+                            BorderBrush="Transparent">
+                        <StackPanel Orientation="Horizontal" Spacing="0">
+                            <TextBlock Text="⚙"
+                                       Width="28"
+                                       TextAlignment="Center"
+                                       FontSize="12"
                                        VerticalAlignment="Center" />
-                        </Border>
-                        <StackPanel Grid.Column="1"
-                                    Margin="10,0,0,0">
-                            <TextBlock Text="blakb"
-                                       Foreground="#F8FAFC"
-                                       FontSize="13"
-                                       FontWeight="SemiBold" />
                             <TextBlock Text="Settings"
-                                       Foreground="#94A3B8"
-                                       FontSize="11" />
+                                       Margin="10,0,0,0"
+                                       FontSize="14"
+                                       VerticalAlignment="Center" />
                         </StackPanel>
-                    </Grid>
-                </Border>
+                    </Button>
+                </StackPanel>
             </Grid>
         </Border>
 
-        <Grid Grid.Column="1">
-            <Grid x:Name="TimelinePage" RowDefinitions="Auto,*">
-                <Border Background="#0F1A2E"
-                        BorderBrush="#233653"
-                        BorderThickness="1"
-                        CornerRadius="14"
-                        Padding="16">
-                    <Grid ColumnDefinitions="*,160,96,Auto,Auto,Auto,Auto" RowDefinitions="Auto,Auto" RowSpacing="12">
-                        <Border Background="#111C31"
+        <Border Grid.Column="0"
+                HorizontalAlignment="Right"
+                Width="1"
+                Margin="0,8,10,8"
+                Background="#233653" />
+
+        <Grid Grid.Column="1" RowDefinitions="66,*"
+              Margin="22,0,0,0">
+            <Grid Margin="16,12,18,0"
+                  PointerPressed="ToolbarDragRegion_PointerPressed">
+                    <Grid ColumnDefinitions="*,142,96,50,50,50,50"
+                          ColumnSpacing="12"
+                          VerticalAlignment="Center">
+                        <Border x:Name="SearchSurface"
+                                Background="#111C31"
                                 BorderBrush="#233653"
                                 BorderThickness="1"
-                                CornerRadius="12"
-                                Padding="14,10">
+                                CornerRadius="7"
+                                Padding="14,8"
+                                MinHeight="40">
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                                <TextBlock Text="⌕"
+                                <TextBlock x:Name="SearchIconText"
+                                           Text="⌕"
                                            Foreground="#64748B"
-                                           FontSize="16"
+                                           FontSize="20"
+                                           Margin="2,0,0,0"
                                            VerticalAlignment="Center" />
                                 <TextBox x:Name="SearchTextBox"
+                                         Classes="searchBox"
                                          Grid.Column="1"
                                          TextChanged="SearchTextBox_TextChanged"
+                                         GotFocus="SearchTextBox_GotFocus"
+                                         LostFocus="SearchTextBox_LostFocus"
                                          PlaceholderText="Search moments, sessions, apps, or websites..."
+                                         PlaceholderForeground="#64748B"
                                          Background="Transparent"
                                          BorderThickness="0"
                                          Foreground="#E2E8F0" />
@@ -356,94 +409,89 @@
                                   SelectionChanged="DateFilterComboBox_SelectionChanged"
                                   HorizontalAlignment="Stretch"
                                   VerticalAlignment="Center"
-                                  Margin="16,0,0,0"
-                                  MinHeight="42" />
+                                  MinHeight="40" />
                         <ComboBox x:Name="TypeFilterComboBox"
                                   Classes="filter"
                                   Grid.Column="2"
                                   HorizontalAlignment="Stretch"
                                   VerticalAlignment="Center"
-                                  Margin="12,0,0,0"
-                                  MinHeight="42" />
+                                  MinHeight="40" />
                         <Button Grid.Column="3"
                                 Classes="toolbar"
-                                Click="RefreshButton_Click"
-                                Margin="12,0,0,0">
-                            <TextBlock Text="≡" FontSize="16" />
+                                Click="ToggleDetailsButton_Click"
+                                Width="48">
+                            <TextBlock Text="☰"
+                                       FontSize="14" />
                         </Button>
                         <Button Grid.Column="4"
                                 Classes="toolbar"
                                 Click="MinimizeShellButton_Click"
-                                Margin="10,0,0,0"
-                                Padding="12,10"
-                                Width="42">
+                                Width="48">
                             <TextBlock Text="−" FontSize="16" />
                         </Button>
                         <Button Grid.Column="5"
                                 Classes="toolbar"
                                 Click="MaximizeShellButton_Click"
-                                Margin="10,0,0,0"
-                                Padding="12,10"
-                                Width="42">
+                                Width="48">
                             <TextBlock Text="□" FontSize="13" />
                         </Button>
                         <Button Grid.Column="6"
                                 Classes="toolbar"
                                 Click="CloseShellButton_Click"
-                                Margin="10,0,0,0"
-                                Padding="12,10"
-                                Width="42">
+                                Width="48">
                             <TextBlock Text="×" FontSize="16" />
                         </Button>
-                        <StackPanel Grid.Row="1" Grid.ColumnSpan="7">
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="Timeline"
-                                           Foreground="#F8FAFC"
-                                           FontSize="20"
-                                           FontWeight="SemiBold" />
+                    </Grid>
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <Grid x:Name="TimelinePage" Margin="28,20,22,0">
+                    <Grid x:Name="TimelineContentGrid"
+                          ColumnDefinitions="*,380"
+                          ClipToBounds="True">
+                    <Grid Grid.Column="0"
+                          Margin="0,0,18,0"
+                          MinWidth="0"
+                          ClipToBounds="True"
+                          RowDefinitions="Auto,*">
+                            <StackPanel Margin="8,0,0,20"
+                                        Spacing="0">
+                                <StackPanel Orientation="Horizontal"
+                                            Spacing="10">
+                                    <TextBlock Text="Timeline"
+                                               Foreground="#F8FAFC"
+                                               FontSize="22"
+                                               FontWeight="SemiBold" />
                                     <Border Classes="infoChip"
                                             VerticalAlignment="Center">
-                                        <TextBlock Text="Stored locally"
-                                                   Foreground="#C4B5FD"
-                                                   FontSize="11"
-                                               FontWeight="SemiBold" />
-                                </Border>
-                            </StackPanel>
-                            <TextBlock x:Name="TimelineSubtitleText"
-                                       Text="Reading local moments"
-                                       Foreground="#94A3B8"
-                                       Margin="0,4,0,0" />
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <Grid Grid.Row="1" ColumnDefinitions="1.3*,0.9*" Margin="0,18,0,0">
-                    <Border Background="#0F1A2E"
-                            BorderBrush="#233653"
-                            BorderThickness="1"
-                            CornerRadius="14"
-                            Padding="16"
-                            Margin="0,0,18,0">
-                        <Grid RowDefinitions="Auto,*">
-                            <Grid ColumnDefinitions="Auto,*" Margin="0,0,0,14">
-                                <Border Classes="infoChip">
-                                    <TextBlock x:Name="TimelineCountText"
-                                               Text="Moments"
-                                               Foreground="#CBD5E1"
-                                               FontSize="11"
-                                               FontWeight="SemiBold" />
-                                </Border>
-                                <TextBlock Grid.Column="1"
+                                        <TextBlock x:Name="TimelineCountText"
+                                                   Text="Moments"
+                                                   Foreground="#CBD5E1"
+                                                   FontSize="13"
+                                                   Margin="0,2,0,0" />
+                                    </Border>
+                                    <Border Classes="infoChip"
+                                            VerticalAlignment="Center">
+                                        <TextBlock Text="Stored locally · Only visible to you"
+                                                   Foreground="#94A3B8"
+                                                   FontSize="11" />
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock x:Name="TimelineSubtitleText"
                                            Text="Grouped into local moments and arranged along a shared activity rail."
                                            Foreground="#64748B"
-                                           Margin="12,2,0,0"
+                                           FontSize="13"
+                                           Margin="0,6,0,0"
                                            TextWrapping="Wrap" />
-                            </Grid>
-                            <ScrollViewer Grid.Row="1">
+                            </StackPanel>
+                            <ScrollViewer Grid.Row="1"
+                                          VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled"
+                                          ClipToBounds="True">
                                 <ItemsControl x:Name="TimelineGroupsItems">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Grid ColumnDefinitions="36,*" Margin="0,0,0,22">
+                                            <Grid ColumnDefinitions="36,*" Margin="0,0,0,24">
                                                 <Grid>
                                                     <Border Width="2"
                                                             Background="#223756"
@@ -459,68 +507,70 @@
                                                             VerticalAlignment="Top"
                                                             Margin="0,12,0,0" />
                                                 </Grid>
-                                                <StackPanel Grid.Column="1" Spacing="12">
-                                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                                    <StackPanel Grid.Column="1" Spacing="16">
+                                                    <Grid ColumnDefinitions="104,*" ColumnSpacing="12">
                                                         <Border Background="{Binding AccentBrush}"
-                                                                CornerRadius="999"
-                                                                Padding="10,4"
+                                                                CornerRadius="12"
+                                                                Padding="9,3"
                                                                 VerticalAlignment="Top">
                                                             <TextBlock Text="{Binding TimeRange}"
                                                                        Foreground="White"
                                                                        FontSize="11"
                                                                        FontWeight="SemiBold" />
                                                         </Border>
-                                                        <StackPanel Grid.Column="1">
-                                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                                <TextBlock Text="{Binding Name}"
+                                                            <StackPanel Grid.Column="1">
+                                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                                    <TextBlock Text="{Binding Name}"
                                                                            Foreground="#F8FAFC"
-                                                                           FontSize="17"
+                                                                           FontSize="15"
                                                                            FontWeight="SemiBold" />
                                                                 <Border Background="#1C2540"
                                                                         BorderBrush="#253653"
                                                                         BorderThickness="1"
-                                                                        CornerRadius="999"
-                                                                        Padding="8,2"
-                                                                        VerticalAlignment="Center">
+                                                                        CornerRadius="10"
+                                                                        Padding="9,3"
+                                                                        Margin="10,-1,0,0"
+                                                                        VerticalAlignment="Top">
                                                                     <TextBlock Text="{Binding CountLabel}"
                                                                                Foreground="#A78BFA"
                                                                                FontSize="11"
                                                                                FontWeight="SemiBold" />
                                                                 </Border>
-                                                            </StackPanel>
-                                                            <TextBlock Text="{Binding Summary}"
-                                                                       Foreground="#94A3B8"
-                                                                       Margin="0,5,0,0"
-                                                                       TextWrapping="Wrap" />
-                                                        </StackPanel>
-                                                    </Grid>
-                                                    <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                                                                  VerticalScrollBarVisibility="Disabled">
-                                                        <ItemsControl ItemsSource="{Binding Moments}">
-                                                            <ItemsControl.ItemsPanel>
-                                                                <ItemsPanelTemplate>
-                                                                    <StackPanel Orientation="Horizontal" Spacing="12" />
-                                                                </ItemsPanelTemplate>
-                                                            </ItemsControl.ItemsPanel>
-                                                            <ItemsControl.ItemTemplate>
-                                                                <DataTemplate>
-                                                                    <Button Click="TimelineMomentButton_Click"
-                                                                            Classes="momentCard"
-                                                                            CommandParameter="{Binding}"
-                                                                            Background="Transparent"
-                                                                            BorderThickness="0"
-                                                                            Padding="0"
-                                                                            HorizontalAlignment="Stretch">
-                                                                        <Border Width="240"
-                                                                                MinHeight="212"
+                                                             </StackPanel>
+                                                             <TextBlock Text="{Binding Summary}"
+                                                                        Foreground="#94A3B8"
+                                                                        Margin="0,7,0,0"
+                                                                        FontSize="12"
+                                                                        TextWrapping="Wrap" />
+                                                         </StackPanel>
+                                                     </Grid>
+                                                    <ItemsControl ItemsSource="{Binding Moments}"
+                                                                  Margin="0,2,0,0">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <WrapPanel Orientation="Horizontal" />
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Button Click="TimelineMomentButton_Click"
+                                                                        Classes="momentCard"
+                                                                        CommandParameter="{Binding}"
+                                                                        Background="Transparent"
+                                                                        BorderThickness="0"
+                                                                        Padding="0"
+                                                                        Margin="0,0,12,12"
+                                                                        HorizontalAlignment="Stretch">
+                                                                        <Border Width="218"
+                                                                                Height="150"
                                                                                 Background="{Binding CardBackground}"
                                                                                 BorderBrush="{Binding BorderBrush}"
                                                                                 BorderThickness="1"
-                                                                                CornerRadius="14"
-                                                                                Padding="14">
-                                                                            <Grid RowDefinitions="108,*,Auto">
+                                                                                CornerRadius="8"
+                                                                                Padding="0">
+                                                                            <Grid RowDefinitions="82,*">
                                                                                 <Border Background="#10192B"
-                                                                                        CornerRadius="12"
+                                                                                        CornerRadius="8"
                                                                                         Padding="0"
                                                                                         ClipToBounds="True">
                                                                                     <Grid>
@@ -533,34 +583,11 @@
                                                                                                IsVisible="{Binding ShowPreview}" />
                                                                                         <Border Background="#10192B"
                                                                                                 IsVisible="{Binding ShowGlyphFallback}" />
-                                                                                        <StackPanel Orientation="Horizontal"
-                                                                                                    Spacing="6">
-                                                                                            <Border Background="{Binding KindBackground}"
-                                                                                                    CornerRadius="999"
-                                                                                                    Padding="8,2"
-                                                                                                    Margin="12,12,0,0"
-                                                                                                    VerticalAlignment="Top">
-                                                                                                <TextBlock Text="{Binding KindLabel}"
-                                                                                                           Foreground="{Binding KindForeground}"
-                                                                                                           FontSize="11"
-                                                                                                           FontWeight="SemiBold" />
-                                                                                            </Border>
-                                                                                            <Border Background="#201A38"
-                                                                                                    IsVisible="{Binding IsSelected}"
-                                                                                                    CornerRadius="999"
-                                                                                                    Padding="8,2"
-                                                                                                    Margin="0,12,0,0">
-                                                                                                <TextBlock Text="Selected"
-                                                                                                           Foreground="#C4B5FD"
-                                                                                                           FontSize="11"
-                                                                                                           FontWeight="SemiBold" />
-                                                                                            </Border>
-                                                                                        </StackPanel>
                                                                                         <Border Grid.Column="1"
                                                                                                 Background="#21324E"
-                                                                                                CornerRadius="999"
-                                                                                                Padding="8,2"
-                                                                                                Margin="0,12,12,0"
+                                                                                                CornerRadius="5"
+                                                                                                Padding="6,2"
+                                                                                                Margin="0,8,8,0"
                                                                                                 VerticalAlignment="Top">
                                                                                             <TextBlock Text="{Binding TimeLabel}"
                                                                                                        Foreground="#CBD5E1"
@@ -582,12 +609,10 @@
                                                                                         </Border>
                                                                                         <Border HorizontalAlignment="Right"
                                                                                                 VerticalAlignment="Bottom"
-                                                                                                Margin="0,0,12,12"
-                                                                                                Background="#1A2437"
-                                                                                                BorderBrush="#253653"
-                                                                                                BorderThickness="1"
-                                                                                                CornerRadius="999"
-                                                                                                Padding="8,2">
+                                                                                                Margin="0,0,8,8"
+                                                                                                Background="#16233A"
+                                                                                                CornerRadius="5"
+                                                                                                Padding="6,2">
                                                                                             <TextBlock Text="{Binding SeenLabel}"
                                                                                                        Foreground="#F8FAFC"
                                                                                                        FontSize="11"
@@ -595,51 +620,50 @@
                                                                                         </Border>
                                                                                     </Grid>
                                                                                 </Border>
-                                                                                <StackPanel Grid.Row="1"
-                                                                                            Margin="0,14,0,0"
-                                                                                            Spacing="8">
-                                                                                    <TextBlock Text="{Binding Title}"
-                                                                                               Foreground="#F8FAFC"
-                                                                                               FontWeight="SemiBold"
-                                                                                               TextWrapping="Wrap"
-                                                                                               FontSize="15"
-                                                                                               MaxHeight="52" />
-                                                                                    <TextBlock Text="{Binding Subtitle}"
-                                                                                               Foreground="#94A3B8"
-                                                                                               TextWrapping="Wrap"
-                                                                                               MaxHeight="58" />
-                                                                                </StackPanel>
-                                                                                <StackPanel Grid.Row="2"
-                                                                                            Margin="0,12,0,0"
-                                                                                            Spacing="6">
-                                                                                    <Border Height="1"
-                                                                                            Background="#223756"
-                                                                                            Opacity="0.65" />
-                                                                                    <TextBlock Text="{Binding Meta}"
-                                                                                               Foreground="#64748B"
-                                                                                               FontSize="11"
-                                                                                               TextWrapping="Wrap" />
-                                                                                    <StackPanel Orientation="Horizontal"
-                                                                                                Spacing="6">
-                                                                                        <Border Background="#1F2A20"
-                                                                                                IsVisible="{Binding HasSavedIndicator}"
-                                                                                                BorderBrush="#2F4A31"
-                                                                                                BorderThickness="1"
-                                                                                                CornerRadius="999"
-                                                                                                Padding="8,2">
-                                                                                            <TextBlock Text="{Binding SavedIndicator}"
-                                                                                                       Foreground="#9FE3A6"
-                                                                                                       FontSize="11" />
+                                                                                <Grid Grid.Row="1"
+                                                                                      Margin="10,8,10,8"
+                                                                                      RowDefinitions="Auto,Auto">
+                                                                                    <Grid ColumnDefinitions="Auto,*,Auto"
+                                                                                          ColumnSpacing="7">
+                                                                                        <Border Width="18"
+                                                                                                Height="18"
+                                                                                                CornerRadius="0"
+                                                                                                Background="Transparent"
+                                                                                                VerticalAlignment="Top">
+                                                                                            <TextBlock Text="{Binding Glyph}"
+                                                                                                       Foreground="{Binding GlyphForeground}"
+                                                                                                       FontSize="10"
+                                                                                                       FontWeight="SemiBold"
+                                                                                                       HorizontalAlignment="Center"
+                                                                                                       VerticalAlignment="Center" />
                                                                                         </Border>
-                                                                                    </StackPanel>
-                                                                                </StackPanel>
+                                                                                        <TextBlock Grid.Column="1"
+                                                                                                   Text="{Binding Title}"
+                                                                                                   Foreground="#F8FAFC"
+                                                                                                   FontWeight="SemiBold"
+                                                                                                   TextWrapping="Wrap"
+                                                                                                   FontSize="13"
+                                                                                                   MaxWidth="154"
+                                                                                                   TextTrimming="CharacterEllipsis" />
+                                                                                        <TextBlock Grid.Column="2"
+                                                                                                   Text="⋮"
+                                                                                                   Foreground="#94A3B8"
+                                                                                                   FontSize="16"
+                                                                                                   VerticalAlignment="Top" />
+                                                                                    </Grid>
+                                                                                    <TextBlock Grid.Row="1"
+                                                                                               Text="{Binding Subtitle}"
+                                                                                               Foreground="#94A3B8"
+                                                                                               Margin="25,2,0,0"
+                                                                                               FontSize="12"
+                                                                                               TextTrimming="CharacterEllipsis" />
+                                                                                </Grid>
                                                                             </Grid>
                                                                         </Border>
-                                                                    </Button>
-                                                                </DataTemplate>
-                                                            </ItemsControl.ItemTemplate>
-                                                        </ItemsControl>
-                                                    </ScrollViewer>
+                                                                </Button>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
                                                 </StackPanel>
                                             </Grid>
                                         </DataTemplate>
@@ -647,255 +671,354 @@
                                 </ItemsControl>
                             </ScrollViewer>
                         </Grid>
-                    </Border>
 
-                    <Border Grid.Column="1"
-                            Background="#0F1A2E"
-                            BorderBrush="#233653"
+                    <Border x:Name="DetailSurface"
+                            Grid.Column="1"
+                            Width="380"
+                            HorizontalAlignment="Stretch"
+                            Background="{DynamicResource PanelBrush}"
+                            BorderBrush="{DynamicResource PanelEdgeBrush}"
                             BorderThickness="1"
-                            CornerRadius="14"
-                            Padding="16">
-                        <Grid RowDefinitions="Auto,Auto,Auto,*">
-                            <Grid ColumnDefinitions="74,*,Auto" ColumnSpacing="12">
+                            CornerRadius="0"
+                            Padding="24,30,22,24">
+                        <Grid RowDefinitions="Auto,Auto,*">
+                            <Grid ColumnDefinitions="62,*" ColumnSpacing="0">
                                 <Border x:Name="DetailGlyphHost"
-                                        Width="74"
-                                        Height="74"
-                                        CornerRadius="18"
-                                        Background="#172743"
-                                        BorderBrush="#253653"
-                                        BorderThickness="1">
+                                        Width="62"
+                                        Height="62"
+                                        CornerRadius="9"
+                                        Background="{DynamicResource SubtlePanelBrush}">
                                     <TextBlock x:Name="DetailGlyphText"
                                                Text="MT"
                                                Foreground="#A78BFA"
-                                               FontSize="24"
+                                               FontSize="22"
                                                FontWeight="SemiBold"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center" />
                                 </Border>
                                 <StackPanel Grid.Column="1"
+                                            Margin="14,5,0,0"
                                             Spacing="6">
                                     <TextBlock x:Name="DetailTitleText"
                                                Text="Select a moment"
                                                Foreground="#F8FAFC"
-                                               FontSize="22"
+                                               FontSize="17"
                                                FontWeight="SemiBold"
                                                TextWrapping="Wrap" />
                                     <TextBlock x:Name="DetailSubtitleText"
                                                Text="Timeline context appears here"
                                                Foreground="#94A3B8"
+                                               FontSize="12"
                                                TextWrapping="Wrap" />
-                                    <StackPanel Orientation="Horizontal"
-                                                Spacing="8">
-                                        <Border x:Name="DetailCategoryChip"
-                                                Classes="infoChip"
-                                                Padding="8,2">
-                                            <TextBlock x:Name="DetailCategoryText"
-                                                       Text="Moment"
-                                                       Foreground="#C4B5FD"
-                                                       FontSize="11"
-                                                       FontWeight="SemiBold" />
-                                        </Border>
-                                        <Border x:Name="DetailDurationChip"
-                                                Background="#10192B"
-                                                BorderBrush="#253653"
-                                                BorderThickness="1"
-                                                CornerRadius="999"
-                                                Padding="8,2">
-                                            <TextBlock x:Name="DetailDurationText"
-                                                       Text="Local only"
-                                                       Foreground="#CBD5E1"
-                                                       FontSize="11"
-                                                       FontWeight="SemiBold" />
-                                        </Border>
-                                    </StackPanel>
                                 </StackPanel>
-                                <Border Grid.Column="2"
-                                        Classes="infoChip"
-                                        Padding="8,2"
-                                        VerticalAlignment="Top">
-                                    <TextBlock Text="Only visible to you"
-                                               Foreground="#A78BFA"
-                                               FontSize="11"
-                                               FontWeight="SemiBold" />
-                                </Border>
                             </Grid>
                             <StackPanel Grid.Row="1"
                                         Orientation="Horizontal"
                                         Spacing="10"
-                                        Margin="0,18,0,0">
-                                <Button Classes="detailPrimary">
+                                        Margin="0,24,0,18">
+                                <Button x:Name="OpenMomentButton"
+                                        Classes="detailPrimary"
+                                        Click="OpenMomentButton_Click">
                                     <TextBlock Text="↗ Open"
                                                FontWeight="SemiBold" />
                                 </Button>
-                                <Button Classes="detailSecondary">
-                                    <TextBlock Text="Pin"
+                                <Button x:Name="PinMomentButton"
+                                        Classes="detailSecondary"
+                                        Click="PinMomentButton_Click">
+                                    <TextBlock x:Name="PinMomentButtonText"
+                                               Text="Pin"
                                                FontWeight="SemiBold" />
                                 </Button>
-                                <Button Classes="detailDanger"
-                                        Width="48">
-                                    <TextBlock Text="🗑"
-                                               FontSize="14"
-                                               HorizontalAlignment="Center" />
+                                <Button x:Name="BookmarkMomentButton"
+                                        Classes="detailSecondary"
+                                        Click="BookmarkMomentButton_Click">
+                                    <TextBlock x:Name="BookmarkMomentButtonText"
+                                               Text="Bookmark"
+                                               FontWeight="SemiBold" />
+                                </Button>
+                                <Button x:Name="DeleteMomentButton"
+                                        Classes="detailDanger"
+                                        Click="DeleteMomentButton_Click"
+                                        Width="42"
+                                        Height="42"
+                                        Padding="0"
+                                        HorizontalContentAlignment="Center"
+                                        VerticalContentAlignment="Center">
+                                    <Grid Width="42" Height="42">
+                                        <TextBlock Text=""
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="14"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Grid>
                                 </Button>
                             </StackPanel>
-                            <Border Grid.Row="2"
-                                    Background="#152238"
-                                    BorderBrush="#233653"
-                                    BorderThickness="1"
-                                    CornerRadius="12"
-                                    Padding="12"
-                                    Margin="0,18,0,0">
-                                <StackPanel Spacing="6">
-                                    <TextBlock Text="Moment context"
-                                               Foreground="#CBD5E1"
-                                               FontWeight="SemiBold" />
-                                    <TextBlock x:Name="DetailNarrativeText"
-                                               Text="Select a moment to inspect its grouped raw activity and nearby related work."
-                                               Foreground="#94A3B8"
-                                               TextWrapping="Wrap" />
-                                </StackPanel>
-                            </Border>
-                            <ScrollViewer Grid.Row="3" Margin="0,18,0,0">
-                                <TabControl Background="Transparent"
-                                            Classes="detailTabs"
-                                            BorderThickness="0">
-                                    <TabItem Header="Overview">
-                                        <Border Background="#111C31"
-                                                BorderBrush="#233653"
-                                                BorderThickness="1"
-                                                CornerRadius="12"
-                                                Padding="12"
-                                                Margin="0,12,0,0">
-                                            <StackPanel Spacing="10">
-                                                <TextBlock Text="Moment overview"
-                                                           Foreground="#CBD5E1"
-                                                           FontWeight="SemiBold" />
-                                                <Border Background="#10192B"
-                                                        BorderBrush="#233653"
-                                                        BorderThickness="1"
-                                                        CornerRadius="10"
-                                                        Padding="10">
-                                                    <TextBlock Text="Stored locally and assembled from grouped activity in the shared presentation layer."
-                                                               Foreground="#64748B"
-                                                               TextWrapping="Wrap"
-                                                               FontSize="11" />
-                                                </Border>
-                                                <TextBlock x:Name="RawSummaryText"
-                                                           Text="No moment selected"
+                            <Grid Grid.Row="2" RowDefinitions="Auto,*" Margin="0,0,0,0">
+                                <Grid RowDefinitions="35,1" Margin="0,0,0,16">
+                                    <Grid ColumnDefinitions="*,*,*">
+                                        <Button x:Name="OverviewDetailTabButton"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                Click="DetailTabButton_Click"
+                                                CommandParameter="Overview"
+                                                Padding="0">
+                                            <Grid RowDefinitions="*,3">
+                                                <TextBlock x:Name="OverviewDetailTabText"
+                                                           Text="Overview"
+                                                           Foreground="#A78BFA"
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center" />
+                                                <Border x:Name="OverviewDetailTabUnderline"
+                                                        Grid.Row="1"
+                                                        Background="#8B5CF6"
+                                                        CornerRadius="2"
+                                                        Margin="12,0" />
+                                            </Grid>
+                                        </Button>
+                                        <Button x:Name="ActivityDetailTabButton"
+                                                Grid.Column="1"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                Click="DetailTabButton_Click"
+                                                CommandParameter="Activity"
+                                                Padding="0">
+                                            <Grid RowDefinitions="*,3">
+                                                <TextBlock x:Name="ActivityDetailTabText"
+                                                           Text="Activity"
                                                            Foreground="#94A3B8"
+                                                           FontSize="13"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center" />
+                                                <Border x:Name="ActivityDetailTabUnderline"
+                                                        Grid.Row="1"
+                                                        Background="#8B5CF6"
+                                                        CornerRadius="2"
+                                                        Margin="12,0"
+                                                        IsVisible="False" />
+                                            </Grid>
+                                        </Button>
+                                        <Button x:Name="RelatedDetailTabButton"
+                                                Grid.Column="2"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                Click="DetailTabButton_Click"
+                                                CommandParameter="Related"
+                                                Padding="0">
+                                            <Grid RowDefinitions="*,3">
+                                                <TextBlock x:Name="RelatedDetailTabText"
+                                                           Text="Related"
+                                                           Foreground="#94A3B8"
+                                                           FontSize="13"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center" />
+                                                <Border x:Name="RelatedDetailTabUnderline"
+                                                        Grid.Row="1"
+                                                        Background="#8B5CF6"
+                                                        CornerRadius="2"
+                                                        Margin="12,0"
+                                                        IsVisible="False" />
+                                            </Grid>
+                                        </Button>
+                                    </Grid>
+                                    <Border Grid.Row="1"
+                                            Background="#233653"
+                                            Opacity="0.9" />
+                                </Grid>
+
+                                <ScrollViewer x:Name="OverviewDetailTabContent"
+                                              Grid.Row="1"
+                                              Margin="0,0,0,0"
+                                              VerticalScrollBarVisibility="Visible"
+                                              HorizontalScrollBarVisibility="Disabled">
+                                    <StackPanel>
+                                        <Border Background="{DynamicResource SubtlePanelBrush}"
+                                                BorderBrush="{DynamicResource PanelEdgeBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="10"
+                                                Padding="16"
+                                                Margin="0,0,0,18">
+                                            <StackPanel>
+                                                <TextBlock Text="Moment overview"
+                                                           Foreground="{DynamicResource TextBrush}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold"
+                                                           Margin="0,0,0,10" />
+                                                <TextBlock x:Name="DetailNarrativeText"
+                                                           Text="Select a moment to inspect its grouped raw activity and nearby related work."
+                                                           Foreground="{DynamicResource MutedTextBrush}"
+                                                           FontSize="13"
+                                                           LineHeight="19"
                                                            TextWrapping="Wrap" />
-                                                <Border Background="#10192B"
-                                                        BorderBrush="#233653"
+                                            </StackPanel>
+                                        </Border>
+                                                <Border x:Name="DetailPreviewHost"
+                                                        Background="{DynamicResource PanelBrush}"
+                                                        BorderBrush="{DynamicResource PanelEdgeBrush}"
                                                         BorderThickness="1"
-                                                        CornerRadius="10"
-                                                        Padding="12"
-                                                        Margin="0,6,0,0">
-                                                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                                                        CornerRadius="8"
+                                                        ClipToBounds="True"
+                                                        Height="150"
+                                                        Margin="0,0,0,18"
+                                                        IsVisible="False">
+                                                    <Image x:Name="DetailPreviewImage"
+                                                           Stretch="UniformToFill" />
+                                                </Border>
+                                                <Border Background="{DynamicResource SubtlePanelBrush}"
+                                                        BorderBrush="{DynamicResource PanelEdgeBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="8"
+                                                        Padding="16"
+                                                        Margin="0,0,0,18">
+                                                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
                                                           ColumnDefinitions="Auto,*"
                                                           RowSpacing="10"
                                                           ColumnSpacing="14">
                                                         <TextBlock Text="Visible span"
-                                                                   Foreground="#94A3B8" />
+                                                                   Foreground="{DynamicResource MutedTextBrush}"
+                                                                   Margin="0,0,0,12" />
                                                         <TextBlock Grid.Column="1"
                                                                    x:Name="DetailMetaSpanText"
                                                                    Text="Local only"
-                                                                   Foreground="#F8FAFC" />
+                                                                   Foreground="{DynamicResource TextBrush}"
+                                                                   Margin="0,0,0,12" />
                                                         <TextBlock Grid.Row="1"
+                                                                   Text="From"
+                                                                   Foreground="{DynamicResource MutedTextBrush}"
+                                                                   Margin="0,0,0,12" />
+                                                        <TextBlock Grid.Row="1"
+                                                                   Grid.Column="1"
+                                                                   x:Name="DetailMetaStartedText"
+                                                                   Text="Local only"
+                                                                   Foreground="{DynamicResource TextBrush}"
+                                                                   Margin="0,0,0,12"
+                                                                   TextWrapping="Wrap" />
+                                                        <TextBlock Grid.Row="2"
+                                                                   Text="Until"
+                                                                   Foreground="{DynamicResource MutedTextBrush}"
+                                                                   Margin="0,0,0,12" />
+                                                        <TextBlock Grid.Row="2"
+                                                                   Grid.Column="1"
+                                                                   x:Name="DetailMetaEndedText"
+                                                                   Text="Local only"
+                                                                   Foreground="{DynamicResource TextBrush}"
+                                                                   Margin="0,0,0,12"
+                                                                   TextWrapping="Wrap" />
+                                                        <TextBlock Grid.Row="3"
                                                                    Text="Source"
-                                                                   Foreground="#94A3B8" />
-                                                        <TextBlock Grid.Row="1"
+                                                                   Foreground="{DynamicResource MutedTextBrush}"
+                                                                   Margin="0,0,0,12" />
+                                                        <TextBlock Grid.Row="3"
                                                                    Grid.Column="1"
                                                                    x:Name="DetailMetaSourceText"
                                                                    Text="MomentTrace"
-                                                                   Foreground="#F8FAFC" />
-                                                        <TextBlock Grid.Row="2"
+                                                                   Foreground="{DynamicResource TextBrush}"
+                                                                   Margin="0,0,0,12"
+                                                                   TextWrapping="Wrap" />
+                                                        <TextBlock Grid.Row="4"
                                                                    Text="Category"
-                                                                   Foreground="#94A3B8" />
-                                                        <Border Grid.Row="2"
+                                                                   Foreground="{DynamicResource MutedTextBrush}"
+                                                                   Margin="0,0,0,12" />
+                                                        <Border Grid.Row="4"
                                                                 Grid.Column="1"
-                                                                Classes="infoChip"
+                                                                Background="{DynamicResource AccentBrush}"
+                                                                CornerRadius="4"
                                                                 HorizontalAlignment="Left"
-                                                                Padding="8,2">
+                                                                Padding="7,2"
+                                                                Margin="0,0,0,12">
                                                             <TextBlock x:Name="DetailMetaCategoryText"
                                                                        Text="Moment"
-                                                                       Foreground="#C4B5FD"
+                                                                       Foreground="{DynamicResource AccentTextBrush}"
                                                                        FontSize="11"
                                                                        FontWeight="SemiBold" />
                                                         </Border>
-                                                        <TextBlock Grid.Row="3"
+                                                        <TextBlock Grid.Row="5"
                                                                    Text="Privacy"
-                                                                   Foreground="#94A3B8" />
-                                                        <TextBlock Grid.Row="3"
+                                                                   Foreground="{DynamicResource MutedTextBrush}" />
+                                                        <TextBlock Grid.Row="5"
                                                                    Grid.Column="1"
                                                                    Text="Stored locally"
-                                                                   Foreground="#F8FAFC" />
-                                                        <TextBlock Grid.Row="4"
-                                                                   Text="Saved"
-                                                                   Foreground="#94A3B8" />
-                                                        <TextBlock Grid.Row="4"
-                                                                   Grid.Column="1"
-                                                                   x:Name="DetailMetaSavedText"
-                                                                   Text="Not saved yet"
-                                                                   Foreground="#F8FAFC" />
+                                                                   Foreground="{DynamicResource TextBrush}" />
                                                     </Grid>
                                                 </Border>
                                                 <Border Background="#10192B"
-                                                        BorderBrush="#233653"
+                                                        BorderBrush="{DynamicResource PanelEdgeBrush}"
                                                         BorderThickness="1"
-                                                        CornerRadius="10"
-                                                        Padding="12"
-                                                        Margin="0,6,0,0">
-                                                    <StackPanel Spacing="10">
-                                                        <Grid ColumnDefinitions="*,Auto">
+                                                        CornerRadius="8"
+                                                        Padding="16"
+                                                        Margin="0,0,0,18">
+                                                    <StackPanel>
+                                                        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,10">
                                                             <TextBlock Text="Personal note"
-                                                                       Foreground="#CBD5E1"
+                                                                       Foreground="{DynamicResource TextBrush}"
+                                                                       FontSize="14"
                                                                        FontWeight="SemiBold" />
                                                             <Button Grid.Column="1"
                                                                     Classes="detailSecondary"
+                                                                    Click="SaveNoteButton_Click"
                                                                     Padding="10,6">
                                                                 <TextBlock Text="Save note"
                                                                            FontSize="11"
                                                                            FontWeight="SemiBold" />
                                                             </Button>
                                                         </Grid>
-                                                        <Border Background="#0F1A2E"
-                                                                BorderBrush="#233653"
-                                                                BorderThickness="1"
-                                                                CornerRadius="10"
-                                                                MinHeight="88" />
+                                                        <TextBox x:Name="MomentNoteTextBox"
+                                                                 Background="{DynamicResource PanelBrush}"
+                                                                 BorderBrush="{DynamicResource PanelEdgeBrush}"
+                                                                 BorderThickness="1"
+                                                                 Foreground="{DynamicResource TextBrush}"
+                                                                 MinHeight="78"
+                                                                 Padding="12"
+                                                                 AcceptsReturn="True"
+                                                                 TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
-                                                <Border Background="#10192B"
-                                                        BorderBrush="#233653"
+                                                <Border Background="{DynamicResource SubtlePanelBrush}"
+                                                        BorderBrush="{DynamicResource PanelEdgeBrush}"
                                                         BorderThickness="1"
-                                                        CornerRadius="10"
-                                                        Padding="12"
-                                                        Margin="0,6,0,0">
-                                                    <StackPanel Spacing="8">
-                                                        <TextBlock Text="Recent activity"
-                                                                   Foreground="#CBD5E1"
+                                                        CornerRadius="8"
+                                                        Padding="16">
+                                                    <StackPanel>
+                                                        <TextBlock Text="Recent Activity"
+                                                                   Foreground="{DynamicResource TextBrush}"
+                                                                   FontSize="14"
+                                                                   Margin="0,0,0,12"
                                                                    FontWeight="SemiBold" />
                                                         <TextBlock Text="Recorded by MomentTrace"
-                                                                   Foreground="#94A3B8" />
+                                                                   Foreground="{DynamicResource MutedTextBrush}"
+                                                                   FontSize="13"
+                                                                   Margin="0,0,0,10" />
                                                         <TextBlock Text="Recording foreground window activity with timestamps."
-                                                                   Foreground="#64748B"
+                                                                   Foreground="{DynamicResource MutedTextBrush}"
+                                                                   FontSize="13"
+                                                                   LineHeight="19"
                                                                    TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
                                             </StackPanel>
-                                        </Border>
-                                    </TabItem>
-                                    <TabItem Header="Activity">
-                                        <Border Background="#111C31"
+                                </ScrollViewer>
+
+                                <ScrollViewer x:Name="ActivityDetailTabContent"
+                                              Grid.Row="1"
+                                              Margin="0,14,0,0"
+                                              IsVisible="False"
+                                              VerticalScrollBarVisibility="Visible"
+                                              HorizontalScrollBarVisibility="Disabled">
+                                    <Border Background="#111C31"
                                                 BorderBrush="#233653"
                                                 BorderThickness="1"
                                                 CornerRadius="12"
                                                 Padding="12"
-                                                Margin="0,12,0,0">
+                                                Margin="0,0,0,0">
                                             <StackPanel Spacing="8">
                                                 <TextBlock Text="Captured activity"
                                                            Foreground="#CBD5E1"
                                                            FontWeight="SemiBold" />
+                                                <TextBlock x:Name="ActivityTabSummaryText"
+                                                           Text="Select a moment to inspect its raw captured entries."
+                                                           Foreground="#64748B"
+                                                           TextWrapping="Wrap" />
                                                 <ItemsControl x:Name="RawEntriesItems">
                                                     <ItemsControl.ItemTemplate>
                                                         <DataTemplate>
@@ -916,14 +1039,20 @@
                                                 </ItemsControl>
                                             </StackPanel>
                                         </Border>
-                                    </TabItem>
-                                    <TabItem Header="Related">
-                                        <Border Background="#111C31"
+                                </ScrollViewer>
+
+                                <ScrollViewer x:Name="RelatedDetailTabContent"
+                                              Grid.Row="1"
+                                              Margin="0,14,0,0"
+                                              IsVisible="False"
+                                              VerticalScrollBarVisibility="Visible"
+                                              HorizontalScrollBarVisibility="Disabled">
+                                    <Border Background="#111C31"
                                                 BorderBrush="#233653"
                                                 BorderThickness="1"
                                                 CornerRadius="12"
                                                 Padding="12"
-                                                Margin="0,12,0,0">
+                                                Margin="0,0,0,0">
                                             <StackPanel Spacing="8">
                                                 <TextBlock Text="Related moments"
                                                            Foreground="#CBD5E1"
@@ -951,15 +1080,14 @@
                                                 </ItemsControl>
                                             </StackPanel>
                                         </Border>
-                                    </TabItem>
-                                </TabControl>
-                            </ScrollViewer>
+                                </ScrollViewer>
+                            </Grid>
                         </Grid>
                     </Border>
                 </Grid>
-            </Grid>
+                </Grid>
 
-            <ScrollViewer x:Name="OverviewPage" IsVisible="False">
+            <ScrollViewer x:Name="OverviewPage" Grid.Row="1" IsVisible="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Spacing="18">
                     <Border Background="#0F1A2E"
                             BorderBrush="#233653"
@@ -1164,6 +1292,7 @@
                     </Grid>
                 </StackPanel>
             </ScrollViewer>
+            </Grid>
         </Grid>
     </Grid>
     </Border>
