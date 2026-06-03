@@ -21,6 +21,7 @@ namespace MomentTrace.Desktop;
 
 public partial class MainWindow : Window
 {
+    private static readonly DesktopAppIconProvider AppIconProvider = new();
     private readonly TimelinePresentationBuilder _timelineBuilder = new(
         RuleBasedActivityClassifier.Default,
         RuleBasedSessionSummarizer.Default);
@@ -582,6 +583,7 @@ public partial class MainWindow : Window
         DetailGlyphHost.Background = Brush.Parse(selected.IconBackground);
         DetailGlyphText.Text = selected.IconGlyph;
         DetailGlyphText.Foreground = Brush.Parse(selected.IconForeground);
+        SetDetailIcon(selected);
         DetailTitleText.Text = selected.Title;
         DetailSubtitleText.Text = $"{selected.Location} · {selected.AppName}";
         DetailMetaSpanText.Text = selected.CapturedSpan;
@@ -627,6 +629,9 @@ public partial class MainWindow : Window
         DetailGlyphHost.Background = new SolidColorBrush(_currentTheme.Toolbar);
         DetailGlyphText.Text = "MT";
         DetailGlyphText.Foreground = new SolidColorBrush(_currentTheme.Accent);
+        DetailGlyphText.IsVisible = true;
+        DetailIconImage.Source = null;
+        DetailIconImage.IsVisible = false;
         DetailTitleText.Text = "Select a moment";
         DetailSubtitleText.Text = "Timeline context appears here";
         DetailMetaSpanText.Text = "Local only";
@@ -787,6 +792,32 @@ public partial class MainWindow : Window
         {
             DetailPreviewImage.Source = null;
             DetailPreviewHost.IsVisible = false;
+        }
+    }
+
+    private void SetDetailIcon(ActivityMomentViewModel selected)
+    {
+        DetailIconImage.Source = null;
+        DetailIconImage.IsVisible = false;
+        DetailGlyphText.IsVisible = true;
+
+        var iconPath = AppIconProvider.GetIcon(selected.ExecutablePath, selected.AppName, selected.ProcessName);
+        if (string.IsNullOrWhiteSpace(iconPath) || !File.Exists(iconPath))
+        {
+            return;
+        }
+
+        try
+        {
+            DetailIconImage.Source = new Bitmap(iconPath);
+            DetailIconImage.IsVisible = true;
+            DetailGlyphText.IsVisible = false;
+        }
+        catch
+        {
+            DetailIconImage.Source = null;
+            DetailIconImage.IsVisible = false;
+            DetailGlyphText.IsVisible = true;
         }
     }
 
@@ -1196,6 +1227,11 @@ public partial class MainWindow : Window
 
     private MomentRow ToMomentRow(ActivityMomentViewModel session)
     {
+        var previewUri = GetPreviewUri(session.ThumbnailPath) ?? GetPreviewUri(session.ScreenshotPath);
+        var iconUri = GetIconUri(session);
+        var hasPreview = !string.IsNullOrWhiteSpace(previewUri);
+        var hasIcon = !string.IsNullOrWhiteSpace(iconUri);
+
         return new MomentRow(
             session.Id,
             session.Title,
@@ -1203,7 +1239,8 @@ public partial class MainWindow : Window
             $"{session.Location} · {session.AppName}",
             session.CardTime,
             session.SeenDuration,
-            GetPreviewUri(session.ThumbnailPath) ?? GetPreviewUri(session.ScreenshotPath),
+            previewUri,
+            iconUri,
             session.IconGlyph,
             session.IconBackground,
             session.IconForeground,
@@ -1214,7 +1251,12 @@ public partial class MainWindow : Window
             session.HasSavedIndicator,
             false,
             ColorToHex(_currentTheme.RaisedSurface),
-            ColorToHex(_currentTheme.Stroke));
+            ColorToHex(_currentTheme.Stroke),
+            hasPreview,
+            !hasPreview && hasIcon,
+            hasIcon,
+            !hasIcon,
+            !hasPreview && !hasIcon);
     }
 
     private static string BuildCardSubtitle(ActivityMomentViewModel session)
@@ -1245,9 +1287,7 @@ public partial class MainWindow : Window
         {
             IsSelected = isSelected,
             CardBackground = isSelected ? ColorToHex(_currentTheme.AccentSoft) : ColorToHex(_currentTheme.RaisedSurface),
-            BorderBrush = isSelected ? ColorToHex(_currentTheme.Accent) : ColorToHex(_currentTheme.Stroke),
-            ShowPreview = !string.IsNullOrWhiteSpace(row.PreviewUri),
-            ShowGlyphFallback = string.IsNullOrWhiteSpace(row.PreviewUri)
+            BorderBrush = isSelected ? ColorToHex(_currentTheme.Accent) : ColorToHex(_currentTheme.Stroke)
         };
     }
 
@@ -1255,6 +1295,17 @@ public partial class MainWindow : Window
 
     private static string? GetPreviewUri(string? path)
     {
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+        {
+            return null;
+        }
+
+        return new Uri(path, UriKind.Absolute).AbsoluteUri;
+    }
+
+    private static string? GetIconUri(ActivityMomentViewModel session)
+    {
+        var path = AppIconProvider.GetIcon(session.ExecutablePath, session.AppName, session.ProcessName);
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
         {
             return null;
@@ -1271,6 +1322,7 @@ public partial class MainWindow : Window
         string TimeLabel,
         string SeenLabel,
         string? PreviewUri,
+        string? IconUri,
         string Glyph,
         string GlyphBackground,
         string GlyphForeground,
@@ -1282,7 +1334,10 @@ public partial class MainWindow : Window
         bool IsSelected,
         string CardBackground,
         string BorderBrush,
-        bool ShowPreview = false,
+        bool ShowPreviewImage = false,
+        bool ShowHeroIcon = false,
+        bool ShowSmallIcon = false,
+        bool ShowSmallGlyph = true,
         bool ShowGlyphFallback = true);
 
     private sealed record TimelineGroupRow(

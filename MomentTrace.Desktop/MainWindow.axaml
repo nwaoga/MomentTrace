@@ -726,7 +726,16 @@
                                                                                         </Grid.ColumnDefinitions>
                                                                                         <Image Source="{Binding PreviewUri}"
                                                                                                Stretch="UniformToFill"
-                                                                                               IsVisible="{Binding ShowPreview}" />
+                                                                                               IsVisible="{Binding ShowPreviewImage}" />
+                                                                                        <Border Background="{DynamicResource ElevatedPanelBrush}"
+                                                                                                IsVisible="{Binding ShowHeroIcon}">
+                                                                                            <Image Source="{Binding IconUri}"
+                                                                                                   Width="58"
+                                                                                                   Height="58"
+                                                                                                   Stretch="Uniform"
+                                                                                                   HorizontalAlignment="Center"
+                                                                                                   VerticalAlignment="Center" />
+                                                                                        </Border>
                                                                                         <Border Background="{DynamicResource ElevatedPanelBrush}"
                                                                                                 IsVisible="{Binding ShowGlyphFallback}" />
                                                                                         <Border Grid.Column="1"
@@ -776,12 +785,22 @@
                                                                                                 CornerRadius="0"
                                                                                                 Background="Transparent"
                                                                                                 VerticalAlignment="Top">
-                                                                                            <TextBlock Text="{Binding Glyph}"
-                                                                                                       Foreground="{Binding GlyphForeground}"
-                                                                                                       FontSize="10"
-                                                                                                       FontWeight="SemiBold"
+                                                                                            <Grid>
+                                                                                                <Image Source="{Binding IconUri}"
+                                                                                                       Width="16"
+                                                                                                       Height="16"
+                                                                                                       Stretch="Uniform"
+                                                                                                       IsVisible="{Binding ShowSmallIcon}"
                                                                                                        HorizontalAlignment="Center"
                                                                                                        VerticalAlignment="Center" />
+                                                                                                <TextBlock Text="{Binding Glyph}"
+                                                                                                           Foreground="{Binding GlyphForeground}"
+                                                                                                           FontSize="10"
+                                                                                                           FontWeight="SemiBold"
+                                                                                                           IsVisible="{Binding ShowSmallGlyph}"
+                                                                                                           HorizontalAlignment="Center"
+                                                                                                           VerticalAlignment="Center" />
+                                                                                            </Grid>
                                                                                         </Border>
                                                                                         <TextBlock Grid.Column="1"
                                                                                                    Text="{Binding Title}"
@@ -835,13 +854,22 @@
                                         Height="62"
                                         CornerRadius="9"
                                         Background="{DynamicResource SubtlePanelBrush}">
-                                    <TextBlock x:Name="DetailGlyphText"
-                                               Text="MT"
-                                               Foreground="{DynamicResource AccentBrush}"
-                                               FontSize="22"
-                                               FontWeight="SemiBold"
+                                    <Grid>
+                                        <Image x:Name="DetailIconImage"
+                                               Width="34"
+                                               Height="34"
+                                               Stretch="Uniform"
+                                               IsVisible="False"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center" />
+                                        <TextBlock x:Name="DetailGlyphText"
+                                                   Text="MT"
+                                                   Foreground="{DynamicResource AccentBrush}"
+                                                   FontSize="22"
+                                                   FontWeight="SemiBold"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Grid>
                                 </Border>
                                 <StackPanel Grid.Column="1"
                                             Margin="14,5,0,0"

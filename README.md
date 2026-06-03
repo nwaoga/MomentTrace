@@ -167,6 +167,13 @@ dotnet build ./MomentTrace.slnx
 dotnet run --project ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
 ```
 
+Quick checklist for the Mac run:
+
+- Install the .NET SDK first.
+- Keep `-p:EnableWindowsTargeting=true` on solution builds because the repo still includes the Windows project.
+- If macOS prompts for Accessibility or Screen Recording permissions, allow them and rerun the probe.
+- The probe now records app path, local screenshots, and thumbnails when permissions allow, so those moments can light up real icons and previews in the shared desktop shell.
+
 If the repo is already cloned:
 
 ```bash

@@ -135,8 +135,8 @@ public sealed class ForegroundWindowActivityRecorder(
         _currentSnapshot = snapshot;
         _currentActivityStartedAt = now;
         _currentActivityLastWrittenAt = now;
-        var screenshotPath = snapshot.Kind == MomentTrace.Core.ActivityKind.Browser ? Snapshot.TryCaptureScreenshot(snapshot.WindowHandle) : null;
-        var thumbnailPath = Snapshot.TryCreateImageThumbnail(snapshot.ImageFilePath);
+        var screenshotPath = Snapshot.TryCaptureScreenshot(snapshot.WindowHandle);
+        var thumbnailPath = Snapshot.TryCreateImageThumbnail(screenshotPath ?? snapshot.ImageFilePath);
 
         var activity = new TimelineActivity
         {

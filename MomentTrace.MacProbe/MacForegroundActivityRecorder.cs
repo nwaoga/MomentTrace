@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Security.Cryptography;
+using System.Text;
 using MomentTrace.Core;
 
 namespace MomentTrace.MacProbe;
@@ -119,14 +121,18 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
         _currentSnapshot = snapshot;
         _currentActivityStartedAt = now;
         _currentActivityLastWrittenAt = now;
+        var screenshotPath = Snapshot.TryCaptureScreenshot();
+        var thumbnailPath = Snapshot.TryCreateImageThumbnail(screenshotPath);
 
         var activity = new TimelineActivity
         {
             AppName = snapshot.AppName,
             WindowTitle = snapshot.WindowTitle,
             ProcessName = snapshot.ProcessName,
-            ExecutablePath = null,
+            ExecutablePath = snapshot.ExecutablePath,
             Resource = snapshot.Resource,
+            ScreenshotPath = screenshotPath,
+            ThumbnailPath = thumbnailPath,
             Kind = ActivityClassifier.Classify(snapshot.ProcessName),
             StartedAt = now,
             EndedAt = now
@@ -190,7 +196,8 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
         string ProcessName,
         string AppName,
         string WindowTitle,
-        string? Resource)
+        string? Resource,
+        string? ExecutablePath)
     {
         public bool SameActivity(Snapshot other)
         {
@@ -210,7 +217,11 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
                     try
                         set windowTitle to value of attribute "AXTitle" of window 1 of frontApp
                     end try
-                    return appName & linefeed & appPid & linefeed & windowTitle
+                    set appPath to ""
+                    try
+                        set appPath to POSIX path of (file of frontApp as alias)
+                    end try
+                    return appName & linefeed & appPid & linefeed & appPath & linefeed & windowTitle
                 end tell
                 """;
 
@@ -220,10 +231,11 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
                 return null;
             }
 
-            var lines = output.Replace("\r\n", "\n").Split('\n', 3);
+            var lines = output.Replace("\r\n", "\n").Split('\n', 4);
             var appName = lines.ElementAtOrDefault(0)?.Trim();
             var pid = lines.ElementAtOrDefault(1)?.Trim();
-            var title = lines.ElementAtOrDefault(2)?.Trim() ?? string.Empty;
+            var appPath = lines.ElementAtOrDefault(2)?.Trim();
+            var title = lines.ElementAtOrDefault(3)?.Trim() ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(appName))
             {
@@ -232,7 +244,100 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
 
             var processName = appName.Replace(" ", string.Empty);
             var resource = string.IsNullOrWhiteSpace(pid) ? null : $"pid:{pid}";
-            return new Snapshot(processName, appName, title, resource);
+            return new Snapshot(processName, appName, title, resource, string.IsNullOrWhiteSpace(appPath) ? null : appPath);
+        }
+
+        public static string? TryCaptureScreenshot()
+        {
+            try
+            {
+                var screenshotDirectory = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "MomentTrace",
+                    "screenshots");
+                Directory.CreateDirectory(screenshotDirectory);
+
+                var screenshotPath = Path.Combine(
+                    screenshotDirectory,
+                    $"{DateTimeOffset.Now:yyyyMMdd-HHmmss-fff}-{Guid.NewGuid():N}.png");
+
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = "/usr/sbin/screencapture",
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false
+                };
+                startInfo.ArgumentList.Add("-x");
+                startInfo.ArgumentList.Add(screenshotPath);
+
+                using var process = Process.Start(startInfo);
+                if (process is null)
+                {
+                    return null;
+                }
+
+                process.WaitForExit();
+                return process.ExitCode == 0 && File.Exists(screenshotPath) ? screenshotPath : null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public static string? TryCreateImageThumbnail(string? imagePath)
+        {
+            if (string.IsNullOrWhiteSpace(imagePath) || !File.Exists(imagePath))
+            {
+                return null;
+            }
+
+            try
+            {
+                var info = new FileInfo(imagePath);
+                var thumbnailDirectory = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "MomentTrace",
+                    "thumbnails");
+                Directory.CreateDirectory(thumbnailDirectory);
+
+                var cacheKey = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{info.FullName}|{info.LastWriteTimeUtc.Ticks}|{info.Length}")));
+                var thumbnailPath = Path.Combine(thumbnailDirectory, $"{cacheKey}.jpg");
+                if (File.Exists(thumbnailPath))
+                {
+                    return thumbnailPath;
+                }
+
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = "/usr/bin/sips",
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false
+                };
+                startInfo.ArgumentList.Add("-s");
+                startInfo.ArgumentList.Add("format");
+                startInfo.ArgumentList.Add("jpeg");
+                startInfo.ArgumentList.Add("--resampleHeightWidthMax");
+                startInfo.ArgumentList.Add("420");
+                startInfo.ArgumentList.Add(imagePath);
+                startInfo.ArgumentList.Add("--out");
+                startInfo.ArgumentList.Add(thumbnailPath);
+
+                using var process = Process.Start(startInfo);
+                if (process is null)
+                {
+                    return null;
+                }
+
+                process.WaitForExit();
+                return process.ExitCode == 0 && File.Exists(thumbnailPath) ? thumbnailPath : null;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private static async Task<string?> RunOsaScriptAsync(string script, CancellationToken cancellationToken)
