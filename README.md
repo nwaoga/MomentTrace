@@ -394,6 +394,7 @@ For Azure DevOps planning, current implementation work is tracked in the MomentT
 
 ## Roadmap
 
+- Fix image and icon rendering parity across the Avalonia shell
 - Refresh README screenshots so every preview reflects the current themed UI
 - Add filter counts, persisted filter preferences, and richer empty states
 - Add saved moments, notes, and bookmarks as real library features

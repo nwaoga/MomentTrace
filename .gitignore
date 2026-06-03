@@ -7,3 +7,5 @@ TestResults/
 publish/
 artifacts/
 dist/
+.codex-screens/
+.tmp_fluent_extract/

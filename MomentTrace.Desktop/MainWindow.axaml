@@ -5,14 +5,15 @@
         mc:Ignorable="d"
         x:Class="MomentTrace.Desktop.MainWindow"
         Title="MomentTrace"
-        Width="1360"
-        Height="840"
-        MinWidth="1120"
-        MinHeight="720"
-        WindowDecorations="BorderOnly"
-        ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="0"
-        Background="{DynamicResource PageBackgroundBrush}">
+	        Width="1360"
+	        Height="840"
+	        MinWidth="1120"
+	        MinHeight="720"
+	        TransparencyLevelHint="Blur, Transparent"
+	        WindowDecorations="BorderOnly"
+	        ExtendClientAreaToDecorationsHint="True"
+	        ExtendClientAreaTitleBarHeightHint="0"
+	        Background="Transparent">
     <Window.Resources>
         <SolidColorBrush x:Key="PageBackgroundBrush" Color="#08111F" />
         <SolidColorBrush x:Key="OuterFrameBrush" Color="#1E2D45" />
@@ -23,7 +24,7 @@
         <SolidColorBrush x:Key="PanelEdgeBrush" Color="#233653" />
         <SolidColorBrush x:Key="PanelEdgeStrongBrush" Color="#2C3E5E" />
         <SolidColorBrush x:Key="TextBrush" Color="#F8FAFC" />
-        <SolidColorBrush x:Key="MutedTextBrush" Color="#94A3B8" />
+        <SolidColorBrush x:Key="MutedTextBrush" Color="#F59E0B" />
         <SolidColorBrush x:Key="SubtleTextBrush" Color="#64748B" />
         <SolidColorBrush x:Key="AccentBrush" Color="#7C5CFF" />
         <SolidColorBrush x:Key="AccentSoftBrush" Color="#201A38" />
@@ -34,8 +35,10 @@
         <SolidColorBrush x:Key="PositiveBrush" Color="#22C55E" />
         <SolidColorBrush x:Key="InfoBrush" Color="#0EA5E9" />
         <SolidColorBrush x:Key="WarningBrush" Color="#F59E0B" />
-        <SolidColorBrush x:Key="ScrollThumbBrush" Color="#304563" />
-        <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="#476285" />
+        <SolidColorBrush x:Key="DangerBrush" Color="#6A334A" />
+        <SolidColorBrush x:Key="DangerFillBrush" Color="#3D1F2C" />
+        <SolidColorBrush x:Key="ScrollThumbBrush" Color="#F59E0B" />
+        <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="#F59E0B" />
         <SolidColorBrush x:Key="ScrollTrackBrush" Color="#142038" />
     </Window.Resources>
     <Window.Styles>
@@ -43,7 +46,8 @@
             <Setter Property="Opacity" Value="0.97" />
         </Style>
         <Style Selector="Button.nav">
-            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="CornerRadius" Value="7" />
             <Setter Property="Padding" Value="12,8" />
             <Setter Property="Height" Value="38" />
@@ -51,7 +55,12 @@
             <Setter Property="Background" Value="Transparent" />
         </Style>
         <Style Selector="Button.nav:pointerover">
-            <Setter Property="Background" Value="{DynamicResource SubtlePanelBrush}" />
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+        </Style>
+        <Style Selector="Button.nav:pointerover TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
         </Style>
         <Style Selector="Button.toolbar">
             <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
@@ -68,6 +77,13 @@
         <Style Selector="Button.toolbar:pointerover">
             <Setter Property="Background" Value="{DynamicResource ToolbarHoverBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+        </Style>
+        <Style Selector="Button.toolbar:pointerover TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+        </Style>
+        <Style Selector="Button.toolbar:pressed TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
         </Style>
         <Style Selector="Button.detailPrimary">
             <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
@@ -86,9 +102,9 @@
             <Setter Property="Padding" Value="14,10" />
         </Style>
         <Style Selector="Button.detailDanger">
-            <Setter Property="Background" Value="#3D1F2C" />
+            <Setter Property="Background" Value="{DynamicResource DangerFillBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-            <Setter Property="BorderBrush" Value="#6A334A" />
+            <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="14,10" />
@@ -124,22 +140,64 @@
             <Setter Property="MinHeight" Value="40" />
         </Style>
         <Style Selector="TextBox.searchBox /template/ TextBlock#watermark">
-            <Setter Property="Foreground" Value="#8D9BB1" />
+            <Setter Property="Foreground" Value="{DynamicResource SubtleTextBrush}" />
             <Setter Property="Opacity" Value="1" />
         </Style>
         <Style Selector="ScrollBar">
             <Setter Property="Background" Value="{DynamicResource ScrollTrackBrush}" />
-            <Setter Property="Width" Value="10" />
-            <Setter Property="Height" Value="10" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Opacity" Value="1" />
         </Style>
-        <Style Selector="Thumb">
+        <Style Selector="ScrollBar:vertical">
+            <Setter Property="Width" Value="10" />
+            <Setter Property="MinWidth" Value="10" />
+            <Setter Property="Margin" Value="8,0,4,0" />
+        </Style>
+        <Style Selector="ScrollBar:horizontal">
+            <Setter Property="Height" Value="10" />
+            <Setter Property="MinHeight" Value="10" />
+        </Style>
+        <Style Selector="ScrollBar /template/ RepeatButton">
+            <Setter Property="Background" Value="{DynamicResource ScrollTrackBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{DynamicResource SubtleTextBrush}" />
+        </Style>
+        <Style Selector="ScrollBar /template/ Button">
+            <Setter Property="Background" Value="{DynamicResource ScrollTrackBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{DynamicResource SubtleTextBrush}" />
+        </Style>
+        <Style Selector="ScrollBar /template/ Thumb">
             <Setter Property="Background" Value="{DynamicResource ScrollThumbBrush}" />
             <Setter Property="CornerRadius" Value="999" />
             <Setter Property="MinWidth" Value="8" />
             <Setter Property="MinHeight" Value="28" />
+            <Setter Property="Opacity" Value="1" />
         </Style>
-        <Style Selector="Thumb:pointerover">
+        <Style Selector="ScrollBar:pointerover /template/ Thumb">
             <Setter Property="Background" Value="{DynamicResource ScrollThumbHoverBrush}" />
+        </Style>
+        <Style Selector="ScrollBar /template/ Thumb:pressed">
+            <Setter Property="Background" Value="{DynamicResource ScrollThumbHoverBrush}" />
+        </Style>
+        <Style Selector="Thumb.ScrollBarThumb">
+            <Setter Property="Background" Value="{DynamicResource ScrollThumbBrush}" />
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="Thumb.ScrollBarThumb:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ScrollThumbHoverBrush}" />
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="Thumb.ScrollBarThumb:pressed">
+            <Setter Property="Background" Value="{DynamicResource ScrollThumbHoverBrush}" />
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="ScrollBar /template/ Rectangle#TrackRect">
+            <Setter Property="Fill" Value="{DynamicResource ScrollTrackBrush}" />
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="RepeatButton.ScrollBarPageButton">
+            <Setter Property="Background" Value="{DynamicResource ScrollTrackBrush}" />
         </Style>
         <Style Selector="TabControl.detailTabs TabItem">
             <Setter Property="Background" Value="Transparent" />
@@ -160,28 +218,29 @@
             BorderBrush="Transparent"
             BorderThickness="0"
             CornerRadius="0"
-            Padding="24,18,24,18"
-            PointerPressed="ToolbarDragRegion_PointerPressed">
-    <Grid ColumnDefinitions="220,*">
-        <Border Grid.Column="0"
+            Padding="24,18,24,18">
+    <Grid ColumnDefinitions="284,*">
+        <Border x:Name="RailSurface"
+                Grid.Column="0"
                 Background="Transparent"
                 BorderBrush="Transparent"
                 BorderThickness="0"
                 CornerRadius="0"
                 Padding="16,16,18,16"
-                Margin="0,0,22,0">
+                Margin="0,0,22,0"
+                PointerPressed="ToolbarDragRegion_PointerPressed">
             <Grid RowDefinitions="Auto,Auto,Auto,* ,Auto,Auto">
                 <StackPanel Spacing="10">
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <Border Width="34" Height="34" CornerRadius="9" Background="#172743">
+                        <Border Width="34" Height="34" CornerRadius="9" Background="{DynamicResource ToolbarBrush}">
                             <TextBlock Text="MT"
-                                       Foreground="#A78BFA"
+                                       Foreground="{DynamicResource AccentBrush}"
                                        FontWeight="Bold"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
                         </Border>
                         <TextBlock Text="MomentTrace"
-                                   Foreground="#F8FAFC"
+                                   Foreground="{DynamicResource TextBrush}"
                                    FontSize="16"
                                    FontWeight="SemiBold"
                                    VerticalAlignment="Center" />
@@ -190,11 +249,11 @@
 
                 <StackPanel Grid.Row="1" Margin="0,28,0,0" Spacing="0">
                     <TextBlock Text="Workspace"
-                               Foreground="#64748B"
+                               Foreground="{DynamicResource SubtleTextBrush}"
                                FontSize="12"
                                Margin="6,0,0,10" />
                     <Border x:Name="TimelineNavHighlight"
-                            Background="#2C2154"
+                            Background="{DynamicResource AccentSoftBrush}"
                             CornerRadius="7"
                             Margin="0,0,0,6">
                         <Button x:Name="TimelineNavButton"
@@ -224,7 +283,7 @@
                                 Classes="nav"
                                 Click="OverviewNavButton_Click"
                                 HorizontalContentAlignment="Left"
-                                Foreground="#CBD5E1">
+                                Foreground="{DynamicResource MutedTextBrush}">
                             <StackPanel Orientation="Horizontal" Spacing="0">
                                 <TextBlock Text="◎"
                                            Width="28"
@@ -242,85 +301,158 @@
 
                 <Border Grid.Row="2"
                         Height="1"
-                        Background="#233653"
+                        Background="{DynamicResource PanelEdgeBrush}"
                         Margin="0,18,0,18" />
 
                 <ScrollViewer Grid.Row="3"
                               Margin="0,0,0,10"
+                              Padding="0,0,34,0"
+                              AllowAutoHide="False"
                               HorizontalScrollBarVisibility="Disabled"
                               VerticalScrollBarVisibility="Auto">
-                    <StackPanel Spacing="18">
+                    <StackPanel Spacing="18"
+                                Margin="0,0,30,0">
                         <StackPanel Spacing="8">
                             <TextBlock Text="Activity"
-                                       Foreground="#64748B"
+                                       Foreground="{DynamicResource SubtleTextBrush}"
                                        FontSize="12"
                                        Margin="2,0,0,4" />
-                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
-                                <TextBlock Text="◎" Foreground="#E2E8F0" FontSize="12" Width="28" TextAlignment="Center" />
-                                <TextBlock Text="Browsing" Margin="10,0,0,0" Foreground="#E2E8F0" FontSize="14" FontWeight="SemiBold" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
-                                <TextBlock Text="&lt;/&gt;" Foreground="#94A3B8" FontSize="11" Width="28" TextAlignment="Center" />
-                                <TextBlock Text="Development" Margin="10,0,0,0" Foreground="#94A3B8" FontSize="14" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
-                                <TextBlock Text="◌" Foreground="#94A3B8" FontSize="12" Width="28" TextAlignment="Center" />
-                                <TextBlock Text="Communication" Margin="10,0,0,0" Foreground="#94A3B8" FontSize="14" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
-                                <TextBlock Text="▤" Foreground="#94A3B8" FontSize="12" Width="28" TextAlignment="Center" />
-                                <TextBlock Text="Documents" Margin="10,0,0,0" Foreground="#94A3B8" FontSize="14" />
-                            </StackPanel>
+                            <Button x:Name="BrowsingNavButton"
+                                    Classes="nav"
+                                    Click="BrowsingNavButton_Click"
+                                    HorizontalContentAlignment="Left"
+                                    Foreground="{DynamicResource MutedTextBrush}"
+                                    Margin="0,0,0,4">
+                                <StackPanel Orientation="Horizontal" Spacing="0">
+                                    <TextBlock Text="◎" FontSize="12" Width="28" TextAlignment="Center" />
+                                    <TextBlock Text="Browsing" Margin="10,0,0,0" FontSize="14" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="DevelopmentNavButton"
+                                    Classes="nav"
+                                    Click="DevelopmentNavButton_Click"
+                                    HorizontalContentAlignment="Left"
+                                    Foreground="{DynamicResource MutedTextBrush}"
+                                    Margin="0,0,0,4">
+                                <StackPanel Orientation="Horizontal" Spacing="0">
+                                    <TextBlock Text="&lt;/&gt;" FontSize="11" Width="28" TextAlignment="Center" />
+                                    <TextBlock Text="Development" Margin="10,0,0,0" FontSize="14" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="CommunicationNavButton"
+                                    Classes="nav"
+                                    Click="CommunicationNavButton_Click"
+                                    HorizontalContentAlignment="Left"
+                                    Foreground="{DynamicResource MutedTextBrush}"
+                                    Margin="0,0,0,4">
+                                <StackPanel Orientation="Horizontal" Spacing="0">
+                                    <TextBlock Text="◌" FontSize="12" Width="28" TextAlignment="Center" />
+                                    <TextBlock Text="Communication" Margin="10,0,0,0" FontSize="14" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="DocumentsNavButton"
+                                    Classes="nav"
+                                    Click="DocumentsNavButton_Click"
+                                    HorizontalContentAlignment="Left"
+                                    Foreground="{DynamicResource MutedTextBrush}"
+                                    Margin="0,0,0,4">
+                                <StackPanel Orientation="Horizontal" Spacing="0">
+                                    <TextBlock Text="▤" FontSize="12" Width="28" TextAlignment="Center" />
+                                    <TextBlock Text="Documents" Margin="10,0,0,0" FontSize="14" />
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
-                        <Border Height="1" Background="#233653" />
+                        <Border Height="1" Background="{DynamicResource PanelEdgeBrush}" />
                         <StackPanel Spacing="8">
                             <TextBlock Text="Library"
-                                       Foreground="#64748B"
+                                       Foreground="{DynamicResource SubtleTextBrush}"
                                        FontSize="12"
                                        Margin="2,0,0,4" />
-                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
-                                <TextBlock Text="★" Foreground="#E2E8F0" FontSize="12" Width="28" TextAlignment="Center" />
-                                <TextBlock Text="Saved Moments" Margin="10,0,0,0" Foreground="#E2E8F0" FontSize="14" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
-                                <TextBlock Text="☰" Foreground="#94A3B8" FontSize="12" Width="28" TextAlignment="Center" />
-                                <TextBlock Text="Notes" Margin="10,0,0,0" Foreground="#94A3B8" FontSize="14" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
-                                <TextBlock Text="⌑" Foreground="#94A3B8" FontSize="12" Width="28" TextAlignment="Center" />
-                                <TextBlock Text="Bookmarks" Margin="10,0,0,0" Foreground="#94A3B8" FontSize="14" />
-                            </StackPanel>
+                            <Button x:Name="SavedMomentsNavButton"
+                                    Classes="nav"
+                                    Click="SavedMomentsNavButton_Click"
+                                    HorizontalContentAlignment="Left"
+                                    Foreground="{DynamicResource MutedTextBrush}"
+                                    Margin="0,0,0,4">
+                                <StackPanel Orientation="Horizontal" Spacing="0">
+                                    <TextBlock Text="★" FontSize="12" Width="28" TextAlignment="Center" />
+                                    <TextBlock Text="Saved Moments" Margin="10,0,0,0" FontSize="14" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="NotesNavButton"
+                                    Classes="nav"
+                                    Click="NotesNavButton_Click"
+                                    HorizontalContentAlignment="Left"
+                                    Foreground="{DynamicResource MutedTextBrush}"
+                                    Margin="0,0,0,4">
+                                <StackPanel Orientation="Horizontal" Spacing="0">
+                                    <TextBlock Text="☰" FontSize="12" Width="28" TextAlignment="Center" />
+                                    <TextBlock Text="Notes" Margin="10,0,0,0" FontSize="14" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="BookmarksNavButton"
+                                    Classes="nav"
+                                    Click="BookmarksNavButton_Click"
+                                    HorizontalContentAlignment="Left"
+                                    Foreground="{DynamicResource MutedTextBrush}"
+                                    Margin="0,0,0,4">
+                                <StackPanel Orientation="Horizontal" Spacing="0">
+                                    <TextBlock Text="⌑" FontSize="12" Width="28" TextAlignment="Center" />
+                                    <TextBlock Text="Bookmarks" Margin="10,0,0,0" FontSize="14" />
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
-                        <Border Height="1" Background="#233653" />
+                        <Border Height="1" Background="{DynamicResource PanelEdgeBrush}" />
                         <StackPanel Spacing="8">
                             <TextBlock Text="Sources"
-                                       Foreground="#64748B"
+                                       Foreground="{DynamicResource SubtleTextBrush}"
                                        FontSize="12"
                                        Margin="2,0,0,4" />
-                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
-                                <TextBlock Text="▦" Foreground="#E2E8F0" FontSize="12" Width="28" TextAlignment="Center" />
-                                <TextBlock Text="Apps" Margin="10,0,0,0" Foreground="#E2E8F0" FontSize="14" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
-                                <TextBlock Text="◎" Foreground="#94A3B8" FontSize="12" Width="28" TextAlignment="Center" />
-                                <TextBlock Text="Websites" Margin="10,0,0,0" Foreground="#94A3B8" FontSize="14" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,6">
-                                <TextBlock Text="□" Foreground="#94A3B8" FontSize="12" Width="28" TextAlignment="Center" />
-                                <TextBlock Text="Files" Margin="10,0,0,0" Foreground="#94A3B8" FontSize="14" />
-                            </StackPanel>
+                            <Button x:Name="AppsNavButton"
+                                    Classes="nav"
+                                    Click="AppsNavButton_Click"
+                                    HorizontalContentAlignment="Left"
+                                    Foreground="{DynamicResource MutedTextBrush}"
+                                    Margin="0,0,0,4">
+                                <StackPanel Orientation="Horizontal" Spacing="0">
+                                    <TextBlock Text="▦" FontSize="12" Width="28" TextAlignment="Center" />
+                                    <TextBlock Text="Apps" Margin="10,0,0,0" FontSize="14" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="WebsitesNavButton"
+                                    Classes="nav"
+                                    Click="WebsitesNavButton_Click"
+                                    HorizontalContentAlignment="Left"
+                                    Foreground="{DynamicResource MutedTextBrush}"
+                                    Margin="0,0,0,4">
+                                <StackPanel Orientation="Horizontal" Spacing="0">
+                                    <TextBlock Text="◎" FontSize="12" Width="28" TextAlignment="Center" />
+                                    <TextBlock Text="Websites" Margin="10,0,0,0" FontSize="14" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="FilesNavButton"
+                                    Classes="nav"
+                                    Click="FilesNavButton_Click"
+                                    HorizontalContentAlignment="Left"
+                                    Foreground="{DynamicResource MutedTextBrush}"
+                                    Margin="0,0,0,4">
+                                <StackPanel Orientation="Horizontal" Spacing="0">
+                                    <TextBlock Text="□" FontSize="12" Width="28" TextAlignment="Center" />
+                                    <TextBlock Text="Files" Margin="10,0,0,0" FontSize="14" />
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
 
                 <StackPanel Grid.Row="4"
                             Margin="0,0,0,14">
-                    <Border Height="1" Background="#233653" Margin="0,0,0,16" />
+                    <Border Height="1" Background="{DynamicResource PanelEdgeBrush}" Margin="0,0,0,16" />
                     <DockPanel Margin="0,0,0,14">
                         <Grid ColumnDefinitions="Auto,*">
                             <Border Width="34"
                                     Height="34"
-                                    Background="#8B5CF6"
+                                    Background="{DynamicResource AccentBrush}"
                                     CornerRadius="17">
                                 <TextBlock Text="B"
                                            Foreground="White"
@@ -332,20 +464,22 @@
                             <StackPanel Grid.Column="1"
                                         Margin="12,0,0,0">
                                 <TextBlock Text="blakb"
-                                           Foreground="#F8FAFC"
+                                           Foreground="{DynamicResource TextBrush}"
                                            FontSize="12"
                                            FontWeight="SemiBold" />
                                 <TextBlock Text="GREENMONKEY\\blakb"
-                                           Foreground="#94A3B8"
+                                           Foreground="{DynamicResource MutedTextBrush}"
                                            FontSize="11" />
                             </StackPanel>
                         </Grid>
                     </DockPanel>
 
-                    <Button Classes="nav"
+                    <Button x:Name="SettingsNavButton"
+                            Classes="nav"
+                            Click="SettingsNavButton_Click"
                             HorizontalContentAlignment="Left"
                             Background="Transparent"
-                            Foreground="#CBD5E1"
+                            Foreground="{DynamicResource MutedTextBrush}"
                             BorderBrush="Transparent">
                         <StackPanel Orientation="Horizontal" Spacing="0">
                             <TextBlock Text="⚙"
@@ -367,18 +501,20 @@
                 HorizontalAlignment="Right"
                 Width="1"
                 Margin="0,8,10,8"
-                Background="#233653" />
+                Background="{DynamicResource PanelEdgeBrush}" />
 
         <Grid Grid.Column="1" RowDefinitions="66,*"
               Margin="22,0,0,0">
-            <Grid Margin="16,12,18,0"
+            <Grid x:Name="TopCommandSurface"
+                  Margin="16,12,18,0"
+                  Background="Transparent"
                   PointerPressed="ToolbarDragRegion_PointerPressed">
                     <Grid ColumnDefinitions="*,142,96,50,50,50,50"
                           ColumnSpacing="12"
                           VerticalAlignment="Center">
                         <Border x:Name="SearchSurface"
-                                Background="#111C31"
-                                BorderBrush="#233653"
+                                Background="{DynamicResource PanelBrush}"
+                                BorderBrush="{DynamicResource PanelEdgeBrush}"
                                 BorderThickness="1"
                                 CornerRadius="7"
                                 Padding="14,8"
@@ -386,7 +522,7 @@
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                                 <TextBlock x:Name="SearchIconText"
                                            Text="⌕"
-                                           Foreground="#64748B"
+                                           Foreground="{DynamicResource SubtleTextBrush}"
                                            FontSize="20"
                                            Margin="2,0,0,0"
                                            VerticalAlignment="Center" />
@@ -397,10 +533,10 @@
                                          GotFocus="SearchTextBox_GotFocus"
                                          LostFocus="SearchTextBox_LostFocus"
                                          PlaceholderText="Search moments, sessions, apps, or websites..."
-                                         PlaceholderForeground="#64748B"
+                                         PlaceholderForeground="{DynamicResource SubtleTextBrush}"
                                          Background="Transparent"
                                          BorderThickness="0"
-                                         Foreground="#E2E8F0" />
+                                         Foreground="{DynamicResource TextBrush}" />
                             </Grid>
                         </Border>
                         <ComboBox x:Name="DateFilterComboBox"
@@ -421,25 +557,32 @@
                                 Click="ToggleDetailsButton_Click"
                                 Width="48">
                             <TextBlock Text="☰"
-                                       FontSize="14" />
+                                       FontSize="14"
+                                       Foreground="{DynamicResource TextBrush}" />
                         </Button>
                         <Button Grid.Column="4"
                                 Classes="toolbar"
                                 Click="MinimizeShellButton_Click"
                                 Width="48">
-                            <TextBlock Text="−" FontSize="16" />
+                            <TextBlock Text="−"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource TextBrush}" />
                         </Button>
                         <Button Grid.Column="5"
                                 Classes="toolbar"
                                 Click="MaximizeShellButton_Click"
                                 Width="48">
-                            <TextBlock Text="□" FontSize="13" />
+                            <TextBlock Text="□"
+                                       FontSize="13"
+                                       Foreground="{DynamicResource TextBrush}" />
                         </Button>
                         <Button Grid.Column="6"
                                 Classes="toolbar"
                                 Click="CloseShellButton_Click"
                                 Width="48">
-                            <TextBlock Text="×" FontSize="16" />
+                            <TextBlock Text="×"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource TextBrush}" />
                         </Button>
                     </Grid>
             </Grid>
@@ -459,49 +602,52 @@
                                 <StackPanel Orientation="Horizontal"
                                             Spacing="10">
                                     <TextBlock Text="Timeline"
-                                               Foreground="#F8FAFC"
+                                               Foreground="{DynamicResource TextBrush}"
                                                FontSize="22"
                                                FontWeight="SemiBold" />
                                     <Border Classes="infoChip"
                                             VerticalAlignment="Center">
                                         <TextBlock x:Name="TimelineCountText"
                                                    Text="Moments"
-                                                   Foreground="#CBD5E1"
+                                                   Foreground="{DynamicResource TextBrush}"
                                                    FontSize="13"
                                                    Margin="0,2,0,0" />
                                     </Border>
                                     <Border Classes="infoChip"
                                             VerticalAlignment="Center">
                                         <TextBlock Text="Stored locally · Only visible to you"
-                                                   Foreground="#94A3B8"
+                                                   Foreground="{DynamicResource MutedTextBrush}"
                                                    FontSize="11" />
                                     </Border>
                                 </StackPanel>
                                 <TextBlock x:Name="TimelineSubtitleText"
                                            Text="Grouped into local moments and arranged along a shared activity rail."
-                                           Foreground="#64748B"
+                                           Foreground="{DynamicResource SubtleTextBrush}"
                                            FontSize="13"
                                            Margin="0,6,0,0"
                                            TextWrapping="Wrap" />
                             </StackPanel>
-                            <ScrollViewer Grid.Row="1"
+                            <ScrollViewer x:Name="TimelineScrollViewer"
+                                          Grid.Row="1"
+                                          AllowAutoHide="False"
                                           VerticalScrollBarVisibility="Auto"
                                           HorizontalScrollBarVisibility="Disabled"
                                           ClipToBounds="True">
-                                <ItemsControl x:Name="TimelineGroupsItems">
+                                <ItemsControl x:Name="TimelineGroupsItems"
+                                              Margin="0,0,12,0">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Grid ColumnDefinitions="36,*" Margin="0,0,0,24">
                                                 <Grid>
                                                     <Border Width="2"
-                                                            Background="#223756"
+                                                            Background="{DynamicResource PanelEdgeBrush}"
                                                             HorizontalAlignment="Center"
                                                             Margin="0,28,0,0" />
                                                     <Border Width="16"
                                                             Height="16"
                                                             CornerRadius="8"
                                                             Background="{Binding AccentBrush}"
-                                                            BorderBrush="#D8D4FF"
+                                                            BorderBrush="{DynamicResource PanelBrush}"
                                                             BorderThickness="2"
                                                             HorizontalAlignment="Center"
                                                             VerticalAlignment="Top"
@@ -521,24 +667,24 @@
                                                             <StackPanel Grid.Column="1">
                                                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                                                     <TextBlock Text="{Binding Name}"
-                                                                           Foreground="#F8FAFC"
+                                                                           Foreground="{DynamicResource TextBrush}"
                                                                            FontSize="15"
                                                                            FontWeight="SemiBold" />
-                                                                <Border Background="#1C2540"
-                                                                        BorderBrush="#253653"
+                                                                <Border Background="{DynamicResource ChipBrush}"
+                                                                        BorderBrush="{DynamicResource PanelEdgeBrush}"
                                                                         BorderThickness="1"
                                                                         CornerRadius="10"
                                                                         Padding="9,3"
                                                                         Margin="10,-1,0,0"
                                                                         VerticalAlignment="Top">
                                                                     <TextBlock Text="{Binding CountLabel}"
-                                                                               Foreground="#A78BFA"
+                                                                               Foreground="{DynamicResource AccentBrush}"
                                                                                FontSize="11"
                                                                                FontWeight="SemiBold" />
                                                                 </Border>
                                                              </StackPanel>
                                                              <TextBlock Text="{Binding Summary}"
-                                                                        Foreground="#94A3B8"
+                                                                        Foreground="{DynamicResource MutedTextBrush}"
                                                                         Margin="0,7,0,0"
                                                                         FontSize="12"
                                                                         TextWrapping="Wrap" />
@@ -569,7 +715,7 @@
                                                                                 CornerRadius="8"
                                                                                 Padding="0">
                                                                             <Grid RowDefinitions="82,*">
-                                                                                <Border Background="#10192B"
+                                                                                <Border Background="{DynamicResource ElevatedPanelBrush}"
                                                                                         CornerRadius="8"
                                                                                         Padding="0"
                                                                                         ClipToBounds="True">
@@ -581,16 +727,16 @@
                                                                                         <Image Source="{Binding PreviewUri}"
                                                                                                Stretch="UniformToFill"
                                                                                                IsVisible="{Binding ShowPreview}" />
-                                                                                        <Border Background="#10192B"
+                                                                                        <Border Background="{DynamicResource ElevatedPanelBrush}"
                                                                                                 IsVisible="{Binding ShowGlyphFallback}" />
                                                                                         <Border Grid.Column="1"
-                                                                                                Background="#21324E"
+                                                                                                Background="{DynamicResource ToolbarBrush}"
                                                                                                 CornerRadius="5"
                                                                                                 Padding="6,2"
                                                                                                 Margin="0,8,8,0"
                                                                                                 VerticalAlignment="Top">
                                                                                             <TextBlock Text="{Binding TimeLabel}"
-                                                                                                       Foreground="#CBD5E1"
+                                                                                                       Foreground="{DynamicResource TextBrush}"
                                                                                                        FontSize="11" />
                                                                                         </Border>
                                                                                         <Border Width="60"
@@ -610,11 +756,11 @@
                                                                                         <Border HorizontalAlignment="Right"
                                                                                                 VerticalAlignment="Bottom"
                                                                                                 Margin="0,0,8,8"
-                                                                                                Background="#16233A"
+                                                                                                Background="{DynamicResource SubtlePanelBrush}"
                                                                                                 CornerRadius="5"
                                                                                                 Padding="6,2">
                                                                                             <TextBlock Text="{Binding SeenLabel}"
-                                                                                                       Foreground="#F8FAFC"
+                                                                                                       Foreground="{DynamicResource TextBrush}"
                                                                                                        FontSize="11"
                                                                                                        FontWeight="SemiBold" />
                                                                                         </Border>
@@ -639,7 +785,7 @@
                                                                                         </Border>
                                                                                         <TextBlock Grid.Column="1"
                                                                                                    Text="{Binding Title}"
-                                                                                                   Foreground="#F8FAFC"
+                                                                                                   Foreground="{DynamicResource TextBrush}"
                                                                                                    FontWeight="SemiBold"
                                                                                                    TextWrapping="Wrap"
                                                                                                    FontSize="13"
@@ -647,13 +793,13 @@
                                                                                                    TextTrimming="CharacterEllipsis" />
                                                                                         <TextBlock Grid.Column="2"
                                                                                                    Text="⋮"
-                                                                                                   Foreground="#94A3B8"
+                                                                                                   Foreground="{DynamicResource MutedTextBrush}"
                                                                                                    FontSize="16"
                                                                                                    VerticalAlignment="Top" />
                                                                                     </Grid>
                                                                                     <TextBlock Grid.Row="1"
                                                                                                Text="{Binding Subtitle}"
-                                                                                               Foreground="#94A3B8"
+                                                                                               Foreground="{DynamicResource MutedTextBrush}"
                                                                                                Margin="25,2,0,0"
                                                                                                FontSize="12"
                                                                                                TextTrimming="CharacterEllipsis" />
@@ -680,7 +826,8 @@
                             BorderBrush="{DynamicResource PanelEdgeBrush}"
                             BorderThickness="1"
                             CornerRadius="0"
-                            Padding="24,30,22,24">
+                            Padding="24,30,22,24"
+                            PointerPressed="ToolbarDragRegion_PointerPressed">
                         <Grid RowDefinitions="Auto,Auto,*">
                             <Grid ColumnDefinitions="62,*" ColumnSpacing="0">
                                 <Border x:Name="DetailGlyphHost"
@@ -690,7 +837,7 @@
                                         Background="{DynamicResource SubtlePanelBrush}">
                                     <TextBlock x:Name="DetailGlyphText"
                                                Text="MT"
-                                               Foreground="#A78BFA"
+                                               Foreground="{DynamicResource AccentBrush}"
                                                FontSize="22"
                                                FontWeight="SemiBold"
                                                HorizontalAlignment="Center"
@@ -701,13 +848,13 @@
                                             Spacing="6">
                                     <TextBlock x:Name="DetailTitleText"
                                                Text="Select a moment"
-                                               Foreground="#F8FAFC"
+                                               Foreground="{DynamicResource TextBrush}"
                                                FontSize="17"
                                                FontWeight="SemiBold"
                                                TextWrapping="Wrap" />
                                     <TextBlock x:Name="DetailSubtitleText"
                                                Text="Timeline context appears here"
-                                               Foreground="#94A3B8"
+                                               Foreground="{DynamicResource MutedTextBrush}"
                                                FontSize="12"
                                                TextWrapping="Wrap" />
                                 </StackPanel>
@@ -765,14 +912,14 @@
                                             <Grid RowDefinitions="*,3">
                                                 <TextBlock x:Name="OverviewDetailTabText"
                                                            Text="Overview"
-                                                           Foreground="#A78BFA"
+                                                           Foreground="{DynamicResource AccentBrush}"
                                                            FontSize="13"
                                                            FontWeight="SemiBold"
                                                            HorizontalAlignment="Center"
                                                            VerticalAlignment="Center" />
                                                 <Border x:Name="OverviewDetailTabUnderline"
                                                         Grid.Row="1"
-                                                        Background="#8B5CF6"
+                                                        Background="{DynamicResource AccentBrush}"
                                                         CornerRadius="2"
                                                         Margin="12,0" />
                                             </Grid>
@@ -787,13 +934,13 @@
                                             <Grid RowDefinitions="*,3">
                                                 <TextBlock x:Name="ActivityDetailTabText"
                                                            Text="Activity"
-                                                           Foreground="#94A3B8"
+                                                           Foreground="{DynamicResource MutedTextBrush}"
                                                            FontSize="13"
                                                            HorizontalAlignment="Center"
                                                            VerticalAlignment="Center" />
                                                 <Border x:Name="ActivityDetailTabUnderline"
                                                         Grid.Row="1"
-                                                        Background="#8B5CF6"
+                                                        Background="{DynamicResource AccentBrush}"
                                                         CornerRadius="2"
                                                         Margin="12,0"
                                                         IsVisible="False" />
@@ -809,13 +956,13 @@
                                             <Grid RowDefinitions="*,3">
                                                 <TextBlock x:Name="RelatedDetailTabText"
                                                            Text="Related"
-                                                           Foreground="#94A3B8"
+                                                           Foreground="{DynamicResource MutedTextBrush}"
                                                            FontSize="13"
                                                            HorizontalAlignment="Center"
                                                            VerticalAlignment="Center" />
                                                 <Border x:Name="RelatedDetailTabUnderline"
                                                         Grid.Row="1"
-                                                        Background="#8B5CF6"
+                                                        Background="{DynamicResource AccentBrush}"
                                                         CornerRadius="2"
                                                         Margin="12,0"
                                                         IsVisible="False" />
@@ -823,16 +970,17 @@
                                         </Button>
                                     </Grid>
                                     <Border Grid.Row="1"
-                                            Background="#233653"
+                                            Background="{DynamicResource PanelEdgeBrush}"
                                             Opacity="0.9" />
                                 </Grid>
 
                                 <ScrollViewer x:Name="OverviewDetailTabContent"
                                               Grid.Row="1"
+                                              AllowAutoHide="False"
                                               Margin="0,0,0,0"
                                               VerticalScrollBarVisibility="Visible"
                                               HorizontalScrollBarVisibility="Disabled">
-                                    <StackPanel>
+                                    <StackPanel Margin="0,0,12,0">
                                         <Border Background="{DynamicResource SubtlePanelBrush}"
                                                 BorderBrush="{DynamicResource PanelEdgeBrush}"
                                                 BorderThickness="1"
@@ -942,7 +1090,7 @@
                                                                    Foreground="{DynamicResource TextBrush}" />
                                                     </Grid>
                                                 </Border>
-                                                <Border Background="#10192B"
+                                                <Border Background="{DynamicResource ElevatedPanelBrush}"
                                                         BorderBrush="{DynamicResource PanelEdgeBrush}"
                                                         BorderThickness="1"
                                                         CornerRadius="8"
@@ -1003,35 +1151,36 @@
                                               Grid.Row="1"
                                               Margin="0,14,0,0"
                                               IsVisible="False"
+                                              AllowAutoHide="False"
                                               VerticalScrollBarVisibility="Visible"
                                               HorizontalScrollBarVisibility="Disabled">
-                                    <Border Background="#111C31"
-                                                BorderBrush="#233653"
+                                    <Border Background="{DynamicResource PanelBrush}"
+                                                BorderBrush="{DynamicResource PanelEdgeBrush}"
                                                 BorderThickness="1"
                                                 CornerRadius="12"
                                                 Padding="12"
-                                                Margin="0,0,0,0">
+                                                Margin="0,0,12,0">
                                             <StackPanel Spacing="8">
                                                 <TextBlock Text="Captured activity"
-                                                           Foreground="#CBD5E1"
+                                                           Foreground="{DynamicResource TextBrush}"
                                                            FontWeight="SemiBold" />
                                                 <TextBlock x:Name="ActivityTabSummaryText"
                                                            Text="Select a moment to inspect its raw captured entries."
-                                                           Foreground="#64748B"
+                                                           Foreground="{DynamicResource SubtleTextBrush}"
                                                            TextWrapping="Wrap" />
                                                 <ItemsControl x:Name="RawEntriesItems">
                                                     <ItemsControl.ItemTemplate>
                                                         <DataTemplate>
-                                                            <Border Background="#16233A"
-                                                                    BorderBrush="#253653"
+                                                            <Border Background="{DynamicResource SubtlePanelBrush}"
+                                                                    BorderBrush="{DynamicResource PanelEdgeBrush}"
                                                                     BorderThickness="1"
                                                                     CornerRadius="10"
                                                                     Padding="10"
                                                                     Margin="0,0,0,8">
                                                                 <StackPanel>
-                                                                    <TextBlock Text="{Binding Title}" Foreground="#F8FAFC" FontWeight="SemiBold" />
-                                                                    <TextBlock Text="{Binding Source}" Foreground="#94A3B8" Margin="0,4,0,0" TextWrapping="Wrap" />
-                                                                    <TextBlock Text="{Binding TimeRange}" Foreground="#64748B" Margin="0,6,0,0" FontSize="11" />
+                                                                    <TextBlock Text="{Binding Title}" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" />
+                                                                    <TextBlock Text="{Binding Source}" Foreground="{DynamicResource MutedTextBrush}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                                                                    <TextBlock Text="{Binding TimeRange}" Foreground="{DynamicResource SubtleTextBrush}" Margin="0,6,0,0" FontSize="11" />
                                                                 </StackPanel>
                                                             </Border>
                                                         </DataTemplate>
@@ -1045,34 +1194,35 @@
                                               Grid.Row="1"
                                               Margin="0,14,0,0"
                                               IsVisible="False"
+                                              AllowAutoHide="False"
                                               VerticalScrollBarVisibility="Visible"
                                               HorizontalScrollBarVisibility="Disabled">
-                                    <Border Background="#111C31"
-                                                BorderBrush="#233653"
+                                    <Border Background="{DynamicResource PanelBrush}"
+                                                BorderBrush="{DynamicResource PanelEdgeBrush}"
                                                 BorderThickness="1"
                                                 CornerRadius="12"
                                                 Padding="12"
-                                                Margin="0,0,0,0">
+                                                Margin="0,0,12,0">
                                             <StackPanel Spacing="8">
                                                 <TextBlock Text="Related moments"
-                                                           Foreground="#CBD5E1"
+                                                           Foreground="{DynamicResource TextBrush}"
                                                            FontWeight="SemiBold" />
                                                 <TextBlock x:Name="RelatedSummaryText"
                                                            Text="No related moments yet"
-                                                           Foreground="#64748B"
+                                                           Foreground="{DynamicResource SubtleTextBrush}"
                                                            TextWrapping="Wrap" />
                                                 <ItemsControl x:Name="RelatedMomentsItems">
                                                     <ItemsControl.ItemTemplate>
                                                         <DataTemplate>
-                                                            <Border Background="#16233A"
-                                                                    BorderBrush="#253653"
+                                                            <Border Background="{DynamicResource SubtlePanelBrush}"
+                                                                    BorderBrush="{DynamicResource PanelEdgeBrush}"
                                                                     BorderThickness="1"
                                                                     CornerRadius="10"
                                                                     Padding="10"
                                                                     Margin="0,0,0,8">
                                                                 <StackPanel>
-                                                                    <TextBlock Text="{Binding Title}" Foreground="#F8FAFC" FontWeight="SemiBold" />
-                                                                    <TextBlock Text="{Binding Detail}" Foreground="#94A3B8" Margin="0,4,0,0" TextWrapping="Wrap" />
+                                                                    <TextBlock Text="{Binding Title}" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" />
+                                                                    <TextBlock Text="{Binding Detail}" Foreground="{DynamicResource MutedTextBrush}" Margin="0,4,0,0" TextWrapping="Wrap" />
                                                                 </StackPanel>
                                                             </Border>
                                                         </DataTemplate>
@@ -1087,30 +1237,31 @@
                 </Grid>
                 </Grid>
 
-            <ScrollViewer x:Name="OverviewPage" Grid.Row="1" IsVisible="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <StackPanel Spacing="18">
-                    <Border Background="#0F1A2E"
-                            BorderBrush="#233653"
+            <ScrollViewer x:Name="OverviewPage" Grid.Row="1" IsVisible="False" AllowAutoHide="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Spacing="18"
+                            Margin="0,0,12,0">
+                    <Border Background="{DynamicResource PanelBrush}"
+                            BorderBrush="{DynamicResource PanelEdgeBrush}"
                             BorderThickness="1"
                             CornerRadius="14"
                             Padding="16">
                         <StackPanel Spacing="6">
                             <StackPanel Orientation="Horizontal" Spacing="10">
                                 <TextBlock Text="Overview"
-                                           Foreground="#F8FAFC"
+                                           Foreground="{DynamicResource TextBrush}"
                                            FontSize="20"
                                            FontWeight="SemiBold" />
                                 <Border Classes="infoChip"
                                         VerticalAlignment="Center">
                                     <TextBlock Text="Local analytics"
-                                               Foreground="#94A3B8"
+                                               Foreground="{DynamicResource MutedTextBrush}"
                                                FontSize="11"
                                                FontWeight="SemiBold" />
                                 </Border>
                             </StackPanel>
                             <TextBlock x:Name="OverviewSubtitleText"
                                        Text="A local read on how the day is taking shape"
-                                       Foreground="#94A3B8"
+                                       Foreground="{DynamicResource MutedTextBrush}"
                                        Margin="0,4,0,0" />
                         </StackPanel>
                     </Border>
@@ -1119,33 +1270,33 @@
                         <Border Grid.Column="0" Classes="overviewMetric">
                             <StackPanel Spacing="8">
                                 <Border Height="3" Background="#7C5CFF" CornerRadius="2" HorizontalAlignment="Stretch" />
-                                <TextBlock Text="Remembered span" Foreground="#94A3B8" />
-                                <TextBlock x:Name="MetricOneValue" Text="0m" Foreground="#F8FAFC" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
-                                <TextBlock x:Name="MetricOneDetail" Text="" Foreground="#64748B" Margin="0,6,0,0" TextWrapping="Wrap" />
+                                <TextBlock Text="Remembered span" Foreground="{DynamicResource MutedTextBrush}" />
+                                <TextBlock x:Name="MetricOneValue" Text="0m" Foreground="{DynamicResource TextBrush}" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
+                                <TextBlock x:Name="MetricOneDetail" Text="" Foreground="{DynamicResource SubtleTextBrush}" Margin="0,6,0,0" TextWrapping="Wrap" />
                             </StackPanel>
                         </Border>
                         <Border Grid.Column="1" Classes="overviewMetric">
                             <StackPanel Spacing="8">
                                 <Border Height="3" Background="#22C55E" CornerRadius="2" HorizontalAlignment="Stretch" />
-                                <TextBlock Text="Moments" Foreground="#94A3B8" />
-                                <TextBlock x:Name="MetricTwoValue" Text="0" Foreground="#F8FAFC" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
-                                <TextBlock x:Name="MetricTwoDetail" Text="" Foreground="#64748B" Margin="0,6,0,0" TextWrapping="Wrap" />
+                                <TextBlock Text="Moments" Foreground="{DynamicResource MutedTextBrush}" />
+                                <TextBlock x:Name="MetricTwoValue" Text="0" Foreground="{DynamicResource TextBrush}" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
+                                <TextBlock x:Name="MetricTwoDetail" Text="" Foreground="{DynamicResource SubtleTextBrush}" Margin="0,6,0,0" TextWrapping="Wrap" />
                             </StackPanel>
                         </Border>
                         <Border Grid.Column="2" Classes="overviewMetric">
                             <StackPanel Spacing="8">
                                 <Border Height="3" Background="#0EA5E9" CornerRadius="2" HorizontalAlignment="Stretch" />
-                                <TextBlock Text="Most seen app" Foreground="#94A3B8" />
-                                <TextBlock x:Name="MetricThreeValue" Text="Waiting" Foreground="#F8FAFC" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
-                                <TextBlock x:Name="MetricThreeDetail" Text="" Foreground="#64748B" Margin="0,6,0,0" TextWrapping="Wrap" />
+                                <TextBlock Text="Most seen app" Foreground="{DynamicResource MutedTextBrush}" />
+                                <TextBlock x:Name="MetricThreeValue" Text="Waiting" Foreground="{DynamicResource TextBrush}" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
+                                <TextBlock x:Name="MetricThreeDetail" Text="" Foreground="{DynamicResource SubtleTextBrush}" Margin="0,6,0,0" TextWrapping="Wrap" />
                             </StackPanel>
                         </Border>
                         <Border Grid.Column="3" Classes="overviewMetric">
                             <StackPanel Spacing="8">
-                                <Border Height="3" Background="#F59E0B" CornerRadius="2" HorizontalAlignment="Stretch" />
-                                <TextBlock Text="Longest visible run" Foreground="#94A3B8" />
-                                <TextBlock x:Name="MetricFourValue" Text="0m" Foreground="#F8FAFC" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
-                                <TextBlock x:Name="MetricFourDetail" Text="" Foreground="#64748B" Margin="0,6,0,0" TextWrapping="Wrap" />
+                                <Border Height="3" Background="{DynamicResource WarningBrush}" CornerRadius="2" HorizontalAlignment="Stretch" />
+                                <TextBlock Text="Longest visible run" Foreground="{DynamicResource MutedTextBrush}" />
+                                <TextBlock x:Name="MetricFourValue" Text="0m" Foreground="{DynamicResource TextBrush}" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
+                                <TextBlock x:Name="MetricFourDetail" Text="" Foreground="{DynamicResource SubtleTextBrush}" Margin="0,6,0,0" TextWrapping="Wrap" />
                             </StackPanel>
                         </Border>
                     </Grid>
@@ -1153,13 +1304,13 @@
                     <Border Classes="overviewPanel">
                         <StackPanel Spacing="12">
                             <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="Daily activity heatmap" Foreground="#F8FAFC" FontSize="16" FontWeight="SemiBold" />
+                                <TextBlock Text="Daily activity heatmap" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="SemiBold" />
                                 <Border Grid.Column="1" Classes="infoChip">
-                                    <TextBlock Text="15 minute blocks" Foreground="#94A3B8" FontSize="11" />
+                                    <TextBlock Text="15 minute blocks" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" />
                                 </Border>
                             </Grid>
                             <TextBlock Text="A lightweight read on how the day filled in over time."
-                                       Foreground="#64748B"
+                                       Foreground="{DynamicResource SubtleTextBrush}"
                                        FontSize="11" />
                             <WrapPanel x:Name="HeatmapPanel" ItemWidth="10" ItemHeight="28" />
                         </StackPanel>
@@ -1170,9 +1321,9 @@
                             <StackPanel Spacing="10">
                                 <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8">
                                     <StackPanel>
-                                        <TextBlock Text="Top applications" Foreground="#F8FAFC" FontSize="16" FontWeight="SemiBold" />
+                                        <TextBlock Text="Top applications" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="SemiBold" />
                                         <TextBlock Text="Sorted from the local activity store"
-                                                   Foreground="#64748B"
+                                                   Foreground="{DynamicResource SubtleTextBrush}"
                                                    FontSize="11"
                                                    Margin="0,4,0,0" />
                                     </StackPanel>
@@ -1188,19 +1339,19 @@
                                 </Grid>
                                 <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,2,0,0">
                                     <TextBlock Text="Application"
-                                               Foreground="#64748B"
+                                               Foreground="{DynamicResource SubtleTextBrush}"
                                                FontSize="11"
                                                FontWeight="SemiBold" />
                                     <TextBlock Grid.Column="1"
                                                Text="Seen"
-                                               Foreground="#64748B"
+                                               Foreground="{DynamicResource SubtleTextBrush}"
                                                FontSize="11"
                                                FontWeight="SemiBold"
                                                HorizontalAlignment="Right"
                                                Margin="0,0,52,0" />
                                     <TextBlock Grid.Column="2"
                                                Text="%"
-                                               Foreground="#64748B"
+                                               Foreground="{DynamicResource SubtleTextBrush}"
                                                FontSize="11"
                                                FontWeight="SemiBold"
                                                HorizontalAlignment="Right" />
@@ -1208,7 +1359,7 @@
                                 <ItemsControl x:Name="TopAppsItems">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Background="#16233A" BorderBrush="#253653" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,8">
+                                            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource PanelEdgeBrush}" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,8">
                                                 <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
                                                     <Border Width="34"
                                                             Height="34"
@@ -1223,18 +1374,18 @@
                                                                    VerticalAlignment="Center" />
                                                     </Border>
                                                     <StackPanel Grid.Column="1">
-                                                        <TextBlock Text="{Binding AppName}" Foreground="#F8FAFC" FontWeight="SemiBold" />
-                                                        <TextBlock Text="{Binding Meta}" Foreground="#94A3B8" Margin="0,4,0,0" />
+                                                        <TextBlock Text="{Binding AppName}" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" />
+                                                        <TextBlock Text="{Binding Meta}" Foreground="{DynamicResource MutedTextBrush}" Margin="0,4,0,0" />
                                                     </StackPanel>
-                                                    <TextBlock Grid.Column="2" Text="{Binding Duration}" Foreground="#CBD5E1" VerticalAlignment="Center" Margin="0,0,12,0" />
+                                                    <TextBlock Grid.Column="2" Text="{Binding Duration}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center" Margin="0,0,12,0" />
                                                     <Border Grid.Column="3"
-                                                            Background="#111C31"
-                                                            BorderBrush="#253653"
+                                                            Background="{DynamicResource PanelBrush}"
+                                                            BorderBrush="{DynamicResource PanelEdgeBrush}"
                                                             BorderThickness="1"
                                                             CornerRadius="999"
                                                             Padding="8,2"
                                                             VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding Percent}" Foreground="#94A3B8" FontSize="11" />
+                                                        <TextBlock Text="{Binding Percent}" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" />
                                                     </Border>
                                                 </Grid>
                                             </Border>
@@ -1247,21 +1398,21 @@
                         <StackPanel Grid.Column="1" Spacing="18">
                             <Border Classes="overviewPanel">
                                 <StackPanel Spacing="10">
-                                    <TextBlock Text="Focus rhythm" Foreground="#F8FAFC" FontSize="16" FontWeight="SemiBold" />
+                                    <TextBlock Text="Focus rhythm" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="SemiBold" />
                                     <TextBlock Text="Longer visible runs grouped from local activity."
-                                               Foreground="#64748B"
+                                               Foreground="{DynamicResource SubtleTextBrush}"
                                                FontSize="11" />
                                     <ItemsControl x:Name="FocusBlocksItems">
                                         <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Background="#16233A" BorderBrush="#253653" BorderThickness="1" CornerRadius="10" Padding="10" Margin="0,0,0,8">
+                                            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource PanelEdgeBrush}" BorderThickness="1" CornerRadius="10" Padding="10" Margin="0,0,0,8">
                                                     <StackPanel>
                                                         <Border Height="3"
                                                                 Background="{Binding AccentBrush}"
                                                                 CornerRadius="2"
                                                                 Margin="0,0,0,8" />
-                                                        <TextBlock Text="{Binding Label}" Foreground="#F8FAFC" FontWeight="SemiBold" />
-                                                        <TextBlock Text="{Binding Duration}" Foreground="#94A3B8" Margin="0,4,0,0" />
+                                                        <TextBlock Text="{Binding Label}" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" />
+                                                        <TextBlock Text="{Binding Duration}" Foreground="{DynamicResource MutedTextBrush}" Margin="0,4,0,0" />
                                                     </StackPanel>
                                                 </Border>
                                             </DataTemplate>
@@ -1272,16 +1423,16 @@
 
                             <Border Classes="overviewPanel">
                                 <StackPanel Spacing="10">
-                                    <TextBlock Text="Legend" Foreground="#F8FAFC" FontSize="16" FontWeight="SemiBold" />
+                                    <TextBlock Text="Legend" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="SemiBold" />
                                     <TextBlock Text="Colour hints used across heatmap and grouped moments."
-                                               Foreground="#64748B"
+                                               Foreground="{DynamicResource SubtleTextBrush}"
                                                FontSize="11" />
                                     <ItemsControl x:Name="LegendItems">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,8">
                                                     <Border Width="12" Height="12" CornerRadius="3" Background="{Binding Fill}" />
-                                                    <TextBlock Text="{Binding Label}" Foreground="#CBD5E1" />
+                                                    <TextBlock Text="{Binding Label}" Foreground="{DynamicResource TextBrush}" />
                                                 </StackPanel>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
