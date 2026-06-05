@@ -789,6 +789,7 @@
                                                          </StackPanel>
                                                      </Grid>
                                                     <ItemsControl ItemsSource="{Binding Moments}"
+                                                                  IsVisible="{Binding ShowCards}"
                                                                   Margin="0,2,0,0">
                                                         <ItemsControl.ItemsPanel>
                                                             <ItemsPanelTemplate>
@@ -923,6 +924,123 @@
                                                                                 </Grid>
                                                                             </Grid>
                                                                         </Border>
+                                                                </Button>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                    <ItemsControl ItemsSource="{Binding Moments}"
+                                                                  IsVisible="{Binding ShowList}"
+                                                                  Margin="0,0,12,0">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Button Click="TimelineMomentButton_Click"
+                                                                        Classes="momentCard"
+                                                                        CommandParameter="{Binding}"
+                                                                        Background="Transparent"
+                                                                        BorderThickness="0"
+                                                                        Padding="0"
+                                                                        Margin="0,0,0,10"
+                                                                        HorizontalAlignment="Stretch"
+                                                                        HorizontalContentAlignment="Stretch">
+                                                                    <Border MinHeight="78"
+                                                                            Background="{Binding CardBackground}"
+                                                                            BorderBrush="{Binding BorderBrush}"
+                                                                            BorderThickness="1"
+                                                                            CornerRadius="9"
+                                                                            Padding="10">
+                                                                        <Grid ColumnDefinitions="64,*,Auto"
+                                                                              ColumnSpacing="12">
+                                                                            <Border Width="56"
+                                                                                    Height="56"
+                                                                                    Background="{DynamicResource ElevatedPanelBrush}"
+                                                                                    CornerRadius="8"
+                                                                                    ClipToBounds="True"
+                                                                                    VerticalAlignment="Center">
+                                                                                <Grid>
+                                                                                    <Image Source="{Binding PreviewImage}"
+                                                                                           Stretch="UniformToFill"
+                                                                                           IsVisible="{Binding ShowPreviewImage}" />
+                                                                                    <Image Source="{Binding IconImage}"
+                                                                                           Width="36"
+                                                                                           Height="36"
+                                                                                           Stretch="Uniform"
+                                                                                           IsVisible="{Binding ShowHeroIcon}"
+                                                                                           HorizontalAlignment="Center"
+                                                                                           VerticalAlignment="Center" />
+                                                                                    <Border Width="36"
+                                                                                            Height="36"
+                                                                                            CornerRadius="10"
+                                                                                            Background="{Binding GlyphBackground}"
+                                                                                            IsVisible="{Binding ShowGlyphFallback}"
+                                                                                            HorizontalAlignment="Center"
+                                                                                            VerticalAlignment="Center">
+                                                                                        <TextBlock Text="{Binding Glyph}"
+                                                                                                   Foreground="{Binding GlyphForeground}"
+                                                                                                   FontSize="14"
+                                                                                                   FontWeight="Bold"
+                                                                                                   HorizontalAlignment="Center"
+                                                                                                   VerticalAlignment="Center" />
+                                                                                    </Border>
+                                                                                </Grid>
+                                                                            </Border>
+                                                                            <StackPanel Grid.Column="1"
+                                                                                        VerticalAlignment="Center">
+                                                                                <Grid ColumnDefinitions="Auto,*,Auto"
+                                                                                      ColumnSpacing="8">
+                                                                                    <Image Source="{Binding IconImage}"
+                                                                                           Width="16"
+                                                                                           Height="16"
+                                                                                           Stretch="Uniform"
+                                                                                           IsVisible="{Binding ShowSmallIcon}"
+                                                                                           VerticalAlignment="Center" />
+                                                                                    <TextBlock Grid.Column="1"
+                                                                                               Text="{Binding Title}"
+                                                                                               Foreground="{DynamicResource TextBrush}"
+                                                                                               FontWeight="SemiBold"
+                                                                                               FontSize="13"
+                                                                                               TextTrimming="CharacterEllipsis" />
+                                                                                    <Border Grid.Column="2"
+                                                                                            Background="{Binding KindBackground}"
+                                                                                            CornerRadius="8"
+                                                                                            Padding="8,2"
+                                                                                            VerticalAlignment="Center">
+                                                                                        <TextBlock Text="{Binding KindLabel}"
+                                                                                                   Foreground="{Binding KindForeground}"
+                                                                                                   FontSize="10"
+                                                                                                   FontWeight="SemiBold" />
+                                                                                    </Border>
+                                                                                </Grid>
+                                                                                <TextBlock Text="{Binding Subtitle}"
+                                                                                           Foreground="{DynamicResource MutedTextBrush}"
+                                                                                           Margin="0,5,0,0"
+                                                                                           FontSize="12"
+                                                                                           TextTrimming="CharacterEllipsis" />
+                                                                                <TextBlock Text="{Binding Meta}"
+                                                                                           Foreground="{DynamicResource SubtleTextBrush}"
+                                                                                           Margin="0,4,0,0"
+                                                                                           FontSize="11"
+                                                                                           TextTrimming="CharacterEllipsis" />
+                                                                            </StackPanel>
+                                                                            <StackPanel Grid.Column="2"
+                                                                                        VerticalAlignment="Center"
+                                                                                        HorizontalAlignment="Right">
+                                                                                <TextBlock Text="{Binding TimeLabel}"
+                                                                                           Foreground="{DynamicResource TextBrush}"
+                                                                                           FontSize="12"
+                                                                                           FontWeight="SemiBold"
+                                                                                           HorizontalAlignment="Right" />
+                                                                                <Border Background="{DynamicResource ToolbarBrush}"
+                                                                                        CornerRadius="6"
+                                                                                        Padding="7,2"
+                                                                                        Margin="0,7,0,0">
+                                                                                    <TextBlock Text="{Binding SeenLabel}"
+                                                                                               Foreground="{DynamicResource TextBrush}"
+                                                                                               FontSize="11"
+                                                                                               FontWeight="SemiBold" />
+                                                                                </Border>
+                                                                            </StackPanel>
+                                                                        </Grid>
+                                                                    </Border>
                                                                 </Button>
                                                             </DataTemplate>
                                                         </ItemsControl.ItemTemplate>

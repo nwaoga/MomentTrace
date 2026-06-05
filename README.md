@@ -12,6 +12,8 @@ MomentTrace uses a Windows Timeline-inspired workspace: left navigation, date an
 
 ![MomentTrace overview analytics](docs/assets/momenttrace-timeline-detail.png)
 
+The README screenshots should be refreshed from sanitized demo activity as the Avalonia shell settles, so public images show current card/list layouts, real app icons, screenshots, themed modals, and top command chrome without exposing a live personal timeline.
+
 The recorder is session based. It polls the foreground window, keeps the same activity open while the app/window/resource remains active, and collapses repeated sequential entries in the UI so noisy history reads as one continuous moment. Rule-based local classification then groups nearby activity into memory-oriented sessions such as Website browsing, Development work, Communication, Document review, Research session, and Screenshot capture.
 
 ![MomentTrace recording rollover model](docs/assets/momenttrace-recording-rollover.svg)
@@ -35,7 +37,7 @@ The Windows installer is built with Inno Setup from a self-contained `win-x64` p
 - Native Windows desktop UI built with WPF
 - Avalonia desktop shell in active parity work, sharing timeline, overview, detail-pane, and shell presentation layers across Windows/macOS targets
 - Avalonia Windows target now starts the Windows foreground recorder and reads the shared local SQLite timeline
-- Grouped timeline with card and list view modes
+- Grouped timeline with card and list view modes in both the WPF app and Avalonia shell
 - Theme system with Midnight, Coffee, Amazon Green, and White Light palettes
 - Real alpha transparency control that keeps theme colours while making the app more or less clear
 - Overview page with daily activity heatmap and lightweight productivity analytics
@@ -90,7 +92,7 @@ This split is intentional. Future macOS support should add platform-specific ser
 
 The WPF app now acts more like a Windows shell over shared timeline data. It still owns WPF controls, tray behavior, custom window chrome, Windows icons, screenshot previews, settings, and installer/startup wiring.
 
-`MomentTrace.Desktop` is the active Avalonia shell for cross-platform UI work. It targets both `net8.0` and `net8.0-windows`, reads the same local SQLite timeline through `MomentTrace.Storage`, and binds timeline groups, Overview analytics, and the right-side detail surface from `MomentTrace.Presentation`. The Windows target now starts the shared Windows foreground recorder, shows local screenshot previews, resolves real app icons through `MomentTrace.Windows`, and uses custom chrome for the main shell, Settings modal, and delete confirmations. Tray behavior, installer packaging, and full Windows startup integration remain owned by `MomentTrace.App` and `MomentTrace.Windows`.
+`MomentTrace.Desktop` is the active Avalonia shell for cross-platform UI work. It targets both `net8.0` and `net8.0-windows`, reads the same local SQLite timeline through `MomentTrace.Storage`, and binds timeline groups, Overview analytics, and the right-side detail surface from `MomentTrace.Presentation`. The Windows target now starts the shared Windows foreground recorder, shows local screenshot previews, resolves real app icons through `MomentTrace.Windows`, and supports both card and compact list timeline views. It also uses custom chrome for the main shell, Settings modal, and delete confirmations. Tray behavior, installer packaging, and full Windows startup integration remain owned by `MomentTrace.App` and `MomentTrace.Windows`.
 
 ## Requirements
 

@@ -1221,6 +1221,8 @@ public partial class MainWindow : Window
                 group.TimeRange,
                 group.AccentBrush,
                 $"{group.VisibleActivities.Count} moment{(group.VisibleActivities.Count == 1 ? string.Empty : "s")}",
+                _preferences.TimelineViewMode == "Cards",
+                _preferences.TimelineViewMode == "List",
                 group.VisibleActivities
                     .Select(session => ToMomentRow(session, session.Id == _selectedMomentId))
                     .ToList()))
@@ -1419,6 +1421,8 @@ public partial class MainWindow : Window
         string TimeRange,
         string AccentBrush,
         string CountLabel,
+        bool ShowCards,
+        bool ShowList,
         IReadOnlyList<MomentRow> Moments);
 
     private sealed record TopAppRow(string AppName, string Meta, string Duration, string Percent, string Glyph, string AccentBrush);
