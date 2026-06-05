@@ -5,6 +5,7 @@
         mc:Ignorable="d"
         x:Class="MomentTrace.Desktop.MainWindow"
         Title="MomentTrace"
+        Icon="avares://MomentTrace.Desktop/Assets/MomentTrace.ico"
 	        Width="1360"
 	        Height="840"
 	        MinWidth="1120"
@@ -42,8 +43,28 @@
         <SolidColorBrush x:Key="ScrollTrackBrush" Color="#142038" />
     </Window.Resources>
     <Window.Styles>
+        <Style Selector="Button.momentCard">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="Button.momentCard /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
         <Style Selector="Button.momentCard:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="Opacity" Value="0.97" />
+        </Style>
+        <Style Selector="Button.momentCard:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="Button.momentCard:focus /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
         </Style>
         <Style Selector="Button.nav">
             <Setter Property="BorderThickness" Value="1" />
@@ -84,6 +105,25 @@
         </Style>
         <Style Selector="Button.toolbar:pressed TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+        </Style>
+        <Style Selector="Button.topCommand">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Height" Value="42" />
+        </Style>
+        <Style Selector="Button.topCommand:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="Button.topCommand:pressed">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="Button.topCommand:focus /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
         </Style>
         <Style Selector="Button.detailPrimary">
             <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
@@ -131,17 +171,71 @@
             <Setter Property="Padding" Value="10,4" />
         </Style>
         <Style Selector="ComboBox.filter">
-            <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="12,7" />
-            <Setter Property="MinHeight" Value="40" />
+            <Setter Property="MinHeight" Value="42" />
+        </Style>
+        <Style Selector="ComboBox.filter:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="ComboBox.filter:pressed">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="ComboBox.filter:focus">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="ComboBox.filter /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="ComboBox.filter:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="ComboBox.filter:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
         </Style>
         <Style Selector="TextBox.searchBox /template/ TextBlock#watermark">
             <Setter Property="Foreground" Value="{DynamicResource SubtleTextBrush}" />
             <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="TextBox.searchBox">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+        </Style>
+        <Style Selector="TextBox.searchBox:pointerover">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="TextBox.searchBox:focus">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="TextBox.searchBox /template/ Border#border">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="TextBox.searchBox:focus /template/ Border#border">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="TextBox.searchBox /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="TextBox.searchBox:focus /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
         </Style>
         <Style Selector="ScrollBar">
             <Setter Property="Background" Value="{DynamicResource ScrollTrackBrush}" />
@@ -503,12 +597,16 @@
                 Margin="0,8,10,8"
                 Background="{DynamicResource PanelEdgeBrush}" />
 
-        <Grid Grid.Column="1" RowDefinitions="66,*"
+        <Grid Grid.Column="1" RowDefinitions="76,*"
               Margin="22,0,0,0">
-            <Grid x:Name="TopCommandSurface"
-                  Margin="16,12,18,0"
-                  Background="Transparent"
-                  PointerPressed="ToolbarDragRegion_PointerPressed">
+            <Border x:Name="TopCommandSurface"
+                    Margin="16,10,18,0"
+                    Background="{DynamicResource ToolbarBrush}"
+                    BorderBrush="{DynamicResource PanelEdgeStrongBrush}"
+                    BorderThickness="1"
+                    CornerRadius="13"
+                    Padding="8"
+                    PointerPressed="ToolbarDragRegion_PointerPressed">
                     <Grid ColumnDefinitions="*,142,96,50,50,50,50"
                           ColumnSpacing="12"
                           VerticalAlignment="Center">
@@ -553,7 +651,7 @@
                                   VerticalAlignment="Center"
                                   MinHeight="40" />
                         <Button Grid.Column="3"
-                                Classes="toolbar"
+                                Classes="toolbar topCommand"
                                 Click="ToggleDetailsButton_Click"
                                 Width="48">
                             <TextBlock Text="☰"
@@ -561,7 +659,7 @@
                                        Foreground="{DynamicResource TextBrush}" />
                         </Button>
                         <Button Grid.Column="4"
-                                Classes="toolbar"
+                                Classes="toolbar topCommand"
                                 Click="MinimizeShellButton_Click"
                                 Width="48">
                             <TextBlock Text="−"
@@ -569,7 +667,7 @@
                                        Foreground="{DynamicResource TextBrush}" />
                         </Button>
                         <Button Grid.Column="5"
-                                Classes="toolbar"
+                                Classes="toolbar topCommand"
                                 Click="MaximizeShellButton_Click"
                                 Width="48">
                             <TextBlock Text="□"
@@ -577,7 +675,7 @@
                                        Foreground="{DynamicResource TextBrush}" />
                         </Button>
                         <Button Grid.Column="6"
-                                Classes="toolbar"
+                                Classes="toolbar topCommand"
                                 Click="CloseShellButton_Click"
                                 Width="48">
                             <TextBlock Text="×"
@@ -585,7 +683,7 @@
                                        Foreground="{DynamicResource TextBrush}" />
                         </Button>
                     </Grid>
-            </Grid>
+            </Border>
 
             <Grid Grid.Row="1">
                 <Grid x:Name="TimelinePage" Margin="28,20,22,0">
@@ -724,12 +822,12 @@
                                                                                             <ColumnDefinition Width="*" />
                                                                                             <ColumnDefinition Width="Auto" />
                                                                                         </Grid.ColumnDefinitions>
-                                                                                        <Image Source="{Binding PreviewUri}"
+                                                                                        <Image Source="{Binding PreviewImage}"
                                                                                                Stretch="UniformToFill"
                                                                                                IsVisible="{Binding ShowPreviewImage}" />
                                                                                         <Border Background="{DynamicResource ElevatedPanelBrush}"
                                                                                                 IsVisible="{Binding ShowHeroIcon}">
-                                                                                            <Image Source="{Binding IconUri}"
+                                                                                            <Image Source="{Binding IconImage}"
                                                                                                    Width="58"
                                                                                                    Height="58"
                                                                                                    Stretch="Uniform"
@@ -786,7 +884,7 @@
                                                                                                 Background="Transparent"
                                                                                                 VerticalAlignment="Top">
                                                                                             <Grid>
-                                                                                                <Image Source="{Binding IconUri}"
+                                                                                                <Image Source="{Binding IconImage}"
                                                                                                        Width="16"
                                                                                                        Height="16"
                                                                                                        Stretch="Uniform"
@@ -856,8 +954,8 @@
                                         Background="{DynamicResource SubtlePanelBrush}">
                                     <Grid>
                                         <Image x:Name="DetailIconImage"
-                                               Width="34"
-                                               Height="34"
+                                               Width="44"
+                                               Height="44"
                                                Stretch="Uniform"
                                                IsVisible="False"
                                                HorizontalAlignment="Center"

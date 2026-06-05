@@ -1,16 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net8.0-windows</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\MomentTrace.App\Assets\MomentTrace.ico</ApplicationIcon>
     <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="..\MomentTrace.App\Assets\MomentTrace.ico" Link="Assets\MomentTrace.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MomentTrace.Core\MomentTrace.Core.csproj" />
     <ProjectReference Include="..\MomentTrace.Presentation\MomentTrace.Presentation.csproj" />
     <ProjectReference Include="..\MomentTrace.Storage\MomentTrace.Storage.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <ProjectReference Include="..\MomentTrace.MacProbe\MomentTrace.MacProbe.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
+    <ProjectReference Include="..\MomentTrace.Windows\MomentTrace.Windows.csproj" />
   </ItemGroup>
 
   <ItemGroup>

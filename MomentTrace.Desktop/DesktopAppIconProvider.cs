@@ -1,4 +1,7 @@
 using MomentTrace.Presentation;
+#if WINDOWS
+using MomentTrace.Windows;
+#endif
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,54 +14,33 @@ namespace MomentTrace.Desktop;
 
 public sealed class DesktopAppIconProvider : IAppIconProvider<string>
 {
+#if WINDOWS
+    private static readonly WindowsAppIconProvider WindowsIconProvider = new();
+#endif
     private readonly Dictionary<string, string?> _cache = new(StringComparer.OrdinalIgnoreCase);
 
     public string? GetIcon(string? executablePath, string? appName, string? processName)
     {
-        if (string.IsNullOrWhiteSpace(executablePath))
-        {
-            return null;
-        }
-
-        if (_cache.TryGetValue(executablePath, out var cached))
+        var cacheKey = $"{executablePath}|{appName}|{processName}";
+        if (_cache.TryGetValue(cacheKey, out var cached))
         {
             return cached;
         }
 
-        var iconPath = OperatingSystem.IsWindows()
-            ? TryGetWindowsIconPath(executablePath)
-            : OperatingSystem.IsMacOS()
-                ? TryGetMacIconPath(executablePath)
-                : null;
-
-        _cache[executablePath] = iconPath;
+        var iconPath = GetIconCore(executablePath, appName, processName);
+        _cache[cacheKey] = iconPath;
         return iconPath;
     }
 
-    private static string? TryGetWindowsIconPath(string executablePath)
+    private static string? GetIconCore(string? executablePath, string? appName, string? processName)
     {
-        if (!File.Exists(executablePath))
-        {
-            return null;
-        }
-
-        try
-        {
-            var file = new FileInfo(executablePath);
-            var cachePath = GetCachePath($"{file.FullName}|{file.LastWriteTimeUtc.Ticks}|{file.Length}", "png");
-            if (File.Exists(cachePath))
-            {
-                return cachePath;
-            }
-
-            return RunWindowsIconExtract(executablePath, cachePath) && File.Exists(cachePath)
-                ? cachePath
-                : null;
-        }
-        catch
-        {
-            return null;
-        }
+#if WINDOWS
+        return WindowsIconProvider.GetIconPath(executablePath, appName, processName);
+#else
+        return !string.IsNullOrWhiteSpace(executablePath) && OperatingSystem.IsMacOS()
+            ? TryGetMacIconPath(executablePath)
+            : null;
+#endif
     }
 
     private static string? TryGetMacIconPath(string executablePath)
@@ -166,6 +148,7 @@ public sealed class DesktopAppIconProvider : IAppIconProvider<string>
             var startInfo = new ProcessStartInfo
             {
                 FileName = "/usr/bin/defaults",
+                CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false
@@ -197,6 +180,7 @@ public sealed class DesktopAppIconProvider : IAppIconProvider<string>
             var startInfo = new ProcessStartInfo
             {
                 FileName = fileName,
+                CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false
@@ -206,57 +190,6 @@ public sealed class DesktopAppIconProvider : IAppIconProvider<string>
             {
                 startInfo.ArgumentList.Add(argument);
             }
-
-            using var process = Process.Start(startInfo);
-            if (process is null)
-            {
-                return false;
-            }
-
-            process.WaitForExit();
-            return process.ExitCode == 0;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    private static bool RunWindowsIconExtract(string executablePath, string cachePath)
-    {
-        const string script = """
-            Add-Type -AssemblyName System.Drawing
-            $icon = [System.Drawing.Icon]::ExtractAssociatedIcon($args[0])
-            if ($null -eq $icon) { exit 1 }
-            try {
-                $bitmap = $icon.ToBitmap()
-                try {
-                    $bitmap.Save($args[1], [System.Drawing.Imaging.ImageFormat]::Png)
-                }
-                finally {
-                    $bitmap.Dispose()
-                }
-            }
-            finally {
-                $icon.Dispose()
-            }
-            exit 0
-            """;
-
-        try
-        {
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = "powershell.exe",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false
-            };
-            startInfo.ArgumentList.Add("-NoProfile");
-            startInfo.ArgumentList.Add("-Command");
-            startInfo.ArgumentList.Add(script);
-            startInfo.ArgumentList.Add(executablePath);
-            startInfo.ArgumentList.Add(cachePath);
 
             using var process = Process.Start(startInfo);
             if (process is null)

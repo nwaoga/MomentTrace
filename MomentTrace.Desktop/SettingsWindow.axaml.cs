@@ -91,14 +91,10 @@ public partial class SettingsWindow : Window
         DeleteActivityButton.Click += DeleteActivityButton_Click;
         CloseButton.Click += CloseButton_Click;
 
-        RecordingButton.Content = "Recorder available in Windows app";
-        RecordingButton.IsEnabled = false;
-
         LoadCurrentSettings(_preferences.Opacity, currentTimelineViewMode, currentTheme);
         LoadPrivacySettings();
         LoadWhereILive();
         _ = LoadRecentPrivacyChoicesAsync();
-        UpdateMaximizeButtonText();
     }
 
     private void LoadCurrentSettings(double currentOpacity, string currentTimelineViewMode, string currentTheme)
@@ -533,12 +529,6 @@ public partial class SettingsWindow : Window
             return;
         }
 
-        if (e.ClickCount == 2)
-        {
-            ToggleWindowState();
-            return;
-        }
-
         BeginMoveDrag(e);
     }
 
@@ -687,40 +677,6 @@ public partial class SettingsWindow : Window
         e.Handled = true;
     }
 
-    private void TitleMinimizeButton_Click(object? sender, RoutedEventArgs e)
-    {
-        WindowState = WindowState.Minimized;
-    }
-
-    private void TitleMaximizeButton_Click(object? sender, RoutedEventArgs e)
-    {
-        ToggleWindowState();
-    }
-
-    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
-    {
-        base.OnPropertyChanged(change);
-
-        if (change.Property == WindowStateProperty)
-        {
-            UpdateMaximizeButtonText();
-        }
-    }
-
-    private void ToggleWindowState()
-    {
-        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
-        UpdateMaximizeButtonText();
-    }
-
-    private void UpdateMaximizeButtonText()
-    {
-        if (TitleMaximizeButton is not null)
-        {
-            TitleMaximizeButton.Content = WindowState == WindowState.Maximized ? "❐" : "□";
-        }
-    }
-
     private async Task<bool> ConfirmDeleteActivityAsync()
     {
         var palette = DesktopAppThemePalette.Find(_preferences.Theme);
@@ -731,7 +687,8 @@ public partial class SettingsWindow : Window
             Height = 220,
             CanResize = false,
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            Background = new SolidColorBrush(palette.Base)
+            WindowDecorations = Avalonia.Controls.WindowDecorations.None,
+            Background = Brushes.Transparent
         };
 
         dialog.Content = new Border
@@ -739,6 +696,7 @@ public partial class SettingsWindow : Window
             Background = new SolidColorBrush(palette.Base),
             BorderBrush = new SolidColorBrush(palette.Stroke),
             BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(14),
             Padding = new Thickness(22),
             Child = BuildContent()
         };
@@ -750,16 +708,26 @@ public partial class SettingsWindow : Window
             var deleteButton = new Button
             {
                 Content = "Delete",
-                Classes = { "settings" },
-                Background = new SolidColorBrush(Color.Parse("#3D1F2C")),
-                BorderBrush = new SolidColorBrush(Color.Parse("#6A334A")),
-                Padding = new Thickness(16, 9)
+                Background = new SolidColorBrush(palette.DangerFill),
+                BorderBrush = new SolidColorBrush(palette.Danger),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(9),
+                Foreground = new SolidColorBrush(palette.Text),
+                Padding = new Thickness(16, 9),
+                MinWidth = 86,
+                HorizontalContentAlignment = HorizontalAlignment.Center
             };
             var cancelButton = new Button
             {
                 Content = "Cancel",
-                Classes = { "settings" },
-                Padding = new Thickness(16, 9)
+                Background = new SolidColorBrush(palette.Toolbar),
+                BorderBrush = new SolidColorBrush(palette.PanelEdgeStrong),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(9),
+                Foreground = new SolidColorBrush(palette.Text),
+                Padding = new Thickness(16, 9),
+                MinWidth = 86,
+                HorizontalContentAlignment = HorizontalAlignment.Center
             };
 
             deleteButton.Click += (_, _) => dialog.Close(true);

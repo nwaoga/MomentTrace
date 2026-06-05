@@ -34,6 +34,7 @@ The Windows installer is built with Inno Setup from a self-contained `win-x64` p
 
 - Native Windows desktop UI built with WPF
 - Avalonia desktop shell in active parity work, sharing timeline, overview, detail-pane, and shell presentation layers across Windows/macOS targets
+- Avalonia Windows target now starts the Windows foreground recorder and reads the shared local SQLite timeline
 - Grouped timeline with card and list view modes
 - Theme system with Midnight, Coffee, Amazon Green, and White Light palettes
 - Real alpha transparency control that keeps theme colours while making the app more or less clear
@@ -52,15 +53,15 @@ The Windows installer is built with Inno Setup from a self-contained `win-x64` p
 - Left-rail semantic filters for browsing, development, communication, documents, apps, websites, and files
 - Date filtering with Today, Yesterday, then concrete activity dates
 - Auto-refreshing date filters after Windows resume and local day changes
-- Real app icon extraction when executable metadata is available
-- Browser URL capture and local screenshot previews
+- Real app icon extraction when executable metadata is available, including platform-specific Windows icon resolution for classic and packaged apps
+- Browser URL capture plus local screenshot and thumbnail previews for captured moments
 - Privacy filters with recent app/website selection, adult website filtering, optional cached blocklist updates, and manual allow/block lists
 - Local activity export and delete controls for user-owned history cleanup
 - Single-instance behavior that brings the running app back when launched again
 - Noise filtering for MomentTrace itself and Windows lock-screen activity
 - Themed Settings modal with startup, recording, timeline view mode, appearance, and privacy controls
 - "Where I Live" diagnostics for install, database, settings, and screenshot locations
-- Custom title bars for the main app and Settings, including taskbar-safe maximize behavior
+- Custom title bars, top command surfaces, and themed confirmation modals for the main app and Settings
 - Optional AI provider abstraction for future summaries and insights
 
 ## Project Structure
@@ -89,7 +90,7 @@ This split is intentional. Future macOS support should add platform-specific ser
 
 The WPF app now acts more like a Windows shell over shared timeline data. It still owns WPF controls, tray behavior, custom window chrome, Windows icons, screenshot previews, settings, and installer/startup wiring.
 
-`MomentTrace.Desktop` is the active Avalonia shell for cross-platform UI work. It targets `net8.0`, reads the same local SQLite timeline through `MomentTrace.Storage`, and binds timeline groups, Overview analytics, and the right-side detail surface from `MomentTrace.Presentation`. It now includes custom window chrome, shared search/filter controls, semantic rail navigation, grouped moment cards, and the WPF-inspired detail tabs. It is still a shell spike rather than the shipping app: the Windows recorder, tray behavior, installer, and startup integration remain owned by `MomentTrace.App` and `MomentTrace.Windows`.
+`MomentTrace.Desktop` is the active Avalonia shell for cross-platform UI work. It targets both `net8.0` and `net8.0-windows`, reads the same local SQLite timeline through `MomentTrace.Storage`, and binds timeline groups, Overview analytics, and the right-side detail surface from `MomentTrace.Presentation`. The Windows target now starts the shared Windows foreground recorder, shows local screenshot previews, resolves real app icons through `MomentTrace.Windows`, and uses custom chrome for the main shell, Settings modal, and delete confirmations. Tray behavior, installer packaging, and full Windows startup integration remain owned by `MomentTrace.App` and `MomentTrace.Windows`.
 
 ## Requirements
 
@@ -117,6 +118,12 @@ Run the Avalonia shell:
 
 ```powershell
 dotnet run --project .\MomentTrace.Desktop\MomentTrace.Desktop.csproj
+```
+
+Run the Avalonia shell with the Windows recorder and Windows app-icon provider:
+
+```powershell
+dotnet run --project .\MomentTrace.Desktop\MomentTrace.Desktop.csproj -f net8.0-windows
 ```
 
 Launch minimized to the tray:

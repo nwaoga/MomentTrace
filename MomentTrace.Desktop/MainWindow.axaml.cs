@@ -6,6 +6,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using MomentTrace.Core;
 using MomentTrace.Presentation;
@@ -29,6 +30,7 @@ public partial class MainWindow : Window
     private readonly DetailContextBuilder _detailContextBuilder = new(RuleBasedActivityClassifier.Default);
     private readonly SqliteActivityStore _store = new(SqliteActivityStore.DefaultDatabasePath);
     private readonly DesktopWindowPreferences _preferences;
+    private readonly DispatcherTimer _refreshTimer;
     private readonly List<TimelineActivity> _visibleActivities = [];
     private IReadOnlyList<ActivityMomentViewModel> _sessions = [];
     private IReadOnlyList<TimelineSessionGroup> _timelineGroups = [];
@@ -44,6 +46,7 @@ public partial class MainWindow : Window
     private Point _scrollDragStartPoint;
     private Vector _scrollDragStartOffset;
     private bool _isScrollDragging;
+    private bool _isReloading;
     private static readonly Cursor ScrollReadyCursor = new(StandardCursorType.Hand);
     private static readonly Cursor ScrollDraggingCursor = new(StandardCursorType.SizeAll);
 
@@ -60,16 +63,31 @@ public partial class MainWindow : Window
         ApplyTimelineViewMode(_preferences.TimelineViewMode);
         ApplyDetailPaneVisibility();
         SetActiveNavState();
+        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _refreshTimer.Tick += async (_, _) => await ReloadAsync();
         AddHandler(InputElement.PointerWheelChangedEvent, GlobalPointerWheelChanged, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(InputElement.PointerPressedEvent, GlobalPointerPressed, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(InputElement.PointerMovedEvent, GlobalPointerMoved, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(InputElement.PointerReleasedEvent, GlobalPointerReleased, RoutingStrategies.Tunnel, handledEventsToo: true);
         ConfigureGrabScrollSurfaces();
-        Opened += async (_, _) => await ReloadAsync();
+        Opened += async (_, _) =>
+        {
+            _refreshTimer.Start();
+            await ReloadAsync();
+        };
+        Closed += (_, _) => _refreshTimer.Stop();
     }
 
     private async Task ReloadAsync()
     {
+        if (_isReloading)
+        {
+            return;
+        }
+
+        _isReloading = true;
+        try
+        {
         await _store.InitializeAsync();
 
         var activities = await _store.QueryAsync(new TimelineQuery { Limit = 1500 });
@@ -85,6 +103,11 @@ public partial class MainWindow : Window
 
         await RefreshTimelineAsync();
         await RefreshOverviewAsync();
+        }
+        finally
+        {
+            _isReloading = false;
+        }
     }
 
     private async Task RefreshTimelineAsync()
@@ -273,7 +296,7 @@ public partial class MainWindow : Window
 
     private void SearchTextBox_GotFocus(object? sender, RoutedEventArgs e)
     {
-        SearchSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.ToolbarHover, Math.Clamp(_preferences.Opacity + 0.08, 0.65, 1.0)));
+        SearchSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.TopCommand, Math.Clamp(_preferences.Opacity + 0.08, 0.65, 1.0)));
         SearchSurface.BorderBrush = new SolidColorBrush(_currentTheme.Accent);
         SearchTextBox.Background = Brushes.Transparent;
         SearchIconText.Foreground = new SolidColorBrush(_currentTheme.Accent);
@@ -511,7 +534,8 @@ public partial class MainWindow : Window
     private static bool IsScrollDragBlockedElement(Visual sourceVisual)
     {
         return sourceVisual.GetSelfAndVisualAncestors().Any(visual =>
-            visual is TextBox
+            visual is Button
+                or TextBox
                 or ComboBox
                 or Slider
                 or ScrollBar
@@ -561,7 +585,14 @@ public partial class MainWindow : Window
 
     private void TimelineMomentButton_Click(object? sender, RoutedEventArgs e)
     {
-        if (sender is not Button { CommandParameter: MomentRow row })
+        var row = sender switch
+        {
+            Button { CommandParameter: MomentRow commandRow } => commandRow,
+            Control { DataContext: MomentRow dataRow } => dataRow,
+            _ => null
+        };
+
+        if (row is null)
         {
             return;
         }
@@ -580,7 +611,6 @@ public partial class MainWindow : Window
     private void ShowDetail(ActivityMomentViewModel selected)
     {
         var detail = _detailContextBuilder.Build(selected, _visibleActivities);
-        DetailGlyphHost.Background = Brush.Parse(selected.IconBackground);
         DetailGlyphText.Text = selected.IconGlyph;
         DetailGlyphText.Foreground = Brush.Parse(selected.IconForeground);
         SetDetailIcon(selected);
@@ -800,25 +830,39 @@ public partial class MainWindow : Window
         DetailIconImage.Source = null;
         DetailIconImage.IsVisible = false;
         DetailGlyphText.IsVisible = true;
+        DetailIconImage.Stretch = Stretch.Uniform;
 
-        var iconPath = AppIconProvider.GetIcon(selected.ExecutablePath, selected.AppName, selected.ProcessName);
-        if (string.IsNullOrWhiteSpace(iconPath) || !File.Exists(iconPath))
+        var previewImage = ShouldPreferPreviewInDetailHeader(selected)
+            ? GetPreviewImage(selected.ThumbnailPath) ?? GetPreviewImage(selected.ScreenshotPath)
+            : null;
+        if (previewImage is not null)
         {
+            DetailGlyphHost.Background = new SolidColorBrush(_currentTheme.RaisedSurface);
+            DetailIconImage.Source = previewImage;
+            DetailIconImage.Stretch = Stretch.UniformToFill;
+            DetailIconImage.IsVisible = true;
+            DetailGlyphText.IsVisible = false;
             return;
         }
 
-        try
+        var iconImage = GetIconImage(selected);
+        if (iconImage is not null)
         {
-            DetailIconImage.Source = new Bitmap(iconPath);
+            DetailGlyphHost.Background = new SolidColorBrush(_currentTheme.RaisedSurface);
+            DetailIconImage.Source = iconImage;
             DetailIconImage.IsVisible = true;
             DetailGlyphText.IsVisible = false;
+            return;
         }
-        catch
-        {
-            DetailIconImage.Source = null;
-            DetailIconImage.IsVisible = false;
-            DetailGlyphText.IsVisible = true;
-        }
+
+        DetailGlyphHost.Background = Brush.Parse(selected.IconBackground);
+    }
+
+    private static bool ShouldPreferPreviewInDetailHeader(ActivityMomentViewModel selected)
+    {
+        return selected.ProcessName.Equals("ApplicationFrameHost", StringComparison.OrdinalIgnoreCase)
+            || selected.ProcessName.Equals("ShellExperienceHost", StringComparison.OrdinalIgnoreCase)
+            || selected.ProcessName.Equals("StartMenuExperienceHost", StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task<bool> ConfirmDeleteMomentAsync()
@@ -830,14 +874,16 @@ public partial class MainWindow : Window
             Height = 210,
             CanResize = false,
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            Background = Brush.Parse("#0F1A2E")
+            WindowDecorations = Avalonia.Controls.WindowDecorations.None,
+            Background = Brushes.Transparent
         };
 
         dialog.Content = new Border
         {
-            Background = Brush.Parse("#0F1A2E"),
-            BorderBrush = Brush.Parse("#233653"),
+            Background = new SolidColorBrush(_currentTheme.Base),
+            BorderBrush = new SolidColorBrush(_currentTheme.Stroke),
             BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(14),
             Padding = new Thickness(22),
             Child = BuildDeleteDialogContent()
         };
@@ -849,14 +895,26 @@ public partial class MainWindow : Window
             var deleteButton = new Button
             {
                 Content = "Delete",
-                Classes = { "detailDanger" },
-                Padding = new Thickness(16, 9)
+                Background = new SolidColorBrush(_currentTheme.DangerFill),
+                BorderBrush = new SolidColorBrush(_currentTheme.Danger),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(9),
+                Foreground = new SolidColorBrush(_currentTheme.Text),
+                Padding = new Thickness(16, 9),
+                MinWidth = 86,
+                HorizontalContentAlignment = HorizontalAlignment.Center
             };
             var cancelButton = new Button
             {
                 Content = "Cancel",
-                Classes = { "detailSecondary" },
-                Padding = new Thickness(16, 9)
+                Background = new SolidColorBrush(_currentTheme.Toolbar),
+                BorderBrush = new SolidColorBrush(_currentTheme.PanelEdgeStrong),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(9),
+                Foreground = new SolidColorBrush(_currentTheme.Text),
+                Padding = new Thickness(16, 9),
+                MinWidth = 86,
+                HorizontalContentAlignment = HorizontalAlignment.Center
             };
 
             deleteButton.Click += (_, _) => dialog.Close(true);
@@ -870,14 +928,14 @@ public partial class MainWindow : Window
                     new TextBlock
                     {
                         Text = "Delete this moment?",
-                        Foreground = Brush.Parse("#F8FAFC"),
+                        Foreground = new SolidColorBrush(_currentTheme.Text),
                         FontSize = 20,
                         FontWeight = FontWeight.SemiBold
                     },
                     new TextBlock
                     {
                         Text = "This removes it from your local timeline and deletes cached MomentTrace previews for this moment.",
-                        Foreground = Brush.Parse("#94A3B8"),
+                        Foreground = new SolidColorBrush(_currentTheme.MutedText),
                         TextWrapping = TextWrapping.Wrap,
                         LineHeight = 20
                     },
@@ -1137,7 +1195,8 @@ public partial class MainWindow : Window
 
         OuterShell.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Base, pageStrength));
         RailSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Rail, panelStrength));
-        TopCommandSurface.Background = Brushes.Transparent;
+        TopCommandSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.TopCommand, panelStrength));
+        TopCommandSurface.BorderBrush = new SolidColorBrush(_currentTheme.PanelEdgeStrong);
         DetailSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Detail, panelStrength));
         SearchSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.TopCommand, panelStrength));
     }
@@ -1227,10 +1286,10 @@ public partial class MainWindow : Window
 
     private MomentRow ToMomentRow(ActivityMomentViewModel session)
     {
-        var previewUri = GetPreviewUri(session.ThumbnailPath) ?? GetPreviewUri(session.ScreenshotPath);
-        var iconUri = GetIconUri(session);
-        var hasPreview = !string.IsNullOrWhiteSpace(previewUri);
-        var hasIcon = !string.IsNullOrWhiteSpace(iconUri);
+        var previewImage = GetPreviewImage(session.ThumbnailPath) ?? GetPreviewImage(session.ScreenshotPath);
+        var iconImage = GetIconImage(session);
+        var hasPreview = previewImage is not null;
+        var hasIcon = iconImage is not null;
 
         return new MomentRow(
             session.Id,
@@ -1239,8 +1298,8 @@ public partial class MainWindow : Window
             $"{session.Location} · {session.AppName}",
             session.CardTime,
             session.SeenDuration,
-            previewUri,
-            iconUri,
+            previewImage,
+            iconImage,
             session.IconGlyph,
             session.IconBackground,
             session.IconForeground,
@@ -1286,24 +1345,31 @@ public partial class MainWindow : Window
         return row with
         {
             IsSelected = isSelected,
-            CardBackground = isSelected ? ColorToHex(_currentTheme.AccentSoft) : ColorToHex(_currentTheme.RaisedSurface),
+            CardBackground = ColorToHex(_currentTheme.RaisedSurface),
             BorderBrush = isSelected ? ColorToHex(_currentTheme.Accent) : ColorToHex(_currentTheme.Stroke)
         };
     }
 
     private static string ColorToHex(Color color) => $"#{color.R:X2}{color.G:X2}{color.B:X2}";
 
-    private static string? GetPreviewUri(string? path)
+    private static Bitmap? GetPreviewImage(string? path)
     {
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
         {
             return null;
         }
 
-        return new Uri(path, UriKind.Absolute).AbsoluteUri;
+        try
+        {
+            return new Bitmap(path);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
-    private static string? GetIconUri(ActivityMomentViewModel session)
+    private static Bitmap? GetIconImage(ActivityMomentViewModel session)
     {
         var path = AppIconProvider.GetIcon(session.ExecutablePath, session.AppName, session.ProcessName);
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
@@ -1311,7 +1377,14 @@ public partial class MainWindow : Window
             return null;
         }
 
-        return new Uri(path, UriKind.Absolute).AbsoluteUri;
+        try
+        {
+            return new Bitmap(path);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private sealed record MomentRow(
@@ -1321,8 +1394,8 @@ public partial class MainWindow : Window
         string Meta,
         string TimeLabel,
         string SeenLabel,
-        string? PreviewUri,
-        string? IconUri,
+        Bitmap? PreviewImage,
+        Bitmap? IconImage,
         string Glyph,
         string GlyphBackground,
         string GlyphForeground,
