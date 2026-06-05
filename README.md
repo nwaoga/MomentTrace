@@ -6,13 +6,9 @@ The long-term goal is a cross-platform desktop timeline for Windows and macOS. T
 
 ## Preview
 
-![MomentTrace card timeline](docs/assets/momenttrace-dark-card-timeline.png)
-
 MomentTrace uses a Windows Timeline-inspired workspace: left navigation, date and type filters, grouped horizontal moment sections, compact cards with app icons or website screenshots, and a contextual detail surface. The window has custom chrome with draggable top regions across the shell, plus minimize, taskbar-safe maximize, close-to-tray, and detail-pane controls.
 
-![MomentTrace overview analytics](docs/assets/momenttrace-timeline-detail.png)
-
-The README screenshots should be refreshed from sanitized demo activity as the Avalonia shell settles, so public images show current card/list layouts, real app icons, screenshots, themed modals, and top command chrome without exposing a live personal timeline.
+The previous README screenshots are intentionally not shown here because they no longer represent the current Avalonia shell. Fresh public screenshots should be captured from sanitized demo activity so they show the current card/list layouts, real app icons, screenshots, themed modals, and top command chrome without exposing a live personal timeline.
 
 The recorder is session based. It polls the foreground window, keeps the same activity open while the app/window/resource remains active, and collapses repeated sequential entries in the UI so noisy history reads as one continuous moment. Rule-based local classification then groups nearby activity into memory-oriented sessions such as Website browsing, Development work, Communication, Document review, Research session, and Screenshot capture.
 
