@@ -6,9 +6,11 @@ The long-term goal is a cross-platform desktop timeline for Windows and macOS. T
 
 ## Preview
 
+![MomentTrace Avalonia shell preview](docs/assets/momenttrace-avalonia-shell-preview.svg)
+
 MomentTrace uses a Windows Timeline-inspired workspace: left navigation, date and type filters, grouped horizontal moment sections, compact cards with app icons or website screenshots, and a contextual detail surface. The window has custom chrome with draggable top regions across the shell, plus minimize, taskbar-safe maximize, close-to-tray, and detail-pane controls.
 
-The previous README screenshots are intentionally not shown here because they no longer represent the current Avalonia shell. Fresh public screenshots should be captured from sanitized demo activity so they show the current card/list layouts, real app icons, screenshots, themed modals, and top command chrome without exposing a live personal timeline.
+The public previews use sanitized demo activity rather than a live personal timeline, so they can show the current card/list layouts, real app icon slots, screenshots, themed modals, and top command chrome without exposing private work history.
 
 The recorder is session based. It polls the foreground window, keeps the same activity open while the app/window/resource remains active, and collapses repeated sequential entries in the UI so noisy history reads as one continuous moment. Rule-based local classification then groups nearby activity into memory-oriented sessions such as Website browsing, Development work, Communication, Document review, Research session, and Screenshot capture.
 
@@ -23,6 +25,8 @@ The **Overview** page gives a lightweight analytics view of the selected day wit
 ![MomentTrace privacy controls](docs/assets/momenttrace-privacy-controls.svg)
 
 Privacy controls are part of Settings rather than hidden configuration. Recent apps and websites can be selected into block lists, adult-site filtering can be enabled, and manual allow/block domains remain available for fine control.
+
+![MomentTrace Settings privacy preview](docs/assets/momenttrace-settings-privacy-preview.svg)
 
 ![MomentTrace release flow](docs/assets/momenttrace-release-flow.svg)
 
