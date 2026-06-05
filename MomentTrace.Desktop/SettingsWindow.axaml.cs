@@ -206,6 +206,11 @@ public partial class SettingsWindow : Window
 
     private async void SavePrivacyFiltersButton_Click(object? sender, RoutedEventArgs e)
     {
+        await SavePrivacyFiltersAsync(reloadChoices: true);
+    }
+
+    private async Task SavePrivacyFiltersAsync(bool reloadChoices)
+    {
         var checkedDomains = _recentWebsites.Where(item => item.IsBlocked).Select(item => item.Value);
         var checkedApps = _recentApps.Where(item => item.IsBlocked).Select(item => item.Value);
         var visibleDomains = _recentWebsites.Select(item => item.Value).ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -231,8 +236,11 @@ public partial class SettingsWindow : Window
         _preferences.ExcludeAdultWebsites = ExcludeAdultWebsitesCheckBox.IsChecked == true;
         _preferences.Save();
         LoadPrivacySettings();
-            await _activityDataChanged();
+        await _activityDataChanged();
+        if (reloadChoices)
+        {
             await LoadRecentPrivacyChoicesAsync();
+        }
     }
 
     private async void UpdateAdultBlocklistButton_Click(object? sender, RoutedEventArgs e)
@@ -410,7 +418,7 @@ public partial class SettingsWindow : Window
 
     private FuncDataTemplate<PrivacyChoiceViewModel> BuildPrivacyTemplate()
     {
-        return new FuncDataTemplate<PrivacyChoiceViewModel>((item, _) =>
+        return new FuncDataTemplate<PrivacyChoiceViewModel>((item, nameScope) =>
         {
             var title = new TextBlock
             {
@@ -443,9 +451,7 @@ public partial class SettingsWindow : Window
                 Foreground = new SolidColorBrush(_currentTextColor())
             };
 
-            checkBox.IsCheckedChanged += (_, _) => item.IsBlocked = checkBox.IsChecked == true;
-
-            return new Border
+            var container = new Border
             {
                 Background = new SolidColorBrush(_currentPanelColor()),
                 BorderBrush = new SolidColorBrush(item.IsBlocked ? _currentAccentColor() : _currentStrokeColor()),
@@ -455,6 +461,31 @@ public partial class SettingsWindow : Window
                 Margin = new Thickness(0, 0, 0, 8),
                 Child = checkBox
             };
+
+            checkBox.IsCheckedChanged += (sender, eventArgs) =>
+            {
+                item.IsBlocked = checkBox.IsChecked == true;
+                container.BorderBrush = new SolidColorBrush(item.IsBlocked ? _currentAccentColor() : _currentStrokeColor());
+                _ = SavePrivacyFiltersAsync(reloadChoices: false);
+            };
+            container.PointerReleased += (_, e) =>
+            {
+                if (e.InitialPressMouseButton is not MouseButton.Left)
+                {
+                    return;
+                }
+
+                if (e.Source is Visual sourceVisual
+                    && sourceVisual.GetSelfAndVisualAncestors().Any(visual => ReferenceEquals(visual, checkBox)))
+                {
+                    return;
+                }
+
+                checkBox.IsChecked = checkBox.IsChecked != true;
+                e.Handled = true;
+            };
+
+            return container;
         });
 
         Color _currentTextColor() => DesktopAppThemePalette.Find(_preferences.Theme).Text;
@@ -638,6 +669,8 @@ public partial class SettingsWindow : Window
     {
         return sourceVisual.GetSelfAndVisualAncestors().Any(visual =>
             visual is TextBox
+                or Button
+                or CheckBox
                 or ComboBox
                 or Slider
                 or ScrollBar

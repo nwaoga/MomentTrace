@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text.Json;
+using System.Threading;
 using MomentTrace.Core;
 
 namespace MomentTrace.App;
@@ -89,8 +90,64 @@ public sealed class WindowPreferences
 
     public void Save()
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(PreferencesPath)!);
-        File.WriteAllText(PreferencesPath, JsonSerializer.Serialize(this, SerializerOptions));
+        SaveJson(PreferencesPath, JsonSerializer.Serialize(this, SerializerOptions));
+    }
+
+    private static void SaveJson(string path, string json)
+    {
+        var directory = Path.GetDirectoryName(path)!;
+        Directory.CreateDirectory(directory);
+
+        for (var attempt = 0; attempt < 5; attempt++)
+        {
+            var tempPath = Path.Combine(directory, $"settings.{Environment.ProcessId}.{Guid.NewGuid():N}.tmp");
+
+            try
+            {
+                File.WriteAllText(tempPath, json);
+
+                if (File.Exists(path))
+                {
+                    File.Replace(tempPath, path, null);
+                }
+                else
+                {
+                    File.Move(tempPath, path);
+                }
+
+                return;
+            }
+            catch (IOException) when (attempt < 4)
+            {
+                TryDelete(tempPath);
+                Thread.Sleep(40 * (attempt + 1));
+            }
+            catch (UnauthorizedAccessException) when (attempt < 4)
+            {
+                TryDelete(tempPath);
+                Thread.Sleep(40 * (attempt + 1));
+            }
+            catch
+            {
+                TryDelete(tempPath);
+                throw;
+            }
+        }
+    }
+
+    private static void TryDelete(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+        catch
+        {
+            // A leftover temp file is safer than crashing while saving preferences.
+        }
     }
 
     public PrivacyFilterOptions ToPrivacyFilterOptions()
