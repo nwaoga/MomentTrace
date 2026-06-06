@@ -95,6 +95,7 @@ public partial class SettingsWindow : Window
         LoadPrivacySettings();
         LoadWhereILive();
         _ = LoadRecentPrivacyChoicesAsync();
+        _ = LoadHealthStatusAsync();
     }
 
     private void LoadCurrentSettings(double currentOpacity, string currentTimelineViewMode, string currentTheme)
@@ -137,6 +138,57 @@ public partial class SettingsWindow : Window
         AppDataPathText.Text = appDataPath;
         DatabasePathText.Text = SqliteActivityStore.DefaultDatabasePath;
         SettingsPathText.Text = DesktopWindowPreferences.PreferencesPath;
+    }
+
+    private async Task LoadHealthStatusAsync()
+    {
+        var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MomentTrace");
+        var screenshotsPath = Path.Combine(appDataPath, "screenshots");
+        var iconsPath = Path.Combine(appDataPath, "icons");
+        var privacyCount = _preferences.CustomBlockedApps.Length
+            + _preferences.CustomBlockedDomains.Length
+            + (_preferences.ExcludeAdultWebsites ? _preferences.AdultBlocklistDomains.Length : 0);
+
+        HealthUpdatedText.Text = $"Checked {DateTime.Now:t}";
+        RecorderHealthText.Text = OperatingSystem.IsWindows()
+            ? "Ready in this Avalonia Windows build"
+            : "Reduced mode on this platform";
+        ScreenshotsHealthText.Text = Directory.Exists(screenshotsPath)
+            ? $"{CountFiles(screenshotsPath):N0} cached files"
+            : "No screenshot cache yet";
+        IconsHealthText.Text = Directory.Exists(iconsPath)
+            ? $"{CountFiles(iconsPath):N0} cached icons"
+            : "No icon cache yet";
+        SettingsHealthText.Text = File.Exists(DesktopWindowPreferences.PreferencesPath)
+            ? "Readable and saved locally"
+            : "Using defaults until first save";
+        PrivacyHealthText.Text = privacyCount == 0
+            ? "No custom exclusions active"
+            : $"{privacyCount:N0} exclusion rules active";
+
+        try
+        {
+            var recent = await _store.QueryAsync(new TimelineQuery { Limit = 250 });
+            DatabaseHealthText.Text = File.Exists(SqliteActivityStore.DefaultDatabasePath)
+                ? $"Readable · {recent.Count:N0} recent rows checked"
+                : "Ready · database will be created on first write";
+        }
+        catch
+        {
+            DatabaseHealthText.Text = "Needs attention · database query failed";
+        }
+    }
+
+    private static int CountFiles(string path)
+    {
+        try
+        {
+            return Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories).Count();
+        }
+        catch
+        {
+            return 0;
+        }
     }
 
     private void StartWithWindowsCheckBox_Changed(object? sender, RoutedEventArgs e)
@@ -216,7 +268,7 @@ public partial class SettingsWindow : Window
         var visibleDomains = _recentWebsites.Select(item => item.Value).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var visibleApps = _recentApps.Select(item => item.Value).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        _preferences.CustomBlockedDomains = ParseDomainText(CustomBlockedDomainsTextBox.Text)
+        _preferences.CustomBlockedDomains = ParseDomainText(CustomBlockedDomainsTextBox.Text ?? string.Empty)
             .Where(domain => !visibleDomains.Contains(domain))
             .Concat(checkedDomains)
             .Select(DomainPrivacyFilter.ParseDomainLine)
@@ -224,7 +276,7 @@ public partial class SettingsWindow : Window
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToArray();
-        _preferences.CustomAllowedDomains = ParseDomainText(CustomAllowedDomainsTextBox.Text);
+        _preferences.CustomAllowedDomains = ParseDomainText(CustomAllowedDomainsTextBox.Text ?? string.Empty);
         _preferences.CustomBlockedApps = ParseAppText(string.Join(Environment.NewLine, _preferences.CustomBlockedApps))
             .Where(app => !visibleApps.Contains(app))
             .Concat(checkedApps)
@@ -237,6 +289,7 @@ public partial class SettingsWindow : Window
         _preferences.Save();
         LoadPrivacySettings();
         await _activityDataChanged();
+        await LoadHealthStatusAsync();
         if (reloadChoices)
         {
             await LoadRecentPrivacyChoicesAsync();
@@ -321,6 +374,7 @@ public partial class SettingsWindow : Window
             DeleteCachedPreviewDirectory("screenshots");
             DeleteCachedPreviewDirectory("thumbnails");
             await _activityDataChanged();
+            await LoadHealthStatusAsync();
             await LoadRecentPrivacyChoicesAsync();
             LocalActivityStatusText.Text = "Local activity history deleted.";
         }

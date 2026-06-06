@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Versioning;
 using Microsoft.Win32;
 using MomentTrace.Core;
 
@@ -47,6 +48,7 @@ public sealed class DesktopStartupRegistration(string appName, string executable
 
     private string Command => $"\"{_executablePath}\" --minimized";
 
+    [SupportedOSPlatform("windows")]
     private void DeleteLegacyValues(RegistryKey key)
     {
         foreach (var legacyAppName in _legacyAppNames)

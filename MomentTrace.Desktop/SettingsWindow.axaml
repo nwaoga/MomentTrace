@@ -228,6 +228,95 @@
           <Border Height="1" Background="{DynamicResource PanelEdgeBrush}" />
 
           <StackPanel Spacing="12">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="App health"
+                         FontSize="15"
+                         FontWeight="SemiBold"
+                         Foreground="{DynamicResource TextBrush}" />
+              <TextBlock x:Name="HealthUpdatedText"
+                         Grid.Column="1"
+                         Foreground="{DynamicResource MutedTextBrush}"
+                         FontSize="11"
+                         VerticalAlignment="Center" />
+            </Grid>
+            <TextBlock Text="Quick checks for the local recorder, storage, previews, icons, and privacy setup."
+                       FontSize="12"
+                       Foreground="{DynamicResource MutedTextBrush}"
+                       TextWrapping="Wrap" />
+            <Grid ColumnDefinitions="*,14,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
+              <Border Background="{DynamicResource SubtlePanelBrush}"
+                      BorderBrush="{DynamicResource PanelEdgeBrush}"
+                      BorderThickness="1"
+                      CornerRadius="9"
+                      Padding="12">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Recorder" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" />
+                  <TextBlock x:Name="RecorderHealthText" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Column="2"
+                      Background="{DynamicResource SubtlePanelBrush}"
+                      BorderBrush="{DynamicResource PanelEdgeBrush}"
+                      BorderThickness="1"
+                      CornerRadius="9"
+                      Padding="12">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Database" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" />
+                  <TextBlock x:Name="DatabaseHealthText" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Row="1"
+                      Background="{DynamicResource SubtlePanelBrush}"
+                      BorderBrush="{DynamicResource PanelEdgeBrush}"
+                      BorderThickness="1"
+                      CornerRadius="9"
+                      Padding="12">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Screenshots" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" />
+                  <TextBlock x:Name="ScreenshotsHealthText" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Row="1"
+                      Grid.Column="2"
+                      Background="{DynamicResource SubtlePanelBrush}"
+                      BorderBrush="{DynamicResource PanelEdgeBrush}"
+                      BorderThickness="1"
+                      CornerRadius="9"
+                      Padding="12">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Icons" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" />
+                  <TextBlock x:Name="IconsHealthText" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Row="2"
+                      Background="{DynamicResource SubtlePanelBrush}"
+                      BorderBrush="{DynamicResource PanelEdgeBrush}"
+                      BorderThickness="1"
+                      CornerRadius="9"
+                      Padding="12">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Settings" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" />
+                  <TextBlock x:Name="SettingsHealthText" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Row="2"
+                      Grid.Column="2"
+                      Background="{DynamicResource SubtlePanelBrush}"
+                      BorderBrush="{DynamicResource PanelEdgeBrush}"
+                      BorderThickness="1"
+                      CornerRadius="9"
+                      Padding="12">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Privacy" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" />
+                  <TextBlock x:Name="PrivacyHealthText" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+            </Grid>
+          </StackPanel>
+
+          <Border Height="1" Background="{DynamicResource PanelEdgeBrush}" />
+
+          <StackPanel Spacing="12">
             <TextBlock Text="Appearance"
                        FontSize="15"
                        FontWeight="SemiBold"
