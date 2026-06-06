@@ -62,8 +62,10 @@ The Windows installer is built with Inno Setup from a self-contained `win-x64` p
 - Single-instance behavior that brings the running app back when launched again
 - Noise filtering for MomentTrace itself and Windows lock-screen activity
 - Themed Settings modal with startup, recording, timeline view mode, appearance, and privacy controls
+- Settings app health panel for recorder availability, database readability, screenshot cache, icon cache, settings file, and privacy exclusion status
 - "Where I Live" diagnostics for install, database, settings, and screenshot locations
 - Custom title bars, top command surfaces, and themed confirmation modals for the main app and Settings
+- Warning-free solution build across the current Windows/Avalonia project set
 - Optional AI provider abstraction for future summaries and insights
 
 ## Project Structure
@@ -92,7 +94,7 @@ This split is intentional. Future macOS support should add platform-specific ser
 
 The WPF app now acts more like a Windows shell over shared timeline data. It still owns WPF controls, tray behavior, custom window chrome, Windows icons, screenshot previews, settings, and installer/startup wiring.
 
-`MomentTrace.Desktop` is the active Avalonia shell for cross-platform UI work. It targets both `net8.0` and `net8.0-windows`, reads the same local SQLite timeline through `MomentTrace.Storage`, and binds timeline groups, Overview analytics, and the right-side detail surface from `MomentTrace.Presentation`. The Windows target now starts the shared Windows foreground recorder, shows local screenshot previews, resolves real app icons through `MomentTrace.Windows`, and supports both card and compact list timeline views. It also uses custom chrome for the main shell, Settings modal, and delete confirmations. Tray behavior, installer packaging, and full Windows startup integration remain owned by `MomentTrace.App` and `MomentTrace.Windows`.
+`MomentTrace.Desktop` is the active Avalonia shell for cross-platform UI work. It targets both `net8.0` and `net8.0-windows`, reads the same local SQLite timeline through `MomentTrace.Storage`, and binds timeline groups, Overview analytics, and the right-side detail surface from `MomentTrace.Presentation`. The Windows target now starts the shared Windows foreground recorder, shows local screenshot previews, resolves real app icons through `MomentTrace.Windows`, and supports both card and compact list timeline views. It also uses custom chrome for the main shell, Settings modal, delete confirmations, and the first Settings health/status panel. Tray behavior, installer packaging, and full Windows startup integration remain owned by `MomentTrace.App` and `MomentTrace.Windows`.
 
 ## Requirements
 
@@ -397,6 +399,11 @@ You can also run the **Release** workflow manually in GitHub Actions and provide
 
 For Azure DevOps planning, current implementation work is tracked in the MomentTrace project and commits can reference work items with `AB#<id>` in the commit message.
 
+Recent planning updates:
+
+- `AB#71` tracks app health and recorder diagnostics. The first Settings health/status panel is implemented, with follow-up scope for last-capture timestamps and browser URL capture availability.
+- Child tasks `#81` and `#82` cover the delivered Settings health panel and warning-free build cleanup.
+
 ## Development Notes
 
 - Keep platform-neutral logic in `MomentTrace.Core` and `MomentTrace.Storage`.
@@ -410,13 +417,12 @@ For Azure DevOps planning, current implementation work is tracked in the MomentT
 
 ## Roadmap
 
-- Fix image and icon rendering parity across the Avalonia shell
-- Refresh README screenshots so every preview reflects the current themed UI
+- Extend app health with recorder last-capture time, browser URL capture availability, screenshot write checks, and database write checks
+- Add regression tests for privacy exclusions, settings persistence, and warning-free build expectations
+- Replace sanitized README artwork with generated screenshots from a fake/demo activity dataset
+- Finish image and icon rendering parity edge cases across the Avalonia shell
 - Add filter counts, persisted filter preferences, and richer empty states
 - Add saved moments, notes, and bookmarks as real library features
-- Add privacy controls for deleting and exporting activity
 - Add a settings option to delete local data when the user wants a full privacy cleanup
-- Add app health/status checks for recorder, screenshot capture, browser URL capture, and database writes
 - Add first-run onboarding for privacy, startup behavior, and local storage
-- Create the first Avalonia shell that reads the shared SQLite timeline through `MomentTrace.Storage` and binds to `MomentTrace.Presentation`
 - Replace the macOS probe capture path with a proper `MomentTrace.Mac` platform service using native AppKit/Accessibility APIs
