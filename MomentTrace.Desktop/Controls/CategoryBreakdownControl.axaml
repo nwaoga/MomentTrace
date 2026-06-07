@@ -1,0 +1,115 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:MomentTrace.Desktop.Controls"
+             x:Class="MomentTrace.Desktop.Controls.CategoryBreakdownControl">
+  <Border Background="{DynamicResource RailBrush}"
+          BorderBrush="{DynamicResource PanelEdgeBrush}"
+          BorderThickness="1"
+          CornerRadius="14"
+          Padding="16">
+    <StackPanel Spacing="10">
+      <StackPanel Spacing="3">
+        <TextBlock Text="{Binding Title, RelativeSource={RelativeSource AncestorType=local:CategoryBreakdownControl}}"
+                   Foreground="{DynamicResource TextBrush}"
+                   FontSize="16"
+                   FontWeight="SemiBold" />
+        <TextBlock Text="Time spent per category from the selected day."
+                   Foreground="{DynamicResource SubtleTextBrush}"
+                   FontSize="11" />
+      </StackPanel>
+      <Grid ColumnDefinitions="Auto,*"
+            ColumnSpacing="16">
+        <Grid Width="144"
+              Height="144">
+          <Ellipse Width="120"
+                   Height="120"
+                   Stroke="{DynamicResource ElevatedPanelBrush}"
+                   StrokeThickness="16"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center" />
+          <ItemsControl x:Name="BreakdownChartItems">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <Canvas Width="144"
+                        Height="144" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Path Data="{Binding Data}"
+                      Stroke="{Binding Stroke}"
+                      StrokeThickness="{Binding StrokeThickness}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <StackPanel HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      Spacing="2">
+            <TextBlock x:Name="BreakdownCenterValueText"
+                       Text="0m"
+                       Foreground="{DynamicResource TextBrush}"
+                       FontSize="20"
+                       FontWeight="SemiBold"
+                       HorizontalAlignment="Center" />
+            <TextBlock x:Name="BreakdownCenterLabelText"
+                       Text="total active"
+                       Foreground="{DynamicResource MutedTextBrush}"
+                       FontSize="10"
+                       HorizontalAlignment="Center" />
+          </StackPanel>
+        </Grid>
+        <ItemsControl Grid.Column="1"
+                      ItemsSource="{Binding Items, RelativeSource={RelativeSource AncestorType=local:CategoryBreakdownControl}}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Margin="0,0,0,10">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                  <Border Width="12" Height="12" CornerRadius="3" Background="{Binding Fill}" VerticalAlignment="Center" />
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="{Binding Label}" Foreground="{DynamicResource TextBrush}" />
+                    <TextBlock Text="{Binding DurationLabel}" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" Margin="0,2,0,0" />
+                  </StackPanel>
+                  <TextBlock Grid.Column="2"
+                             Text="{Binding PercentLabel}"
+                             Foreground="{DynamicResource TextBrush}"
+                             VerticalAlignment="Center" />
+                </Grid>
+                <Border Background="{DynamicResource ElevatedPanelBrush}"
+                        Height="6"
+                        CornerRadius="999"
+                        Margin="22,6,0,0">
+                  <Border Background="{Binding Fill}"
+                          Width="{Binding BarWidth}"
+                          CornerRadius="999"
+                          HorizontalAlignment="Left" />
+                </Border>
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </Grid>
+      <ItemsControl ItemsSource="{Binding Items, RelativeSource={RelativeSource AncestorType=local:CategoryBreakdownControl}}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <StackPanel Orientation="Horizontal"
+                        Spacing="6"
+                        Margin="0,0,12,4">
+              <Border Width="10"
+                      Height="10"
+                      CornerRadius="3"
+                      Background="{Binding Fill}" />
+              <TextBlock Text="{Binding Label}"
+                         Foreground="{DynamicResource MutedTextBrush}"
+                         FontSize="11" />
+            </StackPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </Border>
+</UserControl>

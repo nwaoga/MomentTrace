@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:MomentTrace.Desktop.Controls"
         mc:Ignorable="d"
         x:Class="MomentTrace.Desktop.MainWindow"
         Title="MomentTrace"
@@ -598,13 +599,13 @@
                 Background="{DynamicResource PanelEdgeBrush}" />
 
         <Grid Grid.Column="1" RowDefinitions="76,*"
-              Margin="22,0,0,0">
+              Margin="12,0,0,0">
             <Border x:Name="TopCommandSurface"
                     Margin="16,10,18,0"
                     Background="{DynamicResource ToolbarBrush}"
-                    BorderBrush="{DynamicResource PanelEdgeStrongBrush}"
+                    BorderBrush="{DynamicResource PanelEdgeBrush}"
                     BorderThickness="1"
-                    CornerRadius="13"
+                    CornerRadius="0"
                     Padding="8"
                     PointerPressed="ToolbarDragRegion_PointerPressed">
                     <Grid ColumnDefinitions="*,142,96,50,50,50,50"
@@ -686,16 +687,16 @@
             </Border>
 
             <Grid Grid.Row="1">
-                <Grid x:Name="TimelinePage" Margin="28,20,22,0">
+                <Grid x:Name="TimelinePage" Margin="16,20,22,0">
                     <Grid x:Name="TimelineContentGrid"
                           ColumnDefinitions="*,380"
                           ClipToBounds="True">
                     <Grid Grid.Column="0"
-                          Margin="0,0,18,0"
+                          Margin="0,0,14,0"
                           MinWidth="0"
                           ClipToBounds="True"
                           RowDefinitions="Auto,*">
-                            <StackPanel Margin="8,0,0,20"
+                            <StackPanel Margin="0,0,0,20"
                                         Spacing="0">
                                 <StackPanel Orientation="Horizontal"
                                             Spacing="10">
@@ -819,10 +820,6 @@
                                                                                         Padding="0"
                                                                                         ClipToBounds="True">
                                                                                     <Grid>
-                                                                                        <Grid.ColumnDefinitions>
-                                                                                            <ColumnDefinition Width="*" />
-                                                                                            <ColumnDefinition Width="Auto" />
-                                                                                        </Grid.ColumnDefinitions>
                                                                                         <Image Source="{Binding PreviewImage}"
                                                                                                Stretch="UniformToFill"
                                                                                                IsVisible="{Binding ShowPreviewImage}" />
@@ -837,15 +834,16 @@
                                                                                         </Border>
                                                                                         <Border Background="{DynamicResource ElevatedPanelBrush}"
                                                                                                 IsVisible="{Binding ShowGlyphFallback}" />
-                                                                                        <Border Grid.Column="1"
-                                                                                                Background="{DynamicResource ToolbarBrush}"
+                                                                                        <Border HorizontalAlignment="Right"
+                                                                                                Background="{DynamicResource SubtlePanelBrush}"
                                                                                                 CornerRadius="5"
                                                                                                 Padding="6,2"
                                                                                                 Margin="0,8,8,0"
                                                                                                 VerticalAlignment="Top">
                                                                                             <TextBlock Text="{Binding TimeLabel}"
                                                                                                        Foreground="{DynamicResource TextBrush}"
-                                                                                                       FontSize="11" />
+                                                                                                       FontSize="11"
+                                                                                                       FontWeight="SemiBold" />
                                                                                         </Border>
                                                                                         <Border Width="60"
                                                                                                 Height="60"
@@ -1045,6 +1043,25 @@
                                                             </DataTemplate>
                                                         </ItemsControl.ItemTemplate>
                                                     </ItemsControl>
+                                                    <Button IsVisible="{Binding HasExpandablePreview}"
+                                                            Click="TimelineGroupToggleButton_Click"
+                                                            CommandParameter="{Binding}"
+                                                            Background="Transparent"
+                                                            BorderThickness="0"
+                                                            HorizontalAlignment="Left"
+                                                            Padding="0"
+                                                            Margin="0,2,0,0">
+                                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                                            <TextBlock Text="{Binding ToggleText}"
+                                                                       Foreground="{DynamicResource AccentBrush}"
+                                                                       FontSize="12"
+                                                                       FontWeight="SemiBold" />
+                                                            <TextBlock Text="{Binding ToggleGlyph}"
+                                                                       Foreground="{DynamicResource AccentBrush}"
+                                                                       FontSize="12"
+                                                                       FontWeight="SemiBold" />
+                                                        </StackPanel>
+                                                    </Button>
                                                 </StackPanel>
                                             </Grid>
                                         </DataTemplate>
@@ -1225,26 +1242,75 @@
                                               VerticalScrollBarVisibility="Visible"
                                               HorizontalScrollBarVisibility="Disabled">
                                     <StackPanel Margin="0,0,12,0">
-                                        <Border Background="{DynamicResource SubtlePanelBrush}"
-                                                BorderBrush="{DynamicResource PanelEdgeBrush}"
-                                                BorderThickness="1"
-                                                CornerRadius="10"
-                                                Padding="16"
-                                                Margin="0,0,0,18">
-                                            <StackPanel>
-                                                <TextBlock Text="Moment overview"
-                                                           Foreground="{DynamicResource TextBrush}"
-                                                           FontSize="14"
-                                                           FontWeight="SemiBold"
-                                                           Margin="0,0,0,10" />
+                                        <StackPanel Margin="0,0,0,18">
+                                            <Button Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Padding="0"
+                                                    HorizontalContentAlignment="Stretch"
+                                                    Click="DetailSectionToggleButton_Click"
+                                                    CommandParameter="OverviewNarrative">
+                                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                                    <TextBlock Text="Moment overview"
+                                                               Foreground="{DynamicResource TextBrush}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold" />
+                                                    <TextBlock x:Name="OverviewNarrativeToggleText"
+                                                               Grid.Column="1"
+                                                               Foreground="{DynamicResource AccentBrush}"
+                                                               FontSize="11"
+                                                               FontWeight="SemiBold"
+                                                               VerticalAlignment="Center" />
+                                                    <TextBlock x:Name="OverviewNarrativeToggleGlyph"
+                                                               Grid.Column="2"
+                                                               Foreground="{DynamicResource AccentBrush}"
+                                                               FontSize="12"
+                                                               FontWeight="SemiBold"
+                                                               VerticalAlignment="Center" />
+                                                </Grid>
+                                            </Button>
+                                            <Border x:Name="OverviewNarrativeSection"
+                                                    Background="{DynamicResource SubtlePanelBrush}"
+                                                    BorderBrush="{DynamicResource PanelEdgeBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="10"
+                                                    Padding="16"
+                                                    Margin="0,10,0,0">
                                                 <TextBlock x:Name="DetailNarrativeText"
                                                            Text="Select a moment to inspect its grouped raw activity and nearby related work."
                                                            Foreground="{DynamicResource MutedTextBrush}"
                                                            FontSize="13"
                                                            LineHeight="19"
                                                            TextWrapping="Wrap" />
-                                            </StackPanel>
-                                        </Border>
+                                            </Border>
+                                        </StackPanel>
+                                        <StackPanel Margin="0,0,0,18">
+                                            <Button Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Padding="0"
+                                                    HorizontalContentAlignment="Stretch"
+                                                    Click="DetailSectionToggleButton_Click"
+                                                    CommandParameter="Preview">
+                                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                                    <TextBlock Text="Preview"
+                                                               Foreground="{DynamicResource TextBrush}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold" />
+                                                    <TextBlock x:Name="PreviewToggleText"
+                                                               Grid.Column="1"
+                                                               Foreground="{DynamicResource AccentBrush}"
+                                                               FontSize="11"
+                                                               FontWeight="SemiBold"
+                                                               VerticalAlignment="Center" />
+                                                    <TextBlock x:Name="PreviewToggleGlyph"
+                                                               Grid.Column="2"
+                                                               Foreground="{DynamicResource AccentBrush}"
+                                                               FontSize="12"
+                                                               FontWeight="SemiBold"
+                                                               VerticalAlignment="Center" />
+                                                </Grid>
+                                            </Button>
+                                            <Border x:Name="DetailPreviewSection"
+                                                    Margin="0,10,0,0">
                                                 <Border x:Name="DetailPreviewHost"
                                                         Background="{DynamicResource PanelBrush}"
                                                         BorderBrush="{DynamicResource PanelEdgeBrush}"
@@ -1252,17 +1318,45 @@
                                                         CornerRadius="8"
                                                         ClipToBounds="True"
                                                         Height="150"
-                                                        Margin="0,0,0,18"
                                                         IsVisible="False">
                                                     <Image x:Name="DetailPreviewImage"
                                                            Stretch="UniformToFill" />
                                                 </Border>
-                                                <Border Background="{DynamicResource SubtlePanelBrush}"
-                                                        BorderBrush="{DynamicResource PanelEdgeBrush}"
-                                                        BorderThickness="1"
-                                                        CornerRadius="8"
-                                                        Padding="16"
-                                                        Margin="0,0,0,18">
+                                            </Border>
+                                        </StackPanel>
+                                        <StackPanel Margin="0,0,0,18">
+                                            <Button Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Padding="0"
+                                                    HorizontalContentAlignment="Stretch"
+                                                    Click="DetailSectionToggleButton_Click"
+                                                    CommandParameter="Metadata">
+                                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                                    <TextBlock Text="Moment details"
+                                                               Foreground="{DynamicResource TextBrush}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold" />
+                                                    <TextBlock x:Name="MetadataToggleText"
+                                                               Grid.Column="1"
+                                                               Foreground="{DynamicResource AccentBrush}"
+                                                               FontSize="11"
+                                                               FontWeight="SemiBold"
+                                                               VerticalAlignment="Center" />
+                                                    <TextBlock x:Name="MetadataToggleGlyph"
+                                                               Grid.Column="2"
+                                                               Foreground="{DynamicResource AccentBrush}"
+                                                               FontSize="12"
+                                                               FontWeight="SemiBold"
+                                                               VerticalAlignment="Center" />
+                                                </Grid>
+                                            </Button>
+                                            <Border x:Name="MetadataSection"
+                                                    Background="{DynamicResource SubtlePanelBrush}"
+                                                    BorderBrush="{DynamicResource PanelEdgeBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="8"
+                                                    Padding="16"
+                                                    Margin="0,10,0,0">
                                                     <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
                                                           ColumnDefinitions="Auto,*"
                                                           RowSpacing="10"
@@ -1333,62 +1427,110 @@
                                                                    Text="Stored locally"
                                                                    Foreground="{DynamicResource TextBrush}" />
                                                     </Grid>
-                                                </Border>
-                                                <Border Background="{DynamicResource ElevatedPanelBrush}"
-                                                        BorderBrush="{DynamicResource PanelEdgeBrush}"
-                                                        BorderThickness="1"
-                                                        CornerRadius="8"
-                                                        Padding="16"
-                                                        Margin="0,0,0,18">
-                                                    <StackPanel>
-                                                        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,10">
-                                                            <TextBlock Text="Personal note"
-                                                                       Foreground="{DynamicResource TextBrush}"
-                                                                       FontSize="14"
-                                                                       FontWeight="SemiBold" />
-                                                            <Button Grid.Column="1"
-                                                                    Classes="detailSecondary"
-                                                                    Click="SaveNoteButton_Click"
-                                                                    Padding="10,6">
-                                                                <TextBlock Text="Save note"
-                                                                           FontSize="11"
-                                                                           FontWeight="SemiBold" />
-                                                            </Button>
-                                                        </Grid>
-                                                        <TextBox x:Name="MomentNoteTextBox"
-                                                                 Background="{DynamicResource PanelBrush}"
-                                                                 BorderBrush="{DynamicResource PanelEdgeBrush}"
-                                                                 BorderThickness="1"
-                                                                 Foreground="{DynamicResource TextBrush}"
-                                                                 MinHeight="78"
-                                                                 Padding="12"
-                                                                 AcceptsReturn="True"
-                                                                 TextWrapping="Wrap" />
-                                                    </StackPanel>
-                                                </Border>
-                                                <Border Background="{DynamicResource SubtlePanelBrush}"
-                                                        BorderBrush="{DynamicResource PanelEdgeBrush}"
-                                                        BorderThickness="1"
-                                                        CornerRadius="8"
-                                                        Padding="16">
-                                                    <StackPanel>
-                                                        <TextBlock Text="Recent Activity"
-                                                                   Foreground="{DynamicResource TextBrush}"
-                                                                   FontSize="14"
-                                                                   Margin="0,0,0,12"
+                                            </Border>
+                                        </StackPanel>
+                                        <StackPanel Margin="0,0,0,18">
+                                            <Button Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Padding="0"
+                                                    HorizontalContentAlignment="Stretch"
+                                                    Click="DetailSectionToggleButton_Click"
+                                                    CommandParameter="Note">
+                                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                                    <TextBlock Text="Personal note"
+                                                               Foreground="{DynamicResource TextBrush}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold" />
+                                                    <TextBlock x:Name="NoteToggleText"
+                                                               Grid.Column="1"
+                                                               Foreground="{DynamicResource AccentBrush}"
+                                                               FontSize="11"
+                                                               FontWeight="SemiBold"
+                                                               VerticalAlignment="Center" />
+                                                    <TextBlock x:Name="NoteToggleGlyph"
+                                                               Grid.Column="2"
+                                                               Foreground="{DynamicResource AccentBrush}"
+                                                               FontSize="12"
+                                                               FontWeight="SemiBold"
+                                                               VerticalAlignment="Center" />
+                                                </Grid>
+                                            </Button>
+                                            <Border x:Name="NoteSection"
+                                                    Background="{DynamicResource ElevatedPanelBrush}"
+                                                    BorderBrush="{DynamicResource PanelEdgeBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="8"
+                                                    Padding="16"
+                                                    Margin="0,10,0,0">
+                                                <StackPanel>
+                                                    <Button Classes="detailSecondary"
+                                                            Click="SaveNoteButton_Click"
+                                                            Padding="10,6"
+                                                            HorizontalAlignment="Right"
+                                                            Margin="0,0,0,10">
+                                                        <TextBlock Text="Save note"
+                                                                   FontSize="11"
                                                                    FontWeight="SemiBold" />
-                                                        <TextBlock Text="Recorded by MomentTrace"
-                                                                   Foreground="{DynamicResource MutedTextBrush}"
-                                                                   FontSize="13"
-                                                                   Margin="0,0,0,10" />
-                                                        <TextBlock Text="Recording foreground window activity with timestamps."
-                                                                   Foreground="{DynamicResource MutedTextBrush}"
-                                                                   FontSize="13"
-                                                                   LineHeight="19"
-                                                                   TextWrapping="Wrap" />
-                                                    </StackPanel>
-                                                </Border>
-                                            </StackPanel>
+                                                    </Button>
+                                                    <TextBox x:Name="MomentNoteTextBox"
+                                                             Background="{DynamicResource PanelBrush}"
+                                                             BorderBrush="{DynamicResource PanelEdgeBrush}"
+                                                             BorderThickness="1"
+                                                             Foreground="{DynamicResource TextBrush}"
+                                                             MinHeight="78"
+                                                             Padding="12"
+                                                             AcceptsReturn="True"
+                                                             TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+                                        <StackPanel>
+                                            <Button Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Padding="0"
+                                                    HorizontalContentAlignment="Stretch"
+                                                    Click="DetailSectionToggleButton_Click"
+                                                    CommandParameter="RecentActivity">
+                                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                                    <TextBlock Text="Recent activity"
+                                                               Foreground="{DynamicResource TextBrush}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold" />
+                                                    <TextBlock x:Name="RecentActivityToggleText"
+                                                               Grid.Column="1"
+                                                               Foreground="{DynamicResource AccentBrush}"
+                                                               FontSize="11"
+                                                               FontWeight="SemiBold"
+                                                               VerticalAlignment="Center" />
+                                                    <TextBlock x:Name="RecentActivityToggleGlyph"
+                                                               Grid.Column="2"
+                                                               Foreground="{DynamicResource AccentBrush}"
+                                                               FontSize="12"
+                                                               FontWeight="SemiBold"
+                                                               VerticalAlignment="Center" />
+                                                </Grid>
+                                            </Button>
+                                            <Border x:Name="RecentActivitySection"
+                                                    Background="{DynamicResource SubtlePanelBrush}"
+                                                    BorderBrush="{DynamicResource PanelEdgeBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="8"
+                                                    Padding="16"
+                                                    Margin="0,10,0,0">
+                                                <StackPanel>
+                                                    <TextBlock Text="Recorded by MomentTrace"
+                                                               Foreground="{DynamicResource MutedTextBrush}"
+                                                               FontSize="13"
+                                                               Margin="0,0,0,10" />
+                                                    <TextBlock Text="Recording foreground window activity with timestamps."
+                                                               Foreground="{DynamicResource MutedTextBrush}"
+                                                               FontSize="13"
+                                                               LineHeight="19"
+                                                               TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+                                    </StackPanel>
                                 </ScrollViewer>
 
                                 <ScrollViewer x:Name="ActivityDetailTabContent"
@@ -1398,16 +1540,40 @@
                                               AllowAutoHide="False"
                                               VerticalScrollBarVisibility="Visible"
                                               HorizontalScrollBarVisibility="Disabled">
-                                    <Border Background="{DynamicResource PanelBrush}"
+                                    <StackPanel Margin="0,0,12,0">
+                                        <Button Background="Transparent"
+                                                BorderThickness="0"
+                                                Padding="0"
+                                                HorizontalContentAlignment="Stretch"
+                                                Click="DetailSectionToggleButton_Click"
+                                                CommandParameter="CapturedActivity">
+                                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                                <TextBlock x:Name="CapturedActivityHeaderText"
+                                                           Text="Captured activity"
+                                                           Foreground="{DynamicResource TextBrush}"
+                                                           FontWeight="SemiBold" />
+                                                <TextBlock x:Name="CapturedActivityToggleText"
+                                                           Grid.Column="1"
+                                                           Foreground="{DynamicResource AccentBrush}"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold"
+                                                           VerticalAlignment="Center" />
+                                                <TextBlock x:Name="CapturedActivityToggleGlyph"
+                                                           Grid.Column="2"
+                                                           Foreground="{DynamicResource AccentBrush}"
+                                                           FontSize="12"
+                                                           FontWeight="SemiBold"
+                                                           VerticalAlignment="Center" />
+                                            </Grid>
+                                        </Button>
+                                        <Border x:Name="CapturedActivitySection"
+                                                Background="{DynamicResource PanelBrush}"
                                                 BorderBrush="{DynamicResource PanelEdgeBrush}"
                                                 BorderThickness="1"
                                                 CornerRadius="12"
                                                 Padding="12"
-                                                Margin="0,0,12,0">
+                                                Margin="0,10,0,0">
                                             <StackPanel Spacing="8">
-                                                <TextBlock Text="Captured activity"
-                                                           Foreground="{DynamicResource TextBrush}"
-                                                           FontWeight="SemiBold" />
                                                 <TextBlock x:Name="ActivityTabSummaryText"
                                                            Text="Select a moment to inspect its raw captured entries."
                                                            Foreground="{DynamicResource SubtleTextBrush}"
@@ -1432,6 +1598,7 @@
                                                 </ItemsControl>
                                             </StackPanel>
                                         </Border>
+                                    </StackPanel>
                                 </ScrollViewer>
 
                                 <ScrollViewer x:Name="RelatedDetailTabContent"
@@ -1441,16 +1608,40 @@
                                               AllowAutoHide="False"
                                               VerticalScrollBarVisibility="Visible"
                                               HorizontalScrollBarVisibility="Disabled">
-                                    <Border Background="{DynamicResource PanelBrush}"
+                                    <StackPanel Margin="0,0,12,0">
+                                        <Button Background="Transparent"
+                                                BorderThickness="0"
+                                                Padding="0"
+                                                HorizontalContentAlignment="Stretch"
+                                                Click="DetailSectionToggleButton_Click"
+                                                CommandParameter="RelatedMoments">
+                                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                                <TextBlock x:Name="RelatedMomentsHeaderText"
+                                                           Text="Related moments"
+                                                           Foreground="{DynamicResource TextBrush}"
+                                                           FontWeight="SemiBold" />
+                                                <TextBlock x:Name="RelatedMomentsToggleText"
+                                                           Grid.Column="1"
+                                                           Foreground="{DynamicResource AccentBrush}"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold"
+                                                           VerticalAlignment="Center" />
+                                                <TextBlock x:Name="RelatedMomentsToggleGlyph"
+                                                           Grid.Column="2"
+                                                           Foreground="{DynamicResource AccentBrush}"
+                                                           FontSize="12"
+                                                           FontWeight="SemiBold"
+                                                           VerticalAlignment="Center" />
+                                            </Grid>
+                                        </Button>
+                                        <Border x:Name="RelatedMomentsSection"
+                                                Background="{DynamicResource PanelBrush}"
                                                 BorderBrush="{DynamicResource PanelEdgeBrush}"
                                                 BorderThickness="1"
                                                 CornerRadius="12"
                                                 Padding="12"
-                                                Margin="0,0,12,0">
+                                                Margin="0,10,0,0">
                                             <StackPanel Spacing="8">
-                                                <TextBlock Text="Related moments"
-                                                           Foreground="{DynamicResource TextBrush}"
-                                                           FontWeight="SemiBold" />
                                                 <TextBlock x:Name="RelatedSummaryText"
                                                            Text="No related moments yet"
                                                            Foreground="{DynamicResource SubtleTextBrush}"
@@ -1474,6 +1665,7 @@
                                                 </ItemsControl>
                                             </StackPanel>
                                         </Border>
+                                    </StackPanel>
                                 </ScrollViewer>
                             </Grid>
                         </Grid>
@@ -1482,208 +1674,208 @@
                 </Grid>
 
             <ScrollViewer x:Name="OverviewPage" Grid.Row="1" IsVisible="False" AllowAutoHide="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <StackPanel Spacing="18"
+                <StackPanel Spacing="14"
                             Margin="0,0,12,0">
-                    <Border Background="{DynamicResource PanelBrush}"
-                            BorderBrush="{DynamicResource PanelEdgeBrush}"
-                            BorderThickness="1"
-                            CornerRadius="14"
-                            Padding="16">
-                        <StackPanel Spacing="6">
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="Overview"
-                                           Foreground="{DynamicResource TextBrush}"
-                                           FontSize="20"
-                                           FontWeight="SemiBold" />
-                                <Border Classes="infoChip"
-                                        VerticalAlignment="Center">
-                                    <TextBlock Text="Local analytics"
-                                               Foreground="{DynamicResource MutedTextBrush}"
-                                               FontSize="11"
-                                               FontWeight="SemiBold" />
-                                </Border>
-                            </StackPanel>
-                            <TextBlock x:Name="OverviewSubtitleText"
-                                       Text="A local read on how the day is taking shape"
-                                       Foreground="{DynamicResource MutedTextBrush}"
-                                       Margin="0,4,0,0" />
-                        </StackPanel>
-                    </Border>
+                    <StackPanel Spacing="2"
+                                Margin="2,6,0,0">
+                        <TextBlock x:Name="OverviewDateText"
+                                   Text="Today"
+                                   Foreground="{DynamicResource TextBrush}"
+                                   FontSize="26"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text="At a glance"
+                                   Foreground="{DynamicResource SubtleTextBrush}"
+                                   FontSize="12" />
+                        <TextBlock x:Name="OverviewLeadText"
+                                   Text="A visual summary of the day"
+                                   Foreground="{DynamicResource MutedTextBrush}"
+                                   FontSize="12" />
+                    </StackPanel>
 
-                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="14">
-                        <Border Grid.Column="0" Classes="overviewMetric">
-                            <StackPanel Spacing="8">
-                                <Border Height="3" Background="#7C5CFF" CornerRadius="2" HorizontalAlignment="Stretch" />
-                                <TextBlock Text="Remembered span" Foreground="{DynamicResource MutedTextBrush}" />
-                                <TextBlock x:Name="MetricOneValue" Text="0m" Foreground="{DynamicResource TextBrush}" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
-                                <TextBlock x:Name="MetricOneDetail" Text="" Foreground="{DynamicResource SubtleTextBrush}" Margin="0,6,0,0" TextWrapping="Wrap" />
+                    <ItemsControl x:Name="OverviewSummaryItems">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="Transparent"
+                                        BorderThickness="0"
+                                        Margin="0,0,12,12">
+                                    <controls:SummaryMetricCard Label="{Binding Label}"
+                                                                Value="{Binding Value}"
+                                                                Detail="{Binding Detail}"
+                                                                AccentFill="{Binding AccentFill}"
+                                                                AccentGlyph="{Binding AccentGlyph}" />
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Grid RowDefinitions="Auto,Auto"
+                          RowSpacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel>
+                                <TextBlock Text="Activity heatmap"
+                                           Foreground="{DynamicResource TextBrush}"
+                                           FontSize="16"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="Your day in 15-minute blocks"
+                                           Foreground="{DynamicResource SubtleTextBrush}"
+                                           FontSize="11" />
                             </StackPanel>
-                        </Border>
-                        <Border Grid.Column="1" Classes="overviewMetric">
-                            <StackPanel Spacing="8">
-                                <Border Height="3" Background="#22C55E" CornerRadius="2" HorizontalAlignment="Stretch" />
-                                <TextBlock Text="Moments" Foreground="{DynamicResource MutedTextBrush}" />
-                                <TextBlock x:Name="MetricTwoValue" Text="0" Foreground="{DynamicResource TextBrush}" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
-                                <TextBlock x:Name="MetricTwoDetail" Text="" Foreground="{DynamicResource SubtleTextBrush}" Margin="0,6,0,0" TextWrapping="Wrap" />
-                            </StackPanel>
-                        </Border>
-                        <Border Grid.Column="2" Classes="overviewMetric">
-                            <StackPanel Spacing="8">
-                                <Border Height="3" Background="#0EA5E9" CornerRadius="2" HorizontalAlignment="Stretch" />
-                                <TextBlock Text="Most seen app" Foreground="{DynamicResource MutedTextBrush}" />
-                                <TextBlock x:Name="MetricThreeValue" Text="Waiting" Foreground="{DynamicResource TextBrush}" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
-                                <TextBlock x:Name="MetricThreeDetail" Text="" Foreground="{DynamicResource SubtleTextBrush}" Margin="0,6,0,0" TextWrapping="Wrap" />
-                            </StackPanel>
-                        </Border>
-                        <Border Grid.Column="3" Classes="overviewMetric">
-                            <StackPanel Spacing="8">
-                                <Border Height="3" Background="{DynamicResource WarningBrush}" CornerRadius="2" HorizontalAlignment="Stretch" />
-                                <TextBlock Text="Longest visible run" Foreground="{DynamicResource MutedTextBrush}" />
-                                <TextBlock x:Name="MetricFourValue" Text="0m" Foreground="{DynamicResource TextBrush}" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
-                                <TextBlock x:Name="MetricFourDetail" Text="" Foreground="{DynamicResource SubtleTextBrush}" Margin="0,6,0,0" TextWrapping="Wrap" />
-                            </StackPanel>
-                        </Border>
+                            <Button Grid.Column="1"
+                                    Classes="toolbar"
+                                    Click="TimelineNavButton_Click"
+                                    Padding="10,6"
+                                    Height="36">
+                                <TextBlock Text="See full timeline"
+                                           FontSize="11" />
+                            </Button>
+                        </Grid>
+                        <controls:ActivityHeatmapControl x:Name="OverviewHeatmapControl"
+                                                         Grid.Row="1"
+                                                         Title=""
+                                                         Subtitle=""
+                                                         Caption="15 minute blocks" />
                     </Grid>
 
-                    <Border Classes="overviewPanel">
-                        <StackPanel Spacing="12">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="Daily activity heatmap" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="SemiBold" />
-                                <Border Grid.Column="1" Classes="infoChip">
-                                    <TextBlock Text="15 minute blocks" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" />
-                                </Border>
-                            </Grid>
-                            <TextBlock Text="A lightweight read on how the day filled in over time."
-                                       Foreground="{DynamicResource SubtleTextBrush}"
-                                       FontSize="11" />
-                            <WrapPanel x:Name="HeatmapPanel" ItemWidth="10" ItemHeight="28" />
-                        </StackPanel>
-                    </Border>
-
-                    <Grid ColumnDefinitions="1.2*,0.8*" ColumnSpacing="18">
-                        <Border Grid.Column="0" Classes="overviewPanel">
+                    <Grid ColumnDefinitions="1.55*,0.85*"
+                          ColumnSpacing="14">
+                        <Border Grid.Column="0"
+                                Classes="overviewPanel">
                             <StackPanel Spacing="10">
-                                <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8">
-                                    <StackPanel>
-                                        <TextBlock Text="Top applications" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="SemiBold" />
-                                        <TextBlock Text="Sorted from the local activity store"
-                                                   Foreground="{DynamicResource SubtleTextBrush}"
-                                                   FontSize="11"
-                                                   Margin="0,4,0,0" />
-                                    </StackPanel>
-                                    <Button x:Name="TopAppsSeenSortButton" Grid.Column="1" Classes="toolbar" Click="TopAppsSortButton_Click" CommandParameter="Duration" Padding="10,6">
-                                        <TextBlock Text="Seen" FontSize="11" />
-                                    </Button>
-                                    <Button x:Name="TopAppsSessionsSortButton" Grid.Column="2" Classes="toolbar" Click="TopAppsSortButton_Click" CommandParameter="Sessions" Padding="10,6">
-                                        <TextBlock Text="Sessions" FontSize="11" />
-                                    </Button>
-                                    <Button x:Name="TopAppsPercentSortButton" Grid.Column="3" Classes="toolbar" Click="TopAppsSortButton_Click" CommandParameter="Percent" Padding="10,6">
-                                        <TextBlock Text="Percent" FontSize="11" />
-                                    </Button>
-                                </Grid>
-                                <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,2,0,0">
-                                    <TextBlock Text="Application"
-                                               Foreground="{DynamicResource SubtleTextBrush}"
-                                               FontSize="11"
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="Moments today"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               FontSize="16"
                                                FontWeight="SemiBold" />
-                                    <TextBlock Grid.Column="1"
-                                               Text="Seen"
-                                               Foreground="{DynamicResource SubtleTextBrush}"
-                                               FontSize="11"
-                                               FontWeight="SemiBold"
-                                               HorizontalAlignment="Right"
-                                               Margin="0,0,52,0" />
-                                    <TextBlock Grid.Column="2"
-                                               Text="%"
-                                               Foreground="{DynamicResource SubtleTextBrush}"
-                                               FontSize="11"
-                                               FontWeight="SemiBold"
-                                               HorizontalAlignment="Right" />
-                                </Grid>
-                                <ItemsControl x:Name="TopAppsItems">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource PanelEdgeBrush}" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,8">
-                                                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
-                                                    <Border Width="34"
-                                                            Height="34"
-                                                            Background="{Binding AccentBrush}"
-                                                            CornerRadius="10"
-                                                            VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding Glyph}"
-                                                                   Foreground="White"
-                                                                   FontSize="13"
-                                                                   FontWeight="SemiBold"
-                                                                   HorizontalAlignment="Center"
-                                                                   VerticalAlignment="Center" />
-                                                    </Border>
-                                                    <StackPanel Grid.Column="1">
-                                                        <TextBlock Text="{Binding AppName}" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" />
-                                                        <TextBlock Text="{Binding Meta}" Foreground="{DynamicResource MutedTextBrush}" Margin="0,4,0,0" />
-                                                    </StackPanel>
-                                                    <TextBlock Grid.Column="2" Text="{Binding Duration}" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                                                    <Border Grid.Column="3"
-                                                            Background="{DynamicResource PanelBrush}"
-                                                            BorderBrush="{DynamicResource PanelEdgeBrush}"
-                                                            BorderThickness="1"
-                                                            CornerRadius="999"
-                                                            Padding="8,2"
-                                                            VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding Percent}" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" />
-                                                    </Border>
-                                                </Grid>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </Border>
-
-                        <StackPanel Grid.Column="1" Spacing="18">
-                            <Border Classes="overviewPanel">
-                                <StackPanel Spacing="10">
-                                    <TextBlock Text="Focus rhythm" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="SemiBold" />
-                                    <TextBlock Text="Longer visible runs grouped from local activity."
+                                    <TextBlock Text="Key moments from your day"
                                                Foreground="{DynamicResource SubtleTextBrush}"
                                                FontSize="11" />
-                                    <ItemsControl x:Name="FocusBlocksItems">
-                                        <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Background="{DynamicResource SubtlePanelBrush}" BorderBrush="{DynamicResource PanelEdgeBrush}" BorderThickness="1" CornerRadius="10" Padding="10" Margin="0,0,0,8">
-                                                    <StackPanel>
-                                                        <Border Height="3"
-                                                                Background="{Binding AccentBrush}"
-                                                                CornerRadius="2"
-                                                                Margin="0,0,0,8" />
-                                                        <TextBlock Text="{Binding Label}" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" />
-                                                        <TextBlock Text="{Binding Duration}" Foreground="{DynamicResource MutedTextBrush}" Margin="0,4,0,0" />
-                                                    </StackPanel>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
                                 </StackPanel>
-                            </Border>
-
-                            <Border Classes="overviewPanel">
-                                <StackPanel Spacing="10">
-                                    <TextBlock Text="Legend" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="SemiBold" />
-                                    <TextBlock Text="Colour hints used across heatmap and grouped moments."
-                                               Foreground="{DynamicResource SubtleTextBrush}"
-                                               FontSize="11" />
-                                    <ItemsControl x:Name="LegendItems">
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                              VerticalScrollBarVisibility="Disabled"
+                                              AllowAutoHide="False">
+                                    <ItemsControl x:Name="OverviewMomentsItems">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal"
+                                                            Spacing="12" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,8">
-                                                    <Border Width="12" Height="12" CornerRadius="3" Background="{Binding Fill}" />
-                                                    <TextBlock Text="{Binding Label}" Foreground="{DynamicResource TextBrush}" />
+                                                <StackPanel Width="224"
+                                                            Spacing="0">
+                                                    <Button Classes="momentCard"
+                                                            Click="OverviewMomentButton_Click"
+                                                            CommandParameter="{Binding Id}">
+                                                        <controls:MomentCard Title="{Binding Title}"
+                                                                             Subtitle="{Binding Subtitle}"
+                                                                             Timestamp="{Binding Timestamp}"
+                                                                             Duration="{Binding Duration}"
+                                                                             Category="{Binding Category}"
+                                                                             AccentFill="{Binding AccentFill}"
+                                                                             AccentText="{Binding AccentText}"
+                                                                             Source="{Binding Source}"
+                                                                             PreviewPath="{Binding ThumbnailPath}" />
+                                                    </Button>
                                                 </StackPanel>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
+                                </ScrollViewer>
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel Grid.Column="1"
+                                    Spacing="14">
+                            <controls:CategoryBreakdownControl x:Name="OverviewCategoryBreakdownControl"
+                                                               Title="Activity by category" />
+                            <Border Classes="overviewPanel">
+                                <StackPanel Spacing="10">
+                                    <StackPanel Spacing="3">
+                                        <TextBlock Text="Top applications"
+                                                   Foreground="{DynamicResource TextBrush}"
+                                                   FontSize="16"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="By total active time"
+                                                   Foreground="{DynamicResource SubtleTextBrush}"
+                                                   FontSize="11" />
+                                    </StackPanel>
+                                    <ItemsControl x:Name="OverviewTopApplicationsItems">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid ColumnDefinitions="Auto,*,Auto"
+                                                      ColumnSpacing="10"
+                                                      Margin="0,0,0,10">
+                                                    <Border Width="22"
+                                                            Height="22"
+                                                            Background="{Binding AccentBrush}"
+                                                            CornerRadius="6"
+                                                            VerticalAlignment="Top">
+                                                        <TextBlock Text="{Binding Glyph}"
+                                                                   Foreground="White"
+                                                                   FontSize="10"
+                                                                   FontWeight="SemiBold"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center" />
+                                                    </Border>
+                                                    <StackPanel Grid.Column="1"
+                                                                Spacing="3">
+                                                        <TextBlock Text="{Binding AppName}"
+                                                                   Foreground="{DynamicResource TextBrush}"
+                                                                   FontSize="12"
+                                                                   FontWeight="SemiBold" />
+                                                        <Border Background="{DynamicResource ElevatedPanelBrush}"
+                                                                Height="4"
+                                                                CornerRadius="999">
+                                                            <Border Width="{Binding BarWidth}"
+                                                                    Background="{DynamicResource AccentBrush}"
+                                                                    CornerRadius="999"
+                                                                    HorizontalAlignment="Left" />
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="2"
+                                                               Text="{Binding Duration}"
+                                                               Foreground="{DynamicResource MutedTextBrush}"
+                                                               FontSize="11"
+                                                               VerticalAlignment="Top" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
+                    </Grid>
+
+                    <Grid RowDefinitions="Auto,Auto"
+                          RowSpacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel>
+                                <TextBlock Text="Focus rhythm"
+                                           Foreground="{DynamicResource TextBrush}"
+                                           FontSize="16"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="Your activity flow throughout the day"
+                                           Foreground="{DynamicResource SubtleTextBrush}"
+                                           FontSize="11" />
+                            </StackPanel>
+                            <Button Grid.Column="1"
+                                    Classes="toolbar"
+                                    Click="TimelineNavButton_Click"
+                                    Padding="10,6"
+                                    Height="36">
+                                <TextBlock Text="See full timeline"
+                                           FontSize="11" />
+                            </Button>
+                        </Grid>
+                        <controls:FocusRhythmControl x:Name="OverviewFocusRhythmControl"
+                                                     Grid.Row="1"
+                                                     Title="" />
                     </Grid>
                 </StackPanel>
             </ScrollViewer>

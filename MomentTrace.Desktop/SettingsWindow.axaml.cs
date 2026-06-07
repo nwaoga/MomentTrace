@@ -24,8 +24,10 @@ namespace MomentTrace.Desktop;
 public partial class SettingsWindow : Window
 {
     private const string AdultBlocklistUrl = "https://raw.githubusercontent.com/blocklistproject/Lists/master/porn.txt";
+    private static readonly TimeSpan CaptureStaleThreshold = TimeSpan.FromMinutes(2);
 
     private readonly IActivityStore _store;
+    private readonly IActivityRecorder? _recorder;
     private readonly DesktopWindowPreferences _preferences;
     private readonly DesktopStartupRegistration _startupRegistration;
     private readonly ObservableCollection<PrivacyChoiceViewModel> _recentApps = [];
@@ -47,6 +49,7 @@ public partial class SettingsWindow : Window
 
     public SettingsWindow(
         IActivityStore store,
+        IActivityRecorder? recorder,
         DesktopWindowPreferences preferences,
         string currentTimelineViewMode,
         string currentTheme,
@@ -56,6 +59,7 @@ public partial class SettingsWindow : Window
         Func<Task> activityDataChanged)
     {
         _store = store;
+        _recorder = recorder;
         _preferences = preferences;
         _startupRegistration = new DesktopStartupRegistration("MomentTrace.Desktop", Environment.ProcessPath ?? AppContext.BaseDirectory);
         _opacityChanged = opacityChanged;
@@ -150,9 +154,6 @@ public partial class SettingsWindow : Window
             + (_preferences.ExcludeAdultWebsites ? _preferences.AdultBlocklistDomains.Length : 0);
 
         HealthUpdatedText.Text = $"Checked {DateTime.Now:t}";
-        RecorderHealthText.Text = OperatingSystem.IsWindows()
-            ? "Ready in this Avalonia Windows build"
-            : "Reduced mode on this platform";
         ScreenshotsHealthText.Text = Directory.Exists(screenshotsPath)
             ? $"{CountFiles(screenshotsPath):N0} cached files"
             : "No screenshot cache yet";
@@ -169,14 +170,89 @@ public partial class SettingsWindow : Window
         try
         {
             var recent = await _store.QueryAsync(new TimelineQuery { Limit = 250 });
+            var latestCapture = recent
+                .OrderByDescending(activity => activity.EndedAt)
+                .FirstOrDefault();
+
+            RecorderHealthText.Text = BuildRecorderHealthText(latestCapture);
+            BrowserUrlHealthText.Text = BuildBrowserUrlHealthText(recent);
             DatabaseHealthText.Text = File.Exists(SqliteActivityStore.DefaultDatabasePath)
                 ? $"Readable · {recent.Count:N0} recent rows checked"
                 : "Ready · database will be created on first write";
         }
         catch
         {
+            RecorderHealthText.Text = BuildRecorderHealthText(null);
+            BrowserUrlHealthText.Text = BuildBrowserUrlHealthText([]);
             DatabaseHealthText.Text = "Needs attention · database query failed";
         }
+    }
+
+    private string BuildRecorderHealthText(TimelineActivity? latestCapture)
+    {
+        var recordingState = _recorder?.IsRecording == true ? "Recording" : "Recorder idle";
+
+        if (latestCapture is null)
+        {
+            return _recorder is null
+                ? "Recorder unavailable on this platform"
+                : $"{recordingState} · no captured activity yet";
+        }
+
+        var capturedAt = latestCapture.EndedAt.LocalDateTime;
+        var age = DateTimeOffset.Now - latestCapture.EndedAt;
+        var freshness = age <= CaptureStaleThreshold ? "fresh" : $"stale by {FormatAge(age)}";
+
+        return $"{recordingState} · last capture {capturedAt:g} ({freshness})";
+    }
+
+    private static string FormatAge(TimeSpan age)
+    {
+        if (age.TotalHours >= 1)
+        {
+            return $"{Math.Max(1, (int)Math.Round(age.TotalHours))}h";
+        }
+
+        if (age.TotalMinutes >= 1)
+        {
+            return $"{Math.Max(1, (int)Math.Round(age.TotalMinutes))}m";
+        }
+
+        return $"{Math.Max(1, (int)Math.Round(age.TotalSeconds))}s";
+    }
+
+    private string BuildBrowserUrlHealthText(IReadOnlyList<TimelineActivity> recent)
+    {
+        if (OperatingSystem.IsWindows() && _recorder is not null)
+        {
+            var browserMoments = recent.Count(activity => activity.Kind == ActivityKind.Browser);
+            var browserUrls = recent.Count(activity => IsWebUrl(activity.Resource));
+
+            if (browserUrls > 0)
+            {
+                return $"Available via UI Automation · {browserUrls:N0} recent URL captures";
+            }
+
+            if (browserMoments > 0)
+            {
+                return $"Available via UI Automation · {browserMoments:N0} recent browser moments but no URL surfaced";
+            }
+
+            return "Available in this Windows build for supported browser windows";
+        }
+
+        if (OperatingSystem.IsMacOS())
+        {
+            return "Reduced mode on this platform · browser URL extraction not wired into this probe";
+        }
+
+        return "Unavailable on this platform";
+    }
+
+    private static bool IsWebUrl(string? value)
+    {
+        return Uri.TryCreate(value, UriKind.Absolute, out var uri)
+            && uri.Scheme is "http" or "https";
     }
 
     private static int CountFiles(string path)

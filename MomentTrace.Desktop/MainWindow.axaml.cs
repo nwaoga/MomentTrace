@@ -17,6 +17,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace MomentTrace.Desktop;
 
@@ -28,40 +29,61 @@ public partial class MainWindow : Window
         RuleBasedSessionSummarizer.Default);
     private readonly OverviewPresentationBuilder _overviewBuilder;
     private readonly DetailContextBuilder _detailContextBuilder = new(RuleBasedActivityClassifier.Default);
-    private readonly SqliteActivityStore _store = new(SqliteActivityStore.DefaultDatabasePath);
+    private readonly SqliteActivityStore _store;
+    private readonly IActivityRecorder? _recorder;
     private readonly DesktopWindowPreferences _preferences;
     private readonly DispatcherTimer _refreshTimer;
     private readonly List<TimelineActivity> _visibleActivities = [];
     private IReadOnlyList<ActivityMomentViewModel> _sessions = [];
     private IReadOnlyList<TimelineSessionGroup> _timelineGroups = [];
     private OverviewPresentationModel? _currentOverview;
-    private string _topAppsSort = "Duration";
+    private readonly Dictionary<string, bool> _detailSectionExpanded = new(StringComparer.Ordinal)
+    {
+        ["OverviewNarrative"] = true,
+        ["Preview"] = true,
+        ["Metadata"] = true,
+        ["Note"] = true,
+        ["RecentActivity"] = true,
+        ["CapturedActivity"] = true,
+        ["RelatedMoments"] = true
+    };
     private long? _selectedMomentId;
     private string _searchText = string.Empty;
     private DetailTab _selectedDetailTab = DetailTab.Overview;
     private bool _isDetailPaneVisible = true;
     private RailSelection _selectedRailSelection = RailSelection.Timeline;
+    private DateTime? _timelineFocusStart;
+    private DateTime? _timelineFocusEnd;
     private DesktopAppThemePalette _currentTheme;
     private ScrollViewer? _pendingDragScrollViewer;
     private Point _scrollDragStartPoint;
     private Vector _scrollDragStartOffset;
     private bool _isScrollDragging;
     private bool _isReloading;
+    private readonly ICommand _overviewHeatmapCommand;
+    private readonly ICommand _overviewFocusCommand;
     private static readonly Cursor ScrollReadyCursor = new(StandardCursorType.Hand);
     private static readonly Cursor ScrollDraggingCursor = new(StandardCursorType.SizeAll);
 
-    public MainWindow()
+    public MainWindow(SqliteActivityStore? store = null, IActivityRecorder? recorder = null)
     {
         InitializeComponent();
+        _store = store ?? new SqliteActivityStore(SqliteActivityStore.DefaultDatabasePath);
+        _recorder = recorder;
         _preferences = DesktopWindowPreferences.Load();
         _currentTheme = DesktopAppThemePalette.Find(_preferences.Theme);
         _overviewBuilder = new OverviewPresentationBuilder(_timelineBuilder);
+        _overviewHeatmapCommand = new DelegateCommand<HeatmapSegmentViewModel>(segment => _ = ShowTimelineRangeAsync(segment.BlockStart, segment.BlockEnd));
+        _overviewFocusCommand = new DelegateCommand<FocusBlockViewModel>(block => _ = HandleOverviewFocusBlockAsync(block));
         TypeFilterComboBox.ItemsSource = new[] { "All" };
         TypeFilterComboBox.SelectedIndex = 0;
+        OverviewHeatmapControl.ItemCommand = _overviewHeatmapCommand;
+        OverviewFocusRhythmControl.ItemCommand = _overviewFocusCommand;
         ApplyTheme(_preferences.Theme);
         ApplySurfaceTransparency(_preferences.Opacity);
         ApplyTimelineViewMode(_preferences.TimelineViewMode);
         ApplyDetailPaneVisibility();
+        ApplyDetailSectionStates();
         SetActiveNavState();
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
         _refreshTimer.Tick += async (_, _) => await ReloadAsync();
@@ -121,6 +143,7 @@ public partial class MainWindow : Window
                 .ToList())
             .Where(MatchesSearch)
             .Where(MatchesRailSelection)
+            .Where(MatchesTimelineFocus)
             .ToList();
         _timelineGroups = _timelineBuilder.BuildGroups(_sessions);
         if (_sessions.Count == 0)
@@ -155,44 +178,20 @@ public partial class MainWindow : Window
         _currentOverview = _overviewBuilder.Build(_visibleActivities, selectedDate);
         var overview = _currentOverview;
 
-        OverviewSubtitleText.Text = $"{overview.Sessions.Count} moments on {TimelineDateFilterBuilder.FormatDateLabel(selectedDate, DateTime.Today)}";
-        ApplyMetric(MetricOneValue, MetricOneDetail, overview.SummaryMetrics.ElementAtOrDefault(0));
-        ApplyMetric(MetricTwoValue, MetricTwoDetail, overview.SummaryMetrics.ElementAtOrDefault(1));
-        ApplyMetric(MetricThreeValue, MetricThreeDetail, overview.SummaryMetrics.ElementAtOrDefault(2));
-        ApplyMetric(MetricFourValue, MetricFourDetail, overview.SummaryMetrics.ElementAtOrDefault(3));
-
-        HeatmapPanel.Children.Clear();
-        foreach (var segment in overview.HeatmapSegments)
-        {
-            var cell = new Border
-            {
-                Width = 10,
-                Height = 28,
-                CornerRadius = new CornerRadius(3),
-                Background = Brush.Parse(segment.Fill),
-                Margin = new Thickness(0, 0, 4, 4)
-            };
-            ToolTip.SetTip(cell, segment.Tooltip);
-            HeatmapPanel.Children.Add(cell);
-        }
-
-        TopAppsItems.ItemsSource = SortTopApplications(overview.TopApplications)
-            .Select(app => ToTopAppRow(app))
+        OverviewDateText.Text = overview.DateLabel;
+        OverviewLeadText.Text = overview.Sessions.Count == 0
+            ? "No captured activity yet for this day."
+            : $"{overview.Sessions.Count} moments captured across {overview.TopApplications.Count} applications with {OverviewPresentationBuilder.FormatDuration(overview.TotalActive)} active time.";
+        OverviewSummaryItems.ItemsSource = overview.DaySummaryMetrics;
+        OverviewHeatmapControl.Items = overview.HeatmapSegments;
+        OverviewHeatmapControl.LegendItems = overview.Legend;
+        OverviewMomentsItems.ItemsSource = overview.KeyMoments;
+        OverviewCategoryBreakdownControl.Items = overview.CategoryBreakdown;
+        OverviewTopApplicationsItems.ItemsSource = overview.TopApplications
+            .Take(4)
+            .Select(ToOverviewTopApplicationRow)
             .ToList();
-        FocusBlocksItems.ItemsSource = overview.FocusBlocks
-            .Take(8)
-            .Select((block, index) => new FocusRow(
-                block.Label,
-                OverviewPresentationBuilder.FormatDuration(block.Duration),
-                (index % 3) switch
-                {
-                    0 => "#8B5CF6",
-                    1 => "#22C55E",
-                    _ => "#0EA5E9"
-                }))
-            .ToList();
-        LegendItems.ItemsSource = overview.Legend;
-        UpdateTopAppSortButtons();
+        OverviewFocusRhythmControl.Items = overview.FocusBlocks.Take(10).ToList();
     }
 
     private void TimelineNavButton_Click(object? sender, RoutedEventArgs e)
@@ -259,6 +258,7 @@ public partial class MainWindow : Window
     {
         var settingsWindow = new SettingsWindow(
             _store,
+            _recorder,
             _preferences,
             _preferences.TimelineViewMode,
             _preferences.Theme,
@@ -364,6 +364,7 @@ public partial class MainWindow : Window
             return;
         }
 
+        ClearTimelineFocusRange();
         await RefreshTimelineAsync();
         await RefreshOverviewAsync();
     }
@@ -608,6 +609,49 @@ public partial class MainWindow : Window
         ShowDetail(selected);
     }
 
+    private async void OverviewMomentButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (!TryGetMomentId(sender, out var momentId))
+        {
+            return;
+        }
+
+        await NavigateToTimelineMomentAsync(momentId);
+    }
+
+    private void OverviewOpenMomentButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (!TryGetMomentId(sender, out var momentId))
+        {
+            return;
+        }
+
+        var selected = FindOverviewMoment(momentId);
+        if (selected is null)
+        {
+            return;
+        }
+
+        OpenActivity(selected);
+    }
+
+    private async void OverviewPinMomentButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (!TryGetMomentId(sender, out var momentId))
+        {
+            return;
+        }
+
+        var selected = FindOverviewMoment(momentId);
+        if (selected is null)
+        {
+            return;
+        }
+
+        await _store.SetPinnedAsync(selected.Id, !selected.IsPinned);
+        await ReloadAsync();
+    }
+
     private void ShowDetail(ActivityMomentViewModel selected)
     {
         var detail = _detailContextBuilder.Build(selected, _visibleActivities);
@@ -632,21 +676,8 @@ public partial class MainWindow : Window
         SetActionButtonActive(PinMomentButton, selected.IsPinned);
         SetActionButtonActive(BookmarkMomentButton, selected.IsBookmarked);
         SetDetailPreview(selected);
+        RefreshDetailSectionHeaders();
         SelectDetailTab(_selectedDetailTab);
-    }
-
-    private void TopAppsSortButton_Click(object? sender, RoutedEventArgs e)
-    {
-        if (sender is not Button { CommandParameter: string sortKey } || _currentOverview is null)
-        {
-            return;
-        }
-
-        _topAppsSort = sortKey;
-        TopAppsItems.ItemsSource = SortTopApplications(_currentOverview.TopApplications)
-            .Select(app => ToTopAppRow(app))
-            .ToList();
-        UpdateTopAppSortButtons();
     }
 
     private DateTime GetSelectedDate()
@@ -681,7 +712,19 @@ public partial class MainWindow : Window
         SetActionButtonActive(BookmarkMomentButton, false);
         DetailPreviewImage.Source = null;
         DetailPreviewHost.IsVisible = false;
+        RefreshDetailSectionHeaders();
         SelectDetailTab(DetailTab.Overview);
+    }
+
+    private void TimelineGroupToggleButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { CommandParameter: TimelineGroupRow row })
+        {
+            return;
+        }
+
+        row.Group.ToggleExpanded();
+        TimelineGroupsItems.ItemsSource = BuildTimelineGroupRows();
     }
 
     private void DetailTabButton_Click(object? sender, RoutedEventArgs e)
@@ -708,11 +751,90 @@ public partial class MainWindow : Window
         SetDetailTabState(RelatedDetailTabText, RelatedDetailTabUnderline, tab == DetailTab.Related);
     }
 
+    private void DetailSectionToggleButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { CommandParameter: string sectionKey }
+            || !_detailSectionExpanded.ContainsKey(sectionKey))
+        {
+            return;
+        }
+
+        _detailSectionExpanded[sectionKey] = !_detailSectionExpanded[sectionKey];
+        ApplyDetailSectionState(sectionKey);
+    }
+
     private void SetDetailTabState(TextBlock text, Border underline, bool isActive)
     {
         text.Foreground = new SolidColorBrush(isActive ? _currentTheme.Accent : _currentTheme.MutedText);
         text.FontWeight = isActive ? FontWeight.SemiBold : FontWeight.Regular;
         underline.IsVisible = isActive;
+    }
+
+    private void ApplyDetailSectionStates()
+    {
+        foreach (var sectionKey in _detailSectionExpanded.Keys)
+        {
+            ApplyDetailSectionState(sectionKey);
+        }
+    }
+
+    private void ApplyDetailSectionState(string sectionKey)
+    {
+        var isExpanded = _detailSectionExpanded[sectionKey];
+        var toggleText = isExpanded ? "Hide" : "Show";
+        var toggleGlyph = isExpanded ? "⌃" : "⌄";
+
+        switch (sectionKey)
+        {
+            case "OverviewNarrative":
+                OverviewNarrativeSection.IsVisible = isExpanded;
+                OverviewNarrativeToggleText.Text = toggleText;
+                OverviewNarrativeToggleGlyph.Text = toggleGlyph;
+                break;
+            case "Preview":
+                DetailPreviewSection.IsVisible = isExpanded;
+                PreviewToggleText.Text = toggleText;
+                PreviewToggleGlyph.Text = toggleGlyph;
+                break;
+            case "Metadata":
+                MetadataSection.IsVisible = isExpanded;
+                MetadataToggleText.Text = toggleText;
+                MetadataToggleGlyph.Text = toggleGlyph;
+                break;
+            case "Note":
+                NoteSection.IsVisible = isExpanded;
+                NoteToggleText.Text = toggleText;
+                NoteToggleGlyph.Text = toggleGlyph;
+                break;
+            case "RecentActivity":
+                RecentActivitySection.IsVisible = isExpanded;
+                RecentActivityToggleText.Text = toggleText;
+                RecentActivityToggleGlyph.Text = toggleGlyph;
+                break;
+            case "CapturedActivity":
+                CapturedActivitySection.IsVisible = isExpanded;
+                CapturedActivityToggleText.Text = toggleText;
+                CapturedActivityToggleGlyph.Text = toggleGlyph;
+                break;
+            case "RelatedMoments":
+                RelatedMomentsSection.IsVisible = isExpanded;
+                RelatedMomentsToggleText.Text = toggleText;
+                RelatedMomentsToggleGlyph.Text = toggleGlyph;
+                break;
+        }
+    }
+
+    private void RefreshDetailSectionHeaders()
+    {
+        var rawCount = RawEntriesItems.ItemsSource?.Cast<object>().Count() ?? 0;
+        var relatedCount = RelatedMomentsItems.ItemsSource?.Cast<object>().Count() ?? 0;
+
+        CapturedActivityHeaderText.Text = rawCount == 0
+            ? "Captured activity"
+            : $"Captured activity · {rawCount} entr{(rawCount == 1 ? "y" : "ies")}";
+        RelatedMomentsHeaderText.Text = relatedCount == 0
+            ? "Related moments"
+            : $"Related moments · {relatedCount}";
     }
 
     private ActivityMomentViewModel? GetSelectedMoment()
@@ -1029,6 +1151,7 @@ public partial class MainWindow : Window
 
     private async Task ActivateTimelineSelectionAsync(RailSelection selection)
     {
+        ClearTimelineFocusRange();
         _selectedRailSelection = selection;
         ShowTimelinePage();
         await RefreshTimelineAsync();
@@ -1050,12 +1173,16 @@ public partial class MainWindow : Window
 
     private string BuildTimelineSubtitle()
     {
+        var focusSuffix = _timelineFocusStart.HasValue && _timelineFocusEnd.HasValue
+            ? $" Filtered to {_timelineFocusStart.Value:HH:mm} - {_timelineFocusEnd.Value:HH:mm}."
+            : string.Empty;
+
         if (_sessions.Count == 0)
         {
-            return GetEmptyRailSelectionText();
+            return GetEmptyRailSelectionText() + focusSuffix;
         }
 
-        return _selectedRailSelection switch
+        return (_selectedRailSelection switch
         {
             RailSelection.Timeline => "Local moments grouped from the shared presentation layer",
             RailSelection.Browsing => "Browsing moments from websites and research sessions.",
@@ -1069,7 +1196,7 @@ public partial class MainWindow : Window
             RailSelection.Websites => "Website moments captured from browser activity.",
             RailSelection.Files => "File and document moments captured from document surfaces.",
             _ => "Local moments grouped from the shared presentation layer"
-        };
+        }) + focusSuffix;
     }
 
     private string GetEmptyRailSelectionText()
@@ -1108,6 +1235,93 @@ public partial class MainWindow : Window
             RailSelection.Files => session.Activity.Kind == MomentTrace.Core.ActivityKind.Document,
             _ => true
         };
+    }
+
+    private bool MatchesTimelineFocus(ActivityMomentViewModel session)
+    {
+        if (!_timelineFocusStart.HasValue || !_timelineFocusEnd.HasValue)
+        {
+            return true;
+        }
+
+        var sessionStart = session.SessionStartedAt.LocalDateTime;
+        var sessionEnd = session.SessionEndedAt.LocalDateTime;
+        return sessionEnd > _timelineFocusStart.Value && sessionStart < _timelineFocusEnd.Value;
+    }
+
+    private void ClearTimelineFocusRange()
+    {
+        _timelineFocusStart = null;
+        _timelineFocusEnd = null;
+    }
+
+    private void ClearSearchFilter()
+    {
+        _searchText = string.Empty;
+        if (!string.IsNullOrEmpty(SearchTextBox.Text))
+        {
+            SearchTextBox.Text = string.Empty;
+        }
+    }
+
+    private ActivityMomentViewModel? FindOverviewMoment(long momentId)
+    {
+        return _currentOverview?.Sessions.FirstOrDefault(session => session.Id == momentId)
+            ?? _sessions.FirstOrDefault(session => session.Id == momentId);
+    }
+
+    private static bool TryGetMomentId(object? sender, out long momentId)
+    {
+        var candidate = sender switch
+        {
+            Button { CommandParameter: long id } => id,
+            Control { DataContext: KeyMomentViewModel keyMoment } => keyMoment.Id,
+            _ => 0
+        };
+
+        if (candidate <= 0)
+        {
+            momentId = 0;
+            return false;
+        }
+
+        momentId = candidate;
+        return true;
+    }
+
+    private async Task NavigateToTimelineMomentAsync(long momentId)
+    {
+        ClearTimelineFocusRange();
+        ClearSearchFilter();
+        _selectedRailSelection = RailSelection.Timeline;
+        _selectedMomentId = momentId;
+        ShowTimelinePage();
+        await RefreshTimelineAsync();
+    }
+
+    private async Task ShowTimelineRangeAsync(DateTime start, DateTime end)
+    {
+        ClearSearchFilter();
+        _selectedRailSelection = RailSelection.Timeline;
+        _timelineFocusStart = start;
+        _timelineFocusEnd = end;
+        _selectedMomentId = null;
+        ShowTimelinePage();
+        await RefreshTimelineAsync();
+    }
+
+    private async Task HandleOverviewFocusBlockAsync(FocusBlockViewModel block)
+    {
+        if (block.MomentId is long momentId)
+        {
+            await NavigateToTimelineMomentAsync(momentId);
+            return;
+        }
+
+        if (block.StartedAt is DateTimeOffset startedAt)
+        {
+            await ShowTimelineRangeAsync(startedAt.LocalDateTime, startedAt.LocalDateTime + block.Duration);
+        }
     }
 
     private void SetActiveNavState()
@@ -1183,7 +1397,6 @@ public partial class MainWindow : Window
             SearchTextBox_LostFocus(SearchTextBox, new RoutedEventArgs());
         }
         SetActiveNavState();
-        UpdateTopAppSortButtons();
         _ = RefreshTimelineAsync();
         _ = RefreshOverviewAsync();
     }
@@ -1196,7 +1409,7 @@ public partial class MainWindow : Window
         OuterShell.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Base, pageStrength));
         RailSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Rail, panelStrength));
         TopCommandSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.TopCommand, panelStrength));
-        TopCommandSurface.BorderBrush = new SolidColorBrush(_currentTheme.PanelEdgeStrong);
+        TopCommandSurface.BorderBrush = new SolidColorBrush(_currentTheme.Stroke);
         DetailSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Detail, panelStrength));
         SearchSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.TopCommand, panelStrength));
     }
@@ -1216,56 +1429,21 @@ public partial class MainWindow : Window
     {
         return _timelineGroups
             .Select(group => new TimelineGroupRow(
+                group,
                 group.Name,
                 group.Summary,
                 group.TimeRange,
                 group.AccentBrush,
                 $"{group.VisibleActivities.Count} moment{(group.VisibleActivities.Count == 1 ? string.Empty : "s")}",
+                group.ToggleText,
+                group.ToggleGlyph,
+                group.HasMoreThanPreviewCount,
                 _preferences.TimelineViewMode == "Cards",
                 _preferences.TimelineViewMode == "List",
                 group.VisibleActivities
                     .Select(session => ToMomentRow(session, session.Id == _selectedMomentId))
                     .ToList()))
             .ToList();
-    }
-
-    private void UpdateTopAppSortButtons()
-    {
-        ApplySortButtonState(TopAppsSeenSortButton, _topAppsSort == "Duration");
-        ApplySortButtonState(TopAppsSessionsSortButton, _topAppsSort == "Sessions");
-        ApplySortButtonState(TopAppsPercentSortButton, _topAppsSort == "Percent");
-    }
-
-    private void ApplySortButtonState(Button button, bool isActive)
-    {
-        button.Background = new SolidColorBrush(isActive ? _currentTheme.Accent : _currentTheme.Toolbar);
-        button.BorderBrush = new SolidColorBrush(isActive ? _currentTheme.Accent : _currentTheme.PanelEdgeStrong);
-        button.Foreground = new SolidColorBrush(isActive ? _currentTheme.AccentText : _currentTheme.Text);
-    }
-
-    private IEnumerable<TopApplicationViewModel> SortTopApplications(IEnumerable<TopApplicationViewModel> apps)
-    {
-        return _topAppsSort switch
-        {
-            "Sessions" => apps.OrderByDescending(app => app.SessionCount),
-            "Percent" => apps.OrderByDescending(app => app.Percent),
-            _ => apps.OrderByDescending(app => app.ActiveDuration)
-        };
-    }
-
-    private static TopAppRow ToTopAppRow(TopApplicationViewModel app)
-    {
-        var glyph = string.IsNullOrWhiteSpace(app.AppName) ? "?" : app.AppName[..1].ToUpperInvariant();
-        var accent = app.AppName.ToLowerInvariant() switch
-        {
-            var name when name.Contains("edge") => "#0EA5E9",
-            var name when name.Contains("code") => "#8B5CF6",
-            var name when name.Contains("teams") || name.Contains("slack") => "#22C55E",
-            var name when name.Contains("word") || name.Contains("docs") => "#F59E0B",
-            _ => "#64748B"
-        };
-
-        return new TopAppRow(app.AppName, $"{app.Sessions} sessions", app.Duration, app.PercentOfDay, glyph, accent);
     }
 
     private bool MatchesSearch(ActivityMomentViewModel session)
@@ -1389,6 +1567,26 @@ public partial class MainWindow : Window
         }
     }
 
+    private static OverviewTopApplicationRow ToOverviewTopApplicationRow(TopApplicationViewModel app)
+    {
+        var glyph = string.IsNullOrWhiteSpace(app.AppName) ? "?" : app.AppName[..1].ToUpperInvariant();
+        var accent = app.Representative.Kind switch
+        {
+            MomentTrace.Core.ActivityKind.Browser => "#0EA5E9",
+            MomentTrace.Core.ActivityKind.Development => "#22C55E",
+            MomentTrace.Core.ActivityKind.Document => "#F59E0B",
+            MomentTrace.Core.ActivityKind.System => "#64748B",
+            _ => "#7C5CFF"
+        };
+
+        return new OverviewTopApplicationRow(
+            app.AppName,
+            app.Duration,
+            glyph,
+            accent,
+            Math.Max(app.Percent * 160d, 12d));
+    }
+
     private sealed record MomentRow(
         long Id,
         string Title,
@@ -1416,18 +1614,25 @@ public partial class MainWindow : Window
         bool ShowGlyphFallback = true);
 
     private sealed record TimelineGroupRow(
+        TimelineSessionGroup Group,
         string Name,
         string Summary,
         string TimeRange,
         string AccentBrush,
         string CountLabel,
+        string ToggleText,
+        string ToggleGlyph,
+        bool HasExpandablePreview,
         bool ShowCards,
         bool ShowList,
         IReadOnlyList<MomentRow> Moments);
 
-    private sealed record TopAppRow(string AppName, string Meta, string Duration, string Percent, string Glyph, string AccentBrush);
-
-    private sealed record FocusRow(string Label, string Duration, string AccentBrush);
+    private sealed record OverviewTopApplicationRow(
+        string AppName,
+        string Duration,
+        string Glyph,
+        string AccentBrush,
+        double BarWidth);
 
     private enum DetailTab
     {
@@ -1449,5 +1654,34 @@ public partial class MainWindow : Window
         Apps,
         Websites,
         Files
+    }
+}
+
+file sealed class DelegateCommand<T> : ICommand where T : class
+{
+    private readonly Action<T> _execute;
+
+    public DelegateCommand(Action<T> execute)
+    {
+        _execute = execute;
+    }
+
+    public event EventHandler? CanExecuteChanged
+    {
+        add { }
+        remove { }
+    }
+
+    public bool CanExecute(object? parameter)
+    {
+        return parameter is T;
+    }
+
+    public void Execute(object? parameter)
+    {
+        if (parameter is T value)
+        {
+            _execute(value);
+        }
     }
 }

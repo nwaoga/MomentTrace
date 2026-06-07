@@ -35,7 +35,7 @@ public partial class App : Application
             }
 
             desktop.Exit += Desktop_Exit;
-            desktop.MainWindow = new MainWindow();
+            desktop.MainWindow = new MainWindow(store, _recorder);
         }
 
         base.OnFrameworkInitializationCompleted();

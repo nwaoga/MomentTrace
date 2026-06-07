@@ -6,7 +6,7 @@ The long-term goal is a cross-platform desktop timeline for Windows and macOS. T
 
 ## Preview
 
-![MomentTrace Avalonia shell preview](docs/assets/momenttrace-avalonia-shell-preview.svg)
+![MomentTrace Avalonia shell preview](docs/assets/momenttrace-main-timeline.png)
 
 MomentTrace uses a Windows Timeline-inspired workspace: left navigation, date and type filters, grouped horizontal moment sections, compact cards with app icons or website screenshots, and a contextual detail surface. The window has custom chrome with draggable top regions across the shell, plus minimize, taskbar-safe maximize, close-to-tray, and detail-pane controls.
 
@@ -20,7 +20,7 @@ MomentTrace now splits recording across long sleep gaps and local day changes, s
 
 When browser activity is detected, MomentTrace attempts to capture the active URL with Windows UI Automation and saves a local PNG screenshot only when a new browser session starts.
 
-The **Overview** page gives a lightweight analytics view of the selected day without requiring AI features: summary cards, a 15-minute activity heatmap, top applications, a focus rhythm chart, and day metadata. Activity colours use a fixed semantic palette so browsing, development, documents, apps, system activity, and gaps remain easy to scan across every app theme.
+The **Overview** page is being reshaped into a more visual daily-story dashboard without requiring AI features. The current Avalonia work includes summary cards, a 15-minute activity heatmap, key-moment cards, category breakdown charts, top applications, and a focus-rhythm strip, all sourced from the existing local activity store. Activity colours use a fixed semantic palette so browsing, development, documents, apps, system activity, and gaps remain easy to scan across every app theme.
 
 ![MomentTrace privacy controls](docs/assets/momenttrace-privacy-controls.svg)
 
@@ -235,7 +235,9 @@ The Timeline page is the memory explorer. It shows moments grouped by `Today`, `
 
 Cards are organized into semantic sessions using deterministic local rules. For example, nearby browser pages can become `Website browsing` or `Research session`, code editors and terminals become `Development work`, messaging tools become `Communication`, document tools become `Document review`, and Snipping Tool activity becomes `Screenshot capture`.
 
-Large groups show a compact preview first. `View all` expands that session inline and changes to `Show less`, keeping the timeline readable while still allowing detailed recovery.
+Session naming is deterministic but more specific than a raw telemetry label. Browser sessions can surface dominant hosts such as `Browsing github.com`, research sessions can call out the site being compared, and app-led sessions can lean on the primary app or representative title when that produces a clearer memory anchor.
+
+Large groups show a compact preview first. `View all` expands that session inline and changes to `Show less`, keeping the timeline readable while still allowing detailed recovery in the Avalonia shell and the Windows app.
 
 The left rail can filter the Timeline by semantic Activity views (`Browsing`, `Development`, `Communication`, `Documents`) or raw Sources (`Apps`, `Websites`, `Files`). Active filters are highlighted in the rail and echoed as a small badge in the Timeline header. Selecting `Timeline` clears the rail filter and returns to all moments.
 
@@ -248,15 +250,17 @@ The Library section uses a simple saved-memory model:
 - `Notes` shows moments with notes.
 - `Bookmarks` shows bookmarked moments.
 
-The Overview page is the activity analytics view. It summarizes the selected date with:
+The Overview page is the daily summary view. In the current Avalonia shell it summarizes the selected date with:
 
-- Remembered/foreground span, session count, most-seen app, and longest visible run
-- A horizontal 15-minute heatmap inspired by GitHub contribution graphs and screen-time tools
-- Top applications with seen time, session count, percentage of captured foreground time, and a simple trend column
-- A lightweight focus timeline showing active blocks and gaps
-- A right sidebar for day totals, quick filters, and category legend
+- A day-header and summary cards for captured moments, active time, apps used, longest activity, and idle/gap time
+- A full-width 15-minute activity heatmap with fixed semantic colours and click-through filtering back into Timeline
+- A `Moments today` gallery driven from the same local grouped sessions used by the Timeline
+- Activity breakdown visuals and top-application summaries built from deterministic local totals
+- A focus-rhythm strip that maps the flow of captured work back through the day
 
-Overview intentionally avoids raw event lists so it does not duplicate Timeline.
+Overview intentionally avoids raw event lists so it does not duplicate Timeline. The current design work is aimed at making that page feel like a visual recap of a day rather than a telemetry dashboard.
+
+The detail pane also supports progressive disclosure. Overview, preview, metadata, note, recent activity, captured activity, and related-moment sections can be collapsed independently so the shell stays scannable even when a moment has a lot of surrounding context.
 
 ## Themes And Appearance
 
@@ -401,8 +405,10 @@ For Azure DevOps planning, current implementation work is tracked in the MomentT
 
 Recent planning updates:
 
-- `AB#71` tracks app health and recorder diagnostics. The first Settings health/status panel is implemented, with follow-up scope for last-capture timestamps and browser URL capture availability.
-- Child tasks `#81` and `#82` cover the delivered Settings health panel and warning-free build cleanup.
+- `AB#71` app health and recorder diagnostics is complete, including last-capture freshness and browser URL capture availability in Avalonia Settings.
+- `AB#63` timeline card intelligence and visual polish now has child tasks for session naming, collapsible detail sections, and final empty/loading-state polish.
+- `#88` tracks the Overview redesign toward a meaningful daily-story dashboard. The shared presentation model, reusable Avalonia overview controls, click-through interactions, heatmap composition, summary cards, charts, and first-pass moment/focus layouts are now in the repo, with final visual matching still active.
+- `#89` tracks final Avalonia shell alignment, spacing, and image-framing cleanup.
 
 ## Development Notes
 
@@ -417,12 +423,10 @@ Recent planning updates:
 
 ## Roadmap
 
-- Extend app health with recorder last-capture time, browser URL capture availability, screenshot write checks, and database write checks
+- Finish final timeline visual polish around empty/loading states and remaining card edge cases
+- Finish the remaining literal visual matching on the Overview `Moments today` and `Focus rhythm` sections
+- Refresh README artwork with up-to-date Avalonia shell screenshots from the current dashboard work
 - Add regression tests for privacy exclusions, settings persistence, and warning-free build expectations
-- Replace sanitized README artwork with generated screenshots from a fake/demo activity dataset
-- Finish image and icon rendering parity edge cases across the Avalonia shell
-- Add filter counts, persisted filter preferences, and richer empty states
-- Add saved moments, notes, and bookmarks as real library features
 - Add a settings option to delete local data when the user wants a full privacy cleanup
 - Add first-run onboarding for privacy, startup behavior, and local storage
 - Replace the macOS probe capture path with a proper `MomentTrace.Mac` platform service using native AppKit/Accessibility APIs

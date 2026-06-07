@@ -1,0 +1,123 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:MomentTrace.Desktop.Controls"
+             x:Class="MomentTrace.Desktop.Controls.ActivityHeatmapControl">
+  <Border Background="{DynamicResource RailBrush}"
+          BorderBrush="{DynamicResource PanelEdgeBrush}"
+          BorderThickness="1"
+          CornerRadius="14"
+          Padding="16">
+    <StackPanel Spacing="12">
+      <Grid ColumnDefinitions="*,Auto">
+        <Border Grid.Column="1"
+                Background="{DynamicResource ChipBrush}"
+                BorderBrush="{DynamicResource PanelEdgeBrush}"
+                BorderThickness="1"
+                CornerRadius="999"
+                Padding="14,6">
+          <TextBlock Text="{Binding Caption, RelativeSource={RelativeSource AncestorType=local:ActivityHeatmapControl}}"
+                     Foreground="{DynamicResource MutedTextBrush}"
+                     FontSize="11" />
+        </Border>
+      </Grid>
+      <StackPanel Spacing="10"
+                  Margin="0,6,0,0">
+        <Grid ColumnDefinitions="*,*,*,*,*,*,*,*,*,*,*,*,*">
+          <TextBlock Text="00:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Left" />
+          <TextBlock Grid.Column="1" Text="02:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+          <TextBlock Grid.Column="2" Text="04:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+          <TextBlock Grid.Column="3" Text="06:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+          <TextBlock Grid.Column="4" Text="08:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+          <TextBlock Grid.Column="5" Text="10:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+          <TextBlock Grid.Column="6" Text="12:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+          <TextBlock Grid.Column="7" Text="14:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+          <TextBlock Grid.Column="8" Text="16:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+          <TextBlock Grid.Column="9" Text="18:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+          <TextBlock Grid.Column="10" Text="20:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+          <TextBlock Grid.Column="11" Text="22:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+          <TextBlock Grid.Column="12" Text="24:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Right" />
+        </Grid>
+        <StackPanel Spacing="5">
+          <ItemsControl x:Name="FirstHeatmapRow">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <UniformGrid Columns="48"
+                             Rows="1" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Button Background="Transparent"
+                        BorderBrush="Transparent"
+                        BorderThickness="0"
+                        Padding="0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Command="{Binding ItemCommand, RelativeSource={RelativeSource AncestorType=local:ActivityHeatmapControl}}"
+                        CommandParameter="{Binding}">
+                  <Border HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          Margin="0,0,3,0"
+                          Height="16"
+                          CornerRadius="4"
+                          Background="{Binding Fill}"
+                          ToolTip.Tip="{Binding Tooltip}" />
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <ItemsControl x:Name="SecondHeatmapRow">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <UniformGrid Columns="48"
+                             Rows="1" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Button Background="Transparent"
+                        BorderBrush="Transparent"
+                        BorderThickness="0"
+                        Padding="0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Command="{Binding ItemCommand, RelativeSource={RelativeSource AncestorType=local:ActivityHeatmapControl}}"
+                        CommandParameter="{Binding}">
+                  <Border HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          Margin="0,0,3,0"
+                          Height="16"
+                          CornerRadius="4"
+                          Background="{Binding Fill}"
+                          ToolTip.Tip="{Binding Tooltip}" />
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </StackPanel>
+      <ItemsControl ItemsSource="{Binding LegendItems, RelativeSource={RelativeSource AncestorType=local:ActivityHeatmapControl}}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <StackPanel Orientation="Horizontal"
+                        Spacing="6"
+                        Margin="0,0,12,4">
+              <Border Width="10"
+                      Height="10"
+                      CornerRadius="3"
+                      Background="{Binding Fill}" />
+              <TextBlock Text="{Binding Label}"
+                         Foreground="{DynamicResource MutedTextBrush}"
+                         FontSize="11" />
+            </StackPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </Border>
+</UserControl>

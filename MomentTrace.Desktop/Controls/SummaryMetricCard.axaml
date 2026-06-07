@@ -1,0 +1,41 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:MomentTrace.Desktop.Controls"
+             x:Class="MomentTrace.Desktop.Controls.SummaryMetricCard">
+  <Border Background="{DynamicResource RailBrush}"
+          BorderBrush="{DynamicResource PanelEdgeBrush}"
+          BorderThickness="1"
+          CornerRadius="14"
+          Padding="14"
+          Width="236">
+    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+      <Border Width="46"
+              Height="46"
+              Background="{Binding AccentFill, RelativeSource={RelativeSource AncestorType=local:SummaryMetricCard}}"
+              CornerRadius="15"
+              VerticalAlignment="Center">
+        <TextBlock Text="{Binding AccentGlyph, RelativeSource={RelativeSource AncestorType=local:SummaryMetricCard}}"
+                   Foreground="White"
+                   FontSize="17"
+                   FontWeight="SemiBold"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center" />
+      </Border>
+      <StackPanel Grid.Column="1"
+                  Spacing="4"
+                  VerticalAlignment="Center">
+        <TextBlock Text="{Binding Label, RelativeSource={RelativeSource AncestorType=local:SummaryMetricCard}}"
+                   Foreground="{DynamicResource SubtleTextBrush}"
+                   FontSize="11" />
+        <TextBlock Text="{Binding Value, RelativeSource={RelativeSource AncestorType=local:SummaryMetricCard}}"
+                   Foreground="{DynamicResource TextBrush}"
+                   FontSize="22"
+                   FontWeight="SemiBold" />
+        <TextBlock Text="{Binding Detail, RelativeSource={RelativeSource AncestorType=local:SummaryMetricCard}}"
+                   Foreground="{DynamicResource MutedTextBrush}"
+                   FontSize="10"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+    </Grid>
+  </Border>
+</UserControl>
