@@ -6,9 +6,9 @@ The long-term goal is a cross-platform desktop timeline for Windows and macOS. T
 
 ## Preview
 
-![MomentTrace Avalonia shell preview](docs/assets/momenttrace-main-timeline.png)
+![MomentTrace Avalonia shell preview](docs/assets/momenttrace-avalonia-shell-current.png)
 
-MomentTrace uses a Windows Timeline-inspired workspace: left navigation, date and type filters, grouped horizontal moment sections, compact cards with app icons or website screenshots, and a contextual detail surface. The window has custom chrome with draggable top regions across the shell, plus minimize, taskbar-safe maximize, close-to-tray, and detail-pane controls.
+MomentTrace uses a Windows Timeline-inspired workspace: left navigation, date and type filters, grouped horizontal moment sections, compact cards with app icons or website screenshots, and a contextual detail surface. The current Avalonia shell preview above reflects the active parity branch with shared presentation logic, custom chrome, and the newer grouped card treatment.
 
 The public previews use sanitized demo activity rather than a live personal timeline, so they can show the current card/list layouts, real app icon slots, screenshots, themed modals, and top command chrome without exposing private work history.
 

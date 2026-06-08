@@ -1741,7 +1741,7 @@
                                                          Caption="15 minute blocks" />
                     </Grid>
 
-                    <Grid ColumnDefinitions="1.55*,0.85*"
+                    <Grid ColumnDefinitions="1.65*,0.75*"
                           ColumnSpacing="14">
                         <Border Grid.Column="0"
                                 Classes="overviewPanel">
@@ -1755,19 +1755,20 @@
                                                Foreground="{DynamicResource SubtleTextBrush}"
                                                FontSize="11" />
                                 </StackPanel>
-                                <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                <ScrollViewer HorizontalScrollBarVisibility="Disabled"
                                               VerticalScrollBarVisibility="Disabled"
                                               AllowAutoHide="False">
                                     <ItemsControl x:Name="OverviewMomentsItems">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
-                                                <StackPanel Orientation="Horizontal"
-                                                            Spacing="12" />
+                                                <UniformGrid Columns="4"
+                                                             Rows="1" />
                                             </ItemsPanelTemplate>
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <StackPanel Width="224"
+                                                <StackPanel Width="206"
+                                                            Margin="0,0,10,0"
                                                             Spacing="0">
                                                     <Button Classes="momentCard"
                                                             Click="OverviewMomentButton_Click"

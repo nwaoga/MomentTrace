@@ -7,10 +7,10 @@
           BorderThickness="1"
           CornerRadius="14"
           Padding="0"
-          Width="188">
+          Width="198">
     <StackPanel Spacing="0">
       <Border x:Name="PreviewHost"
-              Height="132"
+              Height="146"
               CornerRadius="14,14,0,0"
               Background="{DynamicResource ElevatedPanelBrush}"
               ClipToBounds="True">
@@ -21,7 +21,7 @@
                   CornerRadius="8"
                   HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="10"
+                  Margin="10,10,10,0"
                   Padding="8,4">
             <TextBlock Text="{Binding Timestamp, RelativeSource={RelativeSource AncestorType=local:MomentCard}}"
                        Foreground="{Binding AccentText, RelativeSource={RelativeSource AncestorType=local:MomentCard}}"
@@ -48,7 +48,7 @@
           <TextBlock Text="{Binding Title, RelativeSource={RelativeSource AncestorType=local:MomentCard}}"
                      Foreground="{DynamicResource TextBrush}"
                      FontWeight="SemiBold"
-                     FontSize="12"
+                     FontSize="13"
                      TextWrapping="Wrap"
                      MaxLines="2" />
           <Border Grid.Column="1"
@@ -69,6 +69,7 @@
                      Text="{Binding Category, RelativeSource={RelativeSource AncestorType=local:MomentCard}}"
                      Foreground="{DynamicResource MutedTextBrush}"
                      FontSize="11"
+                     Margin="0,2,0,0"
                      TextWrapping="NoWrap"
                      TextTrimming="CharacterEllipsis" />
         </Grid>
