@@ -827,8 +827,25 @@ public partial class MainWindow : Window
 
     private void RefreshDetailSectionHeaders()
     {
+        var selected = GetSelectedMoment();
         var rawCount = RawEntriesItems.ItemsSource?.Cast<object>().Count() ?? 0;
         var relatedCount = RelatedMomentsItems.ItemsSource?.Cast<object>().Count() ?? 0;
+        var hasPreview = DetailPreviewHost.IsVisible;
+        var hasNote = !string.IsNullOrWhiteSpace(MomentNoteTextBox.Text);
+
+        OverviewNarrativeHeaderText.Text = selected is null
+            ? "Moment overview · waiting"
+            : "Moment overview · summary";
+        PreviewHeaderText.Text = hasPreview
+            ? "Preview · available"
+            : "Preview · unavailable";
+        MetadataHeaderText.Text = selected is null
+            ? "Moment details · waiting"
+            : "Moment details · local";
+        NoteHeaderText.Text = hasNote
+            ? "Personal note · saved"
+            : "Personal note · empty";
+        RecentActivityHeaderText.Text = "Recent activity · recorder";
 
         CapturedActivityHeaderText.Text = rawCount == 0
             ? "Captured activity · empty"

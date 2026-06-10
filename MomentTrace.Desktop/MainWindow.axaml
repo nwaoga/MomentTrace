@@ -1280,7 +1280,8 @@
                                                     Click="DetailSectionToggleButton_Click"
                                                     CommandParameter="OverviewNarrative">
                                                 <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                                                    <TextBlock Text="Moment overview"
+                                                    <TextBlock x:Name="OverviewNarrativeHeaderText"
+                                                               Text="Moment overview"
                                                                Foreground="{DynamicResource TextBrush}"
                                                                FontSize="14"
                                                                FontWeight="SemiBold" />
@@ -1321,7 +1322,8 @@
                                                     Click="DetailSectionToggleButton_Click"
                                                     CommandParameter="Preview">
                                                 <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                                                    <TextBlock Text="Preview"
+                                                    <TextBlock x:Name="PreviewHeaderText"
+                                                               Text="Preview"
                                                                Foreground="{DynamicResource TextBrush}"
                                                                FontSize="14"
                                                                FontWeight="SemiBold" />
@@ -1362,7 +1364,8 @@
                                                     Click="DetailSectionToggleButton_Click"
                                                     CommandParameter="Metadata">
                                                 <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                                                    <TextBlock Text="Moment details"
+                                                    <TextBlock x:Name="MetadataHeaderText"
+                                                               Text="Moment details"
                                                                Foreground="{DynamicResource TextBrush}"
                                                                FontSize="14"
                                                                FontWeight="SemiBold" />
@@ -1467,7 +1470,8 @@
                                                     Click="DetailSectionToggleButton_Click"
                                                     CommandParameter="Note">
                                                 <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                                                    <TextBlock Text="Personal note"
+                                                    <TextBlock x:Name="NoteHeaderText"
+                                                               Text="Personal note"
                                                                Foreground="{DynamicResource TextBrush}"
                                                                FontSize="14"
                                                                FontWeight="SemiBold" />
@@ -1522,7 +1526,8 @@
                                                     Click="DetailSectionToggleButton_Click"
                                                     CommandParameter="RecentActivity">
                                                 <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                                                    <TextBlock Text="Recent activity"
+                                                    <TextBlock x:Name="RecentActivityHeaderText"
+                                                               Text="Recent activity"
                                                                Foreground="{DynamicResource TextBrush}"
                                                                FontSize="14"
                                                                FontWeight="SemiBold" />
