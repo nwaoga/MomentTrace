@@ -1074,6 +1074,30 @@
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </ScrollViewer>
+                            <Border x:Name="TimelineEmptyState"
+                                    Grid.Row="1"
+                                    IsVisible="False"
+                                    Background="{DynamicResource CardBrush}"
+                                    BorderBrush="{DynamicResource FaintBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="14"
+                                    Padding="22"
+                                    Margin="0,6,12,0"
+                                    VerticalAlignment="Top">
+                                <StackPanel Spacing="8">
+                                    <TextBlock x:Name="TimelineEmptyTitleText"
+                                               Text="No moments yet"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               FontSize="18"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock x:Name="TimelineEmptyDetailText"
+                                               Text="Captured activity will appear here once local moments are available."
+                                               Foreground="{DynamicResource SubtleTextBrush}"
+                                               FontSize="12"
+                                               TextWrapping="Wrap"
+                                               LineHeight="19" />
+                                </StackPanel>
+                            </Border>
                         </Grid>
 
                     <Border x:Name="DetailSurface"

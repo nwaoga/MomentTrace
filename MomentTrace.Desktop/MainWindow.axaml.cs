@@ -110,21 +110,21 @@ public partial class MainWindow : Window
         _isReloading = true;
         try
         {
-        await _store.InitializeAsync();
+            await _store.InitializeAsync();
 
-        var activities = await _store.QueryAsync(new TimelineQuery { Limit = 1500 });
-        _visibleActivities.Clear();
-        var privacyFilter = CurrentPrivacyFilter();
-        _visibleActivities.AddRange(activities
-            .Where(activity => !ActivityExclusionFilter.IsExcluded(activity))
-            .Where(activity => !privacyFilter.ShouldExclude(activity)));
+            var activities = await _store.QueryAsync(new TimelineQuery { Limit = 1500 });
+            _visibleActivities.Clear();
+            var privacyFilter = CurrentPrivacyFilter();
+            _visibleActivities.AddRange(activities
+                .Where(activity => !ActivityExclusionFilter.IsExcluded(activity))
+                .Where(activity => !privacyFilter.ShouldExclude(activity)));
 
-        var dateFilters = TimelineDateFilterBuilder.Build(_visibleActivities, DateTime.Today);
-        DateFilterComboBox.ItemsSource = dateFilters;
-        DateFilterComboBox.SelectedItem ??= dateFilters.FirstOrDefault();
+            var dateFilters = TimelineDateFilterBuilder.Build(_visibleActivities, DateTime.Today);
+            DateFilterComboBox.ItemsSource = dateFilters;
+            DateFilterComboBox.SelectedItem ??= dateFilters.FirstOrDefault();
 
-        await RefreshTimelineAsync();
-        await RefreshOverviewAsync();
+            await RefreshTimelineAsync();
+            await RefreshOverviewAsync();
         }
         finally
         {
@@ -156,6 +156,7 @@ public partial class MainWindow : Window
         }
 
         TimelineGroupsItems.ItemsSource = BuildTimelineGroupRows();
+        UpdateTimelineEmptyState();
         TimelineCountText.Text = $"{_sessions.Count} moments on {TimelineDateFilterBuilder.FormatDateLabel(selectedDate, DateTime.Today)}";
         TimelineSubtitleText.Text = BuildTimelineSubtitle();
 
@@ -701,8 +702,8 @@ public partial class MainWindow : Window
         DetailMetaEndedText.Text = "Local only";
         DetailMetaCategoryText.Text = "Moment";
         DetailNarrativeText.Text = "Select a moment to inspect its grouped raw activity and nearby related work.";
-        ActivityTabSummaryText.Text = "Select a moment to inspect its raw captured entries.";
-        RelatedSummaryText.Text = "No related moments yet";
+        ActivityTabSummaryText.Text = "Choose a moment to inspect the raw entries grouped into it.";
+        RelatedSummaryText.Text = "Choose a moment to see nearby activity from the same source or category.";
         RawEntriesItems.ItemsSource = Array.Empty<DetailActivityRowViewModel>();
         RelatedMomentsItems.ItemsSource = Array.Empty<RelatedMomentViewModel>();
         PinMomentButtonText.Text = "Pin";
@@ -830,10 +831,10 @@ public partial class MainWindow : Window
         var relatedCount = RelatedMomentsItems.ItemsSource?.Cast<object>().Count() ?? 0;
 
         CapturedActivityHeaderText.Text = rawCount == 0
-            ? "Captured activity"
+            ? "Captured activity · empty"
             : $"Captured activity · {rawCount} entr{(rawCount == 1 ? "y" : "ies")}";
         RelatedMomentsHeaderText.Text = relatedCount == 0
-            ? "Related moments"
+            ? "Related moments · empty"
             : $"Related moments · {relatedCount}";
     }
 
@@ -1216,6 +1217,59 @@ public partial class MainWindow : Window
             RailSelection.Files => "No file moments matched this day",
             _ => "No activity captured for this day yet"
         };
+    }
+
+    private void UpdateTimelineEmptyState()
+    {
+        if (_sessions.Count > 0)
+        {
+            TimelineEmptyState.IsVisible = false;
+            TimelineScrollViewer.IsVisible = true;
+            return;
+        }
+
+        var title = _isReloading
+            ? "Refreshing timeline..."
+            : GetEmptyRailSelectionText();
+        var detail = BuildTimelineEmptyDetail();
+        ShowTimelineStatusState(title, detail);
+    }
+
+    private string BuildTimelineEmptyDetail()
+    {
+        if (!string.IsNullOrWhiteSpace(_searchText))
+        {
+            return $"No moments matched \"{_searchText}\". Try clearing search or changing the current rail filter.";
+        }
+
+        if (_timelineFocusStart.HasValue && _timelineFocusEnd.HasValue)
+        {
+            return $"No moments fell inside {_timelineFocusStart.Value:HH:mm} - {_timelineFocusEnd.Value:HH:mm}. Clear the focused time block or pick a different range.";
+        }
+
+        return _selectedRailSelection switch
+        {
+            RailSelection.Timeline => "Captured activity will appear here once MomentTrace records local moments for this day.",
+            RailSelection.Browsing => "Try another date or switch back to All activity to see browsing moments.",
+            RailSelection.Development => "No coding, tooling, or terminal moments matched this date and filter combination.",
+            RailSelection.Communication => "No conversation, meeting, or collaboration moments matched this view.",
+            RailSelection.Documents => "No file, note, or document moments matched this view.",
+            RailSelection.SavedMoments => "Pinned, bookmarked, and noted moments will collect here once you save them.",
+            RailSelection.Notes => "Moments with personal notes will appear here after you save one.",
+            RailSelection.Bookmarks => "Bookmarked moments will appear here once you mark activity for later.",
+            RailSelection.Apps => "Application-led moments will appear here when desktop or system surfaces are captured.",
+            RailSelection.Websites => "Website moments will appear here when browser activity is captured for this date.",
+            RailSelection.Files => "File and document moments will appear here when document surfaces are captured.",
+            _ => "Captured activity will appear here once local moments are available."
+        };
+    }
+
+    private void ShowTimelineStatusState(string title, string detail)
+    {
+        TimelineEmptyTitleText.Text = title;
+        TimelineEmptyDetailText.Text = detail;
+        TimelineEmptyState.IsVisible = true;
+        TimelineScrollViewer.IsVisible = false;
     }
 
     private bool MatchesRailSelection(ActivityMomentViewModel session)
