@@ -133,6 +133,10 @@ public sealed class FocusBlockViewModel
 
     public double Width => Math.Clamp(Duration.TotalMinutes * 1.35, 20, 84);
 
+    public string StartedAtLabel => StartedAt?.LocalDateTime.ToString("h:mm tt") ?? string.Empty;
+
+    public string DurationLabel => OverviewPresentationBuilder.FormatDuration(Duration);
+
     public string Tooltip => $"{Label}\nSeen {OverviewPresentationBuilder.FormatDuration(Duration)}";
 
     public static FocusBlockViewModel Active(ActivityMomentViewModel moment)

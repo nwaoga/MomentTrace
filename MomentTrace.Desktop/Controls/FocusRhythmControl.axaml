@@ -8,18 +8,62 @@
           CornerRadius="14"
           Padding="16,12,16,12">
     <StackPanel Spacing="10">
-      <StackPanel Spacing="3">
-        <TextBlock Text="{Binding Title, RelativeSource={RelativeSource AncestorType=local:FocusRhythmControl}}"
-                   Foreground="{DynamicResource TextBrush}"
-                   FontSize="16"
-                   FontWeight="SemiBold" />
-        <TextBlock Text="{Binding Subtitle, RelativeSource={RelativeSource AncestorType=local:FocusRhythmControl}}"
-                   Foreground="{DynamicResource SubtleTextBrush}"
-                   FontSize="11" />
-      </StackPanel>
-      <ScrollViewer HorizontalScrollBarVisibility="Auto"
+      <Grid ColumnDefinitions="*,Auto"
+            ColumnSpacing="12">
+        <StackPanel Spacing="3">
+          <TextBlock Text="{Binding Title, RelativeSource={RelativeSource AncestorType=local:FocusRhythmControl}}"
+                     Foreground="{DynamicResource TextBrush}"
+                     FontSize="16"
+                     FontWeight="SemiBold" />
+          <TextBlock Text="{Binding Subtitle, RelativeSource={RelativeSource AncestorType=local:FocusRhythmControl}}"
+                     Foreground="{DynamicResource SubtleTextBrush}"
+                     FontSize="11" />
+        </StackPanel>
+        <StackPanel Grid.Column="1"
+                    Orientation="Horizontal"
+                    Spacing="8"
+                    VerticalAlignment="Top">
+          <Button x:Name="ScrollLeftButton"
+                  Background="{DynamicResource ToolbarBrush}"
+                  Foreground="{DynamicResource TextBrush}"
+                  BorderBrush="{DynamicResource FaintBorderBrush}"
+                  BorderThickness="1"
+                  CornerRadius="10"
+                  Width="36"
+                  Height="36"
+                  Padding="0"
+                  Click="ScrollLeftButton_Click">
+            <TextBlock Text="‹"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" />
+          </Button>
+          <Button x:Name="ScrollRightButton"
+                  Background="{DynamicResource ToolbarBrush}"
+                  Foreground="{DynamicResource TextBrush}"
+                  BorderBrush="{DynamicResource FaintBorderBrush}"
+                  BorderThickness="1"
+                  CornerRadius="10"
+                  Width="36"
+                  Height="36"
+                  Padding="0"
+                  Click="ScrollRightButton_Click">
+            <TextBlock Text="›"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" />
+          </Button>
+        </StackPanel>
+      </Grid>
+      <ScrollViewer x:Name="FocusScrollViewer"
+                    HorizontalScrollBarVisibility="Hidden"
                     VerticalScrollBarVisibility="Disabled"
-                    AllowAutoHide="False">
+                    AllowAutoHide="False"
+                    PointerPressed="FocusScrollViewer_PointerPressed"
+                    PointerMoved="FocusScrollViewer_PointerMoved"
+                    PointerReleased="FocusScrollViewer_PointerReleased">
       <Grid MinHeight="92">
         <Border Height="2"
                 Background="{DynamicResource PanelEdgeBrush}"
@@ -48,7 +92,7 @@
                 <Grid Width="{Binding Width}"
                       MinWidth="112"
                       RowDefinitions="Auto,Auto,Auto">
-                  <TextBlock Text="{Binding StartedAt, StringFormat={}{0:HH:mm}}"
+                  <TextBlock Text="{Binding StartedAtLabel}"
                              Foreground="{DynamicResource MutedTextBrush}"
                              FontSize="10"
                              HorizontalAlignment="Left" />
@@ -82,7 +126,7 @@
                                    FontSize="10"
                                    TextTrimming="CharacterEllipsis"
                                    MaxLines="2" />
-                        <TextBlock Text="{Binding Duration}"
+                        <TextBlock Text="{Binding DurationLabel}"
                                    Foreground="{DynamicResource AccentTextBrush}"
                                    FontSize="9" />
                       </StackPanel>

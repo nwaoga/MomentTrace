@@ -60,6 +60,13 @@ public partial class MainWindow : Window
     private Vector _scrollDragStartOffset;
     private bool _isScrollDragging;
     private bool _isReloading;
+    private DispatcherTimer? _overviewMomentsScrollAnimationTimer;
+    private double _overviewMomentsScrollFrom;
+    private double _overviewMomentsScrollTo;
+    private readonly Stopwatch _overviewMomentsScrollClock = new();
+    private Point _overviewMomentsDragStartPoint;
+    private Vector _overviewMomentsDragStartOffset;
+    private bool _isOverviewMomentsDragging;
     private readonly ICommand _overviewHeatmapCommand;
     private readonly ICommand _overviewFocusCommand;
     private static readonly Cursor ScrollReadyCursor = new(StandardCursorType.Hand);
@@ -1392,6 +1399,117 @@ public partial class MainWindow : Window
         if (block.StartedAt is DateTimeOffset startedAt)
         {
             await ShowTimelineRangeAsync(startedAt.LocalDateTime, startedAt.LocalDateTime + block.Duration);
+        }
+    }
+
+    private void OverviewMomentsScrollLeft_Click(object? sender, RoutedEventArgs e)
+    {
+        ScrollOverviewMomentsBy(-GetOverviewMomentsScrollStep());
+    }
+
+    private void OverviewMomentsScrollRight_Click(object? sender, RoutedEventArgs e)
+    {
+        ScrollOverviewMomentsBy(GetOverviewMomentsScrollStep());
+    }
+
+    private double GetOverviewMomentsScrollStep()
+    {
+        return OverviewMomentsScrollViewer.Bounds.Width > 0
+            ? Math.Max(240d, OverviewMomentsScrollViewer.Bounds.Width * 0.82d)
+            : 320d;
+    }
+
+    private void ScrollOverviewMomentsBy(double delta)
+    {
+        var maxOffset = Math.Max(0d, OverviewMomentsScrollViewer.Extent.Width - OverviewMomentsScrollViewer.Viewport.Width);
+        var nextX = Math.Clamp(OverviewMomentsScrollViewer.Offset.X + delta, 0d, maxOffset);
+        AnimateOverviewMomentsScrollTo(nextX);
+    }
+
+    private void OverviewMomentsScrollViewer_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (e.GetCurrentPoint(OverviewMomentsScrollViewer).Properties.IsLeftButtonPressed is false)
+        {
+            return;
+        }
+
+        _overviewMomentsDragStartPoint = e.GetPosition(OverviewMomentsScrollViewer);
+        _overviewMomentsDragStartOffset = OverviewMomentsScrollViewer.Offset;
+        _isOverviewMomentsDragging = false;
+    }
+
+    private void OverviewMomentsScrollViewer_PointerMoved(object? sender, PointerEventArgs e)
+    {
+        if (e.GetCurrentPoint(OverviewMomentsScrollViewer).Properties.IsLeftButtonPressed is false)
+        {
+            ReleaseOverviewMomentsDrag(e);
+            return;
+        }
+
+        var delta = e.GetPosition(OverviewMomentsScrollViewer) - _overviewMomentsDragStartPoint;
+        if (!_isOverviewMomentsDragging && Math.Abs(delta.X) < 4)
+        {
+            return;
+        }
+
+        if (!_isOverviewMomentsDragging)
+        {
+            _isOverviewMomentsDragging = true;
+            e.Pointer.Capture(OverviewMomentsScrollViewer);
+        }
+
+        var maxOffset = Math.Max(0, OverviewMomentsScrollViewer.Extent.Width - OverviewMomentsScrollViewer.Viewport.Width);
+        var nextX = Math.Clamp(_overviewMomentsDragStartOffset.X - delta.X, 0, maxOffset);
+        OverviewMomentsScrollViewer.Offset = new Vector(nextX, OverviewMomentsScrollViewer.Offset.Y);
+        e.Handled = true;
+    }
+
+    private void OverviewMomentsScrollViewer_PointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        ReleaseOverviewMomentsDrag(e);
+    }
+
+    private void ReleaseOverviewMomentsDrag(PointerEventArgs e)
+    {
+        e.Pointer.Capture(null);
+        _isOverviewMomentsDragging = false;
+    }
+
+    private void AnimateOverviewMomentsScrollTo(double targetX)
+    {
+        _overviewMomentsScrollFrom = OverviewMomentsScrollViewer.Offset.X;
+        _overviewMomentsScrollTo = targetX;
+
+        if (Math.Abs(_overviewMomentsScrollTo - _overviewMomentsScrollFrom) < 1d)
+        {
+            OverviewMomentsScrollViewer.Offset = new Vector(_overviewMomentsScrollTo, OverviewMomentsScrollViewer.Offset.Y);
+            return;
+        }
+
+        _overviewMomentsScrollAnimationTimer ??= new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(16)
+        };
+        _overviewMomentsScrollAnimationTimer.Tick -= OverviewMomentsScrollAnimationTimer_Tick;
+        _overviewMomentsScrollAnimationTimer.Tick += OverviewMomentsScrollAnimationTimer_Tick;
+
+        _overviewMomentsScrollClock.Restart();
+        _overviewMomentsScrollAnimationTimer.Start();
+    }
+
+    private void OverviewMomentsScrollAnimationTimer_Tick(object? sender, EventArgs e)
+    {
+        const double durationMs = 220d;
+
+        var progress = Math.Clamp(_overviewMomentsScrollClock.Elapsed.TotalMilliseconds / durationMs, 0d, 1d);
+        var eased = 1d - Math.Pow(1d - progress, 3d);
+        var nextX = _overviewMomentsScrollFrom + ((_overviewMomentsScrollTo - _overviewMomentsScrollFrom) * eased);
+        OverviewMomentsScrollViewer.Offset = new Vector(nextX, OverviewMomentsScrollViewer.Offset.Y);
+
+        if (progress >= 1d)
+        {
+            _overviewMomentsScrollAnimationTimer?.Stop();
+            OverviewMomentsScrollViewer.Offset = new Vector(_overviewMomentsScrollTo, OverviewMomentsScrollViewer.Offset.Y);
         }
     }
 
