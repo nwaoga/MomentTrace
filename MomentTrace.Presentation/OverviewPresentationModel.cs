@@ -109,7 +109,14 @@ public sealed class TopApplicationViewModel
 
 public sealed class FocusBlockViewModel
 {
-    private FocusBlockViewModel(string label, TimeSpan duration, string fill, bool isGap, DateTimeOffset? startedAt, long? momentId)
+    private FocusBlockViewModel(
+        string label,
+        TimeSpan duration,
+        string fill,
+        bool isGap,
+        DateTimeOffset? startedAt,
+        long? momentId,
+        double timelineOffset)
     {
         Label = label;
         Duration = duration;
@@ -117,6 +124,7 @@ public sealed class FocusBlockViewModel
         IsGap = isGap;
         StartedAt = startedAt;
         MomentId = momentId;
+        TimelineOffset = timelineOffset;
     }
 
     public string Label { get; }
@@ -131,15 +139,17 @@ public sealed class FocusBlockViewModel
 
     public long? MomentId { get; }
 
-    public double Width => Math.Clamp(Duration.TotalMinutes * 1.35, 20, 84);
+    public double TimelineOffset { get; }
 
-    public string StartedAtLabel => StartedAt?.LocalDateTime.ToString("h:mm tt") ?? string.Empty;
+    public double Width => Math.Clamp((Duration.TotalMinutes * 1.85d) + 72d, 112d, 220d);
+
+    public string StartedAtLabel => StartedAt?.LocalDateTime.ToString("HH:mm") ?? string.Empty;
 
     public string DurationLabel => OverviewPresentationBuilder.FormatDuration(Duration);
 
     public string Tooltip => $"{Label}\nSeen {OverviewPresentationBuilder.FormatDuration(Duration)}";
 
-    public static FocusBlockViewModel Active(ActivityMomentViewModel moment)
+    public static FocusBlockViewModel Active(ActivityMomentViewModel moment, double timelineOffset)
     {
         var fill = moment.Activity.Kind switch
         {
@@ -160,11 +170,19 @@ public sealed class FocusBlockViewModel
             fill,
             isGap: false,
             moment.SessionStartedAt,
-            moment.Id);
+            moment.Id,
+            timelineOffset);
     }
 
-    public static FocusBlockViewModel Gap(TimeSpan duration)
+    public static FocusBlockViewModel Gap(TimeSpan duration, DateTimeOffset startedAt, double timelineOffset)
     {
-        return new FocusBlockViewModel("Gap or idle space", duration, ActivityPalette.Gap, isGap: true, startedAt: null, momentId: null);
+        return new FocusBlockViewModel(
+            "Gap or idle space",
+            duration,
+            ActivityPalette.Gap,
+            isGap: true,
+            startedAt,
+            momentId: null,
+            timelineOffset);
     }
 }

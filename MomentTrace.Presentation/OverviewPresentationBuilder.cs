@@ -170,8 +170,18 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
 
     private static IReadOnlyList<FocusBlockViewModel> BuildFocusBlocks(IReadOnlyList<ActivityMomentViewModel> sessions)
     {
+        if (sessions.Count == 0)
+        {
+            return [];
+        }
+
+        const double pixelsPerMinute = 2.35d;
+        const double minimumBlockGap = 12d;
+
         var blocks = new List<FocusBlockViewModel>();
         ActivityMomentViewModel? previous = null;
+        var anchor = sessions[0].SessionStartedAt;
+        var previousDisplayEnd = 0d;
 
         foreach (var session in sessions)
         {
@@ -180,15 +190,23 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
                 var gap = session.SessionStartedAt - previous.SessionEndedAt;
                 if (gap.TotalMinutes >= 5)
                 {
-                    blocks.Add(FocusBlockViewModel.Gap(gap));
+                    var rawGapOffset = Math.Max(0d, (previous.SessionEndedAt - anchor).TotalMinutes * pixelsPerMinute);
+                    var gapOffset = Math.Max(rawGapOffset, previousDisplayEnd + minimumBlockGap);
+                    var gapBlock = FocusBlockViewModel.Gap(gap, previous.SessionEndedAt, gapOffset);
+                    blocks.Add(gapBlock);
+                    previousDisplayEnd = gapBlock.TimelineOffset + gapBlock.Width;
                 }
             }
 
-            blocks.Add(FocusBlockViewModel.Active(session));
+            var rawSessionOffset = Math.Max(0d, (session.SessionStartedAt - anchor).TotalMinutes * pixelsPerMinute);
+            var sessionOffset = Math.Max(rawSessionOffset, previousDisplayEnd + minimumBlockGap);
+            var sessionBlock = FocusBlockViewModel.Active(session, sessionOffset);
+            blocks.Add(sessionBlock);
+            previousDisplayEnd = sessionBlock.TimelineOffset + sessionBlock.Width;
             previous = session;
         }
 
-        return blocks.Take(26).ToList();
+        return blocks.Take(24).ToList();
     }
 
     private static IEnumerable<KeyMomentViewModel> BuildKeyMoments(IReadOnlyList<ActivityMomentViewModel> sessions)

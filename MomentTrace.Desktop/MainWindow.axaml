@@ -1777,7 +1777,7 @@
                                                          Caption="15 minute blocks" />
                     </Grid>
 
-                    <Grid ColumnDefinitions="1.65*,0.75*"
+                    <Grid ColumnDefinitions="1.78*,0.72*"
                           ColumnSpacing="14">
                         <StackPanel Grid.Column="0"
                                     VerticalAlignment="Top"
@@ -1830,15 +1830,14 @@
                                                       HorizontalAlignment="Left">
                                             <ItemsControl.ItemsPanel>
                                                 <ItemsPanelTemplate>
-                                                    <WrapPanel Orientation="Horizontal"
-                                                               ItemWidth="224"
-                                                               ItemHeight="244" />
+                                                    <StackPanel Orientation="Horizontal"
+                                                                Spacing="14" />
                                                 </ItemsPanelTemplate>
                                             </ItemsControl.ItemsPanel>
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Border Width="224"
-                                                            Margin="0,0,14,14">
+                                                    <Border Width="248"
+                                                            Margin="0,0,0,0">
                                                         <Button Classes="momentCard"
                                                                 Click="OverviewMomentButton_Click"
                                                                 CommandParameter="{Binding Id}">

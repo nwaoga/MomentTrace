@@ -36,7 +36,7 @@ public sealed record AppThemePalette(
 
     public static readonly AppThemePalette StarbucksReserve = new(
         "StarbucksReserve",
-        "Starbucks Reserve",
+        "Matcha Reserve",
         FromHex("#0F1512"),
         FromHex("#17201C"),
         FromHex("#F6F5F2"),
@@ -44,9 +44,29 @@ public sealed record AppThemePalette(
         FromHex("#00754A"),
         FromHex("#2E4D40"));
 
+    public static readonly AppThemePalette CostaAfterglow = new(
+        "CostaAfterglow",
+        "Costa Afterglow",
+        FromHex("#231019"),
+        FromHex("#311722"),
+        FromHex("#FFF5F7"),
+        FromHex("#D8B7C0"),
+        FromHex("#C64176"),
+        FromHex("#5E3044"));
+
+    public static readonly AppThemePalette EspressoMono = new(
+        "EspressoMono",
+        "Espresso (Mono)",
+        FromHex("#18110B"),
+        FromHex("#22170F"),
+        FromHex("#F8F1E7"),
+        FromHex("#C6B29C"),
+        FromHex("#C6844C"),
+        FromHex("#5E432B"));
+
     public static readonly AppThemePalette Light = new(
         "Light",
-        "Light",
+        "Hot White",
         FromHex("#F6F8FB"),
         FromHex("#FFFFFF"),
         FromHex("#172033"),
@@ -123,6 +143,8 @@ public sealed record AppThemePalette(
         Midnight,
         GitHubLight,
         StarbucksReserve,
+        CostaAfterglow,
+        EspressoMono,
         Light
     ];
 
@@ -136,6 +158,25 @@ public sealed record AppThemePalette(
         if (string.Equals(key, "AmazonGreen", StringComparison.OrdinalIgnoreCase))
         {
             return StarbucksReserve;
+        }
+
+        if (string.Equals(key, "MatchaReserve", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "Matcha Reserve", StringComparison.OrdinalIgnoreCase))
+        {
+            return StarbucksReserve;
+        }
+
+        if (string.Equals(key, "Costa", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "Costa Afterglow", StringComparison.OrdinalIgnoreCase))
+        {
+            return CostaAfterglow;
+        }
+
+        if (string.Equals(key, "Espresso", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "Brown", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "Espresso (Mono)", StringComparison.OrdinalIgnoreCase))
+        {
+            return EspressoMono;
         }
 
         if (string.Equals(key, "White Light", StringComparison.OrdinalIgnoreCase))

@@ -64,33 +64,36 @@
                     PointerPressed="FocusScrollViewer_PointerPressed"
                     PointerMoved="FocusScrollViewer_PointerMoved"
                     PointerReleased="FocusScrollViewer_PointerReleased">
-      <Grid MinHeight="92">
-        <Border Height="2"
-                Background="{DynamicResource PanelEdgeBrush}"
-                CornerRadius="999"
-                Margin="2,18,18,0"
-                VerticalAlignment="Top" />
-        <Border Width="18"
-                Height="2"
-                Background="{DynamicResource PanelEdgeBrush}"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Margin="0,18,0,0"
-                RenderTransformOrigin="0.5,0.5">
-          <Border.RenderTransform>
-            <RotateTransform Angle="18" />
-          </Border.RenderTransform>
-        </Border>
-        <ItemsControl ItemsSource="{Binding Items, RelativeSource={RelativeSource AncestorType=local:FocusRhythmControl}}">
+        <Grid MinHeight="118"
+              Margin="0,2,0,0">
+          <Border Height="2"
+                  Background="{DynamicResource PanelEdgeBrush}"
+                  CornerRadius="999"
+                  Margin="2,22,22,0"
+                  VerticalAlignment="Top" />
+          <Border Width="18"
+                  Height="2"
+                  Background="{DynamicResource PanelEdgeBrush}"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Top"
+                  Margin="0,22,0,0"
+                  RenderTransformOrigin="0.5,0.5">
+            <Border.RenderTransform>
+              <RotateTransform Angle="18" />
+            </Border.RenderTransform>
+          </Border>
+          <ItemsControl ItemsSource="{Binding Items, RelativeSource={RelativeSource AncestorType=local:FocusRhythmControl}}">
             <ItemsControl.ItemsPanel>
               <ItemsPanelTemplate>
-                <StackPanel Orientation="Horizontal" Spacing="12" />
+                <StackPanel Orientation="Horizontal"
+                            Spacing="14" />
               </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
               <DataTemplate>
                 <Grid Width="{Binding Width}"
                       MinWidth="112"
+                      Margin="0,0,0,0"
                       RowDefinitions="Auto,Auto,Auto">
                   <TextBlock Text="{Binding StartedAtLabel}"
                              Foreground="{DynamicResource MutedTextBrush}"
@@ -103,23 +106,23 @@
                           Background="{Binding Fill}"
                           BorderBrush="{DynamicResource PageBackgroundBrush}"
                           BorderThickness="2"
-                          Margin="0,6,0,0"
+                          Margin="0,8,0,0"
                           HorizontalAlignment="Left" />
                   <Button Grid.Row="2"
                           Background="Transparent"
                           BorderBrush="Transparent"
                           BorderThickness="0"
                           Padding="0"
-                          Margin="0,6,0,0"
+                          Margin="0,8,0,0"
                           Command="{Binding ItemCommand, RelativeSource={RelativeSource AncestorType=local:FocusRhythmControl}}"
                           CommandParameter="{Binding}">
                     <Border Background="{Binding Fill}"
                             BorderBrush="{DynamicResource FaintBorderBrush}"
                             BorderThickness="1"
-                            CornerRadius="10"
-                            Padding="10,8"
+                            CornerRadius="12"
+                            Padding="12,9"
                             ToolTip.Tip="{Binding Tooltip}">
-                      <StackPanel Spacing="3">
+                      <StackPanel Spacing="4">
                         <TextBlock Text="{Binding Label}"
                                    Foreground="White"
                                    FontWeight="SemiBold"
@@ -128,7 +131,7 @@
                                    MaxLines="2" />
                         <TextBlock Text="{Binding DurationLabel}"
                                    Foreground="{DynamicResource AccentTextBrush}"
-                                   FontSize="9" />
+                                   FontSize="10" />
                       </StackPanel>
                     </Border>
                   </Button>
@@ -136,8 +139,8 @@
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
-      </Grid>
-    </ScrollViewer>
+        </Grid>
+      </ScrollViewer>
     </StackPanel>
   </Border>
 </UserControl>

@@ -40,7 +40,7 @@ public sealed record DesktopAppThemePalette(
 
     public static readonly DesktopAppThemePalette StarbucksReserve = new(
         "StarbucksReserve",
-        "Starbucks Reserve",
+        "Matcha Reserve",
         FromHex("#0F1512"),
         FromHex("#17201C"),
         FromHex("#F6F5F2"),
@@ -48,9 +48,29 @@ public sealed record DesktopAppThemePalette(
         FromHex("#00754A"),
         FromHex("#2E4D40"));
 
+    public static readonly DesktopAppThemePalette CostaAfterglow = new(
+        "CostaAfterglow",
+        "Costa Afterglow",
+        FromHex("#231019"),
+        FromHex("#311722"),
+        FromHex("#FFF5F7"),
+        FromHex("#D8B7C0"),
+        FromHex("#C64176"),
+        FromHex("#5E3044"));
+
+    public static readonly DesktopAppThemePalette EspressoMono = new(
+        "EspressoMono",
+        "Espresso (Mono)",
+        FromHex("#18110B"),
+        FromHex("#22170F"),
+        FromHex("#F8F1E7"),
+        FromHex("#C6B29C"),
+        FromHex("#C6844C"),
+        FromHex("#5E432B"));
+
     public static readonly DesktopAppThemePalette Light = new(
         "Light",
-        "Light",
+        "Hot White",
         FromHex("#F6F8FB"),
         FromHex("#FFFFFF"),
         FromHex("#172033"),
@@ -104,12 +124,58 @@ public sealed record DesktopAppThemePalette(
     public Color Success => FromHex("#22C55E");
     public Color Info => FromHex("#3B82F6");
     public Color Warning => FromHex("#F59E0B");
+    public Color HeatmapEmpty => IsGitHubLight
+        ? Mix(Base, Stroke, 0.18)
+        : IsStarbucksReserve
+            ? FromHex("#133126")
+            : IsCostaAfterglow
+                ? FromHex("#351926")
+                : IsEspressoMono
+                    ? FromHex("#2A1C12")
+                    : FromHex("#16243B");
+    public Color HeatmapApps => IsStarbucksReserve
+        ? FromHex("#9874FF")
+        : IsCostaAfterglow
+            ? FromHex("#D85B8D")
+            : IsEspressoMono
+                ? FromHex("#D59A61")
+                : Accent;
+    public Color HeatmapWeb => IsStarbucksReserve
+        ? FromHex("#54B8FF")
+        : IsCostaAfterglow
+            ? FromHex("#9D8BFF")
+            : IsEspressoMono
+                ? FromHex("#E2B675")
+                : FromHex("#3B82F6");
+    public Color HeatmapDevelopment => IsCostaAfterglow
+        ? FromHex("#F07892")
+        : IsEspressoMono
+            ? FromHex("#B98C55")
+            : FromHex("#22C55E");
+    public Color HeatmapDocuments => IsStarbucksReserve
+        ? FromHex("#FFB84D")
+        : IsCostaAfterglow
+            ? FromHex("#F59B5D")
+            : IsEspressoMono
+                ? FromHex("#F0B07A")
+                : FromHex("#F59E0B");
+    public Color HeatmapGap => IsGitHubLight
+        ? Mix(Stroke, Base, 0.55)
+        : IsStarbucksReserve
+            ? FromHex("#10261D")
+            : IsCostaAfterglow
+                ? FromHex("#28131C")
+                : IsEspressoMono
+                    ? FromHex("#1E140D")
+                    : FromHex("#10233F");
 
     public static IReadOnlyList<DesktopAppThemePalette> All { get; } =
     [
         Midnight,
         GitHubLight,
         StarbucksReserve,
+        CostaAfterglow,
+        EspressoMono,
         Light
     ];
 
@@ -123,6 +189,25 @@ public sealed record DesktopAppThemePalette(
         if (string.Equals(key, "AmazonGreen", StringComparison.OrdinalIgnoreCase))
         {
             return StarbucksReserve;
+        }
+
+        if (string.Equals(key, "MatchaReserve", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "Matcha Reserve", StringComparison.OrdinalIgnoreCase))
+        {
+            return StarbucksReserve;
+        }
+
+        if (string.Equals(key, "Costa", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "Costa Afterglow", StringComparison.OrdinalIgnoreCase))
+        {
+            return CostaAfterglow;
+        }
+
+        if (string.Equals(key, "Espresso", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "Brown", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "Espresso (Mono)", StringComparison.OrdinalIgnoreCase))
+        {
+            return EspressoMono;
         }
 
         if (string.Equals(key, "White Light", StringComparison.OrdinalIgnoreCase))
@@ -166,6 +251,12 @@ public sealed record DesktopAppThemePalette(
         SetBrush(target, "ScrollThumbBrush", ScrollThumb);
         SetBrush(target, "ScrollThumbHoverBrush", ScrollThumbHover);
         SetBrush(target, "ScrollTrackBrush", ScrollTrack);
+        SetBrush(target, "HeatmapEmptyBrush", HeatmapEmpty);
+        SetBrush(target, "HeatmapAppsBrush", HeatmapApps);
+        SetBrush(target, "HeatmapWebBrush", HeatmapWeb);
+        SetBrush(target, "HeatmapDevelopmentBrush", HeatmapDevelopment);
+        SetBrush(target, "HeatmapDocumentsBrush", HeatmapDocuments);
+        SetBrush(target, "HeatmapGapBrush", HeatmapGap);
     }
 
     public Color WithAlpha(Color color, double opacity)
@@ -179,6 +270,10 @@ public sealed record DesktopAppThemePalette(
     private bool IsGitHubLight => string.Equals(Key, GitHubLight.Key, StringComparison.OrdinalIgnoreCase);
 
     private bool IsStarbucksReserve => string.Equals(Key, StarbucksReserve.Key, StringComparison.OrdinalIgnoreCase);
+
+    private bool IsCostaAfterglow => string.Equals(Key, CostaAfterglow.Key, StringComparison.OrdinalIgnoreCase);
+
+    private bool IsEspressoMono => string.Equals(Key, EspressoMono.Key, StringComparison.OrdinalIgnoreCase);
 
     private static void SetBrush(StyledElement target, string key, Color color)
     {

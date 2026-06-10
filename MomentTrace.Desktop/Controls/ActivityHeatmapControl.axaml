@@ -54,13 +54,13 @@
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         Command="{Binding ItemCommand, RelativeSource={RelativeSource AncestorType=local:ActivityHeatmapControl}}"
-                        CommandParameter="{Binding}">
+                        CommandParameter="{Binding Segment}">
                   <Border HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           Margin="0,0,3,0"
                           Height="16"
                           CornerRadius="4"
-                          Background="{Binding Fill}"
+                          Background="{Binding Brush}"
                           ToolTip.Tip="{Binding Tooltip}" />
                 </Button>
               </DataTemplate>
@@ -82,13 +82,13 @@
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         Command="{Binding ItemCommand, RelativeSource={RelativeSource AncestorType=local:ActivityHeatmapControl}}"
-                        CommandParameter="{Binding}">
+                        CommandParameter="{Binding Segment}">
                   <Border HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           Margin="0,0,3,0"
                           Height="16"
                           CornerRadius="4"
-                          Background="{Binding Fill}"
+                          Background="{Binding Brush}"
                           ToolTip.Tip="{Binding Tooltip}" />
                 </Button>
               </DataTemplate>
@@ -96,7 +96,7 @@
           </ItemsControl>
         </StackPanel>
       </StackPanel>
-      <ItemsControl ItemsSource="{Binding LegendItems, RelativeSource={RelativeSource AncestorType=local:ActivityHeatmapControl}}">
+      <ItemsControl x:Name="HeatmapLegendItems">
         <ItemsControl.ItemsPanel>
           <ItemsPanelTemplate>
             <WrapPanel />
@@ -110,7 +110,7 @@
               <Border Width="10"
                       Height="10"
                       CornerRadius="3"
-                      Background="{Binding Fill}" />
+                      Background="{Binding Brush}" />
               <TextBlock Text="{Binding Label}"
                          Foreground="{DynamicResource MutedTextBrush}"
                          FontSize="11" />

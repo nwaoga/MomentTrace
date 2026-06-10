@@ -20,7 +20,7 @@ MomentTrace now splits recording across long sleep gaps and local day changes, s
 
 When browser activity is detected, MomentTrace attempts to capture the active URL with Windows UI Automation and saves a local PNG screenshot only when a new browser session starts.
 
-The **Overview** page is being reshaped into a more visual daily-story dashboard without requiring AI features. The current Avalonia work includes summary cards, a 15-minute activity heatmap, key-moment cards, category breakdown charts, top applications, and a focus-rhythm strip, all sourced from the existing local activity store. Activity colours use a fixed semantic palette so browsing, development, documents, apps, system activity, and gaps remain easy to scan across every app theme.
+The **Overview** page is being reshaped into a more visual daily-story dashboard without requiring AI features. The current Avalonia work includes summary cards, a theme-aware 15-minute activity heatmap, key-moment cards, category breakdown charts, top applications, and a focus-rhythm strip, all sourced from the existing local activity store. Activity colours keep stable category meaning while adapting to the selected workspace theme.
 
 ![MomentTrace privacy controls](docs/assets/momenttrace-privacy-controls.svg)
 
@@ -38,7 +38,7 @@ The Windows installer is built with Inno Setup from a self-contained `win-x64` p
 - Avalonia desktop shell in active parity work, sharing timeline, overview, detail-pane, and shell presentation layers across Windows/macOS targets
 - Avalonia Windows target now starts the Windows foreground recorder and reads the shared local SQLite timeline
 - Grouped timeline with card and list view modes in both the WPF app and Avalonia shell
-- Theme system with Midnight, GitHub Light, Starbucks Reserve, and Light palettes
+- Theme system with Midnight, GitHub Light, Matcha Reserve, Costa Afterglow, Espresso (Mono), and Hot White palettes
 - Real alpha transparency control that keeps theme colours while making the app more or less clear
 - Overview page with daily activity heatmap and lightweight productivity analytics
 - Memory-oriented session grouping into moments rather than raw activity rows
@@ -253,7 +253,7 @@ The Library section uses a simple saved-memory model:
 The Overview page is the daily summary view. In the current Avalonia shell it summarizes the selected date with:
 
 - A day-header and summary cards for captured moments, active time, apps used, longest activity, and idle/gap time
-- A full-width 15-minute activity heatmap with fixed semantic colours and click-through filtering back into Timeline
+- A full-width 15-minute activity heatmap with theme-aware category colours and click-through filtering back into Timeline
 - A `Moments today` gallery driven from the same local grouped sessions used by the Timeline
 - Activity breakdown visuals and top-application summaries built from deterministic local totals
 - A focus-rhythm strip that maps the flow of captured work back through the day
@@ -264,21 +264,25 @@ The detail pane also supports progressive disclosure. Overview, preview, metadat
 
 ## Themes And Appearance
 
-MomentTrace currently ships with four app themes:
+MomentTrace currently ships with six app themes:
 
 - `Midnight`
 - `GitHub Light`
-- `Starbucks Reserve`
-- `Light`
+- `Matcha Reserve`
+- `Costa Afterglow`
+- `Espresso (Mono)`
+- `Hot White`
 
 Themes use six base colour roles: `Base`, `Surface`, `Text`, `MutedText`, `Accent`, and `Stroke`. The app derives supporting colours such as raised surfaces, card surfaces, hover fills, overlays, faint borders, glow accents, semantic status colours, rail/detail surfaces, and contrast-aware accent text from those roles. This keeps the themes coherent across WPF and Avalonia while still giving each workspace a distinct personality.
 
 - `Midnight` stays premium, modern, and technology-focused with purple accents and cool dark surfaces.
 - `GitHub Light` is intentionally cleaner and more developer-tool-like, with white cards, subtle borders, and restrained blue accents so screenshots stay central.
-- `Starbucks Reserve` keeps the premium dark feel but shifts warmer and softer, using greener highlights and less blue-heavy contrast.
-- `Light` remains the broader neutral light option for users who want a brighter workspace without the GitHub-inspired styling.
+- `Matcha Reserve` keeps the premium dark feel but shifts warmer and softer, using greener highlights and less blue-heavy contrast.
+- `Costa Afterglow` adds a warmer berry coffee-house palette for users who prefer deeper red-brown surfaces.
+- `Espresso (Mono)` leans into the brown reference design with amber accents and muted roast-coloured panels.
+- `Hot White` remains the broader neutral light option for users who want a brighter workspace without the GitHub-inspired styling.
 
-Overview activity colours are intentionally separate from the app theme. They use a fixed semantic palette for activity types so the heatmap, focus rhythm, quick filters, and legend remain readable in both dark and light themes.
+Overview activity colours now adapt per theme while preserving semantic meaning for apps, browsing, development, documents, and gaps. The heatmap, focus rhythm, quick filters, and legends stay readable across dark, light, green, Costa, and espresso palettes without feeling pasted on from a different design system.
 
 The transparency slider changes real window alpha rather than merely lightening or darkening colours. Opacity is no longer artificially clamped to a high minimum, which allows softer overlays, cleaner hover states, and more convincing glass treatment across the shell. Custom chrome is used for a cleaner desktop shell, and maximize behavior is constrained to the Windows work area so the app does not cover the taskbar.
 
@@ -412,8 +416,8 @@ Recent planning updates:
 
 - `AB#71` app health and recorder diagnostics is complete, including last-capture freshness and browser URL capture availability in Avalonia Settings.
 - `AB#63` timeline card intelligence and visual polish now has the session-naming pass, timeline empty/detail-state cleanup, and collapsible detail-section polish in the repo.
-- `#88` tracks the Overview redesign toward a meaningful daily-story dashboard. The shared presentation model, reusable Avalonia overview controls, click-through interactions, heatmap composition, summary cards, charts, and the tightened moments/focus layouts are now in the repo, with final visual matching still active.
-- `#89` tracks final Avalonia shell alignment, spacing, and image-framing cleanup, including refreshed preview artwork for the current Overview-first shell.
+- `#88` tracks the Overview redesign toward a meaningful daily-story dashboard. The shared presentation model, reusable Avalonia overview controls, click-through interactions, theme-aware heatmap composition, summary cards, charts, and the tightened moments/focus layouts are now in the repo, with final visual matching still active.
+- `#89` tracks final Avalonia shell alignment, spacing, image-framing cleanup, and refreshed preview artwork for the current Overview-first shell.
 
 ## Development Notes
 
@@ -430,8 +434,7 @@ Recent planning updates:
 
 - Finish final timeline visual polish around empty/loading states and remaining card edge cases
 - Finish the remaining literal visual matching on the Overview `Moments today` and `Focus rhythm` sections
-- Refresh README artwork with up-to-date Avalonia shell screenshots from the current dashboard work
-- Add a lightweight visual QA pass for the three primary themes so future UI changes do not collapse them back toward the same look
+- Add a lightweight visual QA pass for the primary dark, green, Costa, espresso, and light themes so future UI changes do not collapse them back toward the same look
 - Add regression tests for privacy exclusions, settings persistence, and warning-free build expectations
 - Add a settings option to delete local data when the user wants a full privacy cleanup
 - Add first-run onboarding for privacy, startup behavior, and local storage

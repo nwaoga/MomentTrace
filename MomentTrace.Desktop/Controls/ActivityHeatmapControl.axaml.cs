@@ -3,12 +3,16 @@ using System.Linq;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Media;
+using MomentTrace.Desktop;
 using MomentTrace.Presentation;
 
 namespace MomentTrace.Desktop.Controls;
 
 public partial class ActivityHeatmapControl : UserControl
 {
+    private DesktopAppThemePalette _themePalette = DesktopAppThemePalette.Midnight;
+
     public static readonly StyledProperty<IEnumerable<HeatmapSegmentViewModel>?> ItemsProperty =
         AvaloniaProperty.Register<ActivityHeatmapControl, IEnumerable<HeatmapSegmentViewModel>?>(nameof(Items));
 
@@ -74,17 +78,74 @@ public partial class ActivityHeatmapControl : UserControl
         set => SetValue(ItemCommandProperty, value);
     }
 
-    public IEnumerable<HeatmapSegmentViewModel> FirstRowItems { get; private set; } = [];
+    private IEnumerable<HeatmapCellViewModel> FirstRowItems { get; set; } = [];
 
-    public IEnumerable<HeatmapSegmentViewModel> SecondRowItems { get; private set; } = [];
+    private IEnumerable<HeatmapCellViewModel> SecondRowItems { get; set; } = [];
+
+    public void ApplyThemePalette(DesktopAppThemePalette palette)
+    {
+        _themePalette = palette;
+        UpdateRows();
+    }
 
     private void UpdateRows()
     {
         var items = Items?.ToList() ?? [];
         var midpoint = (int)System.Math.Ceiling(items.Count / 2d);
-        FirstRowItems = items.Take(midpoint).ToList();
-        SecondRowItems = items.Skip(midpoint).ToList();
+        FirstRowItems = items.Take(midpoint).Select(ToHeatmapCell).ToList();
+        SecondRowItems = items.Skip(midpoint).Select(ToHeatmapCell).ToList();
         FirstHeatmapRow.ItemsSource = FirstRowItems;
         SecondHeatmapRow.ItemsSource = SecondRowItems;
+        HeatmapLegendItems.ItemsSource = (LegendItems ?? [])
+            .Select(item => new HeatmapLegendViewModel(item.Label, CreateBrush(GetCategoryColor(item.Label), 1d)))
+            .ToList();
     }
+
+    private HeatmapCellViewModel ToHeatmapCell(HeatmapSegmentViewModel segment)
+    {
+        return new HeatmapCellViewModel(
+            segment,
+            CreateBrush(GetCategoryColor(segment.CategoryLabel), segment.Intensity),
+            segment.Tooltip);
+    }
+
+    private IBrush CreateBrush(Color categoryColor, double intensity)
+    {
+        if (intensity <= 0d)
+        {
+            return new SolidColorBrush(_themePalette.HeatmapEmpty);
+        }
+
+        var amount = intensity > 0.66d ? 1.0d : intensity > 0.33d ? 0.76d : 0.52d;
+        return new SolidColorBrush(Mix(categoryColor, _themePalette.HeatmapEmpty, amount));
+    }
+
+    private Color GetCategoryColor(string? categoryLabel)
+    {
+        return categoryLabel switch
+        {
+            "Web browsing" => _themePalette.HeatmapWeb,
+            "Development work" => _themePalette.HeatmapDevelopment,
+            "Documents" => _themePalette.HeatmapDocuments,
+            "Idle or system surfaces" => _themePalette.HeatmapGap,
+            "Gaps or idle space" => _themePalette.HeatmapGap,
+            "Idle / gaps" => _themePalette.HeatmapGap,
+            _ => _themePalette.HeatmapApps
+        };
+    }
+
+    private static Color Mix(Color foreground, Color background, double foregroundAmount)
+    {
+        var amount = System.Math.Clamp(foregroundAmount, 0d, 1d);
+        var inverse = 1d - amount;
+
+        return Color.FromRgb(
+            (byte)System.Math.Round((foreground.R * amount) + (background.R * inverse)),
+            (byte)System.Math.Round((foreground.G * amount) + (background.G * inverse)),
+            (byte)System.Math.Round((foreground.B * amount) + (background.B * inverse)));
+    }
+
+    private sealed record HeatmapCellViewModel(HeatmapSegmentViewModel Segment, IBrush Brush, string Tooltip);
+
+    private sealed record HeatmapLegendViewModel(string Label, IBrush Brush);
 }

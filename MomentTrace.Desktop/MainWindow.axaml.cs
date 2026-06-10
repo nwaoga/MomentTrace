@@ -1576,6 +1576,7 @@ public partial class MainWindow : Window
     {
         _currentTheme = DesktopAppThemePalette.Find(theme);
         _currentTheme.ApplyTo(this);
+        OverviewHeatmapControl.ApplyThemePalette(_currentTheme);
         ApplySurfaceTransparency(_preferences.Opacity);
         if (SearchTextBox.IsFocused)
         {
