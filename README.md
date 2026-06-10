@@ -8,7 +8,7 @@ The long-term goal is a cross-platform desktop timeline for Windows and macOS. T
 
 ![MomentTrace Avalonia shell preview](docs/assets/momenttrace-avalonia-shell-current.png)
 
-MomentTrace uses a Windows Timeline-inspired workspace: left navigation, date and type filters, grouped horizontal moment sections, compact cards with app icons or website screenshots, and a contextual detail surface. The current Avalonia shell preview above reflects the active parity branch with shared presentation logic, custom chrome, and the newer grouped card treatment.
+MomentTrace uses a Windows Timeline-inspired workspace with a more visual daily-story layer on top: left navigation, date and type filters, grouped moment sections, compact cards with app icons or website screenshots, and a contextual detail surface. The current Avalonia shell preview above reflects the active parity branch with shared presentation logic, custom chrome, and the newer Overview dashboard treatment.
 
 The public previews use sanitized demo activity rather than a live personal timeline, so they can show the current card/list layouts, real app icon slots, screenshots, themed modals, and top command chrome without exposing private work history.
 
@@ -412,8 +412,8 @@ Recent planning updates:
 
 - `AB#71` app health and recorder diagnostics is complete, including last-capture freshness and browser URL capture availability in Avalonia Settings.
 - `AB#63` timeline card intelligence and visual polish now has child tasks for session naming, collapsible detail sections, and final empty/loading-state polish.
-- `#88` tracks the Overview redesign toward a meaningful daily-story dashboard. The shared presentation model, reusable Avalonia overview controls, click-through interactions, heatmap composition, summary cards, charts, and first-pass moment/focus layouts are now in the repo, with final visual matching still active.
-- `#89` tracks final Avalonia shell alignment, spacing, and image-framing cleanup.
+- `#88` tracks the Overview redesign toward a meaningful daily-story dashboard. The shared presentation model, reusable Avalonia overview controls, click-through interactions, heatmap composition, summary cards, charts, and the tightened moments/focus layouts are now in the repo, with final visual matching still active.
+- `#89` tracks final Avalonia shell alignment, spacing, and image-framing cleanup, including refreshed preview artwork for the current Overview-first shell.
 
 ## Development Notes
 

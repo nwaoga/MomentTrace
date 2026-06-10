@@ -1749,62 +1749,65 @@
                     </Grid>
 
                     <Grid ColumnDefinitions="1.65*,0.75*"
-                          RowDefinitions="Auto,Auto"
-                          ColumnSpacing="14"
-                          RowSpacing="8">
-                        <Border Grid.Column="0"
-                                Grid.Row="0"
-                                VerticalAlignment="Top"
-                                Classes="overviewPanel">
-                            <StackPanel Spacing="10">
-                                <StackPanel Spacing="4">
-                                    <TextBlock Text="Moments today"
-                                               Foreground="{DynamicResource TextBrush}"
-                                               FontSize="16"
-                                               FontWeight="SemiBold" />
-                                    <TextBlock Text="Key moments from your day"
-                                               Foreground="{DynamicResource SubtleTextBrush}"
-                                               FontSize="11" />
+                          ColumnSpacing="14">
+                        <StackPanel Grid.Column="0"
+                                    VerticalAlignment="Top"
+                                    Spacing="12">
+                            <Border Classes="overviewPanel">
+                                <StackPanel Spacing="10">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Moments today"
+                                                   Foreground="{DynamicResource TextBrush}"
+                                                   FontSize="16"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="Key moments from your day"
+                                                   Foreground="{DynamicResource SubtleTextBrush}"
+                                                   FontSize="11" />
+                                    </StackPanel>
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                                  VerticalScrollBarVisibility="Disabled"
+                                                  AllowAutoHide="False">
+                                        <ItemsControl x:Name="OverviewMomentsItems"
+                                                      HorizontalAlignment="Left">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel Orientation="Horizontal"
+                                                               ItemWidth="224"
+                                                               ItemHeight="244" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Width="224"
+                                                            Margin="0,0,14,14">
+                                                        <Button Classes="momentCard"
+                                                                Click="OverviewMomentButton_Click"
+                                                                CommandParameter="{Binding Id}">
+                                                            <controls:MomentCard Title="{Binding Title}"
+                                                                                 Subtitle="{Binding Subtitle}"
+                                                                                 Timestamp="{Binding Timestamp}"
+                                                                                 Duration="{Binding Duration}"
+                                                                                 Category="{Binding Category}"
+                                                                                 AccentFill="{Binding AccentFill}"
+                                                                                 AccentText="{Binding AccentText}"
+                                                                                 Source="{Binding Source}"
+                                                                                 PreviewPath="{Binding ThumbnailPath}" />
+                                                        </Button>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
                                 </StackPanel>
-                                <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                                              VerticalScrollBarVisibility="Disabled"
-                                              AllowAutoHide="False">
-                                    <ItemsControl x:Name="OverviewMomentsItems">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <UniformGrid Columns="4"
-                                                             Rows="1" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Width="206"
-                                                            Margin="0,0,10,0"
-                                                            Spacing="0">
-                                                    <Button Classes="momentCard"
-                                                            Click="OverviewMomentButton_Click"
-                                                            CommandParameter="{Binding Id}">
-                                                        <controls:MomentCard Title="{Binding Title}"
-                                                                             Subtitle="{Binding Subtitle}"
-                                                                             Timestamp="{Binding Timestamp}"
-                                                                             Duration="{Binding Duration}"
-                                                                             Category="{Binding Category}"
-                                                                             AccentFill="{Binding AccentFill}"
-                                                                             AccentText="{Binding AccentText}"
-                                                                             Source="{Binding Source}"
-                                                                             PreviewPath="{Binding ThumbnailPath}" />
-                                                    </Button>
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </ScrollViewer>
-                            </StackPanel>
-                        </Border>
+                            </Border>
+                            <controls:FocusRhythmControl x:Name="OverviewFocusRhythmControl"
+                                                         VerticalAlignment="Top"
+                                                         Margin="0,-2,0,0"
+                                                         Title="Focus rhythm"
+                                                         Subtitle="Your activity flow throughout the day" />
+                        </StackPanel>
 
                         <StackPanel Grid.Column="1"
-                                    Grid.Row="0"
-                                    Grid.RowSpan="2"
                                     VerticalAlignment="Top"
                                     Spacing="14">
                             <controls:CategoryBreakdownControl x:Name="OverviewCategoryBreakdownControl"
@@ -1865,13 +1868,6 @@
                                 </StackPanel>
                             </Border>
                         </StackPanel>
-                        <controls:FocusRhythmControl Grid.Column="0"
-                                                     Grid.Row="1"
-                                                     x:Name="OverviewFocusRhythmControl"
-                                                     VerticalAlignment="Top"
-                                                     Margin="0,-2,0,0"
-                                                     Title="Focus rhythm"
-                                                     Subtitle="Your activity flow throughout the day" />
                     </Grid>
                 </StackPanel>
             </ScrollViewer>

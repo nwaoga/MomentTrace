@@ -131,7 +131,7 @@ public sealed class FocusBlockViewModel
 
     public long? MomentId { get; }
 
-    public double Width => Math.Clamp(Duration.TotalMinutes * 1.8, 18, 96);
+    public double Width => Math.Clamp(Duration.TotalMinutes * 1.35, 20, 84);
 
     public string Tooltip => $"{Label}\nSeen {OverviewPresentationBuilder.FormatDuration(Duration)}";
 
