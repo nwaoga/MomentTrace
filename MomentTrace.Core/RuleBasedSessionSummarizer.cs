@@ -2,6 +2,27 @@ namespace MomentTrace.Core;
 
 public sealed class RuleBasedSessionSummarizer(IActivityClassifier classifier) : ISessionSummarizer
 {
+    private static readonly HashSet<string> BrowserSuffixes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Microsoft Edge",
+        "Google Chrome",
+        "Chrome",
+        "Firefox",
+        "Safari",
+        "Brave",
+        "Opera",
+        "Vivaldi"
+    };
+
+    private static readonly HashSet<string> BrowserProfiles = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Personal",
+        "Profile 1",
+        "Profile 2",
+        "Default",
+        "Work"
+    };
+
     public static RuleBasedSessionSummarizer Default { get; } = new(RuleBasedActivityClassifier.Default);
 
     public string GetSessionTitle(ActivityCategory category, IReadOnlyList<TimelineActivity> activities)
@@ -14,9 +35,14 @@ public sealed class RuleBasedSessionSummarizer(IActivityClassifier classifier) :
         var representativeTitle = GetRepresentativeTitle(activities);
         var dominantApp = GetDominantApp(activities);
         var dominantHost = GetDominantHost(activities);
+        var hosts = GetHosts(activities)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(2)
+            .ToArray();
 
         return category switch
         {
+            ActivityCategory.Browsing when IsSpecificRepresentativeTitle(representativeTitle, dominantApp, "Website browsing") => representativeTitle,
             ActivityCategory.Browsing when !string.IsNullOrWhiteSpace(dominantHost) => $"Browsing {dominantHost}",
             ActivityCategory.Browsing when !string.IsNullOrWhiteSpace(dominantApp) => $"Browsing in {dominantApp}",
             ActivityCategory.Browsing => "Website browsing",
@@ -25,6 +51,7 @@ public sealed class RuleBasedSessionSummarizer(IActivityClassifier classifier) :
             ActivityCategory.Development when !string.IsNullOrWhiteSpace(dominantApp) => $"{dominantApp} work",
             ActivityCategory.Development => "Development work",
 
+            ActivityCategory.Communication when IsSpecificRepresentativeTitle(representativeTitle, dominantApp, "Communication") => representativeTitle,
             ActivityCategory.Communication when !string.IsNullOrWhiteSpace(dominantApp) => $"{dominantApp} conversations",
             ActivityCategory.Communication => "Communication",
 
@@ -32,13 +59,17 @@ public sealed class RuleBasedSessionSummarizer(IActivityClassifier classifier) :
             ActivityCategory.Documents when !string.IsNullOrWhiteSpace(dominantApp) => $"{dominantApp} documents",
             ActivityCategory.Documents => "Document review",
 
+            ActivityCategory.Research when IsSpecificRepresentativeTitle(representativeTitle, dominantApp, "Research session") => representativeTitle,
+            ActivityCategory.Research when hosts.Length > 1 => $"Research across {string.Join(" and ", hosts)}",
             ActivityCategory.Research when !string.IsNullOrWhiteSpace(dominantHost) => $"Research on {dominantHost}",
             ActivityCategory.Research when !string.IsNullOrWhiteSpace(dominantApp) => $"Research in {dominantApp}",
             ActivityCategory.Research => "Research session",
 
+            ActivityCategory.ScreenshotCapture when IsSpecificRepresentativeTitle(representativeTitle, dominantApp, "Screenshot capture") => representativeTitle,
             ActivityCategory.ScreenshotCapture when !string.IsNullOrWhiteSpace(dominantApp) => $"{dominantApp} capture",
             ActivityCategory.ScreenshotCapture => "Screenshot capture",
 
+            ActivityCategory.System when IsSpecificRepresentativeTitle(representativeTitle, dominantApp, "System activity") => representativeTitle,
             ActivityCategory.System when !string.IsNullOrWhiteSpace(dominantApp) => $"{dominantApp} activity",
             ActivityCategory.System => "System activity",
 
@@ -87,9 +118,23 @@ public sealed class RuleBasedSessionSummarizer(IActivityClassifier classifier) :
     private string GetRepresentativeTitle(IReadOnlyList<TimelineActivity> activities)
     {
         var representative = activities
-            .Select(activity => classifier.Classify(activity))
-            .GroupBy(classification => classification.Title)
+            .Select(GetSpecificActivityTitle)
+            .Where(title => !string.IsNullOrWhiteSpace(title))
+            .GroupBy(title => title, StringComparer.OrdinalIgnoreCase)
             .OrderByDescending(group => group.Count())
+            .ThenBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault()?.Key;
+
+        if (!string.IsNullOrWhiteSpace(representative))
+        {
+            return representative;
+        }
+
+        representative = activities
+            .Select(activity => classifier.Classify(activity))
+            .GroupBy(classification => classification.Title, StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(group => group.Count())
+            .ThenBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
             .FirstOrDefault()?.Key;
 
         return string.IsNullOrWhiteSpace(representative) ? "App activity" : representative;
@@ -151,5 +196,56 @@ public sealed class RuleBasedSessionSummarizer(IActivityClassifier classifier) :
         return !string.IsNullOrWhiteSpace(representativeTitle)
             && !string.Equals(representativeTitle, fallbackTitle, StringComparison.OrdinalIgnoreCase)
             && !string.Equals(representativeTitle, dominantApp, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string? GetSpecificActivityTitle(TimelineActivity activity)
+    {
+        var title = CleanTitle(activity.DisplayTitle);
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            return null;
+        }
+
+        if (string.Equals(title, activity.AppName, StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        return title;
+    }
+
+    private static string CleanTitle(string? title)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            return string.Empty;
+        }
+
+        var segments = title
+            .Split(" - ", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .ToList();
+
+        while (segments.Count > 0 && LooksLikeTrailingShellSegment(segments[^1]))
+        {
+            segments.RemoveAt(segments.Count - 1);
+        }
+
+        return segments.Count == 0
+            ? title.Trim()
+            : string.Join(" - ", segments).Trim();
+    }
+
+    private static bool LooksLikeTrailingShellSegment(string segment)
+    {
+        if (BrowserSuffixes.Contains(segment) || BrowserProfiles.Contains(segment))
+        {
+            return true;
+        }
+
+        return segment.Contains("Edge", StringComparison.OrdinalIgnoreCase)
+            || segment.Contains("Chrome", StringComparison.OrdinalIgnoreCase)
+            || segment.Contains("Firefox", StringComparison.OrdinalIgnoreCase)
+            || segment.Contains("Safari", StringComparison.OrdinalIgnoreCase)
+            || segment.Contains("Visual Studio Code", StringComparison.OrdinalIgnoreCase);
     }
 }

@@ -1475,7 +1475,7 @@ public partial class MainWindow : Window
             session.Id,
             session.Title,
             BuildCardSubtitle(session),
-            $"{session.Location} · {session.AppName}",
+            BuildCardMeta(session),
             session.CardTime,
             session.SeenDuration,
             previewImage,
@@ -1505,18 +1505,44 @@ public partial class MainWindow : Window
             return session.Location;
         }
 
+        if (!string.IsNullOrWhiteSpace(session.AppName)
+            && !string.Equals(session.Title, session.AppName, StringComparison.OrdinalIgnoreCase))
+        {
+            return session.AppName;
+        }
+
+        return session.CategoryLabel;
+    }
+
+    private static string BuildCardMeta(ActivityMomentViewModel session)
+    {
+        var parts = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(session.CategoryLabel)
+            && !string.Equals(session.CategoryLabel, BuildCardSubtitle(session), StringComparison.OrdinalIgnoreCase))
+        {
+            parts.Add(session.CategoryLabel);
+        }
+
         if (!string.IsNullOrWhiteSpace(session.Location)
             && !string.Equals(session.Location, session.AppName, StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(session.Location, BuildCardSubtitle(session), StringComparison.OrdinalIgnoreCase)
             && session.Location is not "Development workspace"
             && session.Location is not "Messages and conversations"
             && session.Location is not "Documents and notes"
             && session.Location is not "Visual capture"
             && session.Location is not "System")
         {
-            return session.Location;
+            parts.Add(session.Location);
         }
 
-        return session.AppName;
+        if (!string.IsNullOrWhiteSpace(session.AppName)
+            && !string.Equals(session.AppName, BuildCardSubtitle(session), StringComparison.OrdinalIgnoreCase))
+        {
+            parts.Add(session.AppName);
+        }
+
+        return parts.Count == 0 ? session.CategoryLabel : string.Join(" · ", parts.Distinct(StringComparer.OrdinalIgnoreCase));
     }
 
     private MomentRow ToMomentRow(ActivityMomentViewModel session, bool isSelected)

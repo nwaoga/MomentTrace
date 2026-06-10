@@ -411,7 +411,7 @@ For Azure DevOps planning, current implementation work is tracked in the MomentT
 Recent planning updates:
 
 - `AB#71` app health and recorder diagnostics is complete, including last-capture freshness and browser URL capture availability in Avalonia Settings.
-- `AB#63` timeline card intelligence and visual polish now has child tasks for session naming, collapsible detail sections, and final empty/loading-state polish.
+- `AB#63` timeline card intelligence and visual polish now has the first session-naming pass in the repo, with collapsible detail sections and final empty/loading-state polish still active.
 - `#88` tracks the Overview redesign toward a meaningful daily-story dashboard. The shared presentation model, reusable Avalonia overview controls, click-through interactions, heatmap composition, summary cards, charts, and the tightened moments/focus layouts are now in the repo, with final visual matching still active.
 - `#89` tracks final Avalonia shell alignment, spacing, and image-framing cleanup, including refreshed preview artwork for the current Overview-first shell.
 

@@ -4,6 +4,24 @@ namespace MomentTrace.Presentation;
 
 public class ActivityMomentViewModel(TimelineActivity activity)
 {
+    private static readonly HashSet<string> TrailingShellSegments = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Microsoft Edge",
+        "Google Chrome",
+        "Chrome",
+        "Firefox",
+        "Safari",
+        "Brave",
+        "Opera",
+        "Vivaldi",
+        "Visual Studio Code",
+        "Personal",
+        "Profile 1",
+        "Profile 2",
+        "Default",
+        "Work"
+    };
+
     private readonly DateTimeOffset _sessionStartedAt = activity.StartedAt;
     private readonly DateTimeOffset _sessionEndedAt = activity.EndedAt;
     private readonly int _occurrenceCount = 1;
@@ -247,10 +265,31 @@ public class ActivityMomentViewModel(TimelineActivity activity)
 
     private static string CleanTitle(string title)
     {
-        return title.Replace(" - Microsoft Edge", string.Empty, StringComparison.OrdinalIgnoreCase)
-            .Replace(" - Google Chrome", string.Empty, StringComparison.OrdinalIgnoreCase)
-            .Replace(" - Visual Studio Code", string.Empty, StringComparison.OrdinalIgnoreCase)
-            .Replace(" - Safari", string.Empty, StringComparison.OrdinalIgnoreCase)
-            .Trim();
+        var segments = title
+            .Split(" - ", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .ToList();
+
+        while (segments.Count > 0 && LooksLikeTrailingShellSegment(segments[^1]))
+        {
+            segments.RemoveAt(segments.Count - 1);
+        }
+
+        return segments.Count == 0
+            ? title.Trim()
+            : string.Join(" - ", segments).Trim();
+    }
+
+    private static bool LooksLikeTrailingShellSegment(string segment)
+    {
+        if (TrailingShellSegments.Contains(segment))
+        {
+            return true;
+        }
+
+        return segment.Contains("Edge", StringComparison.OrdinalIgnoreCase)
+            || segment.Contains("Chrome", StringComparison.OrdinalIgnoreCase)
+            || segment.Contains("Firefox", StringComparison.OrdinalIgnoreCase)
+            || segment.Contains("Safari", StringComparison.OrdinalIgnoreCase)
+            || segment.Contains("Visual Studio Code", StringComparison.OrdinalIgnoreCase);
     }
 }
