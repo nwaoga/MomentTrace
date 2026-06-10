@@ -2,8 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:MomentTrace.Desktop.Controls"
              x:Class="MomentTrace.Desktop.Controls.MomentCard">
-  <Border Background="{DynamicResource RailBrush}"
-          BorderBrush="{DynamicResource PanelEdgeBrush}"
+  <Border Background="{DynamicResource CardBrush}"
+          BorderBrush="{DynamicResource FaintBorderBrush}"
           BorderThickness="1"
           CornerRadius="14"
           Padding="0"
@@ -28,14 +28,14 @@
                        FontSize="10"
                        FontWeight="SemiBold" />
           </Border>
-          <Border Background="#CC0B1322"
+          <Border Background="{DynamicResource OverlayBrush}"
                   CornerRadius="8"
                   HorizontalAlignment="Left"
                   VerticalAlignment="Bottom"
                   Margin="10"
                   Padding="8,4">
             <TextBlock Text="{Binding Duration, RelativeSource={RelativeSource AncestorType=local:MomentCard}}"
-                       Foreground="White"
+                       Foreground="{DynamicResource TextBrush}"
                        FontSize="10"
                        FontWeight="SemiBold" />
           </Border>
@@ -59,7 +59,7 @@
                   HorizontalAlignment="Right"
                   VerticalAlignment="Center">
             <TextBlock Text="{Binding Subtitle, RelativeSource={RelativeSource AncestorType=local:MomentCard}, FallbackValue='A'}"
-                       Foreground="White"
+                       Foreground="{Binding AccentText, RelativeSource={RelativeSource AncestorType=local:MomentCard}}"
                        FontSize="9"
                        FontWeight="SemiBold"
                        HorizontalAlignment="Center"

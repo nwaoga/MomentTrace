@@ -6,10 +6,27 @@
         <SolidColorBrush x:Key="RailBrush" Color="#F1F5F9" />
         <SolidColorBrush x:Key="PanelBrush" Color="#FFFFFF" />
         <SolidColorBrush x:Key="SubtlePanelBrush" Color="#FAFCFF" />
+        <SolidColorBrush x:Key="CardBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="CardHoverBrush" Color="#F0F7FF" />
         <SolidColorBrush x:Key="BorderBrush" Color="#D9E1EA" />
+        <SolidColorBrush x:Key="FaintBorderBrush" Color="#73D9E1EA" />
+        <SolidColorBrush x:Key="PanelEdgeStrongBrush" Color="#B7C4D3" />
         <SolidColorBrush x:Key="TextBrush" Color="#202734" />
         <SolidColorBrush x:Key="MutedTextBrush" Color="#5F6B7A" />
+        <SolidColorBrush x:Key="SubtleTextBrush" Color="#6B7280" />
         <SolidColorBrush x:Key="AccentBrush" Color="#0078D4" />
         <SolidColorBrush x:Key="AccentSoftBrush" Color="#E8F3FF" />
+        <SolidColorBrush x:Key="AccentGlowBrush" Color="#470078D4" />
+        <SolidColorBrush x:Key="AccentTextBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="ToolbarBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="ToolbarHoverBrush" Color="#F0F7FF" />
+        <SolidColorBrush x:Key="ChipBrush" Color="#F0F7FF" />
+        <SolidColorBrush x:Key="OverlayBrush" Color="#B8F6F8FA" />
+        <SolidColorBrush x:Key="SuccessBrush" Color="#22C55E" />
+        <SolidColorBrush x:Key="InfoBrush" Color="#3B82F6" />
+        <SolidColorBrush x:Key="WarningBrush" Color="#F59E0B" />
+        <SolidColorBrush x:Key="ScrollTrackBrush" Color="#EEF2F6" />
+        <SolidColorBrush x:Key="ActiveSurfaceBrush" Color="#E8F3FF" />
+        <SolidColorBrush x:Key="ActiveEdgeBrush" Color="#7A9FD8" />
     </Application.Resources>
 </Application>

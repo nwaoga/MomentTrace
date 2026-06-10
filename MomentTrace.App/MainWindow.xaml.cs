@@ -616,12 +616,12 @@ public partial class MainWindow : Window
 
     private void SetFilterHighlight(Border border, bool isActive)
     {
-        var accentBrush = GetThemeBrush("AccentBrush");
+        var activeSurfaceBrush = GetThemeBrush("ActiveSurfaceBrush");
         var textBrush = GetThemeBrush("TextBrush");
         var accentTextBrush = GetThemeBrush("AccentTextBrush");
 
         border.Background = isActive
-            ? accentBrush
+            ? activeSurfaceBrush
             : System.Windows.Media.Brushes.Transparent;
 
         if (border.Child is System.Windows.Controls.Button button)
@@ -780,8 +780,8 @@ public partial class MainWindow : Window
 
     private void SetActionButtonActive(System.Windows.Controls.Button button, bool isActive)
     {
-        button.Background = isActive ? GetThemeBrush("AccentBrush") : GetThemeBrush("SubtlePanelBrush");
-        button.BorderBrush = isActive ? GetThemeBrush("AccentBrush") : GetThemeBrush("BorderBrush");
+        button.Background = isActive ? GetThemeBrush("ActiveSurfaceBrush") : GetThemeBrush("ToolbarBrush");
+        button.BorderBrush = isActive ? GetThemeBrush("ActiveEdgeBrush") : GetThemeBrush("FaintBorderBrush");
         button.Foreground = isActive ? GetThemeBrush("AccentTextBrush") : GetThemeBrush("TextBrush");
     }
 
@@ -1083,7 +1083,7 @@ public partial class MainWindow : Window
 
     private void ApplySavedOpacity()
     {
-        var opacity = Math.Clamp(_preferences.Opacity, 0.55, 1.0);
+        var opacity = Math.Clamp(_preferences.Opacity, 0.0, 1.0);
         Opacity = 1.0;
         ApplySurfaceTransparency(opacity);
     }
@@ -1116,8 +1116,8 @@ public partial class MainWindow : Window
 
     private void ApplySurfaceTransparency(double opacity)
     {
-        var strength = Math.Clamp(opacity, 0.55, 1.0);
-        var panelStrength = Math.Clamp(strength + 0.04, 0.55, 1.0);
+        var strength = Math.Clamp(opacity, 0.0, 1.0);
+        var panelStrength = Math.Clamp(strength + 0.04, 0.0, 1.0);
 
         WindowSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Base, strength));
         RailSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Rail, panelStrength));
@@ -1155,7 +1155,7 @@ public partial class MainWindow : Window
 
     private void SaveOpacity(double opacity)
     {
-        _preferences.Opacity = Math.Clamp(opacity, 0.55, 1.0);
+        _preferences.Opacity = Math.Clamp(opacity, 0.0, 1.0);
         ApplySurfaceTransparency(_preferences.Opacity);
         _preferences.Save();
     }

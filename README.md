@@ -38,7 +38,7 @@ The Windows installer is built with Inno Setup from a self-contained `win-x64` p
 - Avalonia desktop shell in active parity work, sharing timeline, overview, detail-pane, and shell presentation layers across Windows/macOS targets
 - Avalonia Windows target now starts the Windows foreground recorder and reads the shared local SQLite timeline
 - Grouped timeline with card and list view modes in both the WPF app and Avalonia shell
-- Theme system with Midnight, Coffee, Amazon Green, and White Light palettes
+- Theme system with Midnight, GitHub Light, Starbucks Reserve, and Light palettes
 - Real alpha transparency control that keeps theme colours while making the app more or less clear
 - Overview page with daily activity heatmap and lightweight productivity analytics
 - Memory-oriented session grouping into moments rather than raw activity rows
@@ -94,7 +94,7 @@ This split is intentional. Future macOS support should add platform-specific ser
 
 The WPF app now acts more like a Windows shell over shared timeline data. It still owns WPF controls, tray behavior, custom window chrome, Windows icons, screenshot previews, settings, and installer/startup wiring.
 
-`MomentTrace.Desktop` is the active Avalonia shell for cross-platform UI work. It targets both `net8.0` and `net8.0-windows`, reads the same local SQLite timeline through `MomentTrace.Storage`, and binds timeline groups, Overview analytics, and the right-side detail surface from `MomentTrace.Presentation`. The Windows target now starts the shared Windows foreground recorder, shows local screenshot previews, resolves real app icons through `MomentTrace.Windows`, and supports both card and compact list timeline views. It also uses custom chrome for the main shell, Settings modal, delete confirmations, and the first Settings health/status panel. Tray behavior, installer packaging, and full Windows startup integration remain owned by `MomentTrace.App` and `MomentTrace.Windows`.
+`MomentTrace.Desktop` is the active Avalonia shell for cross-platform UI work. It targets both `net8.0` and `net8.0-windows`, reads the same local SQLite timeline through `MomentTrace.Storage`, and binds timeline groups, Overview analytics, and the right-side detail surface from `MomentTrace.Presentation`. The Windows target now starts the shared Windows foreground recorder, shows local screenshot previews, resolves real app icons through `MomentTrace.Windows`, and supports both card and compact list timeline views. It also uses custom chrome for the main shell, Settings modal, delete confirmations, and the first Settings health/status panel. Main window creation now happens before background recorder startup so the Avalonia shell appears reliably even if recorder initialization is slow. Tray behavior, installer packaging, and full Windows startup integration remain owned by `MomentTrace.App` and `MomentTrace.Windows`.
 
 ## Requirements
 
@@ -266,16 +266,21 @@ The detail pane also supports progressive disclosure. Overview, preview, metadat
 
 MomentTrace currently ships with four app themes:
 
-- `Midnight (Dark)`
-- `Coffee (Light)`
-- `Amazon Green (Dark)`
-- `White Light`
+- `Midnight`
+- `GitHub Light`
+- `Starbucks Reserve`
+- `Light`
 
-Themes use six base colour roles: `Base`, `Surface`, `Text`, `MutedText`, `Accent`, and `Stroke`. The app derives supporting colours such as raised surfaces, soft accent, rail/detail surfaces, and contrast-aware accent text from those roles. This keeps the current themes consistent and leaves a clear path for future custom theme creation.
+Themes use six base colour roles: `Base`, `Surface`, `Text`, `MutedText`, `Accent`, and `Stroke`. The app derives supporting colours such as raised surfaces, card surfaces, hover fills, overlays, faint borders, glow accents, semantic status colours, rail/detail surfaces, and contrast-aware accent text from those roles. This keeps the themes coherent across WPF and Avalonia while still giving each workspace a distinct personality.
+
+- `Midnight` stays premium, modern, and technology-focused with purple accents and cool dark surfaces.
+- `GitHub Light` is intentionally cleaner and more developer-tool-like, with white cards, subtle borders, and restrained blue accents so screenshots stay central.
+- `Starbucks Reserve` keeps the premium dark feel but shifts warmer and softer, using greener highlights and less blue-heavy contrast.
+- `Light` remains the broader neutral light option for users who want a brighter workspace without the GitHub-inspired styling.
 
 Overview activity colours are intentionally separate from the app theme. They use a fixed semantic palette for activity types so the heatmap, focus rhythm, quick filters, and legend remain readable in both dark and light themes.
 
-The transparency slider changes real window alpha rather than merely lightening or darkening colours. Custom chrome is used for a cleaner desktop shell, and maximize behavior is constrained to the Windows work area so the app does not cover the taskbar.
+The transparency slider changes real window alpha rather than merely lightening or darkening colours. Opacity is no longer artificially clamped to a high minimum, which allows softer overlays, cleaner hover states, and more convincing glass treatment across the shell. Custom chrome is used for a cleaner desktop shell, and maximize behavior is constrained to the Windows work area so the app does not cover the taskbar.
 
 ## Local Classification And Search
 
@@ -426,6 +431,7 @@ Recent planning updates:
 - Finish final timeline visual polish around empty/loading states and remaining card edge cases
 - Finish the remaining literal visual matching on the Overview `Moments today` and `Focus rhythm` sections
 - Refresh README artwork with up-to-date Avalonia shell screenshots from the current dashboard work
+- Add a lightweight visual QA pass for the three primary themes so future UI changes do not collapse them back toward the same look
 - Add regression tests for privacy exclusions, settings persistence, and warning-free build expectations
 - Add a settings option to delete local data when the user wants a full privacy cleanup
 - Add first-run onboarding for privacy, startup behavior, and local storage

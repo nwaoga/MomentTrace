@@ -296,7 +296,7 @@ public partial class MainWindow : Window
 
     private void SearchTextBox_GotFocus(object? sender, RoutedEventArgs e)
     {
-        SearchSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.TopCommand, Math.Clamp(_preferences.Opacity + 0.08, 0.65, 1.0)));
+        SearchSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.TopCommand, Math.Clamp(_preferences.Opacity + 0.08, 0.0, 1.0)));
         SearchSurface.BorderBrush = new SolidColorBrush(_currentTheme.Accent);
         SearchTextBox.Background = Brushes.Transparent;
         SearchIconText.Foreground = new SolidColorBrush(_currentTheme.Accent);
@@ -304,7 +304,7 @@ public partial class MainWindow : Window
 
     private void SearchTextBox_LostFocus(object? sender, RoutedEventArgs e)
     {
-        SearchSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.TopCommand, Math.Clamp(_preferences.Opacity + 0.08, 0.65, 1.0)));
+        SearchSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.TopCommand, Math.Clamp(_preferences.Opacity + 0.08, 0.0, 1.0)));
         SearchSurface.BorderBrush = new SolidColorBrush(_currentTheme.Stroke);
         SearchTextBox.Background = Brushes.Transparent;
         SearchIconText.Foreground = new SolidColorBrush(_currentTheme.SubtleText);
@@ -1403,8 +1403,8 @@ public partial class MainWindow : Window
 
     private void ApplySurfaceTransparency(double opacity)
     {
-        var pageStrength = Math.Clamp(opacity, 0.55, 1.0);
-        var panelStrength = Math.Clamp(opacity + 0.08, 0.65, 1.0);
+        var pageStrength = Math.Clamp(opacity, 0.0, 1.0);
+        var panelStrength = Math.Clamp(opacity + 0.08, 0.0, 1.0);
 
         OuterShell.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Base, pageStrength));
         RailSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Rail, panelStrength));

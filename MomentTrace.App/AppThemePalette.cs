@@ -16,7 +16,7 @@ public sealed record AppThemePalette(
 {
     public static readonly AppThemePalette Midnight = new(
         "Midnight",
-        "Midnight (Dark)",
+        "Midnight",
         FromHex("#08111F"),
         FromHex("#121D2F"),
         FromHex("#F4F7FB"),
@@ -24,29 +24,29 @@ public sealed record AppThemePalette(
         FromHex("#8B5CF6"),
         FromHex("#26344D"));
 
-    public static readonly AppThemePalette Coffee = new(
-        "Coffee",
-        "Coffee (Light)",
-        FromHex("#FFF7ED"),
-        FromHex("#FFF1E3"),
-        FromHex("#2A1B12"),
-        FromHex("#7B604D"),
-        FromHex("#8A4B25"),
-        FromHex("#E2C2A6"));
+    public static readonly AppThemePalette GitHubLight = new(
+        "GitHubLight",
+        "GitHub Light",
+        FromHex("#F6F8FA"),
+        FromHex("#FFFFFF"),
+        FromHex("#24292F"),
+        FromHex("#57606A"),
+        FromHex("#0969DA"),
+        FromHex("#D0D7DE"));
 
-    public static readonly AppThemePalette AmazonGreen = new(
-        "AmazonGreen",
-        "Amazon Green (Dark)",
-        FromHex("#061713"),
-        FromHex("#0D221B"),
-        FromHex("#F1FFF8"),
-        FromHex("#9CC8B7"),
-        FromHex("#00A862"),
-        FromHex("#245342"));
+    public static readonly AppThemePalette StarbucksReserve = new(
+        "StarbucksReserve",
+        "Starbucks Reserve",
+        FromHex("#0F1512"),
+        FromHex("#17201C"),
+        FromHex("#F6F5F2"),
+        FromHex("#AAB6AF"),
+        FromHex("#00754A"),
+        FromHex("#2E4D40"));
 
     public static readonly AppThemePalette Light = new(
         "Light",
-        "White Light",
+        "Light",
         FromHex("#F6F8FB"),
         FromHex("#FFFFFF"),
         FromHex("#172033"),
@@ -54,28 +54,95 @@ public sealed record AppThemePalette(
         FromHex("#2563EB"),
         FromHex("#CBD5E1"));
 
-    public WpfColor RaisedSurface => Mix(Surface, Base, 0.58);
+    public WpfColor RaisedSurface => IsGitHubLight ? Mix(Surface, Base, 0.92) : Mix(Surface, Base, 0.58);
+
+    public WpfColor Card => Mix(Surface, Base, 0.78);
+
+    public WpfColor CardHover => Mix(Surface, Accent, 0.88);
 
     public WpfColor AccentSoft => Mix(Accent, Surface, 0.78);
 
-    public WpfColor Rail => Surface;
+    public WpfColor AccentGlow => WithAlpha(Accent, 0.28);
 
-    public WpfColor TopCommand => Mix(Base, Surface, 0.36);
+    public WpfColor Overlay => WithAlpha(Base, 0.72);
 
-    public WpfColor Detail => Surface;
+    public WpfColor FaintStroke => WithAlpha(Stroke, 0.45);
+
+    public WpfColor Rail => IsGitHubLight ? Base : Surface;
+
+    public WpfColor TopCommand => IsGitHubLight ? Surface : Mix(Base, Surface, 0.36);
+
+    public WpfColor Detail => Card;
 
     public WpfColor AccentText => IsLight(Accent) ? FromHex("#111827") : FromHex("#FFFFFF");
+
+    public WpfColor SubtleText => IsGitHubLight
+        ? Mix(MutedText, Surface, 0.92)
+        : IsStarbucksReserve
+            ? Mix(MutedText, Base, 0.82)
+            : Mix(MutedText, Base, 0.72);
+
+    public WpfColor Toolbar => IsGitHubLight
+        ? Surface
+        : IsStarbucksReserve
+            ? Mix(Surface, Base, 0.64)
+            : Mix(Surface, Base, 0.5);
+
+    public WpfColor ToolbarHover => IsGitHubLight ? Mix(Surface, Accent, 0.08) : CardHover;
+
+    public WpfColor Chip => IsGitHubLight
+        ? Mix(Base, Accent, 0.06)
+        : IsStarbucksReserve
+            ? Mix(Surface, Accent, 0.12)
+            : Mix(Surface, Base, 0.42);
+
+    public WpfColor PanelEdgeStrong => IsGitHubLight
+        ? Stroke
+        : IsStarbucksReserve
+            ? Mix(Stroke, Accent, 0.12)
+            : Mix(Stroke, Accent, 0.2);
+
+    public WpfColor ActiveSurface => IsGitHubLight
+        ? Mix(Surface, Accent, 0.10)
+        : IsStarbucksReserve
+            ? Mix(Surface, Accent, 0.22)
+            : Accent;
+
+    public WpfColor ActiveEdge => IsGitHubLight ? Mix(Stroke, Accent, 0.45) : Accent;
+
+    public WpfColor ScrollTrack => IsGitHubLight ? Mix(Base, Surface, 0.82) : Mix(Base, Surface, 0.5);
+
+    public WpfColor Success => FromHex("#22C55E");
+
+    public WpfColor Info => FromHex("#3B82F6");
+
+    public WpfColor Warning => FromHex("#F59E0B");
 
     public static IReadOnlyList<AppThemePalette> All { get; } =
     [
         Midnight,
-        Coffee,
-        AmazonGreen,
+        GitHubLight,
+        StarbucksReserve,
         Light
     ];
 
     public static AppThemePalette Find(string? key)
     {
+        if (string.Equals(key, "Coffee", StringComparison.OrdinalIgnoreCase))
+        {
+            return GitHubLight;
+        }
+
+        if (string.Equals(key, "AmazonGreen", StringComparison.OrdinalIgnoreCase))
+        {
+            return StarbucksReserve;
+        }
+
+        if (string.Equals(key, "White Light", StringComparison.OrdinalIgnoreCase))
+        {
+            return Light;
+        }
+
         return All.FirstOrDefault(theme => string.Equals(theme.Key, key, StringComparison.OrdinalIgnoreCase)
             || string.Equals(theme.DisplayName, key, StringComparison.OrdinalIgnoreCase))
             ?? Midnight;
@@ -87,21 +154,41 @@ public sealed record AppThemePalette(
         SetBrush(target, "RailBrush", Rail);
         SetBrush(target, "PanelBrush", Surface);
         SetBrush(target, "SubtlePanelBrush", RaisedSurface);
+        SetBrush(target, "ToolbarBrush", Toolbar);
+        SetBrush(target, "ToolbarHoverBrush", ToolbarHover);
+        SetBrush(target, "ChipBrush", Chip);
+        SetBrush(target, "PanelEdgeStrongBrush", PanelEdgeStrong);
+        SetBrush(target, "SubtleTextBrush", SubtleText);
+        SetBrush(target, "ScrollTrackBrush", ScrollTrack);
+        SetBrush(target, "ActiveSurfaceBrush", ActiveSurface);
+        SetBrush(target, "ActiveEdgeBrush", ActiveEdge);
+        SetBrush(target, "CardBrush", Card);
+        SetBrush(target, "CardHoverBrush", CardHover);
         SetBrush(target, "BorderBrush", Stroke);
+        SetBrush(target, "FaintBorderBrush", FaintStroke);
         SetBrush(target, "TextBrush", Text);
         SetBrush(target, "MutedTextBrush", MutedText);
         SetBrush(target, "AccentBrush", Accent);
         SetBrush(target, "AccentSoftBrush", AccentSoft);
+        SetBrush(target, "AccentGlowBrush", AccentGlow);
         SetBrush(target, "AccentTextBrush", AccentText);
+        SetBrush(target, "OverlayBrush", Overlay);
+        SetBrush(target, "SuccessBrush", Success);
+        SetBrush(target, "InfoBrush", Info);
+        SetBrush(target, "WarningBrush", Warning);
     }
 
     public WpfColor WithAlpha(WpfColor color, double opacity)
     {
-        var strength = Math.Clamp(opacity, 0.55, 1.0);
+        var strength = Math.Clamp(opacity, 0.0, 1.0);
         return WpfColor.FromArgb((byte)Math.Round(strength * 255), color.R, color.G, color.B);
     }
 
     public override string ToString() => DisplayName;
+
+    private bool IsGitHubLight => string.Equals(Key, GitHubLight.Key, StringComparison.OrdinalIgnoreCase);
+
+    private bool IsStarbucksReserve => string.Equals(Key, StarbucksReserve.Key, StringComparison.OrdinalIgnoreCase);
 
     private static WpfColor Mix(WpfColor foreground, WpfColor background, double foregroundAmount)
     {

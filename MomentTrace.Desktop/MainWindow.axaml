@@ -23,18 +23,24 @@
         <SolidColorBrush x:Key="PanelBrush" Color="#111C31" />
         <SolidColorBrush x:Key="SubtlePanelBrush" Color="#16233A" />
         <SolidColorBrush x:Key="ElevatedPanelBrush" Color="#10192B" />
+        <SolidColorBrush x:Key="CardBrush" Color="#10192B" />
+        <SolidColorBrush x:Key="CardHoverBrush" Color="#1C2D49" />
         <SolidColorBrush x:Key="PanelEdgeBrush" Color="#233653" />
         <SolidColorBrush x:Key="PanelEdgeStrongBrush" Color="#2C3E5E" />
+        <SolidColorBrush x:Key="FaintBorderBrush" Color="#7A8AA655" />
         <SolidColorBrush x:Key="TextBrush" Color="#F8FAFC" />
         <SolidColorBrush x:Key="MutedTextBrush" Color="#F59E0B" />
         <SolidColorBrush x:Key="SubtleTextBrush" Color="#64748B" />
         <SolidColorBrush x:Key="AccentBrush" Color="#7C5CFF" />
         <SolidColorBrush x:Key="AccentSoftBrush" Color="#201A38" />
+        <SolidColorBrush x:Key="AccentGlowBrush" Color="#477C5CFF" />
         <SolidColorBrush x:Key="AccentTextBrush" Color="#FFFFFF" />
         <SolidColorBrush x:Key="ChipBrush" Color="#1B2640" />
         <SolidColorBrush x:Key="ToolbarBrush" Color="#172743" />
         <SolidColorBrush x:Key="ToolbarHoverBrush" Color="#1C2D49" />
+        <SolidColorBrush x:Key="OverlayBrush" Color="#B708111F" />
         <SolidColorBrush x:Key="PositiveBrush" Color="#22C55E" />
+        <SolidColorBrush x:Key="SuccessBrush" Color="#22C55E" />
         <SolidColorBrush x:Key="InfoBrush" Color="#0EA5E9" />
         <SolidColorBrush x:Key="WarningBrush" Color="#F59E0B" />
         <SolidColorBrush x:Key="DangerBrush" Color="#6A334A" />
@@ -77,17 +83,17 @@
             <Setter Property="Background" Value="Transparent" />
         </Style>
         <Style Selector="Button.nav:pointerover">
-            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Background" Value="{DynamicResource CardHoverBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
-            <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
         </Style>
         <Style Selector="Button.nav:pointerover TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
         </Style>
         <Style Selector="Button.toolbar">
             <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeStrongBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource FaintBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="10,8" />
@@ -109,7 +115,7 @@
         </Style>
         <Style Selector="Button.topCommand">
             <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeStrongBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Height" Value="42" />
@@ -137,7 +143,7 @@
         <Style Selector="Button.detailSecondary">
             <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeStrongBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource FaintBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="14,10" />
@@ -151,22 +157,22 @@
             <Setter Property="Padding" Value="14,10" />
         </Style>
         <Style Selector="Border.overviewMetric">
-            <Setter Property="Background" Value="{DynamicResource RailBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeBrush}" />
+            <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource FaintBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="14" />
             <Setter Property="Padding" Value="14" />
         </Style>
         <Style Selector="Border.overviewPanel">
-            <Setter Property="Background" Value="{DynamicResource RailBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeBrush}" />
+            <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource FaintBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="14" />
             <Setter Property="Padding" Value="16" />
         </Style>
         <Style Selector="Border.infoChip">
             <Setter Property="Background" Value="{DynamicResource ChipBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource FaintBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="999" />
             <Setter Property="Padding" Value="10,4" />
@@ -174,7 +180,7 @@
         <Style Selector="ComboBox.filter">
             <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeStrongBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="12,7" />
@@ -1714,7 +1720,8 @@
                     </ItemsControl>
 
                     <Grid RowDefinitions="Auto,Auto"
-                          RowSpacing="8">
+                          RowSpacing="4"
+                          Margin="0,-6,0,0">
                         <Grid ColumnDefinitions="*,Auto">
                             <StackPanel>
                                 <TextBlock Text="Activity heatmap"
@@ -1742,8 +1749,12 @@
                     </Grid>
 
                     <Grid ColumnDefinitions="1.65*,0.75*"
-                          ColumnSpacing="14">
+                          RowDefinitions="Auto,Auto"
+                          ColumnSpacing="14"
+                          RowSpacing="8">
                         <Border Grid.Column="0"
+                                Grid.Row="0"
+                                VerticalAlignment="Top"
                                 Classes="overviewPanel">
                             <StackPanel Spacing="10">
                                 <StackPanel Spacing="4">
@@ -1792,6 +1803,9 @@
                         </Border>
 
                         <StackPanel Grid.Column="1"
+                                    Grid.Row="0"
+                                    Grid.RowSpan="2"
+                                    VerticalAlignment="Top"
                                     Spacing="14">
                             <controls:CategoryBreakdownControl x:Name="OverviewCategoryBreakdownControl"
                                                                Title="Activity by category" />
@@ -1851,32 +1865,13 @@
                                 </StackPanel>
                             </Border>
                         </StackPanel>
-                    </Grid>
-
-                    <Grid RowDefinitions="Auto,Auto"
-                          RowSpacing="8">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <StackPanel>
-                                <TextBlock Text="Focus rhythm"
-                                           Foreground="{DynamicResource TextBrush}"
-                                           FontSize="16"
-                                           FontWeight="SemiBold" />
-                                <TextBlock Text="Your activity flow throughout the day"
-                                           Foreground="{DynamicResource SubtleTextBrush}"
-                                           FontSize="11" />
-                            </StackPanel>
-                            <Button Grid.Column="1"
-                                    Classes="toolbar"
-                                    Click="TimelineNavButton_Click"
-                                    Padding="10,6"
-                                    Height="36">
-                                <TextBlock Text="See full timeline"
-                                           FontSize="11" />
-                            </Button>
-                        </Grid>
-                        <controls:FocusRhythmControl x:Name="OverviewFocusRhythmControl"
+                        <controls:FocusRhythmControl Grid.Column="0"
                                                      Grid.Row="1"
-                                                     Title="" />
+                                                     x:Name="OverviewFocusRhythmControl"
+                                                     VerticalAlignment="Top"
+                                                     Margin="0,-2,0,0"
+                                                     Title="Focus rhythm"
+                                                     Subtitle="Your activity flow throughout the day" />
                     </Grid>
                 </StackPanel>
             </ScrollViewer>

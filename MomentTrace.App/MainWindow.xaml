@@ -20,12 +20,26 @@
         <SolidColorBrush x:Key="RailBrush" Color="#101B2C" />
         <SolidColorBrush x:Key="PanelBrush" Color="#121D2F" />
         <SolidColorBrush x:Key="SubtlePanelBrush" Color="#172337" />
+        <SolidColorBrush x:Key="CardBrush" Color="#172337" />
+        <SolidColorBrush x:Key="CardHoverBrush" Color="#2A2146" />
         <SolidColorBrush x:Key="BorderBrush" Color="#26344D" />
+        <SolidColorBrush x:Key="FaintBorderBrush" Color="#7326344D" />
+        <SolidColorBrush x:Key="PanelEdgeStrongBrush" Color="#334A6B" />
         <SolidColorBrush x:Key="TextBrush" Color="#F4F7FB" />
         <SolidColorBrush x:Key="MutedTextBrush" Color="#A5B0C3" />
+        <SolidColorBrush x:Key="SubtleTextBrush" Color="#7D8AA1" />
         <SolidColorBrush x:Key="AccentBrush" Color="#8B5CF6" />
         <SolidColorBrush x:Key="AccentSoftBrush" Color="#2C2154" />
+        <SolidColorBrush x:Key="AccentGlowBrush" Color="#478B5CF6" />
         <SolidColorBrush x:Key="AccentTextBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="ToolbarBrush" Color="#172337" />
+        <SolidColorBrush x:Key="ToolbarHoverBrush" Color="#1F2A3D" />
+        <SolidColorBrush x:Key="ChipBrush" Color="#1D2940" />
+        <SolidColorBrush x:Key="OverlayBrush" Color="#B708111F" />
+        <SolidColorBrush x:Key="SuccessBrush" Color="#22C55E" />
+        <SolidColorBrush x:Key="InfoBrush" Color="#3B82F6" />
+        <SolidColorBrush x:Key="WarningBrush" Color="#F59E0B" />
+        <SolidColorBrush x:Key="ScrollTrackBrush" Color="#142038" />
 
         <Style x:Key="InvisibleScrollButton" TargetType="RepeatButton">
             <Setter Property="Focusable" Value="False" />
@@ -100,9 +114,9 @@
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Padding" Value="14,8" />
-            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource FaintBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Background" Value="{DynamicResource SubtlePanelBrush}" />
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
@@ -118,7 +132,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ButtonRoot" Property="Background" Value="{DynamicResource PanelBrush}" />
+                                <Setter TargetName="ButtonRoot" Property="Background" Value="{DynamicResource CardHoverBrush}" />
                                 <Setter TargetName="ButtonRoot" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -152,7 +166,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="RailButtonRoot" Property="Background" Value="{DynamicResource SubtlePanelBrush}" />
+                                <Setter TargetName="RailButtonRoot" Property="Background" Value="{DynamicResource CardHoverBrush}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -195,9 +209,9 @@
         <Style TargetType="TextBox">
             <Setter Property="FontSize" Value="14" />
             <Setter Property="Padding" Value="40,11,14,11" />
-            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeStrongBrush}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
             <Setter Property="CaretBrush" Value="{DynamicResource TextBrush}" />
         </Style>
@@ -205,9 +219,9 @@
         <Style TargetType="ComboBox">
             <Setter Property="FontSize" Value="13" />
             <Setter Property="Padding" Value="10,8" />
-            <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource FaintBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="ItemContainerStyle">
                 <Setter.Value>
@@ -223,8 +237,8 @@
         <Style x:Key="TopComboBox" TargetType="ComboBox">
             <Setter Property="FontSize" Value="13" />
             <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
-            <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeStrongBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Padding" Value="12,8" />
             <Setter Property="ItemContainerStyle">
@@ -271,7 +285,7 @@
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource SubtlePanelBrush}" />
+                                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource CardHoverBrush}" />
                                                 <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                             </Trigger>
                                         </ControlTemplate.Triggers>
@@ -325,7 +339,7 @@
         </ItemsPanelTemplate>
 
         <DataTemplate x:Key="TimelineListItemTemplate">
-            <Border Margin="0,0,10,10" Padding="12" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource SubtlePanelBrush}">
+            <Border Margin="0,0,10,10" Padding="12" BorderBrush="{DynamicResource FaintBorderBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBrush}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="34" />
@@ -346,10 +360,10 @@
             <Border Width="218"
                     Height="150"
                     Margin="0,0,16,16"
-                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderBrush="{DynamicResource FaintBorderBrush}"
                     BorderThickness="1"
                     CornerRadius="8"
-                    Background="{DynamicResource SubtlePanelBrush}"
+                    Background="{DynamicResource CardBrush}"
                     ClipToBounds="True"
                     Cursor="Hand"
                     MouseLeftButtonUp="TimelineCard_Click">
@@ -395,7 +409,7 @@
                         <Border HorizontalAlignment="Left"
                                 VerticalAlignment="Top"
                                 Margin="8"
-                                Background="{DynamicResource SubtlePanelBrush}"
+                                Background="{DynamicResource ChipBrush}"
                                 Opacity="0.94"
                                 CornerRadius="5"
                                 Padding="6,2">
@@ -404,7 +418,7 @@
                         <Border HorizontalAlignment="Right"
                                 VerticalAlignment="Top"
                                 Margin="8"
-                                Background="{DynamicResource SubtlePanelBrush}"
+                                Background="{DynamicResource ChipBrush}"
                                 Opacity="0.94"
                                 CornerRadius="5"
                                 Padding="6,2">

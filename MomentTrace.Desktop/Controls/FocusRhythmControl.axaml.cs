@@ -14,6 +14,9 @@ public partial class FocusRhythmControl : UserControl
     public static readonly StyledProperty<string?> TitleProperty =
         AvaloniaProperty.Register<FocusRhythmControl, string?>(nameof(Title), "Focus rhythm");
 
+    public static readonly StyledProperty<string?> SubtitleProperty =
+        AvaloniaProperty.Register<FocusRhythmControl, string?>(nameof(Subtitle), "Your activity flow throughout the day");
+
     public static readonly StyledProperty<ICommand?> ItemCommandProperty =
         AvaloniaProperty.Register<FocusRhythmControl, ICommand?>(nameof(ItemCommand));
 
@@ -32,6 +35,12 @@ public partial class FocusRhythmControl : UserControl
     {
         get => GetValue(TitleProperty);
         set => SetValue(TitleProperty, value);
+    }
+
+    public string? Subtitle
+    {
+        get => GetValue(SubtitleProperty);
+        set => SetValue(SubtitleProperty, value);
     }
 
     public ICommand? ItemCommand

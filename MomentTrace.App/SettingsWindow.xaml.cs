@@ -84,7 +84,7 @@ public partial class SettingsWindow : Window
         _isUpdatingTheme = false;
 
         _isUpdatingOpacitySlider = true;
-        OpacitySlider.Value = Math.Clamp(currentOpacity, 0.55, 1.0) * 100;
+        OpacitySlider.Value = Math.Clamp(currentOpacity, 0.0, 1.0) * 100;
         OpacityValueText.Text = $"{Math.Round(OpacitySlider.Value)}%";
         _isUpdatingOpacitySlider = false;
 
@@ -155,7 +155,7 @@ public partial class SettingsWindow : Window
         }
 
         OpacityValueText.Text = $"{Math.Round(OpacitySlider.Value)}%";
-        _opacityChanged(Math.Clamp(OpacitySlider.Value / 100, 0.55, 1.0));
+        _opacityChanged(Math.Clamp(OpacitySlider.Value / 100, 0.0, 1.0));
     }
 
     private void TimelineViewModeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

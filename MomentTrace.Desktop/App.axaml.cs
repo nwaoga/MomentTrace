@@ -1,6 +1,7 @@
 using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Threading;
 using Avalonia.Markup.Xaml;
 using MomentTrace.Core;
 using MomentTrace.Storage;
@@ -28,14 +29,25 @@ public partial class App : Application
             var store = new SqliteActivityStore(SqliteActivityStore.DefaultDatabasePath);
             await store.InitializeAsync();
 
+            var mainWindow = new MainWindow(store, null);
+            desktop.MainWindow = mainWindow;
             _recorder = CreateRecorder(store);
+            desktop.Exit += Desktop_Exit;
+
             if (_recorder is not null)
             {
-                await _recorder.StartAsync();
+                Dispatcher.UIThread.Post(async () =>
+                {
+                    try
+                    {
+                        await _recorder.StartAsync();
+                    }
+                    catch
+                    {
+                        // Recorder startup should not prevent the shell from appearing.
+                    }
+                });
             }
-
-            desktop.Exit += Desktop_Exit;
-            desktop.MainWindow = new MainWindow(store, _recorder);
         }
 
         base.OnFrameworkInitializationCompleted();
