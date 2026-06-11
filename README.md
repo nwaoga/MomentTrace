@@ -273,6 +273,8 @@ MomentTrace currently ships with six app themes:
 - `Espresso (Mono)`
 - `Hot White`
 
+![MomentTrace theme collage](docs/assets/momenttrace-theme-collage.png)
+
 Themes use six base colour roles: `Base`, `Surface`, `Text`, `MutedText`, `Accent`, and `Stroke`. The app derives supporting colours such as raised surfaces, card surfaces, hover fills, overlays, faint borders, glow accents, semantic status colours, rail/detail surfaces, and contrast-aware accent text from those roles. This keeps the themes coherent across WPF and Avalonia while still giving each workspace a distinct personality.
 
 - `Midnight` stays premium, modern, and technology-focused with purple accents and cool dark surfaces.
@@ -329,7 +331,7 @@ The Avalonia Overview dashboard also has theme-aware activity colours:
 | `HeatmapDocuments` | Document review/editing blocks and document activity. |
 | `HeatmapGap` | Idle, gap, and system-space blocks. |
 
-Overview activity colours now adapt per theme while preserving semantic meaning for apps, browsing, development, documents, and gaps. The heatmap, focus rhythm, quick filters, and legends stay readable across dark, light, green, Costa, and espresso palettes without feeling pasted on from a different design system.
+Overview activity colours now adapt per theme while preserving semantic meaning for apps, browsing, development, documents, and gaps. The heatmap, focus rhythm, quick filters, legends, and overview summary surfaces stay readable across dark, light, green, Costa, and espresso palettes without feeling pasted on from a different design system.
 
 The transparency slider changes real window alpha rather than merely lightening or darkening colours. Opacity is no longer artificially clamped to a high minimum, which allows softer overlays, cleaner hover states, and more convincing glass treatment across the shell. Custom chrome is used for a cleaner desktop shell, and maximize behavior is constrained to the Windows work area so the app does not cover the taskbar.
 

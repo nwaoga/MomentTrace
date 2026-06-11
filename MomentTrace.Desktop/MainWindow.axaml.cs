@@ -60,6 +60,7 @@ public partial class MainWindow : Window
     private Vector _scrollDragStartOffset;
     private bool _isScrollDragging;
     private bool _isReloading;
+    private bool _isSelectingDateForOverviewNavigation;
     private DispatcherTimer? _overviewMomentsScrollAnimationTimer;
     private double _overviewMomentsScrollFrom;
     private double _overviewMomentsScrollTo;
@@ -378,6 +379,11 @@ public partial class MainWindow : Window
     private async void DateFilterComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (!IsLoaded)
+        {
+            return;
+        }
+
+        if (_isSelectingDateForOverviewNavigation)
         {
             return;
         }
@@ -1379,8 +1385,10 @@ public partial class MainWindow : Window
 
     private async Task NavigateToTimelineMomentAsync(long momentId)
     {
+        var selected = FindOverviewMoment(momentId);
         ClearTimelineFocusRange();
         ClearSearchFilter();
+        SelectTimelineDate(selected?.SessionStartedAt.LocalDateTime.Date);
         _selectedRailSelection = RailSelection.Timeline;
         _selectedMomentId = momentId;
         ShowTimelinePage();
@@ -1390,12 +1398,46 @@ public partial class MainWindow : Window
     private async Task ShowTimelineRangeAsync(DateTime start, DateTime end)
     {
         ClearSearchFilter();
+        SelectTimelineDate(start.Date);
         _selectedRailSelection = RailSelection.Timeline;
         _timelineFocusStart = start;
         _timelineFocusEnd = end;
         _selectedMomentId = null;
         ShowTimelinePage();
         await RefreshTimelineAsync();
+    }
+
+    private void SelectTimelineDate(DateTime? date)
+    {
+        if (date is null)
+        {
+            return;
+        }
+
+        var selectedDate = date.Value.Date;
+        var selectedOption = DateFilterComboBox.SelectedItem as DateFilterOption;
+        if (selectedOption?.Date == selectedDate)
+        {
+            return;
+        }
+
+        var match = (DateFilterComboBox.ItemsSource as IEnumerable<DateFilterOption>)
+            ?.FirstOrDefault(option => option.Date == selectedDate);
+
+        if (match is null)
+        {
+            return;
+        }
+
+        _isSelectingDateForOverviewNavigation = true;
+        try
+        {
+            DateFilterComboBox.SelectedItem = match;
+        }
+        finally
+        {
+            _isSelectingDateForOverviewNavigation = false;
+        }
     }
 
     private async Task HandleOverviewFocusBlockAsync(FocusBlockViewModel block)
