@@ -73,6 +73,21 @@
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderBrush" Value="Transparent" />
         </Style>
+        <Style Selector="Button.clickBlock">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="Button.clickBlock /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="Button.clickBlock:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Opacity" Value="0.9" />
+        </Style>
         <Style Selector="Button.nav">
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="BorderBrush" Value="Transparent" />
@@ -1782,7 +1797,8 @@
                         <StackPanel Grid.Column="0"
                                     VerticalAlignment="Top"
                                     Spacing="12">
-                            <Border Classes="overviewPanel">
+                            <Border Classes="overviewPanel"
+                                    Padding="18">
                                 <StackPanel Spacing="10">
                                     <Grid ColumnDefinitions="*,Auto"
                                           ColumnSpacing="12">
@@ -1819,43 +1835,57 @@
                                             </Button>
                                         </StackPanel>
                                     </Grid>
-                                    <ScrollViewer x:Name="OverviewMomentsScrollViewer"
-                                                  HorizontalScrollBarVisibility="Hidden"
-                                                  VerticalScrollBarVisibility="Disabled"
-                                                  AllowAutoHide="False"
-                                                  PointerPressed="OverviewMomentsScrollViewer_PointerPressed"
-                                                  PointerMoved="OverviewMomentsScrollViewer_PointerMoved"
-                                                  PointerReleased="OverviewMomentsScrollViewer_PointerReleased">
-                                        <ItemsControl x:Name="OverviewMomentsItems"
-                                                      HorizontalAlignment="Left">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <StackPanel Orientation="Horizontal"
-                                                                Spacing="14" />
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border Width="248"
-                                                            Margin="0,0,0,0">
-                                                        <Button Classes="momentCard"
-                                                                Click="OverviewMomentButton_Click"
-                                                                CommandParameter="{Binding Id}">
-                                                            <controls:MomentCard Title="{Binding Title}"
-                                                                                 Subtitle="{Binding Subtitle}"
-                                                                                 Timestamp="{Binding Timestamp}"
-                                                                                 Duration="{Binding Duration}"
-                                                                                 Category="{Binding Category}"
-                                                                                 AccentFill="{Binding AccentFill}"
-                                                                                 AccentText="{Binding AccentText}"
-                                                                                 Source="{Binding Source}"
-                                                                                 PreviewPath="{Binding ThumbnailPath}" />
-                                                        </Button>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </ScrollViewer>
+                                    <Grid ClipToBounds="True"
+                                          MinHeight="276">
+                                        <ScrollViewer x:Name="OverviewMomentsScrollViewer"
+                                                      HorizontalScrollBarVisibility="Hidden"
+                                                      VerticalScrollBarVisibility="Disabled"
+                                                      AllowAutoHide="False"
+                                                      PointerPressed="OverviewMomentsScrollViewer_PointerPressed"
+                                                      PointerMoved="OverviewMomentsScrollViewer_PointerMoved"
+                                                      PointerReleased="OverviewMomentsScrollViewer_PointerReleased">
+                                            <ItemsControl x:Name="OverviewMomentsItems"
+                                                          HorizontalAlignment="Left">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Horizontal"
+                                                                    Spacing="16" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Width="282"
+                                                                Margin="0,0,0,0">
+                                                            <Button Classes="momentCard"
+                                                                    Click="OverviewMomentButton_Click"
+                                                                    CommandParameter="{Binding Id}"
+                                                                    ToolTip.Tip="Open this moment in the timeline">
+                                                                <controls:MomentCard Title="{Binding Title}"
+                                                                                     Subtitle="{Binding Subtitle}"
+                                                                                     Timestamp="{Binding Timestamp}"
+                                                                                     Duration="{Binding Duration}"
+                                                                                     Category="{Binding Category}"
+                                                                                     AccentFill="{Binding AccentFill}"
+                                                                                     AccentText="{Binding AccentText}"
+                                                                                     Source="{Binding Source}"
+                                                                                     PreviewPath="{Binding ThumbnailPath}" />
+                                                            </Button>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+                                        <Border Width="28"
+                                                HorizontalAlignment="Left"
+                                                Background="{DynamicResource CardBrush}"
+                                                Opacity="0.72"
+                                                IsHitTestVisible="False" />
+                                        <Border Width="42"
+                                                HorizontalAlignment="Right"
+                                                Background="{DynamicResource CardBrush}"
+                                                Opacity="0.72"
+                                                IsHitTestVisible="False" />
+                                    </Grid>
                                 </StackPanel>
                             </Border>
                             <controls:FocusRhythmControl x:Name="OverviewFocusRhythmControl"

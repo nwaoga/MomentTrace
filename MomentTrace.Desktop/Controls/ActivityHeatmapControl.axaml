@@ -47,12 +47,10 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
               <DataTemplate>
-                <Button Background="Transparent"
-                        BorderBrush="Transparent"
-                        BorderThickness="0"
-                        Padding="0"
+                <Button Classes="clickBlock"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
+                        ToolTip.Tip="{Binding Tooltip}"
                         Command="{Binding ItemCommand, RelativeSource={RelativeSource AncestorType=local:ActivityHeatmapControl}}"
                         CommandParameter="{Binding Segment}">
                   <Border HorizontalAlignment="Stretch"
@@ -75,12 +73,10 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
               <DataTemplate>
-                <Button Background="Transparent"
-                        BorderBrush="Transparent"
-                        BorderThickness="0"
-                        Padding="0"
+                <Button Classes="clickBlock"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
+                        ToolTip.Tip="{Binding Tooltip}"
                         Command="{Binding ItemCommand, RelativeSource={RelativeSource AncestorType=local:ActivityHeatmapControl}}"
                         CommandParameter="{Binding Segment}">
                   <Border HorizontalAlignment="Stretch"
