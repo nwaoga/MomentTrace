@@ -62,6 +62,12 @@ public partial class FocusRhythmControl : UserControl
         set => SetValue(ItemCommandProperty, value);
     }
 
+    public void ResetScrollPosition()
+    {
+        _scrollAnimationTimer?.Stop();
+        FocusScrollViewer.Offset = new Vector(0, FocusScrollViewer.Offset.Y);
+    }
+
     private void ScrollLeftButton_Click(object? sender, RoutedEventArgs e)
     {
         ScrollBy(-GetScrollStep());

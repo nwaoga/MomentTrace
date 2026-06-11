@@ -116,7 +116,8 @@ public sealed class FocusBlockViewModel
         bool isGap,
         DateTimeOffset? startedAt,
         long? momentId,
-        double timelineOffset)
+        double timelineOffset,
+        bool showTimeLabel)
     {
         Label = label;
         Duration = duration;
@@ -125,6 +126,7 @@ public sealed class FocusBlockViewModel
         StartedAt = startedAt;
         MomentId = momentId;
         TimelineOffset = timelineOffset;
+        ShowTimeLabel = showTimeLabel;
     }
 
     public string Label { get; }
@@ -141,7 +143,9 @@ public sealed class FocusBlockViewModel
 
     public double TimelineOffset { get; }
 
-    public double Width => Math.Clamp((Duration.TotalMinutes * 1.85d) + 72d, 112d, 220d);
+    public bool ShowTimeLabel { get; }
+
+    public double Width => Math.Clamp((Duration.TotalMinutes * 1.25d) + 92d, 108d, 176d);
 
     public string StartedAtLabel => StartedAt?.LocalDateTime.ToString("HH:mm") ?? string.Empty;
 
@@ -149,7 +153,7 @@ public sealed class FocusBlockViewModel
 
     public string Tooltip => $"{Label}\nSeen {OverviewPresentationBuilder.FormatDuration(Duration)}";
 
-    public static FocusBlockViewModel Active(ActivityMomentViewModel moment, double timelineOffset)
+    public static FocusBlockViewModel Active(ActivityMomentViewModel moment, double timelineOffset, bool showTimeLabel)
     {
         var fill = moment.Activity.Kind switch
         {
@@ -171,10 +175,11 @@ public sealed class FocusBlockViewModel
             isGap: false,
             moment.SessionStartedAt,
             moment.Id,
-            timelineOffset);
+            timelineOffset,
+            showTimeLabel);
     }
 
-    public static FocusBlockViewModel Gap(TimeSpan duration, DateTimeOffset startedAt, double timelineOffset)
+    public static FocusBlockViewModel Gap(TimeSpan duration, DateTimeOffset startedAt, double timelineOffset, bool showTimeLabel)
     {
         return new FocusBlockViewModel(
             "Gap or idle space",
@@ -183,6 +188,7 @@ public sealed class FocusBlockViewModel
             isGap: true,
             startedAt,
             momentId: null,
-            timelineOffset);
+            timelineOffset,
+            showTimeLabel);
     }
 }

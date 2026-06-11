@@ -182,6 +182,7 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
         ActivityMomentViewModel? previous = null;
         var anchor = sessions[0].SessionStartedAt;
         var previousDisplayEnd = 0d;
+        string? previousLabel = null;
 
         foreach (var session in sessions)
         {
@@ -192,17 +193,21 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
                 {
                     var rawGapOffset = Math.Max(0d, (previous.SessionEndedAt - anchor).TotalMinutes * pixelsPerMinute);
                     var gapOffset = Math.Max(rawGapOffset, previousDisplayEnd + minimumBlockGap);
-                    var gapBlock = FocusBlockViewModel.Gap(gap, previous.SessionEndedAt, gapOffset);
+                    var gapLabel = previous.SessionEndedAt.LocalDateTime.ToString("HH:mm");
+                    var gapBlock = FocusBlockViewModel.Gap(gap, previous.SessionEndedAt, gapOffset, gapLabel != previousLabel);
                     blocks.Add(gapBlock);
                     previousDisplayEnd = gapBlock.TimelineOffset + gapBlock.Width;
+                    previousLabel = gapLabel;
                 }
             }
 
             var rawSessionOffset = Math.Max(0d, (session.SessionStartedAt - anchor).TotalMinutes * pixelsPerMinute);
             var sessionOffset = Math.Max(rawSessionOffset, previousDisplayEnd + minimumBlockGap);
-            var sessionBlock = FocusBlockViewModel.Active(session, sessionOffset);
+            var sessionLabel = session.SessionStartedAt.LocalDateTime.ToString("HH:mm");
+            var sessionBlock = FocusBlockViewModel.Active(session, sessionOffset, sessionLabel != previousLabel);
             blocks.Add(sessionBlock);
             previousDisplayEnd = sessionBlock.TimelineOffset + sessionBlock.Width;
+            previousLabel = sessionLabel;
             previous = session;
         }
 

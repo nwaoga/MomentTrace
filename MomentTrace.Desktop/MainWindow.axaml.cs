@@ -67,6 +67,8 @@ public partial class MainWindow : Window
     private Point _overviewMomentsDragStartPoint;
     private Vector _overviewMomentsDragStartOffset;
     private bool _isOverviewMomentsDragging;
+    private string _overviewMomentsSignature = string.Empty;
+    private string _overviewFocusSignature = string.Empty;
     private readonly ICommand _overviewHeatmapCommand;
     private readonly ICommand _overviewFocusCommand;
     private static readonly Cursor ScrollReadyCursor = new(StandardCursorType.Hand);
@@ -193,13 +195,21 @@ public partial class MainWindow : Window
         OverviewSummaryItems.ItemsSource = overview.DaySummaryMetrics;
         OverviewHeatmapControl.Items = overview.HeatmapSegments;
         OverviewHeatmapControl.LegendItems = overview.Legend;
+        var momentsSignature = BuildOverviewMomentsSignature(overview.KeyMoments);
+        var focusSignature = BuildOverviewFocusSignature(overview.FocusBlocks);
+        var shouldResetMomentsRail = !string.Equals(momentsSignature, _overviewMomentsSignature, StringComparison.Ordinal);
+        var shouldResetFocusRail = !string.Equals(focusSignature, _overviewFocusSignature, StringComparison.Ordinal);
+        _overviewMomentsSignature = momentsSignature;
+        _overviewFocusSignature = focusSignature;
+
         OverviewMomentsItems.ItemsSource = overview.KeyMoments;
         OverviewCategoryBreakdownControl.Items = overview.CategoryBreakdown;
         OverviewTopApplicationsItems.ItemsSource = overview.TopApplications
             .Take(4)
             .Select(ToOverviewTopApplicationRow)
             .ToList();
-        OverviewFocusRhythmControl.Items = overview.FocusBlocks.Take(10).ToList();
+        OverviewFocusRhythmControl.Items = overview.FocusBlocks.Take(16).ToList();
+        ResetOverviewRailOffsets(shouldResetMomentsRail, shouldResetFocusRail);
     }
 
     private void TimelineNavButton_Click(object? sender, RoutedEventArgs e)
@@ -1424,6 +1434,38 @@ public partial class MainWindow : Window
         var maxOffset = Math.Max(0d, OverviewMomentsScrollViewer.Extent.Width - OverviewMomentsScrollViewer.Viewport.Width);
         var nextX = Math.Clamp(OverviewMomentsScrollViewer.Offset.X + delta, 0d, maxOffset);
         AnimateOverviewMomentsScrollTo(nextX);
+    }
+
+    private void ResetOverviewRailOffsets(bool resetMomentsRail, bool resetFocusRail)
+    {
+        if (!resetMomentsRail && !resetFocusRail)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (resetMomentsRail)
+            {
+                _overviewMomentsScrollAnimationTimer?.Stop();
+                OverviewMomentsScrollViewer.Offset = new Vector(0, OverviewMomentsScrollViewer.Offset.Y);
+            }
+
+            if (resetFocusRail)
+            {
+                OverviewFocusRhythmControl.ResetScrollPosition();
+            }
+        }, DispatcherPriority.Background);
+    }
+
+    private static string BuildOverviewMomentsSignature(IEnumerable<KeyMomentViewModel> moments)
+    {
+        return string.Join("|", moments.Select(moment => moment.Id));
+    }
+
+    private static string BuildOverviewFocusSignature(IEnumerable<FocusBlockViewModel> blocks)
+    {
+        return string.Join("|", blocks.Take(16).Select(block => $"{block.MomentId}:{block.StartedAt?.ToUnixTimeSeconds()}:{block.Duration.TotalSeconds:F0}"));
     }
 
     private void OverviewMomentsScrollViewer_PointerPressed(object? sender, PointerPressedEventArgs e)
