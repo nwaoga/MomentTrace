@@ -282,6 +282,53 @@ Themes use six base colour roles: `Base`, `Surface`, `Text`, `MutedText`, `Accen
 - `Espresso (Mono)` leans into the brown reference design with amber accents and muted roast-coloured panels.
 - `Hot White` remains the broader neutral light option for users who want a brighter workspace without the GitHub-inspired styling.
 
+Theme definitions live in two places while both shells are still active:
+
+- `MomentTrace.Desktop/DesktopAppThemePalette.cs` defines the Avalonia shell palettes and applies Avalonia dynamic resources such as `PageBackgroundBrush`, `RailBrush`, `CardBrush`, `AccentBrush`, and the heatmap brushes.
+- `MomentTrace.App/AppThemePalette.cs` defines the WPF shell palettes using the same base roles so the legacy Windows shell stays visually aligned.
+
+The six base roles mean:
+
+| Role | Used for |
+| --- | --- |
+| `Base` | Main app background, glass/tint base, and the page colour under the shell. |
+| `Surface` | Primary panels such as the rail, settings modal body, detail surfaces, and overview panels. |
+| `Text` | Primary labels, headings, card titles, metric values, and strong body copy. |
+| `MutedText` | Secondary labels, metadata, subtitles, timestamps, and explanatory text. |
+| `Accent` | Selected navigation, primary buttons, focus rings, active borders, metric icons, and strong highlights. |
+| `Stroke` | Panel outlines, toolbar borders, dividers, card edges, and low-emphasis separators. |
+
+Derived roles are calculated from the base roles so each theme remains cohesive:
+
+| Derived role | Used for |
+| --- | --- |
+| `RaisedSurface` / `SubtlePanelBrush` | Slightly lifted cards, list rows, nested panels, and softer empty states. |
+| `Card` / `CardBrush` | Timeline cards, overview cards, detail cards, and repeated item surfaces. |
+| `CardHover` / `ToolbarHoverBrush` | Hover states for cards, toolbar controls, and navigation buttons. |
+| `Rail` / `RailBrush` | Left navigation rail and its surrounding shell surface. |
+| `TopCommand` / `ToolbarBrush` | Search bar, date/type filters, menu buttons, and window command buttons. |
+| `Detail` | Right-hand detail pane and elevated detail surfaces. |
+| `Chip` / `ChipBrush` | Count pills, stored-locally badges, heatmap captions, and small status chips. |
+| `AccentText` | Text placed directly on accent-coloured buttons, chips, and selected navigation. |
+| `SubtleText` | Very low-emphasis hints, watermarks, placeholder text, and quiet metadata. |
+| `FaintStroke` / `FaintBorderBrush` | Softer card borders and low-contrast panel boundaries. |
+| `PanelEdgeStrong` | More visible toolbar, combo box, and command borders. |
+| `ActiveSurface` / `ActiveEdge` | Active left-rail items and selected workspace/source filters. |
+| `Overlay` | Preview overlays, duration chips on screenshots, and modal dimming surfaces. |
+| `ScrollThumb` / `ScrollTrack` | Custom scrollbar thumb and track colours. |
+| `Danger` / `DangerFill` | Delete buttons, confirmation dialogs, and destructive action borders. |
+
+The Avalonia Overview dashboard also has theme-aware activity colours:
+
+| Activity colour | Used for |
+| --- | --- |
+| `HeatmapEmpty` | Empty 15-minute blocks and quiet gap cells. |
+| `HeatmapApps` | Apps and tools blocks, app-led focus rhythm items, and the apps legend swatch. |
+| `HeatmapWeb` | Web browsing blocks, browser-led focus rhythm items, and the web legend swatch. |
+| `HeatmapDevelopment` | Development work blocks and coding/tooling activity. |
+| `HeatmapDocuments` | Document review/editing blocks and document activity. |
+| `HeatmapGap` | Idle, gap, and system-space blocks. |
+
 Overview activity colours now adapt per theme while preserving semantic meaning for apps, browsing, development, documents, and gaps. The heatmap, focus rhythm, quick filters, and legends stay readable across dark, light, green, Costa, and espresso palettes without feeling pasted on from a different design system.
 
 The transparency slider changes real window alpha rather than merely lightening or darkening colours. Opacity is no longer artificially clamped to a high minimum, which allows softer overlays, cleaner hover states, and more convincing glass treatment across the shell. Custom chrome is used for a cleaner desktop shell, and maximize behavior is constrained to the Windows work area so the app does not cover the taskbar.
