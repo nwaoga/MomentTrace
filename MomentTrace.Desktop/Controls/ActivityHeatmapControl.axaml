@@ -20,78 +20,102 @@
                      FontSize="11" />
         </Border>
       </Grid>
-      <StackPanel Spacing="10"
-                  Margin="0,6,0,0">
-        <Grid ColumnDefinitions="*,*,*,*,*,*,*,*,*,*,*,*,*">
-          <TextBlock Text="00:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Left" />
-          <TextBlock Grid.Column="1" Text="02:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
-          <TextBlock Grid.Column="2" Text="04:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
-          <TextBlock Grid.Column="3" Text="06:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
-          <TextBlock Grid.Column="4" Text="08:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
-          <TextBlock Grid.Column="5" Text="10:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
-          <TextBlock Grid.Column="6" Text="12:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
-          <TextBlock Grid.Column="7" Text="14:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
-          <TextBlock Grid.Column="8" Text="16:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
-          <TextBlock Grid.Column="9" Text="18:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
-          <TextBlock Grid.Column="10" Text="20:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
-          <TextBlock Grid.Column="11" Text="22:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
-          <TextBlock Grid.Column="12" Text="24:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Right" />
-        </Grid>
-        <StackPanel Spacing="5">
-          <ItemsControl x:Name="FirstHeatmapRow">
-            <ItemsControl.ItemsPanel>
-              <ItemsPanelTemplate>
-                <UniformGrid Columns="48"
-                             Rows="1" />
-              </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <Button Classes="clickBlock"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        ToolTip.Tip="{Binding Tooltip}"
-                        Command="{Binding ItemCommand, RelativeSource={RelativeSource AncestorType=local:ActivityHeatmapControl}}"
-                        CommandParameter="{Binding Segment}">
-                  <Border HorizontalAlignment="Stretch"
+      <Grid Margin="0,6,0,0">
+        <StackPanel x:Name="HeatmapContent"
+                    Spacing="10">
+          <Grid ColumnDefinitions="*,*,*,*,*,*,*,*,*,*,*,*,*">
+            <TextBlock Text="00:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Left" />
+            <TextBlock Grid.Column="1" Text="02:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+            <TextBlock Grid.Column="2" Text="04:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+            <TextBlock Grid.Column="3" Text="06:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+            <TextBlock Grid.Column="4" Text="08:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+            <TextBlock Grid.Column="5" Text="10:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+            <TextBlock Grid.Column="6" Text="12:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+            <TextBlock Grid.Column="7" Text="14:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+            <TextBlock Grid.Column="8" Text="16:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+            <TextBlock Grid.Column="9" Text="18:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+            <TextBlock Grid.Column="10" Text="20:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+            <TextBlock Grid.Column="11" Text="22:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Center" />
+            <TextBlock Grid.Column="12" Text="24:00" Foreground="{DynamicResource SubtleTextBrush}" FontSize="10" HorizontalAlignment="Right" />
+          </Grid>
+          <StackPanel Spacing="5">
+            <ItemsControl x:Name="FirstHeatmapRow">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <UniformGrid Columns="48"
+                               Rows="1" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Button Classes="clickBlock"
+                          HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
-                          Margin="0,0,3,0"
-                          Height="16"
-                          CornerRadius="4"
-                          Background="{Binding Brush}"
-                          ToolTip.Tip="{Binding Tooltip}" />
-                </Button>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-          <ItemsControl x:Name="SecondHeatmapRow">
-            <ItemsControl.ItemsPanel>
-              <ItemsPanelTemplate>
-                <UniformGrid Columns="48"
-                             Rows="1" />
-              </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <Button Classes="clickBlock"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        ToolTip.Tip="{Binding Tooltip}"
-                        Command="{Binding ItemCommand, RelativeSource={RelativeSource AncestorType=local:ActivityHeatmapControl}}"
-                        CommandParameter="{Binding Segment}">
-                  <Border HorizontalAlignment="Stretch"
+                          ToolTip.Tip="{Binding Tooltip}"
+                          Command="{Binding ItemCommand, RelativeSource={RelativeSource AncestorType=local:ActivityHeatmapControl}}"
+                          CommandParameter="{Binding Segment}">
+                    <Border HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Margin="0,0,3,0"
+                            Height="16"
+                            CornerRadius="4"
+                            Background="{Binding Brush}"
+                            ToolTip.Tip="{Binding Tooltip}" />
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ItemsControl x:Name="SecondHeatmapRow">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <UniformGrid Columns="48"
+                               Rows="1" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Button Classes="clickBlock"
+                          HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
-                          Margin="0,0,3,0"
-                          Height="16"
-                          CornerRadius="4"
-                          Background="{Binding Brush}"
-                          ToolTip.Tip="{Binding Tooltip}" />
-                </Button>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
+                          ToolTip.Tip="{Binding Tooltip}"
+                          Command="{Binding ItemCommand, RelativeSource={RelativeSource AncestorType=local:ActivityHeatmapControl}}"
+                          CommandParameter="{Binding Segment}">
+                    <Border HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Margin="0,0,3,0"
+                            Height="16"
+                            CornerRadius="4"
+                            Background="{Binding Brush}"
+                            ToolTip.Tip="{Binding Tooltip}" />
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
         </StackPanel>
-      </StackPanel>
+        <Border x:Name="HeatmapEmptyState"
+                Padding="20"
+                Background="{DynamicResource ElevatedPanelBrush}"
+                BorderBrush="{DynamicResource FaintBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="14"
+                IsVisible="False">
+          <StackPanel Spacing="6"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center">
+            <TextBlock Text="No captured activity yet"
+                       Foreground="{DynamicResource TextBrush}"
+                       FontWeight="SemiBold"
+                       HorizontalAlignment="Center" />
+            <TextBlock Text="The heatmap will light up as MomentTrace records foreground activity throughout the day."
+                       Foreground="{DynamicResource MutedTextBrush}"
+                       FontSize="11"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center"
+                       MaxWidth="360" />
+          </StackPanel>
+        </Border>
+      </Grid>
       <ItemsControl x:Name="HeatmapLegendItems">
         <ItemsControl.ItemsPanel>
           <ItemsPanelTemplate>

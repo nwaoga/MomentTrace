@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Input;
+using Avalonia.Layout;
 using Avalonia.Threading;
 using MomentTrace.Presentation;
 
@@ -33,9 +35,15 @@ public partial class FocusRhythmControl : UserControl
     public static readonly StyledProperty<ICommand?> ItemCommandProperty =
         AvaloniaProperty.Register<FocusRhythmControl, ICommand?>(nameof(ItemCommand));
 
+    static FocusRhythmControl()
+    {
+        ItemsProperty.Changed.AddClassHandler<FocusRhythmControl>((control, _) => control.UpdateVisualState());
+    }
+
     public FocusRhythmControl()
     {
         InitializeComponent();
+        UpdateVisualState();
     }
 
     public IEnumerable<FocusBlockViewModel>? Items
@@ -66,6 +74,30 @@ public partial class FocusRhythmControl : UserControl
     {
         _scrollAnimationTimer?.Stop();
         FocusScrollViewer.Offset = new Vector(0, FocusScrollViewer.Offset.Y);
+    }
+
+    private void UpdateVisualState()
+    {
+        var items = Items?.ToList() ?? [];
+        var hasItems = items.Count > 0;
+        var showsRailControls = items.Count > 3;
+        var isCompactSet = items.Count > 0 && items.Count <= 2;
+
+        FocusScrollViewer.IsVisible = hasItems;
+        FocusEmptyState.IsVisible = !hasItems;
+        ScrollLeftButton.IsVisible = showsRailControls;
+        ScrollRightButton.IsVisible = showsRailControls;
+        FocusBlocksItems.HorizontalAlignment = showsRailControls
+            ? HorizontalAlignment.Left
+            : HorizontalAlignment.Center;
+        FocusRailLine.IsVisible = !isCompactSet;
+        FocusRailTail.IsVisible = !isCompactSet;
+        FocusRailHost.MinHeight = isCompactSet ? 86d : 112d;
+
+        if (!hasItems)
+        {
+            ResetScrollPosition();
+        }
     }
 
     private void ScrollLeftButton_Click(object? sender, RoutedEventArgs e)

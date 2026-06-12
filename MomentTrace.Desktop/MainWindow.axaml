@@ -1815,7 +1815,8 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8"
                                                     VerticalAlignment="Top">
-                                            <Button Classes="toolbar"
+                                            <Button x:Name="OverviewMomentsScrollLeftButton"
+                                                    Classes="toolbar"
                                                     Click="OverviewMomentsScrollLeft_Click"
                                                     Width="36"
                                                     Height="36"
@@ -1824,7 +1825,8 @@
                                                            FontSize="18"
                                                            FontWeight="SemiBold" />
                                             </Button>
-                                            <Button Classes="toolbar"
+                                            <Button x:Name="OverviewMomentsScrollRightButton"
+                                                    Classes="toolbar"
                                                     Click="OverviewMomentsScrollRight_Click"
                                                     Width="36"
                                                     Height="36"
@@ -1835,7 +1837,8 @@
                                             </Button>
                                         </StackPanel>
                                     </Grid>
-                                    <Grid ClipToBounds="True"
+                                    <Grid x:Name="OverviewMomentsRailHost"
+                                          ClipToBounds="True"
                                           MinHeight="276">
                                         <ScrollViewer x:Name="OverviewMomentsScrollViewer"
                                                       HorizontalScrollBarVisibility="Hidden"
@@ -1854,7 +1857,7 @@
                                                 </ItemsControl.ItemsPanel>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Width="282"
+                                                        <Border Width="{Binding CardWidth}"
                                                                 Margin="0,0,0,0">
                                                             <Button Classes="momentCard"
                                                                     Click="OverviewMomentButton_Click"
@@ -1875,12 +1878,38 @@
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>
                                         </ScrollViewer>
-                                        <Border Width="28"
+                                        <Border x:Name="OverviewMomentsEmptyState"
+                                                Margin="4,10,4,0"
+                                                Padding="22"
+                                                CornerRadius="16"
+                                                Background="{DynamicResource ElevatedPanelBrush}"
+                                                BorderBrush="{DynamicResource FaintBorderBrush}"
+                                                BorderThickness="1"
+                                                IsVisible="False">
+                                            <StackPanel Spacing="6"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center">
+                                                <TextBlock Text="No moments captured yet"
+                                                           Foreground="{DynamicResource TextBrush}"
+                                                           FontSize="15"
+                                                           FontWeight="SemiBold"
+                                                           HorizontalAlignment="Center" />
+                                                <TextBlock Text="This rail fills in as MomentTrace records related windows, sites, and documents through the day."
+                                                           Foreground="{DynamicResource MutedTextBrush}"
+                                                           FontSize="11"
+                                                           TextWrapping="Wrap"
+                                                           TextAlignment="Center"
+                                                           MaxWidth="420" />
+                                            </StackPanel>
+                                        </Border>
+                                        <Border x:Name="OverviewMomentsLeftFade"
+                                                Width="28"
                                                 HorizontalAlignment="Left"
                                                 Background="{DynamicResource CardBrush}"
                                                 Opacity="0.72"
                                                 IsHitTestVisible="False" />
-                                        <Border Width="42"
+                                        <Border x:Name="OverviewMomentsRightFade"
+                                                Width="42"
                                                 HorizontalAlignment="Right"
                                                 Background="{DynamicResource CardBrush}"
                                                 Opacity="0.72"
@@ -1953,6 +1982,18 @@
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
+                                    <Border x:Name="OverviewTopApplicationsEmptyState"
+                                            Background="{DynamicResource ElevatedPanelBrush}"
+                                            BorderBrush="{DynamicResource FaintBorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="12"
+                                            Padding="16"
+                                            IsVisible="False">
+                                        <TextBlock Text="No applications have been captured for this day yet."
+                                                   Foreground="{DynamicResource MutedTextBrush}"
+                                                   FontSize="11"
+                                                   TextWrapping="Wrap" />
+                                    </Border>
                                 </StackPanel>
                             </Border>
                         </StackPanel>

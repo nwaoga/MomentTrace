@@ -188,11 +188,15 @@ public partial class MainWindow : Window
         var selectedDate = GetSelectedDate();
         _currentOverview = _overviewBuilder.Build(_visibleActivities, selectedDate);
         var overview = _currentOverview;
+        var overviewMomentRows = BuildOverviewMomentRows(overview.KeyMoments).ToList();
+        var topApplicationRows = overview.TopApplications
+            .Take(4)
+            .Select(ToOverviewTopApplicationRow)
+            .ToList();
+        var focusBlocks = overview.FocusBlocks.Take(16).ToList();
 
         OverviewDateText.Text = overview.DateLabel;
-        OverviewLeadText.Text = overview.Sessions.Count == 0
-            ? "No captured activity yet for this day."
-            : $"{overview.Sessions.Count} moments captured across {overview.TopApplications.Count} applications with {OverviewPresentationBuilder.FormatDuration(overview.TotalActive)} active time.";
+        OverviewLeadText.Text = BuildOverviewLeadText(overview);
         OverviewSummaryItems.ItemsSource = overview.DaySummaryMetrics;
         OverviewHeatmapControl.Items = overview.HeatmapSegments;
         OverviewHeatmapControl.LegendItems = overview.Legend;
@@ -203,13 +207,11 @@ public partial class MainWindow : Window
         _overviewMomentsSignature = momentsSignature;
         _overviewFocusSignature = focusSignature;
 
-        OverviewMomentsItems.ItemsSource = overview.KeyMoments;
+        OverviewMomentsItems.ItemsSource = overviewMomentRows;
         OverviewCategoryBreakdownControl.Items = overview.CategoryBreakdown;
-        OverviewTopApplicationsItems.ItemsSource = overview.TopApplications
-            .Take(4)
-            .Select(ToOverviewTopApplicationRow)
-            .ToList();
-        OverviewFocusRhythmControl.Items = overview.FocusBlocks.Take(16).ToList();
+        OverviewTopApplicationsItems.ItemsSource = topApplicationRows;
+        OverviewFocusRhythmControl.Items = focusBlocks;
+        ApplyOverviewState(overviewMomentRows, topApplicationRows, focusBlocks);
         ResetOverviewRailOffsets(shouldResetMomentsRail, shouldResetFocusRail);
     }
 
@@ -1510,6 +1512,90 @@ public partial class MainWindow : Window
         return string.Join("|", blocks.Take(16).Select(block => $"{block.MomentId}:{block.StartedAt?.ToUnixTimeSeconds()}:{block.Duration.TotalSeconds:F0}"));
     }
 
+    private void ApplyOverviewState(
+        IReadOnlyList<OverviewMomentRow> momentRows,
+        IReadOnlyList<OverviewTopApplicationRow> topApplicationRows,
+        IReadOnlyList<FocusBlockViewModel> focusBlocks)
+    {
+        var hasMoments = momentRows.Count > 0;
+        var showsMomentRailControls = momentRows.Count > 2;
+
+        OverviewMomentsEmptyState.IsVisible = !hasMoments;
+        OverviewMomentsScrollViewer.IsVisible = hasMoments;
+        OverviewMomentsScrollLeftButton.IsVisible = showsMomentRailControls;
+        OverviewMomentsScrollRightButton.IsVisible = showsMomentRailControls;
+        OverviewMomentsLeftFade.IsVisible = showsMomentRailControls;
+        OverviewMomentsRightFade.IsVisible = showsMomentRailControls;
+        OverviewMomentsItems.HorizontalAlignment = showsMomentRailControls
+            ? HorizontalAlignment.Left
+            : HorizontalAlignment.Center;
+        OverviewMomentsRailHost.MinHeight = momentRows.Count switch
+        {
+            0 => 188d,
+            1 => 228d,
+            2 => 244d,
+            _ => 276d
+        };
+
+        if (!hasMoments)
+        {
+            _overviewMomentsScrollAnimationTimer?.Stop();
+            OverviewMomentsScrollViewer.Offset = new Vector(0, OverviewMomentsScrollViewer.Offset.Y);
+        }
+
+        OverviewTopApplicationsItems.IsVisible = topApplicationRows.Count > 0;
+        OverviewTopApplicationsEmptyState.IsVisible = topApplicationRows.Count == 0;
+
+        if (focusBlocks.Count == 0)
+        {
+            OverviewFocusRhythmControl.Subtitle = "Your activity flow throughout the day";
+        }
+        else if (focusBlocks.Count <= 2)
+        {
+            OverviewFocusRhythmControl.Subtitle = "A compact view of the captured runs so far";
+        }
+        else
+        {
+            OverviewFocusRhythmControl.Subtitle = "Your activity flow throughout the day";
+        }
+    }
+
+    private static string BuildOverviewLeadText(OverviewPresentationModel overview)
+    {
+        if (overview.Sessions.Count == 0)
+        {
+            return "No captured activity yet for this day.";
+        }
+
+        if (overview.Sessions.Count <= 2)
+        {
+            var applicationLabel = overview.TopApplications.Count == 1
+                ? overview.TopApplications[0].AppName
+                : $"{overview.TopApplications.Count} applications";
+            return $"{overview.Sessions.Count} moment{(overview.Sessions.Count == 1 ? string.Empty : "s")} captured so far across {applicationLabel} with {OverviewPresentationBuilder.FormatDuration(overview.TotalActive)} active time.";
+        }
+
+        return $"{overview.Sessions.Count} moments captured across {overview.TopApplications.Count} applications with {OverviewPresentationBuilder.FormatDuration(overview.TotalActive)} active time.";
+    }
+
+    private static IEnumerable<OverviewMomentRow> BuildOverviewMomentRows(IReadOnlyList<KeyMomentViewModel> moments)
+    {
+        var compactWidth = moments.Count <= 2 ? 244d : 282d;
+
+        return moments.Select(moment => new OverviewMomentRow(
+            moment.Id,
+            moment.Title,
+            moment.Subtitle,
+            moment.Timestamp,
+            moment.Duration,
+            moment.Category,
+            moment.AccentFill,
+            moment.AccentText,
+            moment.Source,
+            moment.ThumbnailPath,
+            compactWidth));
+    }
+
     private void OverviewMomentsScrollViewer_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (e.GetCurrentPoint(OverviewMomentsScrollViewer).Properties.IsLeftButtonPressed is false)
@@ -1933,6 +2019,19 @@ public partial class MainWindow : Window
         string Glyph,
         string AccentBrush,
         double BarWidth);
+
+    private sealed record OverviewMomentRow(
+        long Id,
+        string Title,
+        string Subtitle,
+        string Timestamp,
+        string Duration,
+        string Category,
+        string AccentFill,
+        string AccentText,
+        string? Source,
+        string? ThumbnailPath,
+        double CardWidth);
 
     private enum DetailTab
     {

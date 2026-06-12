@@ -17,7 +17,8 @@
                    Foreground="{DynamicResource SubtleTextBrush}"
                    FontSize="11" />
       </StackPanel>
-      <Grid ColumnDefinitions="Auto,*"
+      <Grid x:Name="BreakdownContent"
+            ColumnDefinitions="Auto,*"
             ColumnSpacing="16">
         <Grid Width="144"
               Height="144">
@@ -59,7 +60,7 @@
           </StackPanel>
         </Grid>
         <ItemsControl Grid.Column="1"
-                      ItemsSource="{Binding Items, RelativeSource={RelativeSource AncestorType=local:CategoryBreakdownControl}}">
+                      x:Name="BreakdownDetailsItems">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
               <StackPanel Margin="0,0,0,10">
@@ -88,7 +89,29 @@
           </ItemsControl.ItemTemplate>
         </ItemsControl>
       </Grid>
-      <ItemsControl ItemsSource="{Binding Items, RelativeSource={RelativeSource AncestorType=local:CategoryBreakdownControl}}">
+      <Border x:Name="BreakdownEmptyState"
+              Background="{DynamicResource ElevatedPanelBrush}"
+              BorderBrush="{DynamicResource FaintBorderBrush}"
+              BorderThickness="1"
+              CornerRadius="14"
+              Padding="18"
+              IsVisible="False">
+        <StackPanel Spacing="6"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+          <TextBlock Text="No breakdown yet"
+                     Foreground="{DynamicResource TextBrush}"
+                     FontWeight="SemiBold"
+                     HorizontalAlignment="Center" />
+          <TextBlock Text="Once activity is captured, category totals and the daily split will appear here."
+                     Foreground="{DynamicResource MutedTextBrush}"
+                     FontSize="11"
+                     TextWrapping="Wrap"
+                     TextAlignment="Center"
+                     MaxWidth="340" />
+        </StackPanel>
+      </Border>
+      <ItemsControl x:Name="BreakdownLegendItems">
         <ItemsControl.ItemsPanel>
           <ItemsPanelTemplate>
             <WrapPanel />

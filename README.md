@@ -12,6 +12,12 @@ MomentTrace uses a Windows Timeline-inspired workspace with a more visual daily-
 
 The public previews use sanitized demo activity rather than a live personal timeline, so they can show the current card/list layouts, real app icon slots, screenshots, themed modals, and top command chrome without exposing private work history.
 
+### More Screens
+
+![MomentTrace timeline and detail preview](docs/assets/momenttrace-timeline-detail.png)
+
+![MomentTrace theme collage](docs/assets/momenttrace-theme-collage.png)
+
 The recorder is session based. It polls the foreground window, keeps the same activity open while the app/window/resource remains active, and collapses repeated sequential entries in the UI so noisy history reads as one continuous moment. Rule-based local classification then groups nearby activity into memory-oriented sessions such as Website browsing, Development work, Communication, Document review, Research session, and Screenshot capture.
 
 ![MomentTrace recording rollover model](docs/assets/momenttrace-recording-rollover.svg)
@@ -20,7 +26,7 @@ MomentTrace now splits recording across long sleep gaps and local day changes, s
 
 When browser activity is detected, MomentTrace attempts to capture the active URL with Windows UI Automation and saves a local PNG screenshot only when a new browser session starts.
 
-The **Overview** page is being reshaped into a more visual daily-story dashboard without requiring AI features. The current Avalonia work includes summary cards, a theme-aware 15-minute activity heatmap, key-moment cards, category breakdown charts, top applications, and a focus-rhythm strip, all sourced from the existing local activity store. Activity colours keep stable category meaning while adapting to the selected workspace theme.
+The **Overview** page now behaves like a more visual daily-story dashboard without requiring AI features. The current Avalonia work includes summary cards, a theme-aware 15-minute activity heatmap, key-moment cards, category breakdown charts, top applications, and a focus-rhythm strip, all sourced from the existing local activity store. Activity colours keep stable category meaning while adapting to the selected workspace theme, and the overview surfaces now degrade more gracefully on empty and low-activity days.
 
 ![MomentTrace privacy controls](docs/assets/momenttrace-privacy-controls.svg)
 
@@ -41,6 +47,7 @@ The Windows installer is built with Inno Setup from a self-contained `win-x64` p
 - Theme system with Midnight, GitHub Light, Matcha Reserve, Costa Afterglow, Espresso (Mono), and Hot White palettes
 - Real alpha transparency control that keeps theme colours while making the app more or less clear
 - Overview page with daily activity heatmap and lightweight productivity analytics
+- Designed empty and low-data overview states so sparse days still feel intentional
 - Memory-oriented session grouping into moments rather than raw activity rows
 - Rule-based local activity classification for browsing, development, communication, documents, research, and screenshot capture
 - Foreground app/window activity recording with session collapsing
@@ -257,6 +264,7 @@ The Overview page is the daily summary view. In the current Avalonia shell it su
 - A `Moments today` gallery driven from the same local grouped sessions used by the Timeline
 - Activity breakdown visuals and top-application summaries built from deterministic local totals
 - A focus-rhythm strip that maps the flow of captured work back through the day
+- Empty and low-activity handling so charts, rails, and cards stay balanced even when the selected day has little or no captured activity
 
 Overview intentionally avoids raw event lists so it does not duplicate Timeline. The current design work is aimed at making that page feel like a visual recap of a day rather than a telemetry dashboard.
 
@@ -465,7 +473,7 @@ Recent planning updates:
 
 - `AB#71` app health and recorder diagnostics is complete, including last-capture freshness and browser URL capture availability in Avalonia Settings.
 - `AB#63` timeline card intelligence and visual polish now has the session-naming pass, timeline empty/detail-state cleanup, and collapsible detail-section polish in the repo.
-- `#88` tracks the Overview redesign toward a meaningful daily-story dashboard. The shared presentation model, reusable Avalonia overview controls, click-through interactions, theme-aware heatmap composition, summary cards, charts, and the tightened moments/focus layouts are now in the repo, with final visual matching still active.
+- `#88` tracks the Overview redesign toward a meaningful daily-story dashboard. The shared presentation model, reusable Avalonia overview controls, click-through interactions, theme-aware heatmap composition, summary cards, charts, empty/low-data states, and the tightened moments/focus layouts are now in the repo, with final visual matching still active.
 - `#89` tracks final Avalonia shell alignment, spacing, image-framing cleanup, and refreshed preview artwork for the current Overview-first shell.
 
 ## Development Notes
@@ -482,7 +490,7 @@ Recent planning updates:
 ## Roadmap
 
 - Finish final timeline visual polish around empty/loading states and remaining card edge cases
-- Finish the remaining literal visual matching on the Overview `Moments today` and `Focus rhythm` sections
+- Refresh the sanitized README preview artwork so it fully reflects the latest low-data Overview treatment
 - Add a lightweight visual QA pass for the primary dark, green, Costa, espresso, and light themes so future UI changes do not collapse them back toward the same look
 - Add regression tests for privacy exclusions, settings persistence, and warning-free build expectations
 - Add a settings option to delete local data when the user wants a full privacy cleanup

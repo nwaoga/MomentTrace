@@ -34,6 +34,7 @@ public partial class ActivityHeatmapControl : UserControl
     static ActivityHeatmapControl()
     {
         ItemsProperty.Changed.AddClassHandler<ActivityHeatmapControl>((control, _) => control.UpdateRows());
+        LegendItemsProperty.Changed.AddClassHandler<ActivityHeatmapControl>((control, _) => control.UpdateRows());
     }
 
     public ActivityHeatmapControl()
@@ -92,6 +93,8 @@ public partial class ActivityHeatmapControl : UserControl
     {
         var items = Items?.ToList() ?? [];
         var midpoint = (int)System.Math.Ceiling(items.Count / 2d);
+        var hasVisibleActivity = items.Any(item => item.Intensity > 0d);
+
         FirstRowItems = items.Take(midpoint).Select(ToHeatmapCell).ToList();
         SecondRowItems = items.Skip(midpoint).Select(ToHeatmapCell).ToList();
         FirstHeatmapRow.ItemsSource = FirstRowItems;
@@ -99,6 +102,8 @@ public partial class ActivityHeatmapControl : UserControl
         HeatmapLegendItems.ItemsSource = (LegendItems ?? [])
             .Select(item => new HeatmapLegendViewModel(item.Label, CreateBrush(GetCategoryColor(item.Label), 1d)))
             .ToList();
+        HeatmapContent.IsVisible = hasVisibleActivity;
+        HeatmapEmptyState.IsVisible = !hasVisibleActivity;
     }
 
     private HeatmapCellViewModel ToHeatmapCell(HeatmapSegmentViewModel segment)

@@ -57,21 +57,25 @@
           </Button>
         </StackPanel>
       </Grid>
-      <ScrollViewer x:Name="FocusScrollViewer"
-                    HorizontalScrollBarVisibility="Hidden"
-                    VerticalScrollBarVisibility="Disabled"
-                    AllowAutoHide="False"
-                    PointerPressed="FocusScrollViewer_PointerPressed"
-                    PointerMoved="FocusScrollViewer_PointerMoved"
-                    PointerReleased="FocusScrollViewer_PointerReleased">
-        <Grid MinHeight="112"
+      <Grid>
+        <ScrollViewer x:Name="FocusScrollViewer"
+                      HorizontalScrollBarVisibility="Hidden"
+                      VerticalScrollBarVisibility="Disabled"
+                      AllowAutoHide="False"
+                      PointerPressed="FocusScrollViewer_PointerPressed"
+                      PointerMoved="FocusScrollViewer_PointerMoved"
+                      PointerReleased="FocusScrollViewer_PointerReleased">
+        <Grid x:Name="FocusRailHost"
+              MinHeight="112"
               Margin="0,2,0,0">
-          <Border Height="2"
+          <Border x:Name="FocusRailLine"
+                  Height="2"
                   Background="{DynamicResource PanelEdgeBrush}"
                   CornerRadius="999"
                   Margin="2,20,22,0"
                   VerticalAlignment="Top" />
-          <Border Width="18"
+          <Border x:Name="FocusRailTail"
+                  Width="18"
                   Height="2"
                   Background="{DynamicResource PanelEdgeBrush}"
                   HorizontalAlignment="Right"
@@ -82,7 +86,8 @@
               <RotateTransform Angle="18" />
             </Border.RenderTransform>
           </Border>
-          <ItemsControl ItemsSource="{Binding Items, RelativeSource={RelativeSource AncestorType=local:FocusRhythmControl}}">
+          <ItemsControl x:Name="FocusBlocksItems"
+                        ItemsSource="{Binding Items, RelativeSource={RelativeSource AncestorType=local:FocusRhythmControl}}">
             <ItemsControl.ItemsPanel>
               <ItemsPanelTemplate>
                 <StackPanel Orientation="Horizontal"
@@ -140,7 +145,30 @@
             </ItemsControl.ItemTemplate>
           </ItemsControl>
         </Grid>
-      </ScrollViewer>
+        </ScrollViewer>
+        <Border x:Name="FocusEmptyState"
+                Padding="20"
+                Background="{DynamicResource ElevatedPanelBrush}"
+                BorderBrush="{DynamicResource FaintBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="14"
+                IsVisible="False">
+          <StackPanel Spacing="6"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center">
+            <TextBlock Text="No focus rhythm yet"
+                       Foreground="{DynamicResource TextBrush}"
+                       FontWeight="SemiBold"
+                       HorizontalAlignment="Center" />
+            <TextBlock Text="Activity runs and gaps appear here once the selected day has a few captured moments."
+                       Foreground="{DynamicResource MutedTextBrush}"
+                       FontSize="11"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center"
+                       MaxWidth="360" />
+          </StackPanel>
+        </Border>
+      </Grid>
     </StackPanel>
   </Border>
 </UserControl>

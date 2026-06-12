@@ -42,12 +42,18 @@ public partial class CategoryBreakdownControl : UserControl
     private void UpdateChart()
     {
         var items = Items?.Where(item => item.PercentOfActive > 0).ToList() ?? [];
+        var hasItems = items.Count > 0;
+
         BreakdownCenterValueText.Text = items.Count == 0
             ? "0m"
             : OverviewPresentationBuilder.FormatDuration(TimeSpan.FromTicks(items.Sum(item => item.Duration.Ticks)));
         BreakdownCenterLabelText.Text = "total active";
+        BreakdownContent.IsVisible = hasItems;
+        BreakdownEmptyState.IsVisible = !hasItems;
+        BreakdownDetailsItems.ItemsSource = items;
+        BreakdownLegendItems.ItemsSource = items;
 
-        if (items.Count == 0)
+        if (!hasItems)
         {
             BreakdownChartItems.ItemsSource = null;
             return;
