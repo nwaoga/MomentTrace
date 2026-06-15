@@ -1754,6 +1754,44 @@
                                    FontSize="12" />
                     </StackPanel>
 
+                    <Border x:Name="OverviewTimelineContextBanner"
+                            IsVisible="False"
+                            Background="{DynamicResource ElevatedPanelBrush}"
+                            BorderBrush="{DynamicResource FaintBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="14"
+                            Padding="14,12">
+                        <Grid ColumnDefinitions="*,Auto,Auto"
+                              ColumnSpacing="10">
+                            <TextBlock x:Name="OverviewTimelineContextText"
+                                       Text="Timeline is currently focused to a subset of the day."
+                                       Foreground="{DynamicResource TextBrush}"
+                                       FontSize="12"
+                                       TextWrapping="Wrap"
+                                       VerticalAlignment="Center" />
+                            <Button x:Name="OverviewTimelineContextResumeButton"
+                                    Grid.Column="1"
+                                    Classes="toolbar"
+                                    Click="OverviewTimelineContextResumeButton_Click"
+                                    Padding="10,6"
+                                    MinWidth="110">
+                                <TextBlock Text="Resume timeline"
+                                           FontSize="11"
+                                           FontWeight="SemiBold" />
+                            </Button>
+                            <Button x:Name="OverviewTimelineContextClearButton"
+                                    Grid.Column="2"
+                                    Classes="toolbar"
+                                    Click="OverviewTimelineContextClearButton_Click"
+                                    Padding="10,6"
+                                    MinWidth="92">
+                                <TextBlock Text="Clear"
+                                           FontSize="11"
+                                           FontWeight="SemiBold" />
+                            </Button>
+                        </Grid>
+                    </Border>
+
                     <ItemsControl x:Name="OverviewSummaryItems">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>

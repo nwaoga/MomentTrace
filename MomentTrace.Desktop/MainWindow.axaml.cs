@@ -165,6 +165,7 @@ public partial class MainWindow : Window
             _selectedMomentId = _sessions[0].Id;
         }
 
+        EnsureSelectedMomentIsVisibleInTimeline();
         TimelineGroupsItems.ItemsSource = BuildTimelineGroupRows();
         UpdateTimelineEmptyState();
         TimelineCountText.Text = $"{_sessions.Count} moments on {TimelineDateFilterBuilder.FormatDateLabel(selectedDate, DateTime.Today)}";
@@ -197,6 +198,7 @@ public partial class MainWindow : Window
 
         OverviewDateText.Text = overview.DateLabel;
         OverviewLeadText.Text = BuildOverviewLeadText(overview);
+        ApplyOverviewTimelineContextState();
         OverviewSummaryItems.ItemsSource = overview.DaySummaryMetrics;
         OverviewHeatmapControl.Items = overview.HeatmapSegments;
         OverviewHeatmapControl.LegendItems = overview.Legend;
@@ -890,6 +892,22 @@ public partial class MainWindow : Window
         return _sessions.FirstOrDefault(session => session.Id == selectedId);
     }
 
+    private void EnsureSelectedMomentIsVisibleInTimeline()
+    {
+        if (_selectedMomentId is not long selectedId)
+        {
+            return;
+        }
+
+        var containingGroup = _timelineGroups.FirstOrDefault(group => group.ContainsActivity(selectedId));
+        if (containingGroup is null || containingGroup.IsActivityVisibleInPreview(selectedId))
+        {
+            return;
+        }
+
+        containingGroup.SetExpanded(true);
+    }
+
     private async void PinMomentButton_Click(object? sender, RoutedEventArgs e)
     {
         var selected = GetSelectedMoment();
@@ -1197,6 +1215,7 @@ public partial class MainWindow : Window
         ClearTimelineFocusRange();
         _selectedRailSelection = selection;
         ShowTimelinePage();
+        ApplyOverviewTimelineContextState();
         await RefreshTimelineAsync();
     }
 
@@ -1211,6 +1230,7 @@ public partial class MainWindow : Window
     {
         TimelinePage.IsVisible = false;
         OverviewPage.IsVisible = true;
+        ApplyOverviewTimelineContextState();
         SetActiveNavState();
     }
 
@@ -1389,11 +1409,62 @@ public partial class MainWindow : Window
         }
     }
 
+    private void ApplyOverviewTimelineContextState()
+    {
+        var context = BuildOverviewTimelineContextText();
+        OverviewTimelineContextBanner.IsVisible = !string.IsNullOrWhiteSpace(context);
+        OverviewTimelineContextText.Text = context ?? string.Empty;
+    }
+
+    private string? BuildOverviewTimelineContextText()
+    {
+        if (_timelineFocusStart.HasValue && _timelineFocusEnd.HasValue)
+        {
+            return $"Timeline is still focused to {_timelineFocusStart.Value:HH:mm} - {_timelineFocusEnd.Value:HH:mm} from your overview drill-in.";
+        }
+
+        if (!string.IsNullOrWhiteSpace(_searchText))
+        {
+            return $"Timeline search is still filtering moments by \"{_searchText}\".";
+        }
+
+        return _selectedRailSelection switch
+        {
+            RailSelection.Browsing => "Timeline is still narrowed to browsing moments.",
+            RailSelection.Development => "Timeline is still narrowed to development moments.",
+            RailSelection.Communication => "Timeline is still narrowed to communication moments.",
+            RailSelection.Documents => "Timeline is still narrowed to document moments.",
+            RailSelection.SavedMoments => "Timeline is still narrowed to saved moments.",
+            RailSelection.Notes => "Timeline is still narrowed to moments with notes.",
+            RailSelection.Bookmarks => "Timeline is still narrowed to bookmarked moments.",
+            RailSelection.Apps => "Timeline is still narrowed to application-led moments.",
+            RailSelection.Websites => "Timeline is still narrowed to website moments.",
+            RailSelection.Files => "Timeline is still narrowed to file and document moments.",
+            _ => null
+        };
+    }
+
+    private void OverviewTimelineContextResumeButton_Click(object? sender, RoutedEventArgs e)
+    {
+        ShowTimelinePage();
+    }
+
+    private async void OverviewTimelineContextClearButton_Click(object? sender, RoutedEventArgs e)
+    {
+        ClearTimelineFocusRange();
+        ClearSearchFilter();
+        _selectedRailSelection = RailSelection.Timeline;
+        SetActiveNavState();
+        ApplyOverviewTimelineContextState();
+        await RefreshTimelineAsync();
+    }
+
     private async void TimelineEmptyActionButton_Click(object? sender, RoutedEventArgs e)
     {
         if (!string.IsNullOrWhiteSpace(_searchText))
         {
             ClearSearchFilter();
+            ApplyOverviewTimelineContextState();
             await RefreshTimelineAsync();
             return;
         }
@@ -1401,6 +1472,7 @@ public partial class MainWindow : Window
         if (_timelineFocusStart.HasValue && _timelineFocusEnd.HasValue)
         {
             ClearTimelineFocusRange();
+            ApplyOverviewTimelineContextState();
             await RefreshTimelineAsync();
             return;
         }
@@ -1409,6 +1481,7 @@ public partial class MainWindow : Window
         {
             _selectedRailSelection = RailSelection.Timeline;
             SetActiveNavState();
+            ApplyOverviewTimelineContextState();
             await RefreshTimelineAsync();
             return;
         }
@@ -1455,6 +1528,7 @@ public partial class MainWindow : Window
         _selectedRailSelection = RailSelection.Timeline;
         _selectedMomentId = momentId;
         ShowTimelinePage();
+        ApplyOverviewTimelineContextState();
         await RefreshTimelineAsync();
     }
 
@@ -1467,6 +1541,7 @@ public partial class MainWindow : Window
         _timelineFocusEnd = end;
         _selectedMomentId = null;
         ShowTimelinePage();
+        ApplyOverviewTimelineContextState();
         await RefreshTimelineAsync();
     }
 

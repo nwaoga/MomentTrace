@@ -48,6 +48,8 @@ public sealed class TimelineSessionGroup : INotifyPropertyChanged
     public IReadOnlyList<ActivityMomentViewModel> VisibleActivities =>
         _isExpanded ? Activities : Activities.Take(PreviewActivityCount).ToList();
 
+    public bool IsExpanded => _isExpanded;
+
     public string ToggleText => _isExpanded ? "Show less" : "View all";
 
     public string ToggleGlyph => _isExpanded ? "⌃" : "⌄";
@@ -60,6 +62,29 @@ public sealed class TimelineSessionGroup : INotifyPropertyChanged
         OnPropertyChanged(nameof(VisibleActivities));
         OnPropertyChanged(nameof(ToggleText));
         OnPropertyChanged(nameof(ToggleGlyph));
+    }
+
+    public void SetExpanded(bool isExpanded)
+    {
+        if (_isExpanded == isExpanded)
+        {
+            return;
+        }
+
+        _isExpanded = isExpanded;
+        OnPropertyChanged(nameof(VisibleActivities));
+        OnPropertyChanged(nameof(ToggleText));
+        OnPropertyChanged(nameof(ToggleGlyph));
+    }
+
+    public bool ContainsActivity(long activityId)
+    {
+        return Activities.Any(activity => activity.Id == activityId);
+    }
+
+    public bool IsActivityVisibleInPreview(long activityId)
+    {
+        return Activities.Take(PreviewActivityCount).Any(activity => activity.Id == activityId);
     }
 
     private void OnPropertyChanged(string propertyName)
