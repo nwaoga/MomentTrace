@@ -51,6 +51,8 @@ public class ActivityMomentViewModel(TimelineActivity activity)
 
     public string? ExecutablePath => Activity.ExecutablePath;
 
+    public string? BundleIdentifier => Activity.BundleIdentifier;
+
     public string? Resource => Activity.Resource;
 
     public string? ScreenshotPath => Activity.ScreenshotPath;
@@ -203,9 +205,25 @@ public class ActivityMomentViewModel(TimelineActivity activity)
         }
     }
 
-    public string TechnicalSource => string.IsNullOrWhiteSpace(Activity.ExecutablePath)
-        ? Activity.ProcessName
-        : $"{Activity.ProcessName} · {Activity.ExecutablePath}";
+    public string TechnicalSource
+    {
+        get
+        {
+            var parts = new List<string> { Activity.ProcessName };
+
+            if (!string.IsNullOrWhiteSpace(Activity.BundleIdentifier))
+            {
+                parts.Add(Activity.BundleIdentifier);
+            }
+
+            if (!string.IsNullOrWhiteSpace(Activity.ExecutablePath))
+            {
+                parts.Add(Activity.ExecutablePath);
+            }
+
+            return string.Join(" · ", parts);
+        }
+    }
 
     private string GetMemoryTitle()
     {

@@ -10,6 +10,8 @@ public sealed class TimelineActivity
 
     public required string ProcessName { get; init; }
 
+    public string? BundleIdentifier { get; init; }
+
     public string? ExecutablePath { get; init; }
 
     public string? Resource { get; init; }

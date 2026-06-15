@@ -129,6 +129,7 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
             AppName = snapshot.AppName,
             WindowTitle = snapshot.WindowTitle,
             ProcessName = snapshot.ProcessName,
+            BundleIdentifier = snapshot.BundleIdentifier,
             ExecutablePath = snapshot.ExecutablePath,
             Resource = snapshot.Resource,
             ScreenshotPath = screenshotPath,
@@ -179,6 +180,7 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
             AppName = activity.AppName,
             WindowTitle = activity.WindowTitle,
             ProcessName = activity.ProcessName,
+            BundleIdentifier = activity.BundleIdentifier,
             ExecutablePath = activity.ExecutablePath,
             Resource = activity.Resource,
             ScreenshotPath = activity.ScreenshotPath,
@@ -196,6 +198,7 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
         string ProcessName,
         string AppName,
         string WindowTitle,
+        string? BundleIdentifier,
         string? Resource,
         string? ExecutablePath)
     {
@@ -213,6 +216,10 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
                     set frontApp to first application process whose frontmost is true
                     set appName to name of frontApp
                     set appPid to unix id of frontApp
+                    set bundleId to ""
+                    try
+                        set bundleId to bundle identifier of frontApp
+                    end try
                     set windowTitle to ""
                     try
                         set windowTitle to value of attribute "AXTitle" of window 1 of frontApp
@@ -221,7 +228,7 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
                     try
                         set appPath to POSIX path of (file of frontApp as alias)
                     end try
-                    return appName & linefeed & appPid & linefeed & appPath & linefeed & windowTitle
+                    return appName & linefeed & appPid & linefeed & bundleId & linefeed & appPath & linefeed & windowTitle
                 end tell
                 """;
 
@@ -231,11 +238,12 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
                 return null;
             }
 
-            var lines = output.Replace("\r\n", "\n").Split('\n', 4);
+            var lines = output.Replace("\r\n", "\n").Split('\n', 5);
             var appName = lines.ElementAtOrDefault(0)?.Trim();
             var pid = lines.ElementAtOrDefault(1)?.Trim();
-            var appPath = lines.ElementAtOrDefault(2)?.Trim();
-            var title = lines.ElementAtOrDefault(3)?.Trim() ?? string.Empty;
+            var bundleIdentifier = lines.ElementAtOrDefault(2)?.Trim();
+            var appPath = lines.ElementAtOrDefault(3)?.Trim();
+            var title = lines.ElementAtOrDefault(4)?.Trim() ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(appName))
             {
@@ -244,7 +252,13 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
 
             var processName = appName.Replace(" ", string.Empty);
             var resource = string.IsNullOrWhiteSpace(pid) ? null : $"pid:{pid}";
-            return new Snapshot(processName, appName, title, resource, string.IsNullOrWhiteSpace(appPath) ? null : appPath);
+            return new Snapshot(
+                processName,
+                appName,
+                title,
+                string.IsNullOrWhiteSpace(bundleIdentifier) ? null : bundleIdentifier,
+                resource,
+                string.IsNullOrWhiteSpace(appPath) ? null : appPath);
         }
 
         public static string? TryCaptureScreenshot()
@@ -252,9 +266,7 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
             try
             {
                 var screenshotDirectory = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "MomentTrace",
-                    "screenshots");
+                    MomentTracePaths.ScreenshotsDirectory);
                 Directory.CreateDirectory(screenshotDirectory);
 
                 var screenshotPath = Path.Combine(
@@ -297,9 +309,7 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
             {
                 var info = new FileInfo(imagePath);
                 var thumbnailDirectory = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "MomentTrace",
-                    "thumbnails");
+                    MomentTracePaths.ThumbnailsDirectory);
                 Directory.CreateDirectory(thumbnailDirectory);
 
                 var cacheKey = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{info.FullName}|{info.LastWriteTimeUtc.Ticks}|{info.Length}")));

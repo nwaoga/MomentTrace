@@ -134,21 +134,19 @@ public partial class SettingsWindow : Window
 
     private void LoadWhereILive()
     {
-        var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MomentTrace");
         var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Development";
 
         VersionText.Text = version;
         InstallPathText.Text = AppContext.BaseDirectory;
-        AppDataPathText.Text = appDataPath;
+        AppDataPathText.Text = MomentTracePaths.AppDataDirectory;
         DatabasePathText.Text = SqliteActivityStore.DefaultDatabasePath;
         SettingsPathText.Text = DesktopWindowPreferences.PreferencesPath;
     }
 
     private async Task LoadHealthStatusAsync()
     {
-        var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MomentTrace");
-        var screenshotsPath = Path.Combine(appDataPath, "screenshots");
-        var iconsPath = Path.Combine(appDataPath, "icons");
+        var screenshotsPath = MomentTracePaths.ScreenshotsDirectory;
+        var iconsPath = MomentTracePaths.IconsDirectory;
         var privacyCount = _preferences.CustomBlockedApps.Length
             + _preferences.CustomBlockedDomains.Length
             + (_preferences.ExcludeAdultWebsites ? _preferences.AdultBlocklistDomains.Length : 0);
@@ -652,7 +650,7 @@ public partial class SettingsWindow : Window
 
     private static void DeleteCachedPreviewDirectory(string directoryName)
     {
-        var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MomentTrace");
+        var appDataPath = MomentTracePaths.AppDataDirectory;
         var target = Path.GetFullPath(Path.Combine(appDataPath, directoryName));
         var root = Path.GetFullPath(appDataPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
 

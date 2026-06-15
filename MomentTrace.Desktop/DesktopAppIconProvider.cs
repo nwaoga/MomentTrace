@@ -1,3 +1,4 @@
+using MomentTrace.Core;
 using MomentTrace.Presentation;
 #if WINDOWS
 using MomentTrace.Windows;
@@ -208,10 +209,7 @@ public sealed class DesktopAppIconProvider : IAppIconProvider<string>
 
     private static string GetCachePath(string cacheKey, string extension)
     {
-        var directory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "MomentTrace",
-            "icons");
+        var directory = MomentTracePaths.IconsDirectory;
         Directory.CreateDirectory(directory);
 
         var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(cacheKey)));

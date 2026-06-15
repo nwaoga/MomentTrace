@@ -11,9 +11,8 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
     {
         get
         {
-            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var databasePath = Path.Combine(appData, "MomentTrace", "timeline.db");
-            var legacyDatabasePath = Path.Combine(appData, "NwaogaTimeline", "timeline.db");
+            var databasePath = MomentTracePaths.DatabasePath;
+            var legacyDatabasePath = Path.Combine(MomentTracePaths.LegacyAppDataDirectory, "timeline.db");
 
             if (!File.Exists(databasePath) && File.Exists(legacyDatabasePath))
             {
@@ -39,6 +38,7 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
                 app_name TEXT NOT NULL,
                 window_title TEXT NOT NULL,
                 process_name TEXT NOT NULL,
+                bundle_identifier TEXT NULL,
                 executable_path TEXT NULL,
                 resource TEXT NULL,
                 screenshot_path TEXT NULL,
@@ -56,6 +56,7 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
             """;
 
         await command.ExecuteNonQueryAsync(cancellationToken);
+        await EnsureColumnAsync(connection, "bundle_identifier", "TEXT NULL", cancellationToken);
         await EnsureColumnAsync(connection, "executable_path", "TEXT NULL", cancellationToken);
         await EnsureColumnAsync(connection, "screenshot_path", "TEXT NULL", cancellationToken);
         await EnsureColumnAsync(connection, "thumbnail_path", "TEXT NULL", cancellationToken);
@@ -71,10 +72,10 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
         var command = connection.CreateCommand();
         command.CommandText = """
             INSERT INTO activities (
-                app_name, window_title, process_name, executable_path, resource, screenshot_path, thumbnail_path, kind, started_at, ended_at, is_pinned, note, is_bookmarked
+                app_name, window_title, process_name, bundle_identifier, executable_path, resource, screenshot_path, thumbnail_path, kind, started_at, ended_at, is_pinned, note, is_bookmarked
             )
             VALUES (
-                $app_name, $window_title, $process_name, $executable_path, $resource, $screenshot_path, $thumbnail_path, $kind, $started_at, $ended_at, $is_pinned, $note, $is_bookmarked
+                $app_name, $window_title, $process_name, $bundle_identifier, $executable_path, $resource, $screenshot_path, $thumbnail_path, $kind, $started_at, $ended_at, $is_pinned, $note, $is_bookmarked
             );
             SELECT last_insert_rowid();
             """;
@@ -211,7 +212,7 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
 
         command.Parameters.AddWithValue("$limit", Math.Clamp(query.Limit, 1, 100000));
         command.CommandText = $"""
-            SELECT id, app_name, window_title, process_name, executable_path, resource, screenshot_path, thumbnail_path, kind, started_at, ended_at, is_pinned, note, is_bookmarked
+            SELECT id, app_name, window_title, process_name, bundle_identifier, executable_path, resource, screenshot_path, thumbnail_path, kind, started_at, ended_at, is_pinned, note, is_bookmarked
             FROM activities
             {(filters.Count > 0 ? "WHERE " + string.Join(" AND ", filters) : string.Empty)}
             ORDER BY is_pinned DESC, started_at DESC
@@ -245,6 +246,7 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
         command.Parameters.AddWithValue("$app_name", activity.AppName);
         command.Parameters.AddWithValue("$window_title", activity.WindowTitle);
         command.Parameters.AddWithValue("$process_name", activity.ProcessName);
+        command.Parameters.AddWithValue("$bundle_identifier", (object?)activity.BundleIdentifier ?? DBNull.Value);
         command.Parameters.AddWithValue("$executable_path", (object?)activity.ExecutablePath ?? DBNull.Value);
         command.Parameters.AddWithValue("$resource", (object?)activity.Resource ?? DBNull.Value);
         command.Parameters.AddWithValue("$screenshot_path", (object?)activity.ScreenshotPath ?? DBNull.Value);
@@ -265,16 +267,17 @@ public sealed class SqliteActivityStore(string databasePath) : IActivityStore
             AppName = reader.GetString(1),
             WindowTitle = reader.GetString(2),
             ProcessName = reader.GetString(3),
-            ExecutablePath = reader.IsDBNull(4) ? null : reader.GetString(4),
-            Resource = reader.IsDBNull(5) ? null : reader.GetString(5),
-            ScreenshotPath = reader.IsDBNull(6) ? null : reader.GetString(6),
-            ThumbnailPath = reader.IsDBNull(7) ? null : reader.GetString(7),
-            Kind = Enum.TryParse<ActivityKind>(reader.GetString(8), out var kind) ? kind : ActivityKind.App,
-            StartedAt = DateTimeOffset.Parse(reader.GetString(9)),
-            EndedAt = DateTimeOffset.Parse(reader.GetString(10)),
-            IsPinned = reader.GetInt32(11) == 1,
-            Note = reader.IsDBNull(12) ? null : reader.GetString(12),
-            IsBookmarked = reader.GetInt32(13) == 1
+            BundleIdentifier = reader.IsDBNull(4) ? null : reader.GetString(4),
+            ExecutablePath = reader.IsDBNull(5) ? null : reader.GetString(5),
+            Resource = reader.IsDBNull(6) ? null : reader.GetString(6),
+            ScreenshotPath = reader.IsDBNull(7) ? null : reader.GetString(7),
+            ThumbnailPath = reader.IsDBNull(8) ? null : reader.GetString(8),
+            Kind = Enum.TryParse<ActivityKind>(reader.GetString(9), out var kind) ? kind : ActivityKind.App,
+            StartedAt = DateTimeOffset.Parse(reader.GetString(10)),
+            EndedAt = DateTimeOffset.Parse(reader.GetString(11)),
+            IsPinned = reader.GetInt32(12) == 1,
+            Note = reader.IsDBNull(13) ? null : reader.GetString(13),
+            IsBookmarked = reader.GetInt32(14) == 1
         };
     }
 

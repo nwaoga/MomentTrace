@@ -49,7 +49,7 @@ public sealed class DesktopWindowPreferences
     public DateTimeOffset? AdultBlocklistUpdatedAt { get; set; }
 
     public static string PrivacyBlocklistDirectory =>
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MomentTrace", "privacy-blocklists");
+        MomentTracePaths.PrivacyBlocklistsDirectory;
 
     public static string AdultBlocklistCachePath => Path.Combine(PrivacyBlocklistDirectory, "adult-domains.txt");
 
@@ -57,9 +57,8 @@ public sealed class DesktopWindowPreferences
     {
         get
         {
-            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var preferencesPath = Path.Combine(appData, "MomentTrace", "settings.json");
-            var legacyPreferencesPath = Path.Combine(appData, "NwaogaTimeline", "settings.json");
+            var preferencesPath = Path.Combine(MomentTracePaths.AppDataDirectory, "settings.json");
+            var legacyPreferencesPath = Path.Combine(MomentTracePaths.LegacyAppDataDirectory, "settings.json");
 
             if (!File.Exists(preferencesPath) && File.Exists(legacyPreferencesPath))
             {
