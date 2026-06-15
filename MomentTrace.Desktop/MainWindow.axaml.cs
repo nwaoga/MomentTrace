@@ -147,6 +147,7 @@ public partial class MainWindow : Window
         await Task.Yield();
 
         var selectedDate = GetSelectedDate();
+        var shouldResetDetailTab = false;
         _sessions = _timelineBuilder.BuildSessions(
             _visibleActivities
                 .Where(activity => activity.StartedAt.LocalDateTime.Date == selectedDate)
@@ -163,6 +164,7 @@ public partial class MainWindow : Window
         else if (_selectedMomentId is null || _sessions.All(session => session.Id != _selectedMomentId.Value))
         {
             _selectedMomentId = _sessions[0].Id;
+            shouldResetDetailTab = true;
         }
 
         EnsureSelectedMomentIsVisibleInTimeline();
@@ -174,6 +176,11 @@ public partial class MainWindow : Window
         if (_sessions.Count > 0 && _selectedMomentId is long selectedId)
         {
             var selected = _sessions.FirstOrDefault(session => session.Id == selectedId) ?? _sessions[0];
+            if (shouldResetDetailTab)
+            {
+                _selectedDetailTab = DetailTab.Overview;
+            }
+
             ShowDetail(selected);
         }
         else
@@ -400,6 +407,7 @@ public partial class MainWindow : Window
     private async void SearchTextBox_TextChanged(object? sender, TextChangedEventArgs e)
     {
         _searchText = SearchTextBox.Text?.Trim() ?? string.Empty;
+        ApplyOverviewTimelineContextState();
 
         if (!IsLoaded)
         {
@@ -1527,6 +1535,7 @@ public partial class MainWindow : Window
         SelectTimelineDate(selected?.SessionStartedAt.LocalDateTime.Date);
         _selectedRailSelection = RailSelection.Timeline;
         _selectedMomentId = momentId;
+        _selectedDetailTab = DetailTab.Overview;
         ShowTimelinePage();
         ApplyOverviewTimelineContextState();
         await RefreshTimelineAsync();
