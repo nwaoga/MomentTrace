@@ -1162,9 +1162,157 @@ public partial class MainWindow : Window
             return activity.Resource!;
         }
 
+        if (TryResolveLocalPath(activity, out var localPath))
+        {
+            return localPath;
+        }
+
         return !string.IsNullOrWhiteSpace(activity.ExecutablePath)
             ? activity.ExecutablePath
             : activity.ProcessName;
+    }
+
+    private static bool TryResolveLocalPath(ActivityMomentViewModel activity, out string path)
+    {
+        path = string.Empty;
+
+        if (TryUseExistingPath(activity.Resource, out path))
+        {
+            return true;
+        }
+
+        foreach (var candidate in EnumerateWindowPathCandidates(activity))
+        {
+            if (TryUseExistingPath(candidate, out path))
+            {
+                return true;
+            }
+
+            var fileName = TryExtractFileName(candidate);
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                continue;
+            }
+
+            foreach (var root in GetOpenSearchRoots())
+            {
+                try
+                {
+                    var directPath = Path.Combine(root, fileName);
+                    if (File.Exists(directPath))
+                    {
+                        path = directPath;
+                        return true;
+                    }
+
+                    var match = Directory.EnumerateFiles(root, fileName, SearchOption.AllDirectories).FirstOrDefault();
+                    if (!string.IsNullOrWhiteSpace(match))
+                    {
+                        path = match;
+                        return true;
+                    }
+                }
+                catch
+                {
+                    // Ignore inaccessible folders and keep trying likely roots.
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static IEnumerable<string?> EnumerateWindowPathCandidates(ActivityMomentViewModel activity)
+    {
+        yield return activity.Activity.WindowTitle;
+        yield return activity.Title;
+    }
+
+    private static bool TryUseExistingPath(string? candidate, out string path)
+    {
+        path = string.Empty;
+        if (string.IsNullOrWhiteSpace(candidate))
+        {
+            return false;
+        }
+
+        var trimmed = candidate.Trim().Trim('"');
+        try
+        {
+            if (Path.IsPathRooted(trimmed) && (File.Exists(trimmed) || Directory.Exists(trimmed)))
+            {
+                path = trimmed;
+                return true;
+            }
+        }
+        catch
+        {
+        }
+
+        return false;
+    }
+
+    private static string? TryExtractFileName(string? candidate)
+    {
+        if (string.IsNullOrWhiteSpace(candidate))
+        {
+            return null;
+        }
+
+        var extensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".tif", ".tiff", ".svg" };
+        var parts = candidate
+            .Split([" - ", " – ", " — ", " | "], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Append(candidate);
+
+        foreach (var part in parts)
+        {
+            foreach (var extension in extensions)
+            {
+                var index = part.LastIndexOf(extension, StringComparison.OrdinalIgnoreCase);
+                if (index < 0)
+                {
+                    continue;
+                }
+
+                var value = part[..(index + extension.Length)].Trim().Trim('"');
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    continue;
+                }
+
+                var fileName = Path.GetFileName(value);
+                if (!string.IsNullOrWhiteSpace(fileName))
+                {
+                    return fileName;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static IEnumerable<string> GetOpenSearchRoots()
+    {
+        var roots = new List<string?>
+        {
+            Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
+            Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads")
+        };
+
+        var oneDrive = Environment.GetEnvironmentVariable("OneDrive");
+        if (!string.IsNullOrWhiteSpace(oneDrive))
+        {
+            roots.Add(Path.Combine(oneDrive, "Pictures"));
+            roots.Add(Path.Combine(oneDrive, "Desktop"));
+            roots.Add(Path.Combine(oneDrive, "Documents"));
+            roots.Add(Path.Combine(oneDrive, "Downloads"));
+        }
+
+        return roots
+            .Where(root => !string.IsNullOrWhiteSpace(root) && Directory.Exists(root))
+            .Distinct(StringComparer.OrdinalIgnoreCase)!;
     }
 
     private static bool IsWebUrl(string? value)
