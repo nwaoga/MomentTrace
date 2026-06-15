@@ -45,12 +45,14 @@ public sealed class TimelineSessionGroup : INotifyPropertyChanged
 
     public int ActivityCount => Activities.Count;
 
+    public string ExpansionKey => string.Join("|", Activities.Select(activity => activity.Id));
+
     public IReadOnlyList<ActivityMomentViewModel> VisibleActivities =>
         _isExpanded ? Activities : Activities.Take(PreviewActivityCount).ToList();
 
     public bool IsExpanded => _isExpanded;
 
-    public string ToggleText => _isExpanded ? "Show less" : "View all";
+    public string ToggleText => _isExpanded ? "Show less" : $"View all {ActivityCount}";
 
     public string ToggleGlyph => _isExpanded ? "⌃" : "⌄";
 

@@ -23,6 +23,13 @@ namespace MomentTrace.Desktop;
 
 public partial class MainWindow : Window
 {
+    private static readonly string[] KnownOpenableExtensions =
+    [
+        ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".tif", ".tiff", ".svg",
+        ".pdf", ".txt", ".md", ".rtf", ".doc", ".docx", ".xls", ".xlsx", ".csv", ".tsv",
+        ".ppt", ".pptx", ".json", ".xml", ".yml", ".yaml", ".cs", ".xaml", ".axaml",
+        ".csproj", ".sln", ".sql", ".ps1", ".js", ".ts", ".tsx", ".html", ".css"
+    ];
     private static readonly DesktopAppIconProvider AppIconProvider = new();
     private readonly TimelinePresentationBuilder _timelineBuilder = new(
         RuleBasedActivityClassifier.Default,
@@ -36,6 +43,7 @@ public partial class MainWindow : Window
     private readonly List<TimelineActivity> _visibleActivities = [];
     private IReadOnlyList<ActivityMomentViewModel> _sessions = [];
     private IReadOnlyList<TimelineSessionGroup> _timelineGroups = [];
+    private readonly Dictionary<string, bool> _timelineGroupExpansionStates = new(StringComparer.Ordinal);
     private OverviewPresentationModel? _currentOverview;
     private readonly Dictionary<string, bool> _detailSectionExpanded = new(StringComparer.Ordinal)
     {
@@ -157,6 +165,7 @@ public partial class MainWindow : Window
             .Where(MatchesTimelineFocus)
             .ToList();
         _timelineGroups = _timelineBuilder.BuildGroups(_sessions);
+        ApplyTimelineGroupExpansionState();
         if (_sessions.Count == 0)
         {
             _selectedMomentId = null;
@@ -760,6 +769,7 @@ public partial class MainWindow : Window
         }
 
         row.Group.ToggleExpanded();
+        _timelineGroupExpansionStates[row.Group.ExpansionKey] = row.Group.IsExpanded;
         TimelineGroupsItems.ItemsSource = BuildTimelineGroupRows();
     }
 
@@ -914,6 +924,18 @@ public partial class MainWindow : Window
         }
 
         containingGroup.SetExpanded(true);
+        _timelineGroupExpansionStates[containingGroup.ExpansionKey] = true;
+    }
+
+    private void ApplyTimelineGroupExpansionState()
+    {
+        foreach (var group in _timelineGroups)
+        {
+            if (_timelineGroupExpansionStates.TryGetValue(group.ExpansionKey, out var isExpanded))
+            {
+                group.SetExpanded(isExpanded);
+            }
+        }
     }
 
     private async void PinMomentButton_Click(object? sender, RoutedEventArgs e)
@@ -1188,12 +1210,22 @@ public partial class MainWindow : Window
                 return true;
             }
 
-            var fileName = TryExtractFileName(candidate);
-            if (string.IsNullOrWhiteSpace(fileName))
+            if (TryResolvePathFromCandidate(candidate, activity, out path))
             {
-                continue;
+                return true;
             }
+        }
 
+        return false;
+    }
+
+    private static bool TryResolvePathFromCandidate(string? candidate, ActivityMomentViewModel activity, out string path)
+    {
+        path = string.Empty;
+
+        var fileName = TryExtractFileName(candidate);
+        if (!string.IsNullOrWhiteSpace(fileName))
+        {
             foreach (var root in GetOpenSearchRoots())
             {
                 try
@@ -1219,13 +1251,56 @@ public partial class MainWindow : Window
             }
         }
 
+        if (!LooksLikeExplorerMoment(activity))
+        {
+            return false;
+        }
+
+        var folderName = TryExtractFolderName(candidate);
+        if (string.IsNullOrWhiteSpace(folderName))
+        {
+            return false;
+        }
+
+        foreach (var root in GetOpenSearchRoots())
+        {
+            try
+            {
+                var directPath = Path.Combine(root, folderName);
+                if (Directory.Exists(directPath))
+                {
+                    path = directPath;
+                    return true;
+                }
+
+                var match = Directory.EnumerateDirectories(root, folderName, SearchOption.AllDirectories).FirstOrDefault();
+                if (!string.IsNullOrWhiteSpace(match))
+                {
+                    path = match;
+                    return true;
+                }
+            }
+            catch
+            {
+                // Ignore inaccessible folders and keep trying likely roots.
+            }
+        }
+
         return false;
     }
 
     private static IEnumerable<string?> EnumerateWindowPathCandidates(ActivityMomentViewModel activity)
     {
+        yield return activity.Resource;
         yield return activity.Activity.WindowTitle;
         yield return activity.Title;
+        yield return activity.Activity.DisplayTitle;
+    }
+
+    private static bool LooksLikeExplorerMoment(ActivityMomentViewModel activity)
+    {
+        return activity.ProcessName.Equals("explorer", StringComparison.OrdinalIgnoreCase)
+            || activity.AppName.Contains("Explorer", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool TryUseExistingPath(string? candidate, out string path)
@@ -1259,14 +1334,13 @@ public partial class MainWindow : Window
             return null;
         }
 
-        var extensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".tif", ".tiff", ".svg" };
         var parts = candidate
             .Split([" - ", " – ", " — ", " | "], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Append(candidate);
 
         foreach (var part in parts)
         {
-            foreach (var extension in extensions)
+            foreach (var extension in KnownOpenableExtensions)
             {
                 var index = part.LastIndexOf(extension, StringComparison.OrdinalIgnoreCase);
                 if (index < 0)
@@ -1291,10 +1365,55 @@ public partial class MainWindow : Window
         return null;
     }
 
+    private static string? TryExtractFolderName(string? candidate)
+    {
+        if (string.IsNullOrWhiteSpace(candidate))
+        {
+            return null;
+        }
+
+        var parts = candidate
+            .Split([" - ", " – ", " — ", " | "], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        foreach (var part in parts)
+        {
+            var trimmed = part.Trim().Trim('"');
+            if (string.IsNullOrWhiteSpace(trimmed))
+            {
+                continue;
+            }
+
+            if (trimmed.Contains(Path.DirectorySeparatorChar)
+                || trimmed.Contains(Path.AltDirectorySeparatorChar))
+            {
+                var name = Path.GetFileName(trimmed.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    return name;
+                }
+            }
+
+            if (trimmed.Equals("File Explorer", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (Path.HasExtension(trimmed))
+            {
+                continue;
+            }
+
+            return trimmed;
+        }
+
+        return null;
+    }
+
     private static IEnumerable<string> GetOpenSearchRoots()
     {
         var roots = new List<string?>
         {
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
             Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
@@ -1304,6 +1423,7 @@ public partial class MainWindow : Window
         var oneDrive = Environment.GetEnvironmentVariable("OneDrive");
         if (!string.IsNullOrWhiteSpace(oneDrive))
         {
+            roots.Add(oneDrive);
             roots.Add(Path.Combine(oneDrive, "Pictures"));
             roots.Add(Path.Combine(oneDrive, "Desktop"));
             roots.Add(Path.Combine(oneDrive, "Documents"));
@@ -2087,7 +2207,7 @@ public partial class MainWindow : Window
                 group.Summary,
                 group.TimeRange,
                 group.AccentBrush,
-                $"{group.VisibleActivities.Count} moment{(group.VisibleActivities.Count == 1 ? string.Empty : "s")}",
+                $"{group.ActivityCount} moment{(group.ActivityCount == 1 ? string.Empty : "s")}",
                 group.ToggleText,
                 group.ToggleGlyph,
                 group.HasMoreThanPreviewCount,
