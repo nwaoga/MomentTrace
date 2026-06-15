@@ -1274,7 +1274,7 @@ public partial class MainWindow : Window
             ? "Refreshing timeline..."
             : GetEmptyRailSelectionText();
         var detail = BuildTimelineEmptyDetail();
-        ShowTimelineStatusState(title, detail);
+        ShowTimelineStatusState(title, detail, GetTimelineEmptyActionLabel());
     }
 
     private string BuildTimelineEmptyDetail()
@@ -1306,10 +1306,39 @@ public partial class MainWindow : Window
         };
     }
 
-    private void ShowTimelineStatusState(string title, string detail)
+    private string? GetTimelineEmptyActionLabel()
+    {
+        if (_isReloading)
+        {
+            return null;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_searchText))
+        {
+            return "Clear search";
+        }
+
+        if (_timelineFocusStart.HasValue && _timelineFocusEnd.HasValue)
+        {
+            return "Clear focus range";
+        }
+
+        if (_selectedRailSelection != RailSelection.Timeline)
+        {
+            return "Show all activity";
+        }
+
+        return GetSelectedDate() != DateTime.Today
+            ? "Jump to today"
+            : null;
+    }
+
+    private void ShowTimelineStatusState(string title, string detail, string? actionLabel)
     {
         TimelineEmptyTitleText.Text = title;
         TimelineEmptyDetailText.Text = detail;
+        TimelineEmptyActionButtonText.Text = actionLabel ?? string.Empty;
+        TimelineEmptyActionButton.IsVisible = !string.IsNullOrWhiteSpace(actionLabel);
         TimelineEmptyState.IsVisible = true;
         TimelineScrollViewer.IsVisible = false;
     }
@@ -1357,6 +1386,38 @@ public partial class MainWindow : Window
         if (!string.IsNullOrEmpty(SearchTextBox.Text))
         {
             SearchTextBox.Text = string.Empty;
+        }
+    }
+
+    private async void TimelineEmptyActionButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (!string.IsNullOrWhiteSpace(_searchText))
+        {
+            ClearSearchFilter();
+            await RefreshTimelineAsync();
+            return;
+        }
+
+        if (_timelineFocusStart.HasValue && _timelineFocusEnd.HasValue)
+        {
+            ClearTimelineFocusRange();
+            await RefreshTimelineAsync();
+            return;
+        }
+
+        if (_selectedRailSelection != RailSelection.Timeline)
+        {
+            _selectedRailSelection = RailSelection.Timeline;
+            SetActiveNavState();
+            await RefreshTimelineAsync();
+            return;
+        }
+
+        if (GetSelectedDate() != DateTime.Today)
+        {
+            SelectTimelineDate(DateTime.Today);
+            await RefreshTimelineAsync();
+            await RefreshOverviewAsync();
         }
     }
 
