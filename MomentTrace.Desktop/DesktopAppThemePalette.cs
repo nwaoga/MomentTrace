@@ -40,13 +40,23 @@ public sealed record DesktopAppThemePalette(
 
     public static readonly DesktopAppThemePalette StarbucksReserve = new(
         "StarbucksReserve",
-        "Matcha Reserve",
+        "Starbucks Reserve",
         FromHex("#0F1512"),
         FromHex("#17201C"),
         FromHex("#F6F5F2"),
         FromHex("#AAB6AF"),
         FromHex("#00754A"),
         FromHex("#2E4D40"));
+
+    public static readonly DesktopAppThemePalette NeroRoast = new(
+        "NeroRoast",
+        "Nero Roast",
+        FromHex("#0E1624"),
+        FromHex("#172235"),
+        FromHex("#F5F2EC"),
+        FromHex("#AAB6C9"),
+        FromHex("#6F8FB8"),
+        FromHex("#2D415C"));
 
     public static readonly DesktopAppThemePalette CostaAfterglow = new(
         "CostaAfterglow",
@@ -174,6 +184,7 @@ public sealed record DesktopAppThemePalette(
         Midnight,
         GitHubLight,
         StarbucksReserve,
+        NeroRoast,
         CostaAfterglow,
         EspressoMono,
         Light
@@ -195,6 +206,19 @@ public sealed record DesktopAppThemePalette(
             || string.Equals(key, "Matcha Reserve", StringComparison.OrdinalIgnoreCase))
         {
             return StarbucksReserve;
+        }
+
+        if (string.Equals(key, "Starbucks", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "Starbucks Reserve", StringComparison.OrdinalIgnoreCase))
+        {
+            return StarbucksReserve;
+        }
+
+        if (string.Equals(key, "Nero", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "Nero Roast", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "Caffe Nero", StringComparison.OrdinalIgnoreCase))
+        {
+            return NeroRoast;
         }
 
         if (string.Equals(key, "Costa", StringComparison.OrdinalIgnoreCase)
