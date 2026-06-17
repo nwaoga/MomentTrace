@@ -89,7 +89,7 @@ Run it on a Mac from the repository root:
 dotnet run --project ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
 ```
 
-The probe writes to the same SQLite schema as the Windows app. It captures active app name, process id as a local resource marker, active window title when macOS permissions allow it, and start/end timestamps.
+The probe writes to the same SQLite schema as the Windows app. It captures active app name, bundle identifier, executable path, a stable app resource marker, active window title when macOS permissions allow it, and start/end timestamps.
 
 It is intentionally not the final macOS implementation. It uses `osascript` and System Events as a fast proof path so we can validate permissions, storage, grouping, and developer workflow before replacing the capture layer with native AppKit/Accessibility bindings in `MomentTrace.Mac`.
 

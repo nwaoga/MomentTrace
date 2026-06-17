@@ -250,8 +250,10 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
                 return null;
             }
 
+            bundleIdentifier = await ResolveBundleIdentifierAsync(bundleIdentifier, appPath, cancellationToken);
+
             var processName = appName.Replace(" ", string.Empty);
-            var resource = string.IsNullOrWhiteSpace(pid) ? null : $"pid:{pid}";
+            var resource = BuildResource(bundleIdentifier, appPath, pid);
             return new Snapshot(
                 processName,
                 appName,
@@ -259,6 +261,50 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
                 string.IsNullOrWhiteSpace(bundleIdentifier) ? null : bundleIdentifier,
                 resource,
                 string.IsNullOrWhiteSpace(appPath) ? null : appPath);
+        }
+
+        private static async Task<string?> ResolveBundleIdentifierAsync(string? bundleIdentifier, string? appPath, CancellationToken cancellationToken)
+        {
+            if (!string.IsNullOrWhiteSpace(bundleIdentifier))
+            {
+                return bundleIdentifier.Trim();
+            }
+
+            if (string.IsNullOrWhiteSpace(appPath) || !appPath.EndsWith(".app", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            var resolved = await RunCommandAsync(
+                "/usr/bin/mdls",
+                cancellationToken,
+                "-name",
+                "kMDItemCFBundleIdentifier",
+                "-raw",
+                appPath.Trim());
+
+            if (string.IsNullOrWhiteSpace(resolved))
+            {
+                return null;
+            }
+
+            var candidate = resolved.Trim();
+            return string.Equals(candidate, "(null)", StringComparison.OrdinalIgnoreCase) ? null : candidate;
+        }
+
+        private static string? BuildResource(string? bundleIdentifier, string? appPath, string? pid)
+        {
+            if (!string.IsNullOrWhiteSpace(bundleIdentifier))
+            {
+                return $"app://{bundleIdentifier.Trim()}";
+            }
+
+            if (!string.IsNullOrWhiteSpace(appPath))
+            {
+                return appPath.Trim();
+            }
+
+            return string.IsNullOrWhiteSpace(pid) ? null : $"pid:{pid.Trim()}";
         }
 
         public static string? TryCaptureScreenshot()
@@ -352,15 +398,23 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
 
         private static async Task<string?> RunOsaScriptAsync(string script, CancellationToken cancellationToken)
         {
+            return await RunCommandAsync("/usr/bin/osascript", cancellationToken, "-e", script);
+        }
+
+        private static async Task<string?> RunCommandAsync(string fileName, CancellationToken cancellationToken, params string[] arguments)
+        {
             var startInfo = new ProcessStartInfo
             {
-                FileName = "/usr/bin/osascript",
+                FileName = fileName,
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false
             };
-            startInfo.ArgumentList.Add("-e");
-            startInfo.ArgumentList.Add(script);
+
+            foreach (var argument in arguments)
+            {
+                startInfo.ArgumentList.Add(argument);
+            }
 
             using var process = Process.Start(startInfo);
             if (process is null)

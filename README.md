@@ -150,8 +150,11 @@ In Visual Studio, open `MomentTrace.slnx`, set `MomentTrace.App` as the startup 
 MomentTrace includes an early macOS recorder probe so the Mac capture model can be tested before the full UI is ported. It reuses `MomentTrace.Core` and `MomentTrace.Storage`, writes to the same SQLite schema, and records:
 
 - active app name
-- process id as a local resource marker
+- bundle identifier when available
+- executable path when available
+- stable app resource identity, preferring `app://<bundle-id>` and then app path before falling back to `pid:`
 - active window title when macOS permissions allow it
+- local screenshot and thumbnail paths when macOS Screen Recording permission allows capture
 - start/end timestamps
 
 Run it on a Mac from the repository root:
@@ -160,7 +163,7 @@ Run it on a Mac from the repository root:
 dotnet run --project ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
 ```
 
-The first run may require macOS privacy approval for Terminal, Visual Studio, or the launched host process to control System Events and read accessibility metadata. The probe intentionally avoids screenshots and browser URL capture for now so we can prove the lowest-permission recorder path first.
+The first run may require macOS privacy approval for Terminal, Visual Studio Code, Rider, or the launched host process to control System Events, read accessibility metadata, and capture screenshots. Browser URL capture is still intentionally out of scope for this probe.
 
 On non-macOS machines, the project builds but exits with a message instead of recording.
 
@@ -190,7 +193,11 @@ Quick checklist for the Mac run:
 - Install the .NET SDK first.
 - Keep `-p:EnableWindowsTargeting=true` on solution builds because the repo still includes the Windows project.
 - If macOS prompts for Accessibility or Screen Recording permissions, allow them and rerun the probe.
-- The probe now records app path, local screenshots, and thumbnails when permissions allow, so those moments can light up real icons and previews in the shared desktop shell.
+- Switch between a few apps with visible windows, such as Finder, Terminal, Safari, Codex, or System Settings.
+- Confirm the console prints foreground changes as they happen.
+- Confirm rows are written under `~/Library/Application Support/MomentTrace/timeline.db`.
+- Confirm recorded rows now prefer stable app identity such as `app://com.apple.finder` instead of raw `pid:` markers when bundle IDs are available.
+- Confirm screenshot and thumbnail files appear under `~/Library/Application Support/MomentTrace/screenshots` and `~/Library/Application Support/MomentTrace/thumbnails` when Screen Recording is allowed.
 
 If the repo is already cloned:
 
@@ -208,6 +215,119 @@ dotnet build ./MomentTrace.slnx -p:EnableWindowsTargeting=true
 ```
 
 For the first Mac spike, Terminal is the simplest way to run the probe because the output is immediate and permission prompts are easier to reason about. Visual Studio Code is the best lightweight IDE for editing and debugging on macOS. Visual Studio for Mac is discontinued, so do not plan the Mac workflow around it. If using a full JetBrains IDE, Rider is a good option once the cross-platform UI work starts.
+
+### Mac Validation Checklist
+
+Use this when you want a quick pass/fail validation on a real Mac after pulling the latest branch, then paste the results back into this Codex thread for review.
+
+1. Build the probe or the solution:
+
+```bash
+dotnet build ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
+dotnet build ./MomentTrace.slnx -p:EnableWindowsTargeting=true
+```
+
+2. Run the probe:
+
+```bash
+dotnet run --project ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
+```
+
+3. Interact with a few apps for 20 to 40 seconds:
+
+- Finder
+- Terminal
+- Safari or Chrome
+- System Settings
+
+4. Verify live console output:
+
+- New foreground changes should print as `HH:mm:ss AppName - Window Title`.
+- Window titles may be blank or reduced until Accessibility permission is granted.
+
+5. Verify stored data:
+
+```bash
+sqlite3 "$HOME/Library/Application Support/MomentTrace/timeline.db" "select started_at, app_name, bundle_identifier, resource, executable_path, screenshot_path, thumbnail_path from activities order by id desc limit 10;"
+```
+
+6. Paste these two artifacts back into Codex:
+
+- the live console output from the probe after switching between a few apps
+- the SQLite query result from the command above
+
+Suggested capture format:
+
+```text
+Console:
+14:32:10 Finder - Downloads
+14:32:18 Safari - OpenAI
+
+SQLite:
+2026-06-17T14:32:18.0000000+01:00 | Safari | com.apple.Safari | app://com.apple.Safari | /Applications/Safari.app | /Users/.../screenshots/...png | /Users/.../thumbnails/...jpg
+```
+
+Expected validation result:
+
+- `app_name` is populated.
+- `bundle_identifier` is populated for normal bundled apps such as Finder or System Settings.
+- `resource` prefers `app://...` when `bundle_identifier` exists.
+- `executable_path` points to the `.app` bundle contents or executable path when macOS exposes it.
+- `screenshot_path` and `thumbnail_path` are populated after Screen Recording permission is granted.
+
+If validation fails:
+
+- No console output usually means the app never became frontmost long enough, or the probe was not running on macOS.
+- Missing titles usually means Accessibility permission was not granted yet.
+- Missing screenshots usually means Screen Recording permission was not granted yet.
+- Repeated `pid:` resources are acceptable only for apps where bundle ID and path could not be resolved.
+
+### Latest Mac Verification
+
+Update this section from the Mac after running the validation checklist, then push the branch so the latest real-machine results are captured in Git.
+
+Date:
+
+```text
+YYYY-MM-DD
+```
+
+Machine / environment:
+
+```text
+Mac model:
+macOS version:
+.NET SDK:
+Branch:
+Commit:
+```
+
+Probe console output:
+
+```text
+Paste the live MomentTrace.MacProbe console lines here after switching between a few apps.
+```
+
+SQLite verification query:
+
+```bash
+sqlite3 "$HOME/Library/Application Support/MomentTrace/timeline.db" "select started_at, app_name, bundle_identifier, resource, executable_path, screenshot_path, thumbnail_path from activities order by id desc limit 10;"
+```
+
+SQLite verification result:
+
+```text
+Paste the query output here.
+```
+
+Validation notes:
+
+```text
+- Did bundle_identifier populate?
+- Did resource switch to app://... for normal bundled apps?
+- Did screenshot_path and thumbnail_path populate?
+- Any apps still falling back to pid:...?
+```
 
 ## Local Data
 
