@@ -169,11 +169,12 @@ On non-macOS machines, the project builds but exits with a message instead of re
 
 Verified macOS probe result:
 
-- Tested from `/Users/blakboi/Documents/src/MomentTrace/MomentTrace`
-- .NET SDK `9.0.314`
-- .NET Runtime `8.0.27`
+- Tested from `/Users/blakboi/Documents/Codex/2026-05-30/help-me-build-this-users-blakboi/work/MomentTrace-verify`
+- .NET SDK `9.0.315`
+- .NET Runtime `8.0.28`
 - Shared timeline database: `~/Library/Application Support/MomentTrace/timeline.db`
-- Confirmed foreground app/window rows were written for Codex and System Settings
+- Confirmed foreground app/window rows were written for Codex
+- Confirmed the latest row populated `bundle_identifier` and switched `resource` to `app://com.openai.codex`
 
 ### Pull And Run On A Mac
 
@@ -284,28 +285,26 @@ If validation fails:
 
 ### Latest Mac Verification
 
-Update this section from the Mac after running the validation checklist, then push the branch so the latest real-machine results are captured in Git.
-
 Date:
 
 ```text
-YYYY-MM-DD
+2026-06-17
 ```
 
 Machine / environment:
 
 ```text
-Mac model:
-macOS version:
-.NET SDK:
-Branch:
-Commit:
+Mac model: unavailable from sandboxed shell
+macOS version: 26.4.1
+.NET SDK: 9.0.315
+Branch: main
+Commit: 3bbb997584e4a354dcc795bb97bf46014770273d
 ```
 
 Probe console output:
 
 ```text
-Paste the live MomentTrace.MacProbe console lines here after switching between a few apps.
+23:44:53 Codex - Codex
 ```
 
 SQLite verification query:
@@ -317,16 +316,17 @@ sqlite3 "$HOME/Library/Application Support/MomentTrace/timeline.db" "select star
 SQLite verification result:
 
 ```text
-Paste the query output here.
+2026-06-17T23:44:53.1492180+01:00 | Codex | com.openai.codex | app://com.openai.codex | /Applications/Codex.app | /Users/blakboi/Library/Application Support/MomentTrace/screenshots/20260617-234453-700-1092294677f34ff6a336f0a0046e358c.png | /Users/blakboi/Library/Application Support/MomentTrace/thumbnails/C84515151B3699AD7C4CD431BBDE246635E110D8FD1080D8C55688CBD56452D9.jpg
+2026-06-15T22:42:23.9277400+01:00 | Codex |  | pid:46115 | /Applications/Codex.app | /Users/blakboi/Library/Application Support/MomentTrace/screenshots/20260615-224224-228-5b4728a9acb143a3803f8ec5f8a2ac8e.png | /Users/blakboi/Library/Application Support/MomentTrace/thumbnails/A50F7A29454F43707137CFB5A9E1B7FA6D00D6D1D5EC93F02EAECAB213DA3019.jpg
 ```
 
 Validation notes:
 
 ```text
-- Did bundle_identifier populate?
-- Did resource switch to app://... for normal bundled apps?
-- Did screenshot_path and thumbnail_path populate?
-- Any apps still falling back to pid:...?
+- Yes. The newest Codex row populated bundle_identifier as com.openai.codex.
+- Yes. The newest Codex row stored resource as app://com.openai.codex.
+- Yes. The newest Codex row populated both screenshot_path and thumbnail_path.
+- Yes, but only for older historical rows recorded before the app-identity update landed.
 ```
 
 ## Local Data
