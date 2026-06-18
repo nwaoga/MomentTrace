@@ -288,7 +288,7 @@ If validation fails:
 Date:
 
 ```text
-2026-06-17
+2026-06-18
 ```
 
 Machine / environment:
@@ -298,13 +298,13 @@ Mac model: unavailable from sandboxed shell
 macOS version: 26.4.1
 .NET SDK: 9.0.315
 Branch: main
-Commit: 3bbb997584e4a354dcc795bb97bf46014770273d
+Commit: 3fe5e2b1223cc897c87cf0e2e97ecc566fb3f87f
 ```
 
 Probe console output:
 
 ```text
-23:44:53 Codex - Codex
+10:03:19 Codex - Codex
 ```
 
 SQLite verification query:
@@ -316,8 +316,8 @@ sqlite3 "$HOME/Library/Application Support/MomentTrace/timeline.db" "select star
 SQLite verification result:
 
 ```text
+2026-06-18T10:03:19.8379640+01:00 | Codex | com.openai.codex | app://com.openai.codex | /Applications/Codex.app | /Users/blakboi/Library/Application Support/MomentTrace/screenshots/20260618-100320-326-90e0bb8e92d24bf5be63ef26e399394a.png | /Users/blakboi/Library/Application Support/MomentTrace/thumbnails/186642888C9BCBE4536F01E982A7C42FEFA2F26EFC6AE3EE5EB54D447DCCC99E.jpg
 2026-06-17T23:44:53.1492180+01:00 | Codex | com.openai.codex | app://com.openai.codex | /Applications/Codex.app | /Users/blakboi/Library/Application Support/MomentTrace/screenshots/20260617-234453-700-1092294677f34ff6a336f0a0046e358c.png | /Users/blakboi/Library/Application Support/MomentTrace/thumbnails/C84515151B3699AD7C4CD431BBDE246635E110D8FD1080D8C55688CBD56452D9.jpg
-2026-06-15T22:42:23.9277400+01:00 | Codex |  | pid:46115 | /Applications/Codex.app | /Users/blakboi/Library/Application Support/MomentTrace/screenshots/20260615-224224-228-5b4728a9acb143a3803f8ec5f8a2ac8e.png | /Users/blakboi/Library/Application Support/MomentTrace/thumbnails/A50F7A29454F43707137CFB5A9E1B7FA6D00D6D1D5EC93F02EAECAB213DA3019.jpg
 ```
 
 Validation notes:
@@ -326,7 +326,7 @@ Validation notes:
 - Yes. The newest Codex row populated bundle_identifier as com.openai.codex.
 - Yes. The newest Codex row stored resource as app://com.openai.codex.
 - Yes. The newest Codex row populated both screenshot_path and thumbnail_path.
-- Yes, but only for older historical rows recorded before the app-identity update landed.
+- Yes, but only for older historical rows recorded before the app-identity update landed. The newest two verified rows both use app://com.openai.codex.
 ```
 
 ## Local Data
