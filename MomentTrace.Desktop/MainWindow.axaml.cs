@@ -1168,6 +1168,11 @@ public partial class MainWindow : Window
     {
         try
         {
+            if (TryOpenMacApplication(activity))
+            {
+                return;
+            }
+
             var target = GetOpenTarget(activity);
             Process.Start(new ProcessStartInfo(target) { UseShellExecute = true });
         }
@@ -1192,6 +1197,42 @@ public partial class MainWindow : Window
         return !string.IsNullOrWhiteSpace(activity.ExecutablePath)
             ? activity.ExecutablePath
             : activity.ProcessName;
+    }
+
+    private static bool TryOpenMacApplication(ActivityMomentViewModel activity)
+    {
+        if (!OperatingSystem.IsMacOS())
+        {
+            return false;
+        }
+
+        var bundleIdentifier = TryGetBundleIdentifier(activity.Resource);
+        if (string.IsNullOrWhiteSpace(bundleIdentifier))
+        {
+            return false;
+        }
+
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "/usr/bin/open",
+            UseShellExecute = false
+        };
+        startInfo.ArgumentList.Add("-b");
+        startInfo.ArgumentList.Add(bundleIdentifier);
+
+        using var process = Process.Start(startInfo);
+        return process is not null;
+    }
+
+    private static string? TryGetBundleIdentifier(string? resource)
+    {
+        if (string.IsNullOrWhiteSpace(resource)
+            || !resource.StartsWith("app://", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        return resource["app://".Length..].Trim();
     }
 
     private static bool TryResolveLocalPath(ActivityMomentViewModel activity, out string path)

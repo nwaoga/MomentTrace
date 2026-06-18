@@ -340,6 +340,79 @@ Validation notes:
 - Yes. A freshly captured Safari row stored a real page URL, which should let reopen target the website instead of only launching Safari.
 ```
 
+### Mac Reopen Verification Checklist
+
+Use this after the app-identity validation pass to confirm the Avalonia shell can reopen captured Mac app moments through bundle ID.
+
+1. Pull the latest branch on the Mac:
+
+```bash
+git pull
+```
+
+2. Build and run the Avalonia desktop shell:
+
+```bash
+dotnet build ./MomentTrace.Desktop/MomentTrace.Desktop.csproj
+dotnet run --project ./MomentTrace.Desktop/MomentTrace.Desktop.csproj
+```
+
+3. In the shell, open a recently captured Mac app moment:
+
+- Prefer a moment with a known `app://...` resource, such as Codex.
+- Use the reopen action from the detail pane or moment card.
+
+4. Verify reopen behavior:
+
+- The target app should relaunch or come to the foreground.
+- `app://...` rows should reopen through macOS bundle ID.
+- Older historical `pid:` rows may still fall back to executable path or fail gracefully.
+- Web moments should still open in the browser.
+- File-backed moments should still open through their local path when available.
+
+5. Record the result back in this README section and push the branch.
+
+### Latest Mac Reopen Verification
+
+Date:
+
+```text
+YYYY-MM-DD
+```
+
+Machine / environment:
+
+```text
+Mac model:
+macOS version:
+.NET SDK:
+Branch:
+Commit:
+```
+
+Moment tested:
+
+```text
+App:
+Resource:
+ExecutablePath:
+```
+
+Reopen result:
+
+```text
+Describe what happened when the reopen action was used.
+```
+
+Notes:
+
+```text
+- Did the app come to the foreground?
+- Did `app://...` reopen correctly?
+- Did older `pid:` rows behave acceptably?
+- Any regressions for web or file moments?
+```
+
 ## Local Data
 
 MomentTrace stores user data locally:
