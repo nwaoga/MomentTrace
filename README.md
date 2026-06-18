@@ -377,40 +377,40 @@ dotnet run --project ./MomentTrace.Desktop/MomentTrace.Desktop.csproj
 Date:
 
 ```text
-YYYY-MM-DD
+2026-06-18
 ```
 
 Machine / environment:
 
 ```text
-Mac model:
-macOS version:
-.NET SDK:
-Branch:
-Commit:
+Mac model: unavailable from sandboxed shell
+macOS version: 26.4.1
+.NET SDK: 9.0.315
+Branch: main
+Commit: eda127f20ef2092c78da4cd439815c7ddfab4c45
 ```
 
 Moment tested:
 
 ```text
-App:
-Resource:
-ExecutablePath:
+App: Safari
+Resource: https://chatgpt.com/g/g-p-6a2b054e8d788191883dc31d7e265708/c/6a176763-1428-83eb-af73-1a053643a332
+ExecutablePath: /Applications/Safari.app
 ```
 
 Reopen result:
 
 ```text
-Describe what happened when the reopen action was used.
+The reopen action now opened the captured website instead of only reopening Safari. The previously failing Safari moment behaved correctly after the reopen-target selection update.
 ```
 
 Notes:
 
 ```text
-- Did the app come to the foreground?
-- Did `app://...` reopen correctly?
-- Did older `pid:` rows behave acceptably?
-- Any regressions for web or file moments?
+- Yes. The browser came to the foreground when the website reopened.
+- Yes. The updated shell now prefers stronger app:// and https:// targets from nearby raw rows inside the selected moment.
+- Older pid: rows are still expected to be weaker fallbacks, but the shell no longer prefers them when richer reopen targets exist in the same moment.
+- No regressions were observed during this reopen check for Safari web moments.
 ```
 
 ## Local Data

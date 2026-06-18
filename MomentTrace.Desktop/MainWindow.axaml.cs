@@ -1164,16 +1164,18 @@ public partial class MainWindow : Window
         }
     }
 
-    private static void OpenActivity(ActivityMomentViewModel activity)
+    private void OpenActivity(ActivityMomentViewModel activity)
     {
         try
         {
-            if (TryOpenMacApplication(activity))
+            var candidate = ResolveBestOpenActivity(activity);
+
+            if (TryOpenMacApplication(candidate))
             {
                 return;
             }
 
-            var target = GetOpenTarget(activity);
+            var target = GetOpenTarget(candidate);
             Process.Start(new ProcessStartInfo(target) { UseShellExecute = true });
         }
         catch
@@ -1182,7 +1184,70 @@ public partial class MainWindow : Window
         }
     }
 
-    private static string GetOpenTarget(ActivityMomentViewModel activity)
+    private TimelineActivity ResolveBestOpenActivity(ActivityMomentViewModel selected)
+    {
+        var candidates = _visibleActivities
+            .Where(activity => IsCandidateForOpen(selected, activity))
+            .OrderByDescending(activity => ScoreOpenCandidate(selected, activity))
+            .ThenByDescending(activity => activity.StartedAt)
+            .ToList();
+
+        return candidates.FirstOrDefault() ?? selected.Activity;
+    }
+
+    private static bool IsCandidateForOpen(ActivityMomentViewModel selected, TimelineActivity activity)
+    {
+        if (!string.Equals(activity.ProcessName, selected.ProcessName, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        return activity.StartedAt.LocalDateTime.Date == selected.SessionStartedAt.LocalDateTime.Date
+            && activity.StartedAt >= selected.SessionStartedAt.AddMinutes(-1)
+            && activity.StartedAt <= selected.SessionEndedAt.AddMinutes(1);
+    }
+
+    private static int ScoreOpenCandidate(ActivityMomentViewModel selected, TimelineActivity activity)
+    {
+        var score = 0;
+
+        if ((selected.Category == ActivityCategory.Browsing || selected.Category == ActivityCategory.Research)
+            && IsWebUrl(activity.Resource))
+        {
+            score += 100;
+        }
+
+        if (TryGetBundleIdentifier(activity.Resource) is not null)
+        {
+            score += 80;
+        }
+
+        if (!string.IsNullOrWhiteSpace(activity.BundleIdentifier))
+        {
+            score += 40;
+        }
+
+        if (!string.IsNullOrWhiteSpace(activity.ExecutablePath))
+        {
+            score += 20;
+        }
+
+        if (!string.IsNullOrWhiteSpace(activity.Resource)
+            && !activity.Resource.StartsWith("pid:", StringComparison.OrdinalIgnoreCase))
+        {
+            score += 10;
+        }
+
+        if (!string.IsNullOrWhiteSpace(activity.WindowTitle)
+            && string.Equals(activity.WindowTitle, selected.Activity.WindowTitle, StringComparison.Ordinal))
+        {
+            score += 5;
+        }
+
+        return score;
+    }
+
+    private static string GetOpenTarget(TimelineActivity activity)
     {
         if (IsWebUrl(activity.Resource))
         {
@@ -1199,7 +1264,7 @@ public partial class MainWindow : Window
             : activity.ProcessName;
     }
 
-    private static bool TryOpenMacApplication(ActivityMomentViewModel activity)
+    private static bool TryOpenMacApplication(TimelineActivity activity)
     {
         if (!OperatingSystem.IsMacOS())
         {
@@ -1235,7 +1300,7 @@ public partial class MainWindow : Window
         return resource["app://".Length..].Trim();
     }
 
-    private static bool TryResolveLocalPath(ActivityMomentViewModel activity, out string path)
+    private static bool TryResolveLocalPath(TimelineActivity activity, out string path)
     {
         path = string.Empty;
 
@@ -1260,7 +1325,7 @@ public partial class MainWindow : Window
         return false;
     }
 
-    private static bool TryResolvePathFromCandidate(string? candidate, ActivityMomentViewModel activity, out string path)
+    private static bool TryResolvePathFromCandidate(string? candidate, TimelineActivity activity, out string path)
     {
         path = string.Empty;
 
@@ -1330,15 +1395,14 @@ public partial class MainWindow : Window
         return false;
     }
 
-    private static IEnumerable<string?> EnumerateWindowPathCandidates(ActivityMomentViewModel activity)
+    private static IEnumerable<string?> EnumerateWindowPathCandidates(TimelineActivity activity)
     {
         yield return activity.Resource;
-        yield return activity.Activity.WindowTitle;
-        yield return activity.Title;
-        yield return activity.Activity.DisplayTitle;
+        yield return activity.WindowTitle;
+        yield return activity.DisplayTitle;
     }
 
-    private static bool LooksLikeExplorerMoment(ActivityMomentViewModel activity)
+    private static bool LooksLikeExplorerMoment(TimelineActivity activity)
     {
         return activity.ProcessName.Equals("explorer", StringComparison.OrdinalIgnoreCase)
             || activity.AppName.Contains("Explorer", StringComparison.OrdinalIgnoreCase);
