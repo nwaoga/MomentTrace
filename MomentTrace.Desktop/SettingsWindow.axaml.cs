@@ -46,6 +46,8 @@ public partial class SettingsWindow : Window
     private bool _isScrollDragging;
     private static readonly Cursor ScrollReadyCursor = new(StandardCursorType.Hand);
     private static readonly Cursor ScrollDraggingCursor = new(StandardCursorType.SizeAll);
+    private static readonly Thickness DefaultSettingsRootBorderThickness = new(1);
+    private bool _isMacChromeMode;
 
     public SettingsWindow(
         IActivityStore store,
@@ -68,15 +70,17 @@ public partial class SettingsWindow : Window
         _activityDataChanged = activityDataChanged;
 
         InitializeComponent();
+        ConfigurePlatformChrome();
         AddHandler(InputElement.PointerWheelChangedEvent, GlobalPointerWheelChanged, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(InputElement.PointerPressedEvent, GlobalPointerPressed, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(InputElement.PointerMovedEvent, GlobalPointerMoved, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(InputElement.PointerReleasedEvent, GlobalPointerReleased, RoutingStrategies.Tunnel, handledEventsToo: true);
+        KeyDown += SettingsWindow_KeyDown;
         SettingsScrollViewer.Cursor = ScrollReadyCursor;
 
         var currentPalette = DesktopAppThemePalette.Find(currentTheme);
         currentPalette.ApplyTo(this);
-        Background = new SolidColorBrush(currentPalette.Base);
+        ApplyWindowPalette(currentPalette);
 
         RecentAppsList.ItemsSource = _recentApps;
         RecentWebsitesList.ItemsSource = _recentWebsites;
@@ -100,6 +104,50 @@ public partial class SettingsWindow : Window
         LoadWhereILive();
         _ = LoadRecentPrivacyChoicesAsync();
         _ = LoadHealthStatusAsync();
+        Opened += (_, _) => ApplyPlatformLayoutMetrics();
+    }
+
+    private void ConfigurePlatformChrome()
+    {
+        _isMacChromeMode = OperatingSystem.IsMacOS();
+        if (!_isMacChromeMode)
+        {
+            return;
+        }
+
+        WindowDecorations = WindowDecorations.Full;
+        ExtendClientAreaToDecorationsHint = true;
+        ExtendClientAreaTitleBarHeightHint = -1;
+        SettingsTitleBar.IsVisible = false;
+        SettingsRootSurface.CornerRadius = new CornerRadius(0);
+        ApplyPlatformLayoutMetrics();
+    }
+
+    private void ApplyPlatformLayoutMetrics()
+    {
+        if (!_isMacChromeMode)
+        {
+            SettingsRootSurface.BorderThickness = DefaultSettingsRootBorderThickness;
+            SettingsRootGrid.RowDefinitions[0].Height = new GridLength(54);
+            return;
+        }
+
+        SettingsRootSurface.BorderThickness = new Thickness(0, 0, 0, 1);
+        SettingsRootGrid.RowDefinitions[0].Height = new GridLength(Math.Max(WindowDecorationMargin.Top, 28) + 10);
+    }
+
+    private void SettingsWindow_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (!_isMacChromeMode || (e.KeyModifiers & KeyModifiers.Meta) == 0)
+        {
+            return;
+        }
+
+        if (e.Key is Key.W or Key.OemComma)
+        {
+            Close();
+            e.Handled = true;
+        }
     }
 
     private void LoadCurrentSettings(double currentOpacity, string currentTimelineViewMode, string currentTheme)
@@ -312,8 +360,18 @@ public partial class SettingsWindow : Window
         }
 
         theme.ApplyTo(this);
-        Background = new SolidColorBrush(theme.Base);
+        ApplyWindowPalette(theme);
         _themeChanged(theme.Key);
+    }
+
+    private void ApplyWindowPalette(DesktopAppThemePalette theme)
+    {
+        var pageStrength = _isMacChromeMode ? 0.82 : 1.0;
+        var panelStrength = _isMacChromeMode ? 0.9 : 1.0;
+
+        Background = new SolidColorBrush(theme.WithAlpha(theme.Base, pageStrength));
+        SettingsRootSurface.Background = new SolidColorBrush(theme.WithAlpha(theme.Surface, panelStrength));
+        SettingsRootSurface.BorderBrush = new SolidColorBrush(theme.Stroke);
     }
 
     private void ExcludeAdultWebsitesCheckBox_Changed(object? sender, RoutedEventArgs e)
@@ -670,6 +728,11 @@ public partial class SettingsWindow : Window
 
     private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
+        if (_isMacChromeMode)
+        {
+            return;
+        }
+
         if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed is false)
         {
             return;

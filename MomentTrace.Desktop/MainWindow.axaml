@@ -15,7 +15,7 @@
 	        WindowDecorations="BorderOnly"
 	        ExtendClientAreaToDecorationsHint="True"
 	        ExtendClientAreaTitleBarHeightHint="0"
-	        Background="Transparent">
+        Background="Transparent">
     <Window.Resources>
         <SolidColorBrush x:Key="PageBackgroundBrush" Color="#08111F" />
         <SolidColorBrush x:Key="OuterFrameBrush" Color="#1E2D45" />
@@ -680,7 +680,8 @@
                                        FontSize="14"
                                        Foreground="{DynamicResource TextBrush}" />
                         </Button>
-                        <Button Grid.Column="4"
+                        <Button x:Name="MinimizeShellButton"
+                                Grid.Column="4"
                                 Classes="toolbar topCommand"
                                 Click="MinimizeShellButton_Click"
                                 Width="48">
@@ -688,7 +689,8 @@
                                        FontSize="16"
                                        Foreground="{DynamicResource TextBrush}" />
                         </Button>
-                        <Button Grid.Column="5"
+                        <Button x:Name="MaximizeShellButton"
+                                Grid.Column="5"
                                 Classes="toolbar topCommand"
                                 Click="MaximizeShellButton_Click"
                                 Width="48">
@@ -696,7 +698,8 @@
                                        FontSize="13"
                                        Foreground="{DynamicResource TextBrush}" />
                         </Button>
-                        <Button Grid.Column="6"
+                        <Button x:Name="CloseShellButton"
+                                Grid.Column="6"
                                 Classes="toolbar topCommand"
                                 Click="CloseShellButton_Click"
                                 Width="48">

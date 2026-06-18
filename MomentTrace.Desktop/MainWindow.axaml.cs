@@ -82,6 +82,11 @@ public partial class MainWindow : Window
     private readonly ICommand _overviewFocusCommand;
     private static readonly Cursor ScrollReadyCursor = new(StandardCursorType.Hand);
     private static readonly Cursor ScrollDraggingCursor = new(StandardCursorType.SizeAll);
+    private static readonly Thickness DefaultOuterShellPadding = new(24, 18, 24, 18);
+    private static readonly Thickness DefaultRailSurfacePadding = new(16, 16, 18, 16);
+    private static readonly Thickness DefaultTopCommandMargin = new(16, 10, 18, 0);
+    private static readonly Thickness DefaultTopCommandPadding = new(8);
+    private bool _isMacChromeMode;
 
     public MainWindow(SqliteActivityStore? store = null, IActivityRecorder? recorder = null)
     {
@@ -103,19 +108,112 @@ public partial class MainWindow : Window
         ApplyDetailPaneVisibility();
         ApplyDetailSectionStates();
         SetActiveNavState();
+        ConfigurePlatformChrome();
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
         _refreshTimer.Tick += async (_, _) => await ReloadAsync();
         AddHandler(InputElement.PointerWheelChangedEvent, GlobalPointerWheelChanged, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(InputElement.PointerPressedEvent, GlobalPointerPressed, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(InputElement.PointerMovedEvent, GlobalPointerMoved, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(InputElement.PointerReleasedEvent, GlobalPointerReleased, RoutingStrategies.Tunnel, handledEventsToo: true);
+        KeyDown += MainWindow_KeyDown;
         ConfigureGrabScrollSurfaces();
         Opened += async (_, _) =>
         {
+            ApplyPlatformLayoutMetrics();
             _refreshTimer.Start();
             await ReloadAsync();
         };
         Closed += (_, _) => _refreshTimer.Stop();
+    }
+
+    private void ConfigurePlatformChrome()
+    {
+        _isMacChromeMode = OperatingSystem.IsMacOS();
+        if (!_isMacChromeMode)
+        {
+            return;
+        }
+
+        WindowDecorations = WindowDecorations.Full;
+        ExtendClientAreaToDecorationsHint = true;
+        ExtendClientAreaTitleBarHeightHint = -1;
+
+        MinimizeShellButton.IsVisible = false;
+        MaximizeShellButton.IsVisible = false;
+        CloseShellButton.IsVisible = false;
+
+        ApplyPlatformLayoutMetrics();
+    }
+
+    private void ApplyPlatformLayoutMetrics()
+    {
+        if (!_isMacChromeMode)
+        {
+            OuterShell.Padding = DefaultOuterShellPadding;
+            RailSurface.Padding = DefaultRailSurfacePadding;
+            TopCommandSurface.Margin = DefaultTopCommandMargin;
+            TopCommandSurface.Padding = DefaultTopCommandPadding;
+            TopCommandSurface.BorderThickness = new Thickness(1);
+            return;
+        }
+
+        var titleBarInset = Math.Max(WindowDecorationMargin.Top, 28);
+        OuterShell.Padding = new Thickness(DefaultOuterShellPadding.Left, 0, DefaultOuterShellPadding.Right, DefaultOuterShellPadding.Bottom);
+        RailSurface.Padding = new Thickness(
+            DefaultRailSurfacePadding.Left,
+            titleBarInset + 14,
+            DefaultRailSurfacePadding.Right,
+            DefaultRailSurfacePadding.Bottom);
+        TopCommandSurface.Margin = new Thickness(DefaultTopCommandMargin.Left, 0, DefaultTopCommandMargin.Right, DefaultTopCommandMargin.Bottom);
+        TopCommandSurface.Padding = new Thickness(
+            DefaultTopCommandPadding.Left,
+            titleBarInset + 4,
+            DefaultTopCommandPadding.Right,
+            DefaultTopCommandPadding.Bottom);
+        TopCommandSurface.BorderThickness = new Thickness(0, 0, 0, 1);
+    }
+
+    private void MainWindow_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (!_isMacChromeMode || (e.KeyModifiers & KeyModifiers.Meta) == 0)
+        {
+            return;
+        }
+
+        switch (e.Key)
+        {
+            case Key.OemComma:
+                OpenSettingsWindow();
+                e.Handled = true;
+                break;
+            case Key.F:
+                FocusSearch();
+                e.Handled = true;
+                break;
+            case Key.D1:
+                _ = ActivateTimelineSelectionAsync(RailSelection.Timeline);
+                e.Handled = true;
+                break;
+            case Key.D2:
+                ShowOverviewPage();
+                e.Handled = true;
+                break;
+            case Key.W:
+                Close();
+                e.Handled = true;
+                break;
+        }
+    }
+
+    private void FocusSearch()
+    {
+        SearchTextBox.Focus();
+        SearchTextBox.SelectAll();
+    }
+
+    private void OpenSettingsWindow()
+    {
+        SettingsNavButton_Click(SettingsNavButton, new RoutedEventArgs());
     }
 
     private async Task ReloadAsync()
@@ -364,6 +462,11 @@ public partial class MainWindow : Window
 
     private void ToolbarDragRegion_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
+        if (_isMacChromeMode)
+        {
+            return;
+        }
+
         if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed is false)
         {
             return;
@@ -2283,6 +2386,12 @@ public partial class MainWindow : Window
     {
         var pageStrength = Math.Clamp(opacity, 0.0, 1.0);
         var panelStrength = Math.Clamp(opacity + 0.08, 0.0, 1.0);
+
+        if (_isMacChromeMode)
+        {
+            pageStrength = Math.Clamp(opacity * 0.82, 0.0, 0.92);
+            panelStrength = Math.Clamp(opacity + 0.02, 0.0, 0.9);
+        }
 
         OuterShell.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Base, pageStrength));
         RailSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Rail, panelStrength));
