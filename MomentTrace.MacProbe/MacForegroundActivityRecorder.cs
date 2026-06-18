@@ -275,7 +275,7 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
             bundleIdentifier = await ResolveBundleIdentifierAsync(bundleIdentifier, appPath, cancellationToken);
 
             var processName = appName.Replace(" ", string.Empty);
-            var resource = BuildResource(bundleIdentifier, appPath, pid);
+            var resource = await ResolveResourceAsync(appName, processName, bundleIdentifier, appPath, pid, cancellationToken);
             return new Snapshot(
                 processName,
                 appName,
@@ -323,7 +323,27 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
             return string.Equals(candidate, "(null)", StringComparison.OrdinalIgnoreCase) ? null : candidate;
         }
 
-        private static string? BuildResource(string? bundleIdentifier, string? appPath, string? pid)
+        private static async Task<string?> ResolveResourceAsync(
+            string appName,
+            string processName,
+            string? bundleIdentifier,
+            string? appPath,
+            string? pid,
+            CancellationToken cancellationToken)
+        {
+            if (ActivityClassifier.Classify(processName) == MomentTrace.Core.ActivityKind.Browser)
+            {
+                var browserUrl = await TryCaptureBrowserUrlAsync(appName, bundleIdentifier, cancellationToken);
+                if (!string.IsNullOrWhiteSpace(browserUrl))
+                {
+                    return browserUrl;
+                }
+            }
+
+            return BuildFallbackResource(bundleIdentifier, appPath, pid);
+        }
+
+        private static string? BuildFallbackResource(string? bundleIdentifier, string? appPath, string? pid)
         {
             if (!string.IsNullOrWhiteSpace(bundleIdentifier))
             {
@@ -336,6 +356,106 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
             }
 
             return string.IsNullOrWhiteSpace(pid) ? null : $"pid:{pid.Trim()}";
+        }
+
+        private static async Task<string?> TryCaptureBrowserUrlAsync(string appName, string? bundleIdentifier, CancellationToken cancellationToken)
+        {
+            var scriptTarget = ResolveBrowserScriptTarget(appName, bundleIdentifier);
+            if (string.IsNullOrWhiteSpace(scriptTarget))
+            {
+                return null;
+            }
+
+            var script = scriptTarget switch
+            {
+                "Safari" => """
+                    tell application "Safari"
+                        if (count of windows) is 0 then return ""
+                        try
+                            return URL of current tab of front window
+                        end try
+                        return ""
+                    end tell
+                    """,
+                _ => $"""
+                    tell application "{scriptTarget}"
+                        if (count of windows) is 0 then return ""
+                        try
+                            return URL of active tab of front window
+                        end try
+                        return ""
+                    end tell
+                    """
+            };
+
+            var captured = await RunOsaScriptAsync(script, cancellationToken);
+            return TryNormalizeBrowserUrl(captured, out var url) ? url : null;
+        }
+
+        private static string? ResolveBrowserScriptTarget(string appName, string? bundleIdentifier)
+        {
+            if (string.Equals(bundleIdentifier, "com.apple.Safari", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(appName, "Safari", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Safari";
+            }
+
+            if (string.Equals(bundleIdentifier, "com.google.Chrome", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(appName, "Google Chrome", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(appName, "Chrome", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Google Chrome";
+            }
+
+            if (string.Equals(bundleIdentifier, "com.microsoft.edgemac", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(appName, "Microsoft Edge", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Microsoft Edge";
+            }
+
+            if (string.Equals(bundleIdentifier, "com.brave.Browser", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(appName, "Brave Browser", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(appName, "Brave", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Brave Browser";
+            }
+
+            if (string.Equals(bundleIdentifier, "com.vivaldi.Vivaldi", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(appName, "Vivaldi", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Vivaldi";
+            }
+
+            if (string.Equals(bundleIdentifier, "com.operasoftware.Opera", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(appName, "Opera", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Opera";
+            }
+
+            return null;
+        }
+
+        private static bool TryNormalizeBrowserUrl(string? value, out string url)
+        {
+            url = string.Empty;
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+
+            var candidate = value.Trim();
+            if (!Uri.TryCreate(candidate, UriKind.Absolute, out var uri))
+            {
+                return false;
+            }
+
+            if (uri.Scheme is not ("http" or "https"))
+            {
+                return false;
+            }
+
+            url = uri.ToString();
+            return true;
         }
 
         public static string? TryCaptureScreenshot(Snapshot snapshot)

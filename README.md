@@ -153,6 +153,7 @@ MomentTrace includes an early macOS recorder probe so the Mac capture model can 
 - bundle identifier when available
 - executable path when available
 - stable app resource identity, preferring `app://<bundle-id>` and then app path before falling back to `pid:`
+- browser URL capture for Safari and Chromium-family browsers when AppleScript access is available
 - active window title when macOS permissions allow it
 - local screenshot and thumbnail paths when macOS Screen Recording permission allows capture, now cropped to the frontmost window bounds when available
 - start/end timestamps
@@ -163,7 +164,7 @@ Run it on a Mac from the repository root:
 dotnet run --project ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
 ```
 
-The first run may require macOS privacy approval for Terminal, Visual Studio Code, Rider, or the launched host process to control System Events, read accessibility metadata, and capture screenshots. Browser URL capture is still intentionally out of scope for this probe.
+The first run may require macOS privacy approval for Terminal, Visual Studio Code, Rider, or the launched host process to control System Events, read accessibility metadata, capture screenshots, and read browser tab URLs through AppleScript where supported.
 
 On non-macOS machines, the project builds but exits with a message instead of recording.
 
@@ -176,6 +177,7 @@ Verified macOS probe result:
 - Confirmed foreground app/window rows were written for Codex
 - Confirmed the latest row populated `bundle_identifier` and switched `resource` to `app://com.openai.codex`
 - Confirmed the latest screenshot capture was cropped to the frontmost app window instead of the full display
+- Confirmed Safari rows can now store real `https://...` page URLs for reopen instead of only reopening the browser app
 
 ### Pull And Run On A Mac
 
@@ -199,6 +201,7 @@ Quick checklist for the Mac run:
 - Confirm the console prints foreground changes as they happen.
 - Confirm rows are written under `~/Library/Application Support/MomentTrace/timeline.db`.
 - Confirm recorded rows now prefer stable app identity such as `app://com.apple.finder` instead of raw `pid:` markers when bundle IDs are available.
+- Confirm Safari and supported Chromium browsers store real page URLs in `resource` when browser scripting access is available.
 - Confirm screenshot and thumbnail files appear under `~/Library/Application Support/MomentTrace/screenshots` and `~/Library/Application Support/MomentTrace/thumbnails` when Screen Recording is allowed.
 - Confirm new screenshots are cropped to the frontmost app window when macOS exposes usable window bounds.
 
@@ -267,14 +270,14 @@ Console:
 14:32:18 Safari - OpenAI
 
 SQLite:
-2026-06-17T14:32:18.0000000+01:00 | Safari | com.apple.Safari | app://com.apple.Safari | /Applications/Safari.app | /Users/.../screenshots/...png | /Users/.../thumbnails/...jpg
+2026-06-17T14:32:18.0000000+01:00 | Safari | com.apple.Safari | https://openai.com/ | /Applications/Safari.app | /Users/.../screenshots/...png | /Users/.../thumbnails/...jpg
 ```
 
 Expected validation result:
 
 - `app_name` is populated.
 - `bundle_identifier` is populated for normal bundled apps such as Finder or System Settings.
-- `resource` prefers `app://...` when `bundle_identifier` exists.
+- `resource` prefers real `http`/`https` page URLs for supported browsers, otherwise it prefers `app://...` when `bundle_identifier` exists.
 - `executable_path` points to the `.app` bundle contents or executable path when macOS exposes it.
 - `screenshot_path` and `thumbnail_path` are populated after Screen Recording permission is granted.
 
@@ -300,13 +303,17 @@ Mac model: unavailable from sandboxed shell
 macOS version: 26.4.1
 .NET SDK: 9.0.315
 Branch: main
-Commit: 46b20ef05075894e72ebfac48f0f459eef31e9b4
+Commit: 42323be69e4e31a2f1679fc3f33e22afcb8ddfb0
 ```
 
 Probe console output:
 
 ```text
-10:34:54 Codex - Codex
+11:31:15 Codex - Codex
+11:32:31 Safari - Google
+11:33:00 Safari - Internet Speed Test | Fast.com
+11:34:40 Safari - GitHub
+11:41:27 Safari - ChatGPT
 ```
 
 SQLite verification query:
@@ -318,18 +325,19 @@ sqlite3 "$HOME/Library/Application Support/MomentTrace/timeline.db" "select star
 SQLite verification result:
 
 ```text
+2026-06-18T14:16:45.9910680+01:00 | Safari | com.apple.Safari | https://chatgpt.com/g/g-p-6a2b054e8d788191883dc31d7e265708/c/6a176763-1428-83eb-af73-1a053643a332 | /Applications/Safari.app | /Users/blakboi/Library/Application Support/MomentTrace/screenshots/20260618-141646-424-8cf8c990705f4128a5f4456c2ca54cb6.png | /Users/blakboi/Library/Application Support/MomentTrace/thumbnails/6241181D1FDFD1E430E5A9C0D3E383D724E2A04B41FCFF91AC93889AAFC75EEF.jpg
 2026-06-18T10:34:54.5185830+01:00 | Codex | com.openai.codex | app://com.openai.codex | /Applications/Codex.app | /Users/blakboi/Library/Application Support/MomentTrace/screenshots/20260618-103454-860-60457a2cf9f44a3791be6746283f1dda.png | /Users/blakboi/Library/Application Support/MomentTrace/thumbnails/EDFE6EC4358CE986F0476DB1D6030B147C59C7FABBF329558E4E9344D30C3D39.jpg
-2026-06-18T10:03:19.8379640+01:00 | Codex | com.openai.codex | app://com.openai.codex | /Applications/Codex.app | /Users/blakboi/Library/Application Support/MomentTrace/screenshots/20260618-100320-326-90e0bb8e92d24bf5be63ef26e399394a.png | /Users/blakboi/Library/Application Support/MomentTrace/thumbnails/186642888C9BCBE4536F01E982A7C42FEFA2F26EFC6AE3EE5EB54D447DCCC99E.jpg
 ```
 
 Validation notes:
 
 ```text
 - Yes. The newest Codex row populated bundle_identifier as com.openai.codex.
-- Yes. The newest Codex row stored resource as app://com.openai.codex.
+- Yes. Safari now stores real https:// URLs in resource, and non-browser app rows still use app://... when appropriate.
 - Yes. The newest Codex row populated both screenshot_path and thumbnail_path.
 - Yes, but only for older historical rows recorded before the app-identity update landed. The newest two verified rows both use app://com.openai.codex.
 - Yes. The newest verified screenshot was visually confirmed as a window crop of the Codex app rather than a full-screen capture.
+- Yes. A freshly captured Safari row stored a real page URL, which should let reopen target the website instead of only launching Safari.
 ```
 
 ## Local Data
