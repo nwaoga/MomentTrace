@@ -121,7 +121,7 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
         _currentSnapshot = snapshot;
         _currentActivityStartedAt = now;
         _currentActivityLastWrittenAt = now;
-        var screenshotPath = Snapshot.TryCaptureScreenshot();
+        var screenshotPath = Snapshot.TryCaptureScreenshot(snapshot);
         var thumbnailPath = Snapshot.TryCreateImageThumbnail(screenshotPath);
 
         var activity = new TimelineActivity
@@ -200,7 +200,11 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
         string WindowTitle,
         string? BundleIdentifier,
         string? Resource,
-        string? ExecutablePath)
+        string? ExecutablePath,
+        int? WindowX,
+        int? WindowY,
+        int? WindowWidth,
+        int? WindowHeight)
     {
         public bool SameActivity(Snapshot other)
         {
@@ -228,7 +232,21 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
                     try
                         set appPath to POSIX path of (file of frontApp as alias)
                     end try
-                    return appName & linefeed & appPid & linefeed & bundleId & linefeed & appPath & linefeed & windowTitle
+                    set windowX to ""
+                    set windowY to ""
+                    set windowWidth to ""
+                    set windowHeight to ""
+                    try
+                        set windowPosition to value of attribute "AXPosition" of window 1 of frontApp
+                        set windowX to (item 1 of windowPosition) as integer
+                        set windowY to (item 2 of windowPosition) as integer
+                    end try
+                    try
+                        set windowSize to value of attribute "AXSize" of window 1 of frontApp
+                        set windowWidth to (item 1 of windowSize) as integer
+                        set windowHeight to (item 2 of windowSize) as integer
+                    end try
+                    return appName & linefeed & appPid & linefeed & bundleId & linefeed & appPath & linefeed & windowTitle & linefeed & windowX & linefeed & windowY & linefeed & windowWidth & linefeed & windowHeight
                 end tell
                 """;
 
@@ -238,12 +256,16 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
                 return null;
             }
 
-            var lines = output.Replace("\r\n", "\n").Split('\n', 5);
+            var lines = output.Replace("\r\n", "\n").Split('\n', 9);
             var appName = lines.ElementAtOrDefault(0)?.Trim();
             var pid = lines.ElementAtOrDefault(1)?.Trim();
             var bundleIdentifier = lines.ElementAtOrDefault(2)?.Trim();
             var appPath = lines.ElementAtOrDefault(3)?.Trim();
             var title = lines.ElementAtOrDefault(4)?.Trim() ?? string.Empty;
+            var windowX = ParseOptionalInt(lines.ElementAtOrDefault(5));
+            var windowY = ParseOptionalInt(lines.ElementAtOrDefault(6));
+            var windowWidth = ParseOptionalInt(lines.ElementAtOrDefault(7));
+            var windowHeight = ParseOptionalInt(lines.ElementAtOrDefault(8));
 
             if (string.IsNullOrWhiteSpace(appName))
             {
@@ -260,7 +282,16 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
                 title,
                 string.IsNullOrWhiteSpace(bundleIdentifier) ? null : bundleIdentifier,
                 resource,
-                string.IsNullOrWhiteSpace(appPath) ? null : appPath);
+                string.IsNullOrWhiteSpace(appPath) ? null : appPath,
+                windowX,
+                windowY,
+                windowWidth,
+                windowHeight);
+        }
+
+        private static int? ParseOptionalInt(string? value)
+        {
+            return int.TryParse(value?.Trim(), out var parsed) ? parsed : null;
         }
 
         private static async Task<string?> ResolveBundleIdentifierAsync(string? bundleIdentifier, string? appPath, CancellationToken cancellationToken)
@@ -307,7 +338,7 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
             return string.IsNullOrWhiteSpace(pid) ? null : $"pid:{pid.Trim()}";
         }
 
-        public static string? TryCaptureScreenshot()
+        public static string? TryCaptureScreenshot(Snapshot snapshot)
         {
             try
             {
@@ -327,6 +358,17 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
                     UseShellExecute = false
                 };
                 startInfo.ArgumentList.Add("-x");
+                startInfo.ArgumentList.Add("-o");
+
+                if (snapshot.WindowX is >= 0
+                    && snapshot.WindowY is >= 0
+                    && snapshot.WindowWidth is > 0
+                    && snapshot.WindowHeight is > 0)
+                {
+                    startInfo.ArgumentList.Add("-R");
+                    startInfo.ArgumentList.Add($"{snapshot.WindowX!.Value},{snapshot.WindowY!.Value},{snapshot.WindowWidth!.Value},{snapshot.WindowHeight!.Value}");
+                }
+
                 startInfo.ArgumentList.Add(screenshotPath);
 
                 using var process = Process.Start(startInfo);

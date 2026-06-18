@@ -154,7 +154,7 @@ MomentTrace includes an early macOS recorder probe so the Mac capture model can 
 - executable path when available
 - stable app resource identity, preferring `app://<bundle-id>` and then app path before falling back to `pid:`
 - active window title when macOS permissions allow it
-- local screenshot and thumbnail paths when macOS Screen Recording permission allows capture
+- local screenshot and thumbnail paths when macOS Screen Recording permission allows capture, now cropped to the frontmost window bounds when available
 - start/end timestamps
 
 Run it on a Mac from the repository root:
@@ -175,6 +175,7 @@ Verified macOS probe result:
 - Shared timeline database: `~/Library/Application Support/MomentTrace/timeline.db`
 - Confirmed foreground app/window rows were written for Codex
 - Confirmed the latest row populated `bundle_identifier` and switched `resource` to `app://com.openai.codex`
+- Confirmed the latest screenshot capture was cropped to the frontmost app window instead of the full display
 
 ### Pull And Run On A Mac
 
@@ -199,6 +200,7 @@ Quick checklist for the Mac run:
 - Confirm rows are written under `~/Library/Application Support/MomentTrace/timeline.db`.
 - Confirm recorded rows now prefer stable app identity such as `app://com.apple.finder` instead of raw `pid:` markers when bundle IDs are available.
 - Confirm screenshot and thumbnail files appear under `~/Library/Application Support/MomentTrace/screenshots` and `~/Library/Application Support/MomentTrace/thumbnails` when Screen Recording is allowed.
+- Confirm new screenshots are cropped to the frontmost app window when macOS exposes usable window bounds.
 
 If the repo is already cloned:
 
@@ -298,13 +300,13 @@ Mac model: unavailable from sandboxed shell
 macOS version: 26.4.1
 .NET SDK: 9.0.315
 Branch: main
-Commit: 3fe5e2b1223cc897c87cf0e2e97ecc566fb3f87f
+Commit: 46b20ef05075894e72ebfac48f0f459eef31e9b4
 ```
 
 Probe console output:
 
 ```text
-10:03:19 Codex - Codex
+10:34:54 Codex - Codex
 ```
 
 SQLite verification query:
@@ -316,8 +318,8 @@ sqlite3 "$HOME/Library/Application Support/MomentTrace/timeline.db" "select star
 SQLite verification result:
 
 ```text
+2026-06-18T10:34:54.5185830+01:00 | Codex | com.openai.codex | app://com.openai.codex | /Applications/Codex.app | /Users/blakboi/Library/Application Support/MomentTrace/screenshots/20260618-103454-860-60457a2cf9f44a3791be6746283f1dda.png | /Users/blakboi/Library/Application Support/MomentTrace/thumbnails/EDFE6EC4358CE986F0476DB1D6030B147C59C7FABBF329558E4E9344D30C3D39.jpg
 2026-06-18T10:03:19.8379640+01:00 | Codex | com.openai.codex | app://com.openai.codex | /Applications/Codex.app | /Users/blakboi/Library/Application Support/MomentTrace/screenshots/20260618-100320-326-90e0bb8e92d24bf5be63ef26e399394a.png | /Users/blakboi/Library/Application Support/MomentTrace/thumbnails/186642888C9BCBE4536F01E982A7C42FEFA2F26EFC6AE3EE5EB54D447DCCC99E.jpg
-2026-06-17T23:44:53.1492180+01:00 | Codex | com.openai.codex | app://com.openai.codex | /Applications/Codex.app | /Users/blakboi/Library/Application Support/MomentTrace/screenshots/20260617-234453-700-1092294677f34ff6a336f0a0046e358c.png | /Users/blakboi/Library/Application Support/MomentTrace/thumbnails/C84515151B3699AD7C4CD431BBDE246635E110D8FD1080D8C55688CBD56452D9.jpg
 ```
 
 Validation notes:
@@ -327,6 +329,7 @@ Validation notes:
 - Yes. The newest Codex row stored resource as app://com.openai.codex.
 - Yes. The newest Codex row populated both screenshot_path and thumbnail_path.
 - Yes, but only for older historical rows recorded before the app-identity update landed. The newest two verified rows both use app://com.openai.codex.
+- Yes. The newest verified screenshot was visually confirmed as a window crop of the Codex app rather than a full-screen capture.
 ```
 
 ## Local Data
