@@ -414,6 +414,103 @@ Notes:
 - No regressions were observed during this reopen check for Safari web moments.
 ```
 
+### Mac UX Sweep Checklist
+
+Use this after pulling the latest `main` on the Mac to verify the Avalonia shell feels native and the recent macOS chrome changes did not break core flows.
+
+1. Pull and run the desktop shell:
+
+```bash
+git pull
+dotnet build ./MomentTrace.Desktop/MomentTrace.Desktop.csproj
+dotnet run --project ./MomentTrace.Desktop/MomentTrace.Desktop.csproj
+```
+
+2. Verify main window chrome:
+
+- The main window should use native macOS traffic-light controls.
+- The old custom minimize, maximize, and close buttons should not appear.
+- The top command surface should feel visually blended into the titlebar area.
+
+3. Verify keyboard shortcuts:
+
+- `Cmd+,` opens Settings.
+- `Cmd+F` focuses the search box.
+- `Cmd+1` switches to Timeline.
+- `Cmd+2` switches to Overview.
+- `Cmd+W` closes the main window.
+
+4. Verify Settings window behavior:
+
+- Settings should use native macOS window chrome.
+- The old custom Settings titlebar should not appear on Mac.
+- `Cmd+W` should close Settings.
+- `Cmd+,` inside Settings should close it cleanly.
+
+5. Verify reopen behavior still works:
+
+- Reopen a captured Codex moment with an `app://...` resource.
+- Reopen a Safari moment with a real `https://...` resource.
+- Confirm app moments bring the app to the foreground.
+- Confirm web moments reopen the captured page URL.
+
+6. Record the result back in this README section and push the branch.
+
+### Latest Mac UX Sweep
+
+Date:
+
+```text
+YYYY-MM-DD
+```
+
+Machine / environment:
+
+```text
+Mac model:
+macOS version:
+.NET SDK:
+Branch:
+Commit:
+```
+
+Main window chrome result:
+
+```text
+Describe whether the shell used native traffic-light controls and whether the top chrome looked correct.
+```
+
+Shortcut results:
+
+```text
+Cmd+, :
+Cmd+F :
+Cmd+1 :
+Cmd+2 :
+Cmd+W :
+```
+
+Settings result:
+
+```text
+Describe whether Settings used native chrome and whether close behavior felt correct.
+```
+
+Reopen regression check:
+
+```text
+Codex moment:
+Safari moment:
+```
+
+Notes:
+
+```text
+- Any duplicated controls?
+- Any broken shortcuts?
+- Any reopen regressions after the chrome polish?
+```
+
 ## Local Data
 
 MomentTrace stores user data locally:
