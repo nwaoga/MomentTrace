@@ -461,54 +461,54 @@ dotnet run --project ./MomentTrace.Desktop/MomentTrace.Desktop.csproj
 Date:
 
 ```text
-YYYY-MM-DD
+2026-06-20
 ```
 
 Machine / environment:
 
 ```text
-Mac model:
-macOS version:
-.NET SDK:
-Branch:
-Commit:
+Mac model: unavailable from sandboxed shell
+macOS version: 26.4.1
+.NET SDK: 9.0.315
+Branch: main
+Commit: e306ede015475a786e663f970ace8fd7342eea51
 ```
 
 Main window chrome result:
 
 ```text
-Describe whether the shell used native traffic-light controls and whether the top chrome looked correct.
+The main window used native macOS traffic-light controls, did not show the older custom minimize/maximize/close buttons, and the top command surface looked visually blended into the titlebar area.
 ```
 
 Shortcut results:
 
 ```text
-Cmd+, :
-Cmd+F :
-Cmd+1 :
-Cmd+2 :
-Cmd+W :
+Cmd+, : No. It still did not reliably open Settings from the main window during this sweep, even after broader key matching and a native Preferences menu attempt.
+Cmd+F : Not re-verified during this pass because the sweep narrowed onto the broken Cmd+, path.
+Cmd+1 : Not re-verified during this pass because the sweep narrowed onto the broken Cmd+, path.
+Cmd+2 : Not re-verified during this pass because the sweep narrowed onto the broken Cmd+, path.
+Cmd+W : Yes. It still worked for window close behavior.
 ```
 
 Settings result:
 
 ```text
-Describe whether Settings used native chrome and whether close behavior felt correct.
+Settings used native macOS window chrome and did not show the older custom Settings titlebar. Cmd+, inside Settings worked when tested manually, so the remaining shortcut issue appears limited to opening Settings from the main shell.
 ```
 
 Reopen regression check:
 
 ```text
-Codex moment:
-Safari moment:
+Codex moment: Not re-verified during this pass.
+Safari moment: Not re-verified during this pass.
 ```
 
 Notes:
 
 ```text
-- Any duplicated controls?
-- Any broken shortcuts?
-- Any reopen regressions after the chrome polish?
+- No duplicated chrome controls were observed in the main window or Settings.
+- The remaining known macOS shortcut bug is that Cmd+, does not reliably open Settings from the main window.
+- Reopen behavior was not re-run in this pass because the sweep focused on the shortcut regression.
 ```
 
 ## Local Data
@@ -776,7 +776,7 @@ Recent planning updates:
 - `AB#71` app health and recorder diagnostics is complete, including last-capture freshness and browser URL capture availability in Avalonia Settings.
 - `AB#63` timeline card intelligence and visual polish now has the session-naming pass, timeline empty/detail-state cleanup, and collapsible detail-section polish in the repo.
 - `#88` tracks the Overview redesign toward a meaningful daily-story dashboard. The shared presentation model, reusable Avalonia overview controls, click-through interactions, theme-aware heatmap composition, summary cards, charts, empty/low-data states, and the tightened moments/focus layouts are now in the repo, with final visual matching still active.
-- `#89` tracks final Avalonia shell alignment, spacing, image-framing cleanup, and refreshed preview artwork for the current Overview-first shell.
+- `#89` tracks final Avalonia shell alignment, spacing, image-framing cleanup, refreshed preview artwork for the current Overview-first shell, and the remaining macOS `Cmd+,` shortcut bug where Preferences does not reliably open from the main window.
 
 ## Development Notes
 
