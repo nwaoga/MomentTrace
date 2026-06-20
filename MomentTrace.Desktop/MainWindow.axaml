@@ -793,15 +793,11 @@
                                                                            Foreground="{DynamicResource TextBrush}"
                                                                            FontSize="15"
                                                                            FontWeight="SemiBold" />
-                                                                <Border Background="{DynamicResource ChipBrush}"
-                                                                        BorderBrush="{DynamicResource PanelEdgeBrush}"
-                                                                        BorderThickness="1"
-                                                                        CornerRadius="10"
-                                                                        Padding="9,3"
+                                                                <Border Classes="infoChip"
                                                                         Margin="10,-1,0,0"
                                                                         VerticalAlignment="Top">
                                                                     <TextBlock Text="{Binding CountLabel}"
-                                                                               Foreground="{DynamicResource AccentBrush}"
+                                                                               Foreground="{DynamicResource TextBrush}"
                                                                                FontSize="11"
                                                                                FontWeight="SemiBold" />
                                                                 </Border>
