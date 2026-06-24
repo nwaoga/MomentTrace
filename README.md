@@ -43,9 +43,9 @@ The Windows installer is built with Inno Setup from a self-contained `win-x64` p
 - Native Windows desktop UI built with WPF
 - Avalonia desktop shell in active parity work, sharing timeline, overview, detail-pane, and shell presentation layers across Windows/macOS targets
 - macOS Avalonia shell now uses native traffic-light controls, Command-key shortcuts, and titlebar-blended surfaces so the top chrome feels more at home on Mac
-- Avalonia Windows target now starts the Windows foreground recorder and reads the shared local SQLite timeline
+- Avalonia Windows target now starts the Windows foreground recorder, reads the shared local SQLite timeline, and refreshes the shell as new activity arrives
 - Grouped timeline with card and list view modes in both the WPF app and Avalonia shell
-- Theme system with Midnight, GitHub Light, Matcha Reserve, Costa Afterglow, Espresso (Mono), and Hot White palettes
+- Theme system with Midnight, GitHub Light, Starbucks Reserve, Nero Roast, Costa Afterglow, Espresso (Mono), and Hot White palettes
 - Real alpha transparency control that keeps theme colours while making the app more or less clear
 - Overview page with daily activity heatmap and lightweight productivity analytics
 - Designed empty and low-data overview states so sparse days still feel intentional
@@ -102,7 +102,7 @@ This split is intentional. Future macOS support should add platform-specific ser
 
 The WPF app now acts more like a Windows shell over shared timeline data. It still owns WPF controls, tray behavior, custom window chrome, Windows icons, screenshot previews, settings, and installer/startup wiring.
 
-`MomentTrace.Desktop` is the active Avalonia shell for cross-platform UI work. It targets both `net8.0` and `net8.0-windows`, reads the same local SQLite timeline through `MomentTrace.Storage`, and binds timeline groups, Overview analytics, and the right-side detail surface from `MomentTrace.Presentation`. The Windows target now starts the shared Windows foreground recorder, shows local screenshot previews, resolves real app icons through `MomentTrace.Windows`, and supports both card and compact list timeline views. On macOS, the shell now defers to native traffic-light window controls, keeps the titlebar visually blended with the app surface, and wires common Command-key shortcuts like settings, search, and close. Custom chrome remains in use for the Windows shell, delete confirmations, and the first Settings health/status panel. Main window creation now happens before background recorder startup so the Avalonia shell appears reliably even if recorder initialization is slow. Tray behavior, installer packaging, and full Windows startup integration remain owned by `MomentTrace.App` and `MomentTrace.Windows`.
+`MomentTrace.Desktop` is the active Avalonia shell for cross-platform UI work. It targets both `net8.0` and `net8.0-windows`, reads the same local SQLite timeline through `MomentTrace.Storage`, and binds timeline groups, Overview analytics, and the right-side detail surface from `MomentTrace.Presentation`. The Windows target now starts the shared Windows foreground recorder, shows local screenshot previews, resolves real app icons through `MomentTrace.Windows`, supports single-instance reopen behavior, and refreshes the shell when new activity lands. On macOS, the shell now defers to native traffic-light window controls, keeps the titlebar visually blended with the app surface, and wires common Command-key shortcuts like settings, search, and close. Custom chrome remains in use for the Windows shell, delete confirmations, and the first Settings health/status panel. Main window creation now happens before background recorder startup so the Avalonia shell appears reliably even if recorder initialization is slow. Tray behavior, installer packaging, and full Windows startup integration remain owned by `MomentTrace.App` and `MomentTrace.Windows`.
 
 ## Requirements
 
@@ -574,11 +574,12 @@ The detail pane also supports progressive disclosure. Overview, preview, metadat
 
 ## Themes And Appearance
 
-MomentTrace currently ships with six app themes:
+MomentTrace currently ships with seven app themes:
 
 - `Midnight`
 - `GitHub Light`
-- `Matcha Reserve`
+- `Starbucks Reserve`
+- `Nero Roast`
 - `Costa Afterglow`
 - `Espresso (Mono)`
 - `Hot White`
@@ -587,9 +588,10 @@ MomentTrace currently ships with six app themes:
 
 Themes use six base colour roles: `Base`, `Surface`, `Text`, `MutedText`, `Accent`, and `Stroke`. The app derives supporting colours such as raised surfaces, card surfaces, hover fills, overlays, faint borders, glow accents, semantic status colours, rail/detail surfaces, and contrast-aware accent text from those roles. This keeps the themes coherent across WPF and Avalonia while still giving each workspace a distinct personality.
 
-- `Midnight` stays premium, modern, and technology-focused with purple accents and cool dark surfaces.
+- `Midnight` stays premium, modern, and technology-focused with cool dark surfaces and electric contrast.
 - `GitHub Light` is intentionally cleaner and more developer-tool-like, with white cards, subtle borders, and restrained blue accents so screenshots stay central.
-- `Matcha Reserve` keeps the premium dark feel but shifts warmer and softer, using greener highlights and less blue-heavy contrast.
+- `Starbucks Reserve` keeps the premium dark feel but shifts warmer and softer, using greener highlights and less blue-heavy contrast.
+- `Nero Roast` adds a cooler cafe-inspired look with inkier blues and a calmer late-evening mood.
 - `Costa Afterglow` adds a warmer berry coffee-house palette for users who prefer deeper red-brown surfaces.
 - `Espresso (Mono)` leans into the brown reference design with amber accents and muted roast-coloured panels.
 - `Hot White` remains the broader neutral light option for users who want a brighter workspace without the GitHub-inspired styling.
@@ -641,7 +643,7 @@ The Avalonia Overview dashboard also has theme-aware activity colours:
 | `HeatmapDocuments` | Document review/editing blocks and document activity. |
 | `HeatmapGap` | Idle, gap, and system-space blocks. |
 
-Overview activity colours now adapt per theme while preserving semantic meaning for apps, browsing, development, documents, and gaps. The heatmap, focus rhythm, quick filters, legends, and overview summary surfaces stay readable across dark, light, green, Costa, and espresso palettes without feeling pasted on from a different design system.
+Overview activity colours now adapt per theme while preserving semantic meaning for apps, browsing, development, documents, and gaps. The heatmap, focus rhythm, quick filters, legends, and overview summary surfaces stay readable across dark, light, Starbucks, Nero, Costa, and espresso palettes without feeling pasted on from a different design system.
 
 The transparency slider changes real window alpha rather than merely lightening or darkening colours. Opacity is no longer artificially clamped to a high minimum, which allows softer overlays, cleaner hover states, and more convincing glass treatment across the shell. Custom chrome is used for a cleaner desktop shell, and maximize behavior is constrained to the Windows work area so the app does not cover the taskbar.
 
@@ -775,8 +777,22 @@ Recent planning updates:
 
 - `AB#71` app health and recorder diagnostics is complete, including last-capture freshness and browser URL capture availability in Avalonia Settings.
 - `AB#63` timeline card intelligence and visual polish now has the session-naming pass, timeline empty/detail-state cleanup, and collapsible detail-section polish in the repo.
-- `#88` tracks the Overview redesign toward a meaningful daily-story dashboard. The shared presentation model, reusable Avalonia overview controls, click-through interactions, theme-aware heatmap composition, summary cards, charts, empty/low-data states, and the tightened moments/focus layouts are now in the repo, with final visual matching still active.
-- `#89` tracks final Avalonia shell alignment, spacing, image-framing cleanup, refreshed preview artwork for the current Overview-first shell, and the remaining macOS `Cmd+,` shortcut bug where Preferences does not reliably open from the main window.
+- `#88` tracks the Overview redesign toward a meaningful daily-story dashboard. The shared presentation model, reusable Avalonia overview controls, click-through interactions, theme-aware heatmap composition, summary cards, charts, empty/low-data states, and the tightened moments/focus layouts are now in the repo. The remaining follow-up is interaction QA rather than broad layout redesign.
+- `#89` tracks final Avalonia shell alignment, spacing, image-framing cleanup, refreshed preview artwork for the current Overview-first shell, the Windows shell startup/reopen reliability work, and the remaining macOS `Cmd+,` shortcut bug where Preferences does not reliably open from the main window.
+
+Current stability read:
+
+- Core data flow, local storage, and shared presentation shaping are in solid shape for ongoing feature work.
+- The main stability risk is still desktop-shell behavior rather than recorder or model correctness.
+- The current app should be treated as late-alpha quality: useful and increasingly coherent, but still needing a dedicated hardening pass before broader trust.
+
+Current stability punch list:
+
+- Make Windows startup, window surfacing, and single-instance reopen behavior fully predictable.
+- Ensure pin, bookmark, note, delete, and view-switch interactions update Timeline and Overview immediately without stale UI.
+- Run a focused interaction QA sweep across empty, sparse, normal, and dense timeline/overview states.
+- Re-verify macOS shell shortcuts, especially `Cmd+,`, after each meaningful shell polish pass.
+- Add a lightweight regression checklist for launch, record, mutate, reopen, and settings flows before pushes.
 
 ## Development Notes
 
@@ -791,9 +807,12 @@ Recent planning updates:
 
 ## Roadmap
 
+- Harden Avalonia shell startup, show-window, and reopen reliability on Windows
+- Finish the immediate-refresh pass for local mutations and view changes across Timeline and Overview
+- Run a dedicated stability QA sweep across Windows and macOS shell interactions
 - Finish final timeline visual polish around empty/loading states and remaining card edge cases
 - Refresh the sanitized README preview artwork so it fully reflects the latest low-data Overview treatment
-- Add a lightweight visual QA pass for the primary dark, green, Costa, espresso, and light themes so future UI changes do not collapse them back toward the same look
+- Add a lightweight visual QA pass for the primary dark, Starbucks, Nero, Costa, espresso, and light themes so future UI changes do not collapse them back toward the same look
 - Add regression tests for privacy exclusions, settings persistence, and warning-free build expectations
 - Add a settings option to delete local data when the user wants a full privacy cleanup
 - Add first-run onboarding for privacy, startup behavior, and local storage

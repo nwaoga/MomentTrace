@@ -4,10 +4,10 @@ This file is a lightweight handoff for any future agent working in this repo.
 
 ## Repo
 
-- Active workspace: `D:\source\repos\MomentTrace`
-- Main branch was used for the latest work
-- Latest known pushed commit: `eec35ab`
-- Latest known pushed commit message: `Polish overview sparse states and refresh README`
+- Active workspace: `C:\Users\blakb\Documents\Codex\MomentTrace`
+- Active branch: `main`
+- Current HEAD at handoff time: `b637d18`
+- Current HEAD message: `Fix timeline session count badge contrast`
 
 ## Product Snapshot
 
@@ -45,7 +45,7 @@ Important cross-project paths:
 
 ## What Was Just Finished
 
-The most recent completed pass focused on overview empty states and low-data behavior.
+The most recent completed and in-progress passes focused on overview sparse-state polish, theme expansion, macOS validation, and Windows Avalonia shell recovery.
 
 Completed:
 
@@ -54,50 +54,91 @@ Completed:
 - Made charts and summary controls degrade more gracefully with tiny datasets
 - Tightened `Moments today` behavior for very small result sets
 - Reduced awkward oversized presentation in `Focus rhythm` for sparse data
-- Updated `README.md` to reflect the current overview work and added more screenshots
+- Added `Starbucks Reserve` and `Nero Roast` alongside the existing theme set
+- Completed real-mac verification for bundle ID capture, `app://...` identity, browser URL capture, screenshot cropping, and reopen targeting
+- Recovered the Avalonia Windows shell so main window creation happens before recorder startup and the shell refreshes when new activity arrives
+- Updated `README.md` and supporting docs to reflect the current overview, theme, platform, and validation state
 
-Key files touched in that pass:
+Key files touched in these passes:
 
+- `MomentTrace.Desktop/App.axaml.cs`
+- `MomentTrace.Desktop/Program.cs`
 - `MomentTrace.Desktop/MainWindow.axaml`
 - `MomentTrace.Desktop/MainWindow.axaml.cs`
+- `MomentTrace.Desktop/Controls/SummaryMetricCard.axaml`
+- `MomentTrace.Desktop/Controls/SummaryMetricCard.axaml.cs`
 - `MomentTrace.Desktop/Controls/ActivityHeatmapControl.axaml`
 - `MomentTrace.Desktop/Controls/ActivityHeatmapControl.axaml.cs`
 - `MomentTrace.Desktop/Controls/CategoryBreakdownControl.axaml`
 - `MomentTrace.Desktop/Controls/CategoryBreakdownControl.axaml.cs`
 - `MomentTrace.Desktop/Controls/FocusRhythmControl.axaml`
 - `MomentTrace.Desktop/Controls/FocusRhythmControl.axaml.cs`
+- `MomentTrace.Desktop/DesktopAppThemePalette.cs`
 - `README.md`
+- `docs/macos-spike.md`
 
 ## Decisions Already Made
 
-- The active source of truth is this repo at `D:\source\repos\MomentTrace`, not the abandoned `nwaoga's TimeLine` folder
+- The active source of truth is this repo at `C:\Users\blakb\Documents\Codex\MomentTrace`, not the abandoned `nwaoga's TimeLine` folder
 - The Avalonia desktop shell in `MomentTrace.Desktop` is the main UI surface to prioritize for polish work
 - Sparse and zero-data days should feel deliberately designed, not merely less populated
 - Overview components should shrink, simplify, or hide extra chrome when datasets are tiny rather than preserving full-density layouts
+- The Windows Avalonia shell should surface the main window immediately, even if recorder or database initialization is slow
+- Single-instance reopen behavior matters because the app is expected to live in the background while still being easy to summon back
 - Privacy and history remain local-first; no cloud dependency is required for the core product experience
 - Codex conversation history is treated as local tooling state, not project source material, and is not expected to be versioned in Git
 - Old workspace screenshots may be reused as reference assets, but old code and old planning notes are not considered authoritative
 - README updates are appropriate when the visible product surface materially changes, especially when screenshots or UX behavior shift
 - The natural next product pass after overview sparse-state work is interaction QA and polish across Overview and Timeline, not a broad redesign
+- The remaining known macOS UX bug is still `Cmd+,` from the main shell; do not assume it is fixed unless re-verified on a Mac
 
 ## Current Status
 
-- Build status after the overview pass: `dotnet build MomentTrace.Desktop\\MomentTrace.Desktop.csproj` succeeded
-- The overview sparse-state work was committed and pushed
-- The current repo has one known uncommitted item: `docs/assets/archive/`
+- Build status after the Windows shell recovery pass: `dotnet build MomentTrace.Desktop\\MomentTrace.Desktop.csproj -f net8.0-windows` succeeded
+- The local shell was manually relaunched and confirmed to expose a real `MomentTrace` window handle on Windows again
+- `%APPDATA%\\MomentTrace\\timeline.db` updated while the recovered shell was running, indicating recorder activity was flowing again
+- There are active uncommitted desktop-shell changes in:
+  - `MomentTrace.Desktop/App.axaml.cs`
+  - `MomentTrace.Desktop/Controls/SummaryMetricCard.axaml`
+  - `MomentTrace.Desktop/Controls/SummaryMetricCard.axaml.cs`
+  - `MomentTrace.Desktop/MainWindow.axaml`
+  - `MomentTrace.Desktop/MainWindow.axaml.cs`
+  - `MomentTrace.Desktop/Program.cs`
 
-## Uncommitted / Loose Artifacts
+## Stability Punch List
 
-`docs/assets/archive/` contains copied screenshots from an old abandoned workspace. These were pulled in for reference/archive purposes and were not part of the last pushed commit.
+This is the current hardening list, ordered by practical risk:
 
-If you keep them:
+1. Windows startup and window surfacing:
+   - make first launch, relaunch, and single-instance reopen behavior deterministic
+   - remove cases where the process is alive but the shell is not obviously surfaced to the user
+2. Immediate UI consistency after local mutations:
+   - pin, bookmark, note, delete, and library-filter changes should redraw Timeline, Overview, and detail state immediately
+   - avoid cache-signature shortcuts that skip metadata-only edits
+3. Interaction QA across data densities:
+   - verify empty, sparse, normal, and dense days in both Timeline and Overview
+   - check rail filters, detail pane state, focus ranges, card expansion, and view switching
+4. macOS shell verification:
+   - re-test shell shortcuts after meaningful UI work
+   - `Cmd+,` from the main shell is still the main known regression until proven fixed
+5. Lightweight regression routine before push:
+   - launch the shell
+   - confirm new activity appears
+   - mutate a moment with pin/bookmark/note
+   - switch views and confirm the UI stays in sync
+   - reopen the app through the single-instance path
 
-- decide whether they should be referenced from the README or kept as historical assets only
-- stage and commit them intentionally
+## Uncommitted / Local Focus
 
-If you do not need them:
+The current local worktree includes real in-progress shell work:
 
-- leave them untracked or remove them manually after confirming they are no longer useful
+- Windows single-instance and show-existing-window guard in `Program.cs` and `App.axaml.cs`
+- Main-window-first startup ordering so the shell does not stay hidden while background initialization runs
+- Recorder-driven UI refresh wiring in `MainWindow.axaml.cs`
+- Ongoing shell/nav/detail-pane polish in `MainWindow.axaml` and `MainWindow.axaml.cs`
+- Quiet-value metric styling in `SummaryMetricCard.axaml` and `SummaryMetricCard.axaml.cs`
+
+Treat these as intentional in-progress product work, not disposable scratch changes.
 
 ## Old Workspace Findings
 
@@ -126,20 +167,20 @@ This means normal `git add/commit/push` from this repo does not push Codex chat 
 
 ## Suggested Next Work
 
-The next likely product pass after the overview sparse-state work is:
+The next likely product pass is:
 
-1. Final interaction QA / polish sweep across Overview and Timeline
-2. Verify empty, sparse, normal, and dense dataset behavior side by side
-3. Check selection states, focus ranges, card expansion, rail filtering, and detail panel transitions
-4. Run another README/screenshots pass only if UI changed materially
+1. Finish the current Avalonia shell polish pass and commit the Windows startup/refresh recovery with the surrounding UI work
+2. Work through the stability punch list from startup/reopen first, then immediate mutation refresh, then interaction QA
+3. Re-verify the macOS shell shortcuts, especially `Cmd+,`, after the next shell pass lands
+4. Refresh README screenshots only if the visible shell changed materially again
 
 ## Good First Checks For The Next Agent
 
 1. Run `git status --short`
-2. Decide what to do with `docs/assets/archive/`
-3. Run `dotnet build MomentTrace.Desktop\\MomentTrace.Desktop.csproj`
+2. Run `dotnet build MomentTrace.Desktop\\MomentTrace.Desktop.csproj -f net8.0-windows`
+3. Launch the Avalonia shell and confirm the window appears and timeline activity refreshes live
 4. If UI work continues, inspect `MainWindow.axaml`, `MainWindow.axaml.cs`, and `MomentTrace.Presentation/OverviewPresentationBuilder.cs`
-5. If macOS work resumes, review `docs/macos-spike.md` and `MomentTrace.MacProbe`
+5. If macOS work resumes, review `docs/macos-spike.md`, the README mac verification notes, and `MomentTrace.MacProbe`
 
 ## Notes For Another Model
 

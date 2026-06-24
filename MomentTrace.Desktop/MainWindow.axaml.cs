@@ -23,6 +23,10 @@ namespace MomentTrace.Desktop;
 
 public partial class MainWindow : Window
 {
+    private static readonly string StartupLogPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "MomentTrace",
+        "startup-debug.log");
     private static readonly string[] KnownOpenableExtensions =
     [
         ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".tif", ".tiff", ".svg",
@@ -45,21 +49,11 @@ public partial class MainWindow : Window
     private IReadOnlyList<TimelineSessionGroup> _timelineGroups = [];
     private readonly Dictionary<string, bool> _timelineGroupExpansionStates = new(StringComparer.Ordinal);
     private OverviewPresentationModel? _currentOverview;
-    private readonly Dictionary<string, bool> _detailSectionExpanded = new(StringComparer.Ordinal)
-    {
-        ["OverviewNarrative"] = true,
-        ["Preview"] = true,
-        ["Metadata"] = true,
-        ["Note"] = true,
-        ["RecentActivity"] = true,
-        ["CapturedActivity"] = true,
-        ["RelatedMoments"] = true
-    };
     private long? _selectedMomentId;
     private string _searchText = string.Empty;
-    private DetailTab _selectedDetailTab = DetailTab.Overview;
     private bool _isDetailPaneVisible = true;
     private RailSelection _selectedRailSelection = RailSelection.Timeline;
+    private WorkspaceNav _activeWorkspaceNav = WorkspaceNav.Timeline;
     private DateTime? _timelineFocusStart;
     private DateTime? _timelineFocusEnd;
     private DesktopAppThemePalette _currentTheme;
@@ -78,19 +72,26 @@ public partial class MainWindow : Window
     private bool _isOverviewMomentsDragging;
     private string _overviewMomentsSignature = string.Empty;
     private string _overviewFocusSignature = string.Empty;
+    private string _activityStoreSignature = string.Empty;
+    private string _timelineRefreshSignature = string.Empty;
+    private string _overviewRefreshSignature = string.Empty;
+    private string _lastDetailSignature = string.Empty;
+    private long? _lastDetailedMomentId;
     private readonly ICommand _overviewHeatmapCommand;
     private readonly ICommand _overviewFocusCommand;
     private static readonly Cursor ScrollReadyCursor = new(StandardCursorType.Hand);
     private static readonly Cursor ScrollDraggingCursor = new(StandardCursorType.SizeAll);
-    private static readonly Thickness DefaultOuterShellPadding = new(24, 18, 24, 18);
-    private static readonly Thickness DefaultRailSurfacePadding = new(16, 16, 18, 16);
-    private static readonly Thickness DefaultTopCommandMargin = new(16, 10, 18, 0);
+    private static readonly Thickness DefaultOuterShellPadding = new(20, 16, 8, 16);
+    private static readonly Thickness DefaultRailSurfacePadding = new(14, 14, 14, 14);
+    private static readonly Thickness DefaultTopCommandMargin = new(12, 0, 4, 0);
     private static readonly Thickness DefaultTopCommandPadding = new(8);
     private bool _isMacChromeMode;
 
     public MainWindow(SqliteActivityStore? store = null, IActivityRecorder? recorder = null)
     {
+        StartupTrace("MainWindow: ctor enter");
         InitializeComponent();
+        StartupTrace("MainWindow: InitializeComponent complete");
         _store = store ?? new SqliteActivityStore(SqliteActivityStore.DefaultDatabasePath);
         _recorder = recorder;
         _preferences = DesktopWindowPreferences.Load();
@@ -106,7 +107,6 @@ public partial class MainWindow : Window
         ApplySurfaceTransparency(_preferences.Opacity);
         ApplyTimelineViewMode(_preferences.TimelineViewMode);
         ApplyDetailPaneVisibility();
-        ApplyDetailSectionStates();
         SetActiveNavState();
         ConfigurePlatformChrome();
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
@@ -116,14 +116,38 @@ public partial class MainWindow : Window
         AddHandler(InputElement.PointerMovedEvent, GlobalPointerMoved, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(InputElement.PointerReleasedEvent, GlobalPointerReleased, RoutingStrategies.Tunnel, handledEventsToo: true);
         KeyDown += MainWindow_KeyDown;
+        if (_recorder is not null)
+        {
+            _recorder.ActivityChanged += Recorder_ActivityChanged;
+        }
         ConfigureGrabScrollSurfaces();
         Opened += async (_, _) =>
         {
             ApplyPlatformLayoutMetrics();
+            ApplyOverviewResponsiveLayout();
+            InitializeProfileRail();
             _refreshTimer.Start();
             await ReloadAsync();
         };
-        Closed += (_, _) => _refreshTimer.Stop();
+        Closed += (_, _) =>
+        {
+            _refreshTimer.Stop();
+            if (_recorder is not null)
+            {
+                _recorder.ActivityChanged -= Recorder_ActivityChanged;
+            }
+        };
+        SizeChanged += (_, _) => ApplyOverviewResponsiveLayout();
+        StartupTrace("MainWindow: ctor complete");
+    }
+
+    private void Recorder_ActivityChanged(object? sender, TimelineActivity e)
+    {
+        Dispatcher.UIThread.Post(async () =>
+        {
+            _activityStoreSignature = string.Empty;
+            await ReloadAsync();
+        }, DispatcherPriority.Background);
     }
 
     private void ConfigurePlatformChrome()
@@ -131,6 +155,12 @@ public partial class MainWindow : Window
         _isMacChromeMode = OperatingSystem.IsMacOS();
         if (!_isMacChromeMode)
         {
+            // Fully borderless on Windows: our custom min/max/close buttons own the
+            // window controls, so we avoid both the native title bar and the
+            // orphaned system caption button that Avalonia draws in extended-client mode.
+            WindowDecorations = WindowDecorations.None;
+            ExtendClientAreaToDecorationsHint = true;
+            ExtendClientAreaTitleBarHeightHint = 0;
             return;
         }
 
@@ -153,7 +183,7 @@ public partial class MainWindow : Window
             RailSurface.Padding = DefaultRailSurfacePadding;
             TopCommandSurface.Margin = DefaultTopCommandMargin;
             TopCommandSurface.Padding = DefaultTopCommandPadding;
-            TopCommandSurface.BorderThickness = new Thickness(1);
+            TopCommandSurface.BorderThickness = new Thickness(0);
             return;
         }
 
@@ -170,7 +200,7 @@ public partial class MainWindow : Window
             titleBarInset + 4,
             DefaultTopCommandPadding.Right,
             DefaultTopCommandPadding.Bottom);
-        TopCommandSurface.BorderThickness = new Thickness(0, 0, 0, 1);
+        TopCommandSurface.BorderThickness = new Thickness(0);
     }
 
     private void MainWindow_KeyDown(object? sender, KeyEventArgs e)
@@ -191,10 +221,12 @@ public partial class MainWindow : Window
                 e.Handled = true;
                 break;
             case Key.D1:
+                _activeWorkspaceNav = WorkspaceNav.Timeline;
                 _ = ActivateTimelineSelectionAsync(RailSelection.Timeline);
                 e.Handled = true;
                 break;
             case Key.D2:
+                _activeWorkspaceNav = WorkspaceNav.Overview;
                 ShowOverviewPage();
                 e.Handled = true;
                 break;
@@ -229,6 +261,13 @@ public partial class MainWindow : Window
             await _store.InitializeAsync();
 
             var activities = await _store.QueryAsync(new TimelineQuery { Limit = 1500 });
+            var storeSignature = BuildStoreSignature(activities);
+            if (string.Equals(storeSignature, _activityStoreSignature, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            _activityStoreSignature = storeSignature;
             _visibleActivities.Clear();
             var privacyFilter = CurrentPrivacyFilter();
             _visibleActivities.AddRange(activities
@@ -275,24 +314,45 @@ public partial class MainWindow : Window
         }
 
         EnsureSelectedMomentIsVisibleInTimeline();
-        TimelineGroupsItems.ItemsSource = BuildTimelineGroupRows();
+
+        var refreshSignature = BuildTimelineRefreshSignature(selectedDate);
+        var timelineChanged = !string.Equals(refreshSignature, _timelineRefreshSignature, StringComparison.Ordinal);
+        if (timelineChanged)
+        {
+            TimelineGroupsItems.ItemsSource = BuildTimelineGroupRows();
+            _timelineRefreshSignature = refreshSignature;
+        }
+
         UpdateTimelineEmptyState();
+        UpdateTimelineFocusBanner();
+        UpdateRailNavSubtitles();
         TimelineCountText.Text = $"{_sessions.Count} moments on {TimelineDateFilterBuilder.FormatDateLabel(selectedDate, DateTime.Today)}";
         TimelineSubtitleText.Text = BuildTimelineSubtitle();
 
         if (_sessions.Count > 0 && _selectedMomentId is long selectedId)
         {
             var selected = _sessions.FirstOrDefault(session => session.Id == selectedId) ?? _sessions[0];
-            if (shouldResetDetailTab)
+            if (_isDetailPaneVisible)
             {
-                _selectedDetailTab = DetailTab.Overview;
-            }
+                var detailSignature = BuildDetailSignature(selected);
+                if (_lastDetailedMomentId != selected.Id
+                    || !string.Equals(detailSignature, _lastDetailSignature, StringComparison.Ordinal))
+                {
+                    ShowDetail(selected);
+                    _lastDetailedMomentId = selected.Id;
+                    _lastDetailSignature = detailSignature;
+                }
 
-            ShowDetail(selected);
+                if (timelineChanged && shouldResetDetailTab)
+                {
+                    ScrollSelectedMomentIntoView();
+                }
+            }
         }
         else
         {
             ClearDetailPanel();
+            CloseDetailPane();
         }
     }
 
@@ -303,6 +363,13 @@ public partial class MainWindow : Window
         var selectedDate = GetSelectedDate();
         _currentOverview = _overviewBuilder.Build(_visibleActivities, selectedDate);
         var overview = _currentOverview;
+        var overviewRefreshSignature = BuildOverviewRefreshSignature(overview, selectedDate);
+        if (string.Equals(overviewRefreshSignature, _overviewRefreshSignature, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _overviewRefreshSignature = overviewRefreshSignature;
         var overviewMomentRows = BuildOverviewMomentRows(overview.KeyMoments).ToList();
         var topApplicationRows = overview.TopApplications
             .Take(4)
@@ -327,39 +394,22 @@ public partial class MainWindow : Window
         OverviewCategoryBreakdownControl.Items = overview.CategoryBreakdown;
         OverviewTopApplicationsItems.ItemsSource = topApplicationRows;
         OverviewFocusRhythmControl.Items = focusBlocks;
-        ApplyOverviewState(overviewMomentRows, topApplicationRows, focusBlocks);
+        ApplyOverviewState(overviewMomentRows, topApplicationRows, focusBlocks, overview.Sessions.Count == 0);
         ResetOverviewRailOffsets(shouldResetMomentsRail, shouldResetFocusRail);
     }
 
     private void TimelineNavButton_Click(object? sender, RoutedEventArgs e)
     {
+        _activeWorkspaceNav = WorkspaceNav.Timeline;
         _ = ActivateTimelineSelectionAsync(RailSelection.Timeline);
     }
 
     private void OverviewNavButton_Click(object? sender, RoutedEventArgs e)
     {
+        _activeWorkspaceNav = WorkspaceNav.Overview;
         ShowOverviewPage();
     }
 
-    private void BrowsingNavButton_Click(object? sender, RoutedEventArgs e)
-    {
-        _ = ActivateTimelineSelectionAsync(RailSelection.Browsing);
-    }
-
-    private void DevelopmentNavButton_Click(object? sender, RoutedEventArgs e)
-    {
-        _ = ActivateTimelineSelectionAsync(RailSelection.Development);
-    }
-
-    private void CommunicationNavButton_Click(object? sender, RoutedEventArgs e)
-    {
-        _ = ActivateTimelineSelectionAsync(RailSelection.Communication);
-    }
-
-    private void DocumentsNavButton_Click(object? sender, RoutedEventArgs e)
-    {
-        _ = ActivateTimelineSelectionAsync(RailSelection.Documents);
-    }
 
     private void SavedMomentsNavButton_Click(object? sender, RoutedEventArgs e)
     {
@@ -410,10 +460,10 @@ public partial class MainWindow : Window
         await settingsWindow.ShowDialog(this);
     }
 
-    private void ToggleDetailsButton_Click(object? sender, RoutedEventArgs e)
+    private void ApplyDetailPaneVisibility()
     {
-        _isDetailPaneVisible = !_isDetailPaneVisible;
-        ApplyDetailPaneVisibility();
+        DetailSurface.IsVisible = _isDetailPaneVisible;
+        DetailScrim.IsVisible = _isDetailPaneVisible;
     }
 
     private void MinimizeShellButton_Click(object? sender, RoutedEventArgs e)
@@ -436,7 +486,7 @@ public partial class MainWindow : Window
         SearchSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.TopCommand, Math.Clamp(_preferences.Opacity + 0.08, 0.0, 1.0)));
         SearchSurface.BorderBrush = new SolidColorBrush(_currentTheme.Accent);
         SearchTextBox.Background = Brushes.Transparent;
-        SearchIconText.Foreground = new SolidColorBrush(_currentTheme.Accent);
+        SearchIconText.Foreground = new SolidColorBrush(_currentTheme.AccentText);
     }
 
     private void SearchTextBox_LostFocus(object? sender, RoutedEventArgs e)
@@ -447,18 +497,13 @@ public partial class MainWindow : Window
         SearchIconText.Foreground = new SolidColorBrush(_currentTheme.SubtleText);
     }
 
-    private void ApplyDetailPaneVisibility()
+    private void CloseDetailPane()
     {
-        if (TimelineContentGrid.ColumnDefinitions.Count < 2)
-        {
-            return;
-        }
-
-        DetailSurface.IsVisible = _isDetailPaneVisible;
-        TimelineContentGrid.ColumnDefinitions[1].Width = _isDetailPaneVisible
-            ? new GridLength(380)
-            : new GridLength(0);
+        _isDetailPaneVisible = false;
+        ApplyDetailPaneVisibility();
     }
+
+    private void CloseDetailButton_Click(object? sender, RoutedEventArgs e) => CloseDetailPane();
 
     private void ToolbarDragRegion_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
@@ -675,8 +720,6 @@ public partial class MainWindow : Window
     {
         yield return TimelineScrollViewer;
         yield return OverviewDetailTabContent;
-        yield return ActivityDetailTabContent;
-        yield return RelatedDetailTabContent;
         yield return OverviewPage;
     }
 
@@ -753,8 +796,15 @@ public partial class MainWindow : Window
         }
 
         _selectedMomentId = selected.Id;
+        _isDetailPaneVisible = true;
+        ApplyDetailPaneVisibility();
+        _timelineRefreshSignature = string.Empty;
         TimelineGroupsItems.ItemsSource = BuildTimelineGroupRows();
+        _timelineRefreshSignature = BuildTimelineRefreshSignature(GetSelectedDate());
         ShowDetail(selected);
+        _lastDetailedMomentId = selected.Id;
+        _lastDetailSignature = BuildDetailSignature(selected);
+        ScrollSelectedMomentIntoView();
     }
 
     private async void OverviewMomentButton_Click(object? sender, RoutedEventArgs e)
@@ -797,6 +847,7 @@ public partial class MainWindow : Window
         }
 
         await _store.SetPinnedAsync(selected.Id, !selected.IsPinned);
+        InvalidatePresentationCaches();
         await ReloadAsync();
     }
 
@@ -809,23 +860,26 @@ public partial class MainWindow : Window
         DetailTitleText.Text = selected.Title;
         DetailSubtitleText.Text = $"{selected.Location} · {selected.AppName}";
         DetailMetaSpanText.Text = selected.CapturedSpan;
-        DetailMetaSourceText.Text = selected.TechnicalSource;
-        DetailMetaStartedText.Text = $"{selected.SessionStartedAt.LocalDateTime:dddd, d MMM yyyy HH:mm:ss}";
-        DetailMetaEndedText.Text = $"{selected.SessionEndedAt.LocalDateTime:dddd, d MMM yyyy HH:mm:ss}";
+        DetailMetaSourceText.Text = FormatDetailSource(selected.TechnicalSource);
+        ToolTip.SetTip(DetailMetaSourceText, selected.TechnicalSource);
+        DetailMetaStartedText.Text = FormatDetailTimestamp(selected.SessionStartedAt.LocalDateTime);
+        DetailMetaEndedText.Text = FormatDetailTimestamp(selected.SessionEndedAt.LocalDateTime);
         DetailMetaCategoryText.Text = selected.CategoryLabel;
         DetailNarrativeText.Text = detail.Narrative;
         ActivityTabSummaryText.Text = detail.RawEntriesSummary;
         RelatedSummaryText.Text = detail.RelatedSummary;
         RawEntriesItems.ItemsSource = detail.RawEntries;
         RelatedMomentsItems.ItemsSource = detail.RelatedMoments;
+        CapturedActivitySection.IsVisible = detail.RawEntries.Count > 0;
+        RelatedMomentsSection.IsVisible = detail.RelatedMoments.Count > 0;
         PinMomentButtonText.Text = selected.IsPinned ? "Pinned" : "Pin";
         BookmarkMomentButtonText.Text = selected.IsBookmarked ? "Bookmarked" : "Bookmark";
         MomentNoteTextBox.Text = selected.Note ?? string.Empty;
         SetActionButtonActive(PinMomentButton, selected.IsPinned);
         SetActionButtonActive(BookmarkMomentButton, selected.IsBookmarked);
+        SetDetailActionsEnabled(true);
         SetDetailPreview(selected);
         RefreshDetailSectionHeaders();
-        SelectDetailTab(_selectedDetailTab);
     }
 
     private DateTime GetSelectedDate()
@@ -842,7 +896,7 @@ public partial class MainWindow : Window
         DetailIconImage.Source = null;
         DetailIconImage.IsVisible = false;
         DetailTitleText.Text = "Select a moment";
-        DetailSubtitleText.Text = "Timeline context appears here";
+        DetailSubtitleText.Text = "Click a moment to inspect it";
         DetailMetaSpanText.Text = "Local only";
         DetailMetaSourceText.Text = "MomentTrace";
         DetailMetaStartedText.Text = "Local only";
@@ -853,15 +907,17 @@ public partial class MainWindow : Window
         RelatedSummaryText.Text = "Choose a moment to see nearby activity from the same source or category.";
         RawEntriesItems.ItemsSource = Array.Empty<DetailActivityRowViewModel>();
         RelatedMomentsItems.ItemsSource = Array.Empty<RelatedMomentViewModel>();
+        CapturedActivitySection.IsVisible = false;
+        RelatedMomentsSection.IsVisible = false;
         PinMomentButtonText.Text = "Pin";
         BookmarkMomentButtonText.Text = "Bookmark";
         MomentNoteTextBox.Text = string.Empty;
         SetActionButtonActive(PinMomentButton, false);
         SetActionButtonActive(BookmarkMomentButton, false);
+        SetDetailActionsEnabled(false);
         DetailPreviewImage.Source = null;
         DetailPreviewHost.IsVisible = false;
         RefreshDetailSectionHeaders();
-        SelectDetailTab(DetailTab.Overview);
     }
 
     private void TimelineGroupToggleButton_Click(object? sender, RoutedEventArgs e)
@@ -876,131 +932,35 @@ public partial class MainWindow : Window
         TimelineGroupsItems.ItemsSource = BuildTimelineGroupRows();
     }
 
-    private void DetailTabButton_Click(object? sender, RoutedEventArgs e)
-    {
-        if (sender is not Button { CommandParameter: string tabName }
-            || !Enum.TryParse<DetailTab>(tabName, out var tab))
-        {
-            return;
-        }
-
-        SelectDetailTab(tab);
-    }
-
-    private void SelectDetailTab(DetailTab tab)
-    {
-        _selectedDetailTab = tab;
-
-        OverviewDetailTabContent.IsVisible = tab == DetailTab.Overview;
-        ActivityDetailTabContent.IsVisible = tab == DetailTab.Activity;
-        RelatedDetailTabContent.IsVisible = tab == DetailTab.Related;
-
-        SetDetailTabState(OverviewDetailTabText, OverviewDetailTabUnderline, tab == DetailTab.Overview);
-        SetDetailTabState(ActivityDetailTabText, ActivityDetailTabUnderline, tab == DetailTab.Activity);
-        SetDetailTabState(RelatedDetailTabText, RelatedDetailTabUnderline, tab == DetailTab.Related);
-    }
-
-    private void DetailSectionToggleButton_Click(object? sender, RoutedEventArgs e)
-    {
-        if (sender is not Button { CommandParameter: string sectionKey }
-            || !_detailSectionExpanded.ContainsKey(sectionKey))
-        {
-            return;
-        }
-
-        _detailSectionExpanded[sectionKey] = !_detailSectionExpanded[sectionKey];
-        ApplyDetailSectionState(sectionKey);
-    }
-
-    private void SetDetailTabState(TextBlock text, Border underline, bool isActive)
-    {
-        text.Foreground = new SolidColorBrush(isActive ? _currentTheme.Accent : _currentTheme.MutedText);
-        text.FontWeight = isActive ? FontWeight.SemiBold : FontWeight.Regular;
-        underline.IsVisible = isActive;
-    }
-
-    private void ApplyDetailSectionStates()
-    {
-        foreach (var sectionKey in _detailSectionExpanded.Keys)
-        {
-            ApplyDetailSectionState(sectionKey);
-        }
-    }
-
-    private void ApplyDetailSectionState(string sectionKey)
-    {
-        var isExpanded = _detailSectionExpanded[sectionKey];
-        var toggleText = isExpanded ? "Hide" : "Show";
-        var toggleGlyph = isExpanded ? "⌃" : "⌄";
-
-        switch (sectionKey)
-        {
-            case "OverviewNarrative":
-                OverviewNarrativeSection.IsVisible = isExpanded;
-                OverviewNarrativeToggleText.Text = toggleText;
-                OverviewNarrativeToggleGlyph.Text = toggleGlyph;
-                break;
-            case "Preview":
-                DetailPreviewSection.IsVisible = isExpanded;
-                PreviewToggleText.Text = toggleText;
-                PreviewToggleGlyph.Text = toggleGlyph;
-                break;
-            case "Metadata":
-                MetadataSection.IsVisible = isExpanded;
-                MetadataToggleText.Text = toggleText;
-                MetadataToggleGlyph.Text = toggleGlyph;
-                break;
-            case "Note":
-                NoteSection.IsVisible = isExpanded;
-                NoteToggleText.Text = toggleText;
-                NoteToggleGlyph.Text = toggleGlyph;
-                break;
-            case "RecentActivity":
-                RecentActivitySection.IsVisible = isExpanded;
-                RecentActivityToggleText.Text = toggleText;
-                RecentActivityToggleGlyph.Text = toggleGlyph;
-                break;
-            case "CapturedActivity":
-                CapturedActivitySection.IsVisible = isExpanded;
-                CapturedActivityToggleText.Text = toggleText;
-                CapturedActivityToggleGlyph.Text = toggleGlyph;
-                break;
-            case "RelatedMoments":
-                RelatedMomentsSection.IsVisible = isExpanded;
-                RelatedMomentsToggleText.Text = toggleText;
-                RelatedMomentsToggleGlyph.Text = toggleGlyph;
-                break;
-        }
-    }
-
     private void RefreshDetailSectionHeaders()
     {
-        var selected = GetSelectedMoment();
         var rawCount = RawEntriesItems.ItemsSource?.Cast<object>().Count() ?? 0;
         var relatedCount = RelatedMomentsItems.ItemsSource?.Cast<object>().Count() ?? 0;
-        var hasPreview = DetailPreviewHost.IsVisible;
-        var hasNote = !string.IsNullOrWhiteSpace(MomentNoteTextBox.Text);
 
-        OverviewNarrativeHeaderText.Text = selected is null
-            ? "Moment overview · waiting"
-            : "Moment overview · summary";
-        PreviewHeaderText.Text = hasPreview
-            ? "Preview · available"
-            : "Preview · unavailable";
-        MetadataHeaderText.Text = selected is null
-            ? "Moment details · waiting"
-            : "Moment details · local";
-        NoteHeaderText.Text = hasNote
-            ? "Personal note · saved"
-            : "Personal note · empty";
-        RecentActivityHeaderText.Text = "Recent activity · recorder";
-
+        OverviewNarrativeHeaderText.Text = "Summary";
+        DetailPreviewSection.IsVisible = DetailPreviewHost.IsVisible;
+        MetadataHeaderText.Text = "Details";
+        NoteHeaderText.Text = "Note";
         CapturedActivityHeaderText.Text = rawCount == 0
-            ? "Captured activity · empty"
-            : $"Captured activity · {rawCount} entr{(rawCount == 1 ? "y" : "ies")}";
+            ? "Captured activity"
+            : $"Captured activity ({rawCount})";
         RelatedMomentsHeaderText.Text = relatedCount == 0
-            ? "Related moments · empty"
-            : $"Related moments · {relatedCount}";
+            ? "Related"
+            : $"Related ({relatedCount})";
+    }
+
+    private static string FormatDetailTimestamp(DateTime timestamp) =>
+        timestamp.ToString("ddd d MMM, HH:mm:ss");
+
+    private static string FormatDetailSource(string source)
+    {
+        if (string.IsNullOrWhiteSpace(source))
+        {
+            return "MomentTrace";
+        }
+
+        var fileName = Path.GetFileName(source.Trim());
+        return string.IsNullOrWhiteSpace(fileName) ? source : fileName;
     }
 
     private ActivityMomentViewModel? GetSelectedMoment()
@@ -1050,6 +1010,7 @@ public partial class MainWindow : Window
         }
 
         await _store.SetPinnedAsync(selected.Id, !selected.IsPinned);
+        InvalidatePresentationCaches();
         await ReloadAsync();
     }
 
@@ -1062,6 +1023,7 @@ public partial class MainWindow : Window
         }
 
         await _store.SetBookmarkedAsync(selected.Id, !selected.IsBookmarked);
+        InvalidatePresentationCaches();
         await ReloadAsync();
     }
 
@@ -1074,6 +1036,7 @@ public partial class MainWindow : Window
         }
 
         await _store.SetNoteAsync(selected.Id, MomentNoteTextBox.Text);
+        InvalidatePresentationCaches();
         await ReloadAsync();
     }
 
@@ -1094,6 +1057,7 @@ public partial class MainWindow : Window
         DeleteCachedPreview(selected.ScreenshotPath);
         DeleteCachedPreview(selected.ThumbnailPath);
         _selectedMomentId = null;
+        InvalidatePresentationCaches();
         await ReloadAsync();
     }
 
@@ -1113,6 +1077,20 @@ public partial class MainWindow : Window
         button.Background = new SolidColorBrush(isActive ? _currentTheme.Accent : _currentTheme.Toolbar);
         button.BorderBrush = new SolidColorBrush(isActive ? _currentTheme.Accent : _currentTheme.PanelEdgeStrong);
         button.Foreground = new SolidColorBrush(isActive ? _currentTheme.AccentText : _currentTheme.Text);
+    }
+
+    private void SetDetailActionsEnabled(bool isEnabled)
+    {
+        OpenMomentButton.IsEnabled = isEnabled;
+        PinMomentButton.IsEnabled = isEnabled;
+        BookmarkMomentButton.IsEnabled = isEnabled;
+        DeleteMomentButton.IsEnabled = isEnabled;
+        MomentNoteTextBox.IsReadOnly = !isEnabled;
+        SaveNoteButton.IsEnabled = isEnabled;
+        OpenMomentButton.Opacity = isEnabled ? 1 : 0.45;
+        PinMomentButton.Opacity = isEnabled ? 1 : 0.45;
+        BookmarkMomentButton.Opacity = isEnabled ? 1 : 0.45;
+        DeleteMomentButton.Opacity = isEnabled ? 1 : 0.45;
     }
 
     private void SetDetailPreview(ActivityMomentViewModel selected)
@@ -1698,6 +1676,11 @@ public partial class MainWindow : Window
     {
         ClearTimelineFocusRange();
         _selectedRailSelection = selection;
+        if (selection != RailSelection.Timeline)
+        {
+            _activeWorkspaceNav = WorkspaceNav.None;
+        }
+
         ShowTimelinePage();
         ApplyOverviewTimelineContextState();
         await RefreshTimelineAsync();
@@ -1712,6 +1695,8 @@ public partial class MainWindow : Window
 
     private void ShowOverviewPage()
     {
+        _isDetailPaneVisible = false;
+        ApplyDetailPaneVisibility();
         TimelinePage.IsVisible = false;
         OverviewPage.IsVisible = true;
         ApplyOverviewTimelineContextState();
@@ -1774,9 +1759,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        var title = _isReloading
-            ? "Refreshing timeline..."
-            : GetEmptyRailSelectionText();
+        var title = GetEmptyRailSelectionText();
         var detail = BuildTimelineEmptyDetail();
         ShowTimelineStatusState(title, detail, GetTimelineEmptyActionLabel());
     }
@@ -1812,11 +1795,6 @@ public partial class MainWindow : Window
 
     private string? GetTimelineEmptyActionLabel()
     {
-        if (_isReloading)
-        {
-            return null;
-        }
-
         if (!string.IsNullOrWhiteSpace(_searchText))
         {
             return "Clear search";
@@ -1845,6 +1823,145 @@ public partial class MainWindow : Window
         TimelineEmptyActionButton.IsVisible = !string.IsNullOrWhiteSpace(actionLabel);
         TimelineEmptyState.IsVisible = true;
         TimelineScrollViewer.IsVisible = false;
+    }
+
+    private void UpdateTimelineFocusBanner()
+    {
+        if (!_timelineFocusStart.HasValue || !_timelineFocusEnd.HasValue)
+        {
+            TimelineFocusBanner.IsVisible = false;
+            return;
+        }
+
+        TimelineFocusBannerText.Text =
+            $"Showing moments between {_timelineFocusStart.Value:HH:mm} and {_timelineFocusEnd.Value:HH:mm}. Clear focus to return to the full day.";
+        TimelineFocusBanner.IsVisible = true;
+    }
+
+    private async void TimelineFocusClearButton_Click(object? sender, RoutedEventArgs e)
+    {
+        ClearTimelineFocusRange();
+        ApplyOverviewTimelineContextState();
+        _timelineRefreshSignature = string.Empty;
+        await RefreshTimelineAsync();
+    }
+
+    private static string BuildStoreSignature(IReadOnlyList<TimelineActivity> activities)
+    {
+        if (activities.Count == 0)
+        {
+            return "empty";
+        }
+
+        return string.Join("|",
+            activities.Count,
+            string.Join(",",
+                activities.Select(activity =>
+                    $"{activity.Id}:{activity.StartedAt.UtcTicks}:{activity.EndedAt.UtcTicks}:{activity.IsPinned}:{activity.IsBookmarked}:{activity.Note}")));
+    }
+
+    private void InvalidatePresentationCaches()
+    {
+        _activityStoreSignature = string.Empty;
+        _timelineRefreshSignature = string.Empty;
+        _overviewRefreshSignature = string.Empty;
+        _lastDetailSignature = string.Empty;
+        _lastDetailedMomentId = null;
+    }
+
+    private string BuildTimelineRefreshSignature(DateTime selectedDate)
+    {
+        return string.Join("|",
+            selectedDate.ToString("yyyyMMdd"),
+            _searchText,
+            _selectedRailSelection,
+            _timelineFocusStart?.Ticks,
+            _timelineFocusEnd?.Ticks,
+            _preferences.TimelineViewMode,
+            _selectedMomentId,
+            string.Join(",", _timelineGroups.Select(group => $"{group.ExpansionKey}:{group.IsExpanded}")),
+            string.Join(",", _sessions.Select(session =>
+                $"{session.Id}:{session.SessionEndedAt.UtcTicks}:{session.SeenDuration}:{session.IsPinned}:{session.IsBookmarked}:{session.Note}")));
+    }
+
+    private static string BuildDetailSignature(ActivityMomentViewModel session)
+    {
+        return string.Join("|",
+            session.Id,
+            session.SessionEndedAt.UtcTicks,
+            session.SeenDuration,
+            session.IsPinned,
+            session.IsBookmarked,
+            session.Note,
+            session.Title,
+            session.MemoryDescription);
+    }
+
+    private static string BuildOverviewRefreshSignature(OverviewPresentationModel overview, DateTime selectedDate)
+    {
+        return string.Join("|",
+            selectedDate.ToString("yyyyMMdd"),
+            overview.TotalActive.Ticks,
+            overview.Sessions.Count,
+            string.Join(",", overview.DaySummaryMetrics.Select(metric => $"{metric.Label}:{metric.Value}:{metric.Detail}")),
+            string.Join(",", overview.KeyMoments.Select(moment => moment.Id)),
+            string.Join(",", overview.TopApplications.Select(app => $"{app.AppName}:{app.Duration}")),
+            string.Join(",", overview.CategoryBreakdown.Select(item => $"{item.Label}:{item.Duration.Ticks}")),
+            string.Join(",", overview.HeatmapSegments.Select(segment => segment.Intensity.ToString("F2"))),
+            string.Join(",", overview.FocusBlocks.Select(block => $"{block.MomentId}:{block.Duration.TotalSeconds:F0}")));
+    }
+
+    private void ScrollSelectedMomentIntoView()
+    {
+        if (_selectedMomentId is not long selectedId)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            var groupIndex = _timelineGroups.ToList().FindIndex(group => group.ContainsActivity(selectedId));
+            if (groupIndex < 0)
+            {
+                return;
+            }
+
+            var estimatedOffset = groupIndex * 228d;
+            var maxOffset = Math.Max(0, TimelineScrollViewer.Extent.Height - TimelineScrollViewer.Viewport.Height);
+            TimelineScrollViewer.Offset = new Vector(0, Math.Clamp(estimatedOffset, 0, maxOffset));
+        }, DispatcherPriority.Loaded);
+    }
+
+    private void ApplyOverviewResponsiveLayout()
+    {
+        if (OverviewStoryGrid is null || OverviewStoryLeftColumn is null || OverviewStoryRightColumn is null)
+        {
+            return;
+        }
+
+        var narrow = Bounds.Width < 1180;
+        if (narrow)
+        {
+            OverviewStoryGrid.ColumnDefinitions = new ColumnDefinitions("1*");
+            OverviewStoryGrid.RowDefinitions = new RowDefinitions("Auto,Auto");
+            Grid.SetColumn(OverviewStoryLeftColumn, 0);
+            Grid.SetRow(OverviewStoryLeftColumn, 0);
+            Grid.SetColumn(OverviewStoryRightColumn, 0);
+            Grid.SetRow(OverviewStoryRightColumn, 1);
+            OverviewStoryGrid.ColumnSpacing = 0;
+            OverviewStoryGrid.RowSpacing = 14;
+        }
+        else
+        {
+            OverviewStoryGrid.ColumnDefinitions = new ColumnDefinitions("1.78*,0.72*");
+            OverviewStoryGrid.RowDefinitions = new RowDefinitions("Auto");
+            Grid.SetColumn(OverviewStoryLeftColumn, 0);
+            Grid.SetRow(OverviewStoryLeftColumn, 0);
+            Grid.SetColumn(OverviewStoryRightColumn, 1);
+            Grid.SetRow(OverviewStoryRightColumn, 0);
+            OverviewStoryGrid.ColumnSpacing = 14;
+            OverviewStoryGrid.RowSpacing = 0;
+        }
     }
 
     private bool MatchesRailSelection(ActivityMomentViewModel session)
@@ -2011,7 +2128,9 @@ public partial class MainWindow : Window
         SelectTimelineDate(selected?.SessionStartedAt.LocalDateTime.Date);
         _selectedRailSelection = RailSelection.Timeline;
         _selectedMomentId = momentId;
-        _selectedDetailTab = DetailTab.Overview;
+        _activeWorkspaceNav = WorkspaceNav.Timeline;
+        _isDetailPaneVisible = true;
+        ApplyDetailPaneVisibility();
         ShowTimelinePage();
         ApplyOverviewTimelineContextState();
         await RefreshTimelineAsync();
@@ -2136,11 +2255,14 @@ public partial class MainWindow : Window
     private void ApplyOverviewState(
         IReadOnlyList<OverviewMomentRow> momentRows,
         IReadOnlyList<OverviewTopApplicationRow> topApplicationRows,
-        IReadOnlyList<FocusBlockViewModel> focusBlocks)
+        IReadOnlyList<FocusBlockViewModel> focusBlocks,
+        bool isEmptyDay)
     {
         var hasMoments = momentRows.Count > 0;
         var showsMomentRailControls = momentRows.Count > 2;
 
+        OverviewEmptyDayBanner.IsVisible = isEmptyDay;
+        OverviewSummaryItems.Opacity = isEmptyDay ? 0.72 : 1;
         OverviewMomentsEmptyState.IsVisible = !hasMoments;
         OverviewMomentsScrollViewer.IsVisible = hasMoments;
         OverviewMomentsScrollLeftButton.IsVisible = showsMomentRailControls;
@@ -2308,36 +2430,65 @@ public partial class MainWindow : Window
     {
         var isOverview = OverviewPage.IsVisible;
 
-        SetWorkspaceButtonState(TimelineNavButton, TimelineNavHighlight, !isOverview && _selectedRailSelection == RailSelection.Timeline);
-        SetWorkspaceButtonState(OverviewNavButton, OverviewNavHighlight, isOverview);
-
-        SetRailButtonState(BrowsingNavButton, !isOverview && _selectedRailSelection == RailSelection.Browsing);
-        SetRailButtonState(DevelopmentNavButton, !isOverview && _selectedRailSelection == RailSelection.Development);
-        SetRailButtonState(CommunicationNavButton, !isOverview && _selectedRailSelection == RailSelection.Communication);
-        SetRailButtonState(DocumentsNavButton, !isOverview && _selectedRailSelection == RailSelection.Documents);
-        SetRailButtonState(SavedMomentsNavButton, !isOverview && _selectedRailSelection == RailSelection.SavedMoments);
-        SetRailButtonState(NotesNavButton, !isOverview && _selectedRailSelection == RailSelection.Notes);
-        SetRailButtonState(BookmarksNavButton, !isOverview && _selectedRailSelection == RailSelection.Bookmarks);
-        SetRailButtonState(AppsNavButton, !isOverview && _selectedRailSelection == RailSelection.Apps);
-        SetRailButtonState(WebsitesNavButton, !isOverview && _selectedRailSelection == RailSelection.Websites);
-        SetRailButtonState(FilesNavButton, !isOverview && _selectedRailSelection == RailSelection.Files);
+        SetNavItemState(TimelineNavHighlight, TimelineNavAccent, TimelineNavButton,
+            !isOverview && _activeWorkspaceNav == WorkspaceNav.Timeline && _selectedRailSelection == RailSelection.Timeline);
+        SetNavItemState(OverviewNavHighlight, OverviewNavAccent, OverviewNavButton,
+            isOverview && _activeWorkspaceNav == WorkspaceNav.Overview);
+        SetNavItemState(SavedMomentsNavHighlight, SavedMomentsNavAccent, SavedMomentsNavButton,
+            !isOverview && _selectedRailSelection == RailSelection.SavedMoments);
+        SetNavItemState(NotesNavHighlight, NotesNavAccent, NotesNavButton,
+            !isOverview && _selectedRailSelection == RailSelection.Notes);
+        SetNavItemState(BookmarksNavHighlight, BookmarksNavAccent, BookmarksNavButton,
+            !isOverview && _selectedRailSelection == RailSelection.Bookmarks);
+        SetNavItemState(AppsNavHighlight, AppsNavAccent, AppsNavButton,
+            !isOverview && _selectedRailSelection == RailSelection.Apps);
+        SetNavItemState(WebsitesNavHighlight, WebsitesNavAccent, WebsitesNavButton,
+            !isOverview && _selectedRailSelection == RailSelection.Websites);
+        SetNavItemState(FilesNavHighlight, FilesNavAccent, FilesNavButton,
+            !isOverview && _selectedRailSelection == RailSelection.Files);
     }
 
-    private void SetWorkspaceButtonState(Button button, Border highlight, bool isActive)
+    private void SetNavItemState(Border highlight, Border accent, Button button, bool isActive)
     {
-        highlight.Background = Brushes.Transparent;
-        button.Background = isActive ? new SolidColorBrush(_currentTheme.ActiveSurface) : Brushes.Transparent;
-        button.BorderBrush = isActive ? new SolidColorBrush(_currentTheme.ActiveEdge) : Brushes.Transparent;
-        button.Foreground = new SolidColorBrush(isActive ? _currentTheme.AccentText : _currentTheme.MutedText);
-        button.FontWeight = isActive ? FontWeight.SemiBold : FontWeight.Regular;
+        highlight.Background = isActive
+            ? new SolidColorBrush(_currentTheme.ActiveSurface)
+            : Brushes.Transparent;
+        accent.Background = isActive
+            ? new SolidColorBrush(_currentTheme.Accent)
+            : Brushes.Transparent;
+        button.Background = Brushes.Transparent;
     }
 
-    private void SetRailButtonState(Button button, bool isActive)
+    private void UpdateRailNavSubtitles()
     {
-        button.Background = isActive ? new SolidColorBrush(_currentTheme.ActiveSurface) : Brushes.Transparent;
-        button.BorderBrush = isActive ? new SolidColorBrush(_currentTheme.ActiveEdge) : Brushes.Transparent;
-        button.Foreground = new SolidColorBrush(isActive ? _currentTheme.AccentText : _currentTheme.MutedText);
-        button.FontWeight = isActive ? FontWeight.SemiBold : FontWeight.Regular;
+        var selectedDate = GetSelectedDate();
+        TimelineNavSubtitle.Text = _sessions.Count switch
+        {
+            0 => "No moments today",
+            1 => "1 moment today",
+            _ => $"{_sessions.Count} moments today"
+        };
+    }
+
+    private void InitializeProfileRail()
+    {
+        var userName = Environment.UserName;
+        ProfileNameText.Text = string.IsNullOrWhiteSpace(userName) ? "Local user" : userName;
+        ProfileInitialText.Text = string.IsNullOrWhiteSpace(userName)
+            ? "?"
+            : char.ToUpperInvariant(userName[0]).ToString();
+    }
+
+    private static void StartupTrace(string message)
+    {
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(StartupLogPath)!);
+            File.AppendAllText(StartupLogPath, $"{DateTime.Now:O} | {message}{Environment.NewLine}");
+        }
+        catch
+        {
+        }
     }
 
     private void SaveOpacity(double opacity)
@@ -2368,6 +2519,8 @@ public partial class MainWindow : Window
         _currentTheme = DesktopAppThemePalette.Find(theme);
         _currentTheme.ApplyTo(this);
         OverviewHeatmapControl.ApplyThemePalette(_currentTheme);
+        _timelineRefreshSignature = string.Empty;
+        _overviewRefreshSignature = string.Empty;
         ApplySurfaceTransparency(_preferences.Opacity);
         if (SearchTextBox.IsFocused)
         {
@@ -2395,8 +2548,8 @@ public partial class MainWindow : Window
 
         OuterShell.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Base, pageStrength));
         RailSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Rail, panelStrength));
-        TopCommandSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.TopCommand, panelStrength));
-        TopCommandSurface.BorderBrush = new SolidColorBrush(_currentTheme.Stroke);
+        TopCommandSurface.Background = Brushes.Transparent;
+        TopCommandSurface.BorderBrush = Brushes.Transparent;
         DetailSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.Detail, panelStrength));
         SearchSurface.Background = new SolidColorBrush(_currentTheme.WithAlpha(_currentTheme.TopCommand, panelStrength));
     }
@@ -2538,7 +2691,9 @@ public partial class MainWindow : Window
         return row with
         {
             IsSelected = isSelected,
-            CardBackground = ColorToHex(_currentTheme.RaisedSurface),
+            CardBackground = isSelected
+                ? ColorToHex(_currentTheme.AccentSoft)
+                : ColorToHex(_currentTheme.RaisedSurface),
             BorderBrush = isSelected ? ColorToHex(_currentTheme.Accent) : ColorToHex(_currentTheme.Stroke)
         };
     }
@@ -2660,11 +2815,11 @@ public partial class MainWindow : Window
         string? ThumbnailPath,
         double CardWidth);
 
-    private enum DetailTab
+    private enum WorkspaceNav
     {
-        Overview,
-        Activity,
-        Related
+        None,
+        Timeline,
+        Overview
     }
 
     private enum RailSelection

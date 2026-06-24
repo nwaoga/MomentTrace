@@ -1,5 +1,7 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Media;
 
 namespace MomentTrace.Desktop.Controls;
 
@@ -20,9 +22,15 @@ public partial class SummaryMetricCard : UserControl
     public static readonly StyledProperty<string?> AccentGlyphProperty =
         AvaloniaProperty.Register<SummaryMetricCard, string?>(nameof(AccentGlyph));
 
+    static SummaryMetricCard()
+    {
+        ValueProperty.Changed.AddClassHandler<SummaryMetricCard>((control, _) => control.UpdateQuietValueStyle());
+    }
+
     public SummaryMetricCard()
     {
         InitializeComponent();
+        UpdateQuietValueStyle();
     }
 
     public string? Label
@@ -53,5 +61,22 @@ public partial class SummaryMetricCard : UserControl
     {
         get => GetValue(AccentGlyphProperty);
         set => SetValue(AccentGlyphProperty, value);
+    }
+
+    private void UpdateQuietValueStyle()
+    {
+        if (this.FindControl<TextBlock>("ValueTextBlock") is not { } valueBlock)
+        {
+            return;
+        }
+
+        var isQuiet = string.IsNullOrWhiteSpace(Value)
+            || Value is "0"
+            || Value.Equals("0m", StringComparison.OrdinalIgnoreCase)
+            || Value.Equals("None yet", StringComparison.OrdinalIgnoreCase);
+
+        valueBlock.Foreground = isQuiet
+            ? this.FindResource("SubtleTextBrush") as IBrush ?? Brushes.Gray
+            : this.FindResource("TextBrush") as IBrush ?? Brushes.White;
     }
 }

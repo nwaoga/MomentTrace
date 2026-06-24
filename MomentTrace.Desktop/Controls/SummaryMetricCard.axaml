@@ -27,7 +27,8 @@
         <TextBlock Text="{Binding Label, RelativeSource={RelativeSource AncestorType=local:SummaryMetricCard}}"
                    Foreground="{DynamicResource SubtleTextBrush}"
                    FontSize="11" />
-        <TextBlock Text="{Binding Value, RelativeSource={RelativeSource AncestorType=local:SummaryMetricCard}}"
+        <TextBlock x:Name="ValueTextBlock"
+                   Text="{Binding Value, RelativeSource={RelativeSource AncestorType=local:SummaryMetricCard}}"
                    Foreground="{DynamicResource TextBrush}"
                    FontSize="22"
                    FontWeight="SemiBold" />

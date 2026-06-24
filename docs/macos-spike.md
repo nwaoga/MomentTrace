@@ -120,6 +120,18 @@ The probe runs and writes foreground app/window activity into:
 
 Observed foreground rows included Codex and System Settings, including the Accessibility window. Treat the macOS recorder spike as proven enough to move on to shared timeline viewing and the first cross-platform UI shell work.
 
+## Current Validation Status
+
+The recorder spike is no longer just theoretical. Real-machine validation now confirms:
+
+- `bundle_identifier` is being stored for normal bundled macOS apps
+- `resource` prefers `app://...` identity for app reopen and real `https://...` URLs for supported browsers
+- screenshot and thumbnail paths are written when Screen Recording permission is granted
+- screenshots can be cropped to the frontmost app window rather than only the full display
+- reopen targeting for captured Safari and Codex moments has been validated on a Mac clone
+
+The remaining known macOS shell issue is not recorder-side. It is a UX bug in the Avalonia shell where `Cmd+,` does not reliably open Settings from the main window and should be re-verified after the next shell polish pass.
+
 ## Shared Presentation Boundary
 
 The first cross-platform boundary has been added with `MomentTrace.Presentation`.
