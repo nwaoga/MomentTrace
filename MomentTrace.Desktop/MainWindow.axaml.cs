@@ -155,10 +155,9 @@ public partial class MainWindow : Window
         _isMacChromeMode = OperatingSystem.IsMacOS();
         if (!_isMacChromeMode)
         {
-            // Fully borderless on Windows: our custom min/max/close buttons own the
-            // window controls, so we avoid both the native title bar and the
-            // orphaned system caption button that Avalonia draws in extended-client mode.
-            WindowDecorations = WindowDecorations.None;
+            // Keep native resize hit-testing without drawing native caption
+            // buttons over the custom shell controls.
+            WindowDecorations = WindowDecorations.BorderOnly;
             ExtendClientAreaToDecorationsHint = true;
             ExtendClientAreaTitleBarHeightHint = 0;
             return;
