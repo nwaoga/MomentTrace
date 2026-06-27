@@ -1900,8 +1900,7 @@ public partial class MainWindow : Window
             _preferences.TimelineViewMode,
             _selectedMomentId,
             string.Join(",", _timelineGroups.Select(group => $"{group.ExpansionKey}:{group.IsExpanded}")),
-            string.Join(",", _sessions.Select(session =>
-                $"{session.Id}:{session.SessionEndedAt.UtcTicks}:{session.SeenDuration}:{session.IsPinned}:{session.IsBookmarked}:{session.Note}")));
+            string.Join(",", _sessions.Select(BuildMomentMutationSignature)));
     }
 
     private static string BuildDetailSignature(ActivityMomentViewModel session)
@@ -1923,12 +1922,18 @@ public partial class MainWindow : Window
             selectedDate.ToString("yyyyMMdd"),
             overview.TotalActive.Ticks,
             overview.Sessions.Count,
+            string.Join(",", overview.Sessions.Select(BuildMomentMutationSignature)),
             string.Join(",", overview.DaySummaryMetrics.Select(metric => $"{metric.Label}:{metric.Value}:{metric.Detail}")),
-            string.Join(",", overview.KeyMoments.Select(moment => $"{moment.Id}:{moment.IsPinned}:{moment.Title}:{moment.Subtitle}")),
+            string.Join(",", overview.KeyMoments.Select(moment => $"{moment.Id}:{moment.IsPinned}:{moment.Title}:{moment.Subtitle}:{moment.Duration}")),
             string.Join(",", overview.TopApplications.Select(app => $"{app.AppName}:{app.Duration}")),
             string.Join(",", overview.CategoryBreakdown.Select(item => $"{item.Label}:{item.Duration.Ticks}")),
             string.Join(",", overview.HeatmapSegments.Select(segment => segment.Intensity.ToString("F2"))),
             string.Join(",", overview.FocusBlocks.Select(block => $"{block.MomentId}:{block.Duration.TotalSeconds:F0}")));
+    }
+
+    private static string BuildMomentMutationSignature(ActivityMomentViewModel session)
+    {
+        return $"{session.Id}:{session.SessionEndedAt.UtcTicks}:{session.SeenDuration}:{session.IsPinned}:{session.IsBookmarked}:{session.Note}";
     }
 
     private void ScrollSelectedMomentIntoView()
@@ -2265,7 +2270,7 @@ public partial class MainWindow : Window
 
     private static string BuildOverviewMomentsSignature(IEnumerable<KeyMomentViewModel> moments)
     {
-        return string.Join("|", moments.Select(moment => $"{moment.Id}:{moment.IsPinned}:{moment.Title}:{moment.Subtitle}"));
+        return string.Join("|", moments.Select(moment => $"{moment.Id}:{moment.IsPinned}:{moment.Title}:{moment.Subtitle}:{moment.Duration}"));
     }
 
     private static string BuildOverviewFocusSignature(IEnumerable<FocusBlockViewModel> blocks)
@@ -2579,6 +2584,9 @@ public partial class MainWindow : Window
     private void ApplyTimelineViewMode(string? viewMode)
     {
         _preferences.TimelineViewMode = string.Equals(viewMode, "List", StringComparison.OrdinalIgnoreCase) ? "List" : "Cards";
+        _timelineRefreshSignature = string.Empty;
+        _lastDetailSignature = string.Empty;
+        _lastDetailedMomentId = null;
         _ = RefreshTimelineAsync();
     }
 

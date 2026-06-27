@@ -20,7 +20,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 ---
 
-## Current State (2026-06-27 09:33 UTC+1)
+## Current State (2026-06-27 18:40 UTC+1)
 
 **Phase:** Late-alpha hardening and polish.
 
@@ -32,6 +32,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Left rail simplified into primary workspace views, Library filters, and Source filters.
 - Windows custom chrome with resize handles and no duplicate native caption buttons.
 - Immediate local mutation refresh across Timeline, Overview, detail pane, and Library filters.
+- Detail-pane note editor now uses a theme-safe dark surface with readable text and focus states.
 - Explorer folder moments capture and reopen the captured folder path.
 - Shared presentation builders for timeline, overview, and detail context.
 - Local SQLite activity store and Windows foreground recorder.
@@ -77,7 +78,7 @@ Choose one track below. Each is scoped for a single focused agent session or sma
 
 **Why:** Recent shell work touched layout, chrome, navigation, and Overview interactions.
 
-**Status:** Recommended next as of 2026-06-27 09:33 UTC+1.
+**Status:** Recommended next as of 2026-06-27 18:40 UTC+1.
 
 **Scope:**
 

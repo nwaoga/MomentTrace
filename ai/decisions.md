@@ -19,6 +19,8 @@
 - Codex/Cursor conversation history is local tooling state and should not be assumed to live in Git.
 - [2026-06-27 09:28 UTC+1] Local shell mutations should invalidate Timeline, Overview, detail, and rail caches together, and reload requests made during an active reload should queue one follow-up pass.
 - [2026-06-27 09:28 UTC+1] Windows Explorer folder moments should persist the captured folder path in `TimelineActivity.Resource`; the desktop opener should not fall back to launching generic Explorer when no folder path can be resolved.
+- [2026-06-27 10:05 UTC+1] Timeline and Overview refresh signatures should include per-moment saved-state metadata so pin, bookmark, and note mutations cannot be skipped as cache-equivalent UI states.
+- [2026-06-27 18:40 UTC+1] The detail-pane note editor should use a dedicated dark-surface textbox style so Avalonia template internals cannot fall back to a light background and low-contrast text.
 
 ## Recently Completed
 
@@ -30,6 +32,7 @@
 - Restored Windows edge/corner resize while preventing native caption buttons from reappearing.
 - Split active planning content out of `README.md` into the repo-local `ai/` structure.
 - [2026-06-27 09:28 UTC+1] Completed the immediate refresh pass for pin, bookmark, note, delete, and timeline view-mode changes.
+- [2026-06-27 18:40 UTC+1] Verified the immediate refresh pass manually and fixed the remaining note-editor contrast clash in the dark shell.
 - [2026-06-27 09:28 UTC+1] Fixed Explorer folder moments so new captures reopen the captured folder path instead of bare Explorer.
 
 ## Open Decisions To Revisit

@@ -320,6 +320,36 @@
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderBrush" Value="Transparent" />
         </Style>
+        <Style Selector="TextBox.noteBox">
+            <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeStrongBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CaretBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="SelectionBrush" Value="{DynamicResource AccentGlowBrush}" />
+        </Style>
+        <Style Selector="TextBox.noteBox:pointerover">
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="TextBox.noteBox:focus">
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="TextBox.noteBox /template/ Border#border">
+            <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeStrongBrush}" />
+        </Style>
+        <Style Selector="TextBox.noteBox:focus /template/ Border#border">
+            <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="TextBox.noteBox /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeStrongBrush}" />
+        </Style>
+        <Style Selector="TextBox.noteBox:focus /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
         <Style Selector="ScrollBar">
             <Setter Property="Background" Value="{DynamicResource ScrollTrackBrush}" />
             <Setter Property="Margin" Value="0" />
@@ -1476,6 +1506,7 @@
                                                     Padding="12">
                                                 <StackPanel Spacing="8">
                                                     <TextBox x:Name="MomentNoteTextBox"
+                                                             Classes="noteBox"
                                                              Background="{DynamicResource PanelBrush}"
                                                              BorderBrush="{DynamicResource FaintBorderBrush}"
                                                              BorderThickness="1"
