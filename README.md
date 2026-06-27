@@ -60,7 +60,7 @@ The Windows installer is built with Inno Setup from a self-contained `win-x64` p
 - Timestamped activity history
 - Local SQLite storage
 - Search, activity type filtering, pinning, and detail view
-- Left-rail semantic filters for browsing, development, communication, documents, apps, websites, and files
+- Left-rail filters for Library (saved moments, notes, bookmarks) and Sources (apps, websites, files)
 - Date filtering with Today, Yesterday, then concrete activity dates
 - Auto-refreshing date filters after Windows resume and local day changes
 - Real app icon extraction when executable metadata is available, including platform-specific Windows icon resolution for classic and packaged apps
@@ -548,7 +548,7 @@ Session naming is deterministic but more specific than a raw telemetry label. Br
 
 Large groups show a compact preview first. `View all` expands that session inline and changes to `Show less`, keeping the timeline readable while still allowing detailed recovery in the Avalonia shell and the Windows app.
 
-The left rail can filter the Timeline by semantic Activity views (`Browsing`, `Development`, `Communication`, `Documents`) or raw Sources (`Apps`, `Websites`, `Files`). Active filters are highlighted in the rail and echoed as a small badge in the Timeline header. Selecting `Timeline` clears the rail filter and returns to all moments.
+The left rail can filter the Timeline by Sources (`Apps`, `Websites`, `Files`) or Library views (`Saved Moments`, `Notes`, `Bookmarks`). The workspace section provides `Timeline` and `Overview` as the two primary views. Active filters are highlighted in the rail and echoed as a small badge in the Timeline header. Selecting `Timeline` clears the rail filter and returns to all moments.
 
 The Library section uses a simple saved-memory model:
 
@@ -779,6 +779,7 @@ Recent planning updates:
 - `AB#63` timeline card intelligence and visual polish now has the session-naming pass, timeline empty/detail-state cleanup, and collapsible detail-section polish in the repo.
 - `#88` tracks the Overview redesign toward a meaningful daily-story dashboard. The shared presentation model, reusable Avalonia overview controls, click-through interactions, theme-aware heatmap composition, summary cards, charts, empty/low-data states, and the tightened moments/focus layouts are now in the repo. The remaining follow-up is interaction QA rather than broad layout redesign.
 - `#89` tracks final Avalonia shell alignment, spacing, image-framing cleanup, refreshed preview artwork for the current Overview-first shell, the Windows shell startup/reopen reliability work, and the remaining macOS `Cmd+,` shortcut bug where Preferences does not reliably open from the main window.
+- `#89` also covers the left-rail cleanup: redundant Browse, Search, and Insights nav items have been removed, sidebar label truncation fixed, content aligned with the nav pane start, and right-side padding tightened. The window chrome now uses `ExtendClientAreaToDecorationsHint` with default Full decorations for a borderless look that preserves edge-resize on Windows.
 
 Current stability read:
 
@@ -788,7 +789,7 @@ Current stability read:
 
 Current stability punch list:
 
-- Make Windows startup, window surfacing, and single-instance reopen behavior fully predictable.
+- ~~Make Windows startup, window surfacing, and single-instance reopen behavior fully predictable.~~ (done — single-instance guard, ExtendClientArea chrome, borderless with resize)
 - Ensure pin, bookmark, note, delete, and view-switch interactions update Timeline and Overview immediately without stale UI.
 - Run a focused interaction QA sweep across empty, sparse, normal, and dense timeline/overview states.
 - Re-verify macOS shell shortcuts, especially `Cmd+,`, after each meaningful shell polish pass.
@@ -808,6 +809,10 @@ Current stability punch list:
 ## Roadmap
 
 - Harden Avalonia shell startup, show-window, and reopen reliability on Windows
+- ~~Remove redundant left-rail navigation items (Browse, Search, Insights) that duplicated Timeline and Overview~~ (done)
+- ~~Fix sidebar label truncation caused by missing Grid.Column placement~~ (done)
+- ~~Tighten content layout: reduced outer padding, aligned content start with left-rail nav, removed excess right margin~~ (done)
+- ~~Fix cross-platform build error from SystemSounds on non-Windows target~~ (done)
 - Finish the immediate-refresh pass for local mutations and view changes across Timeline and Overview
 - Run a dedicated stability QA sweep across Windows and macOS shell interactions
 - Finish final timeline visual polish around empty/loading states and remaining card edge cases
