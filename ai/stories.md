@@ -2,7 +2,6 @@
 
 ## Backlog
 
-- [ ] Immediate refresh pass for local mutations and view changes across Timeline and Overview.
 - [ ] Focused stability QA sweep across Windows and macOS shell interactions.
 - [ ] Refresh sanitized README preview artwork for the current Avalonia shell.
 - [ ] Re-verify and fix macOS `Cmd+,` Settings shortcut from the main shell.
@@ -29,6 +28,8 @@
 - [x] Add single-instance behavior that brings the running app back when launched again.
 - [x] Add Overview empty/low-data states and theme-aware dashboard controls.
 - [x] Add macOS probe validation notes for app identity, browser URLs, screenshots, and reopen behavior.
+- [x] Immediate refresh pass for local mutations and view changes across Timeline and Overview.
+- [x] Capture Explorer folder paths so folder moments open the captured folder instead of generic Explorer.
 
 ## QA Notes
 

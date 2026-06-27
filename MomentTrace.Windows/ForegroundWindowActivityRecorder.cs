@@ -247,7 +247,14 @@ public sealed class ForegroundWindowActivityRecorder(
                 var executablePath = TryGetExecutablePath(process);
                 var appName = TryGetDisplayName(process, executablePath);
                 var kind = ActivityClassifier.Classify(processName);
-                var resource = kind == MomentTrace.Core.ActivityKind.Browser ? TryGetBrowserUrl(handle) : null;
+                var resource = kind == MomentTrace.Core.ActivityKind.Browser
+                    ? TryGetBrowserUrl(handle)
+                    : TryGetExplorerFolderPath(handle, processName);
+                if (!string.IsNullOrWhiteSpace(resource) && Directory.Exists(resource))
+                {
+                    kind = MomentTrace.Core.ActivityKind.Document;
+                }
+
                 var imageFilePath = TryFindImageFile(title);
 
                 return new Snapshot(handle, processName, appName, title.Trim(), executablePath, resource, imageFilePath, kind);
@@ -300,6 +307,109 @@ public sealed class ForegroundWindowActivityRecorder(
             }
 
             return null;
+        }
+
+        private static string? TryGetExplorerFolderPath(IntPtr handle, string processName)
+        {
+            if (!processName.Equals("explorer", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            try
+            {
+                var shellType = Type.GetTypeFromProgID("Shell.Application");
+                if (shellType is null)
+                {
+                    return null;
+                }
+
+                dynamic shell = Activator.CreateInstance(shellType)!;
+                if (shell is null)
+                {
+                    return null;
+                }
+
+                try
+                {
+                    foreach (var window in shell.Windows())
+                    {
+                        if (!TryGetExplorerWindowHandle(window, out IntPtr windowHandle)
+                            || windowHandle != handle)
+                        {
+                            continue;
+                        }
+
+                        if (TryGetExplorerWindowPath(window, out string path))
+                        {
+                            return path;
+                        }
+                    }
+                }
+                finally
+                {
+                    if (Marshal.IsComObject(shell))
+                    {
+                        Marshal.FinalReleaseComObject(shell);
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            return null;
+        }
+
+        private static bool TryGetExplorerWindowHandle(dynamic window, out IntPtr handle)
+        {
+            handle = IntPtr.Zero;
+
+            try
+            {
+                handle = new IntPtr((int)window.HWND);
+                return handle != IntPtr.Zero;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static bool TryGetExplorerWindowPath(dynamic window, out string path)
+        {
+            path = string.Empty;
+
+            try
+            {
+                string? shellPath = window.Document?.Folder?.Self?.Path;
+                if (!string.IsNullOrWhiteSpace(shellPath) && Directory.Exists(shellPath))
+                {
+                    path = shellPath;
+                    return true;
+                }
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                string? locationUrl = window.LocationURL;
+                if (!string.IsNullOrWhiteSpace(locationUrl)
+                    && Uri.TryCreate(locationUrl, UriKind.Absolute, out var uri)
+                    && uri.IsFile
+                    && Directory.Exists(uri.LocalPath))
+                {
+                    path = uri.LocalPath;
+                    return true;
+                }
+            }
+            catch
+            {
+            }
+
+            return false;
         }
 
         public static string? TryCaptureScreenshot(IntPtr handle)

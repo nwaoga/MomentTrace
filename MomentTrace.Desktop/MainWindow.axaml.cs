@@ -62,6 +62,7 @@ public partial class MainWindow : Window
     private Vector _scrollDragStartOffset;
     private bool _isScrollDragging;
     private bool _isReloading;
+    private bool _reloadPending;
     private bool _isSelectingDateForOverviewNavigation;
     private DispatcherTimer? _overviewMomentsScrollAnimationTimer;
     private double _overviewMomentsScrollFrom;
@@ -251,34 +252,40 @@ public partial class MainWindow : Window
     {
         if (_isReloading)
         {
+            _reloadPending = true;
             return;
         }
 
         _isReloading = true;
         try
         {
-            await _store.InitializeAsync();
-
-            var activities = await _store.QueryAsync(new TimelineQuery { Limit = 1500 });
-            var storeSignature = BuildStoreSignature(activities);
-            if (string.Equals(storeSignature, _activityStoreSignature, StringComparison.Ordinal))
+            do
             {
-                return;
+                _reloadPending = false;
+                await _store.InitializeAsync();
+
+                var activities = await _store.QueryAsync(new TimelineQuery { Limit = 1500 });
+                var storeSignature = BuildStoreSignature(activities);
+                if (string.Equals(storeSignature, _activityStoreSignature, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                _activityStoreSignature = storeSignature;
+                _visibleActivities.Clear();
+                var privacyFilter = CurrentPrivacyFilter();
+                _visibleActivities.AddRange(activities
+                    .Where(activity => !ActivityExclusionFilter.IsExcluded(activity))
+                    .Where(activity => !privacyFilter.ShouldExclude(activity)));
+
+                var dateFilters = TimelineDateFilterBuilder.Build(_visibleActivities, DateTime.Today);
+                DateFilterComboBox.ItemsSource = dateFilters;
+                DateFilterComboBox.SelectedItem ??= dateFilters.FirstOrDefault();
+
+                await RefreshTimelineAsync();
+                await RefreshOverviewAsync();
             }
-
-            _activityStoreSignature = storeSignature;
-            _visibleActivities.Clear();
-            var privacyFilter = CurrentPrivacyFilter();
-            _visibleActivities.AddRange(activities
-                .Where(activity => !ActivityExclusionFilter.IsExcluded(activity))
-                .Where(activity => !privacyFilter.ShouldExclude(activity)));
-
-            var dateFilters = TimelineDateFilterBuilder.Build(_visibleActivities, DateTime.Today);
-            DateFilterComboBox.ItemsSource = dateFilters;
-            DateFilterComboBox.SelectedItem ??= dateFilters.FirstOrDefault();
-
-            await RefreshTimelineAsync();
-            await RefreshOverviewAsync();
+            while (_reloadPending);
         }
         finally
         {
@@ -846,8 +853,7 @@ public partial class MainWindow : Window
         }
 
         await _store.SetPinnedAsync(selected.Id, !selected.IsPinned);
-        InvalidatePresentationCaches();
-        await ReloadAsync();
+        await RefreshAfterLocalMutationAsync(selected.Id);
     }
 
     private void ShowDetail(ActivityMomentViewModel selected)
@@ -1009,8 +1015,7 @@ public partial class MainWindow : Window
         }
 
         await _store.SetPinnedAsync(selected.Id, !selected.IsPinned);
-        InvalidatePresentationCaches();
-        await ReloadAsync();
+        await RefreshAfterLocalMutationAsync(selected.Id);
     }
 
     private async void BookmarkMomentButton_Click(object? sender, RoutedEventArgs e)
@@ -1022,8 +1027,7 @@ public partial class MainWindow : Window
         }
 
         await _store.SetBookmarkedAsync(selected.Id, !selected.IsBookmarked);
-        InvalidatePresentationCaches();
-        await ReloadAsync();
+        await RefreshAfterLocalMutationAsync(selected.Id);
     }
 
     private async void SaveNoteButton_Click(object? sender, RoutedEventArgs e)
@@ -1035,8 +1039,7 @@ public partial class MainWindow : Window
         }
 
         await _store.SetNoteAsync(selected.Id, MomentNoteTextBox.Text);
-        InvalidatePresentationCaches();
-        await ReloadAsync();
+        await RefreshAfterLocalMutationAsync(selected.Id);
     }
 
     private async void DeleteMomentButton_Click(object? sender, RoutedEventArgs e)
@@ -1056,8 +1059,7 @@ public partial class MainWindow : Window
         DeleteCachedPreview(selected.ScreenshotPath);
         DeleteCachedPreview(selected.ThumbnailPath);
         _selectedMomentId = null;
-        InvalidatePresentationCaches();
-        await ReloadAsync();
+        await RefreshAfterLocalMutationAsync(null);
     }
 
     private void OpenMomentButton_Click(object? sender, RoutedEventArgs e)
@@ -1256,6 +1258,11 @@ public partial class MainWindow : Window
             }
 
             var target = GetOpenTarget(candidate);
+            if (string.IsNullOrWhiteSpace(target))
+            {
+                return;
+            }
+
             Process.Start(new ProcessStartInfo(target) { UseShellExecute = true });
         }
         catch
@@ -1327,7 +1334,7 @@ public partial class MainWindow : Window
         return score;
     }
 
-    private static string GetOpenTarget(TimelineActivity activity)
+    private static string? GetOpenTarget(TimelineActivity activity)
     {
         if (IsWebUrl(activity.Resource))
         {
@@ -1337,6 +1344,11 @@ public partial class MainWindow : Window
         if (TryResolveLocalPath(activity, out var localPath))
         {
             return localPath;
+        }
+
+        if (LooksLikeExplorerMoment(activity))
+        {
+            return null;
         }
 
         return !string.IsNullOrWhiteSpace(activity.ExecutablePath)
@@ -1864,8 +1876,17 @@ public partial class MainWindow : Window
         _activityStoreSignature = string.Empty;
         _timelineRefreshSignature = string.Empty;
         _overviewRefreshSignature = string.Empty;
+        _overviewMomentsSignature = string.Empty;
+        _overviewFocusSignature = string.Empty;
         _lastDetailSignature = string.Empty;
         _lastDetailedMomentId = null;
+    }
+
+    private async Task RefreshAfterLocalMutationAsync(long? selectedMomentId)
+    {
+        _selectedMomentId = selectedMomentId;
+        InvalidatePresentationCaches();
+        await ReloadAsync();
     }
 
     private string BuildTimelineRefreshSignature(DateTime selectedDate)
@@ -1903,7 +1924,7 @@ public partial class MainWindow : Window
             overview.TotalActive.Ticks,
             overview.Sessions.Count,
             string.Join(",", overview.DaySummaryMetrics.Select(metric => $"{metric.Label}:{metric.Value}:{metric.Detail}")),
-            string.Join(",", overview.KeyMoments.Select(moment => moment.Id)),
+            string.Join(",", overview.KeyMoments.Select(moment => $"{moment.Id}:{moment.IsPinned}:{moment.Title}:{moment.Subtitle}")),
             string.Join(",", overview.TopApplications.Select(app => $"{app.AppName}:{app.Duration}")),
             string.Join(",", overview.CategoryBreakdown.Select(item => $"{item.Label}:{item.Duration.Ticks}")),
             string.Join(",", overview.HeatmapSegments.Select(segment => segment.Intensity.ToString("F2"))),
@@ -2244,7 +2265,7 @@ public partial class MainWindow : Window
 
     private static string BuildOverviewMomentsSignature(IEnumerable<KeyMomentViewModel> moments)
     {
-        return string.Join("|", moments.Select(moment => moment.Id));
+        return string.Join("|", moments.Select(moment => $"{moment.Id}:{moment.IsPinned}:{moment.Title}:{moment.Subtitle}"));
     }
 
     private static string BuildOverviewFocusSignature(IEnumerable<FocusBlockViewModel> blocks)
