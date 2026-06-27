@@ -1939,7 +1939,8 @@ public partial class MainWindow : Window
             return;
         }
 
-        var narrow = Bounds.Width < 1180;
+        var overviewWidth = OverviewPage.Bounds.Width > 0 ? OverviewPage.Bounds.Width : Bounds.Width;
+        var narrow = overviewWidth < 860;
         if (narrow)
         {
             OverviewStoryGrid.ColumnDefinitions = new ColumnDefinitions("1*");
@@ -2336,6 +2337,7 @@ public partial class MainWindow : Window
             moment.AccentText,
             moment.Source,
             moment.ThumbnailPath,
+            moment.IsPinned ? "Pinned" : "Pin",
             compactWidth));
     }
 
@@ -2813,6 +2815,7 @@ public partial class MainWindow : Window
         string AccentText,
         string? Source,
         string? ThumbnailPath,
+        string PinActionLabel,
         double CardWidth);
 
     private enum WorkspaceNav
