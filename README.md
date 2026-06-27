@@ -4,6 +4,8 @@ MomentTrace is a Windows-first desktop app that builds a private memory timeline
 
 The long-term goal is a cross-platform desktop timeline for Windows and macOS. The current implementation focuses on a shippable Windows MVP while keeping the core model and storage code separate from Windows-specific integrations.
 
+For active roadmap, Azure DevOps mapping, QA priorities, and current risks, see [`ai/project-plan.md`](ai/project-plan.md).
+
 ## Preview
 
 ![MomentTrace Avalonia shell preview](docs/assets/momenttrace-avalonia-shell-current.png)
@@ -771,29 +773,7 @@ The release workflow validates the `vMAJOR.MINOR.PATCH` tag format, publishes th
 
 You can also run the **Release** workflow manually in GitHub Actions and provide a version such as `v0.1.0`.
 
-For Azure DevOps planning, current implementation work is tracked in the MomentTrace project and commits can reference work items with `AB#<id>` in the commit message.
-
-Recent planning updates:
-
-- `AB#71` app health and recorder diagnostics is complete, including last-capture freshness and browser URL capture availability in Avalonia Settings.
-- `AB#63` timeline card intelligence and visual polish now has the session-naming pass, timeline empty/detail-state cleanup, and collapsible detail-section polish in the repo.
-- `#88` tracks the Overview redesign toward a meaningful daily-story dashboard. The shared presentation model, reusable Avalonia overview controls, click-through interactions, theme-aware heatmap composition, summary cards, charts, empty/low-data states, and the tightened moments/focus layouts are now in the repo. The remaining follow-up is interaction QA rather than broad layout redesign.
-- `#89` tracks final Avalonia shell alignment, spacing, image-framing cleanup, refreshed preview artwork for the current Overview-first shell, the Windows shell startup/reopen reliability work, and the remaining macOS `Cmd+,` shortcut bug where Preferences does not reliably open from the main window.
-- `#89` also covers the left-rail cleanup: redundant Browse, Search, and Insights nav items have been removed, sidebar label truncation fixed, content aligned with the nav pane start, and right-side padding tightened. The window chrome now uses `ExtendClientAreaToDecorationsHint` with default Full decorations for a borderless look that preserves edge-resize on Windows.
-
-Current stability read:
-
-- Core data flow, local storage, and shared presentation shaping are in solid shape for ongoing feature work.
-- The main stability risk is still desktop-shell behavior rather than recorder or model correctness.
-- The current app should be treated as late-alpha quality: useful and increasingly coherent, but still needing a dedicated hardening pass before broader trust.
-
-Current stability punch list:
-
-- ~~Make Windows startup, window surfacing, and single-instance reopen behavior fully predictable.~~ (done — single-instance guard, ExtendClientArea chrome, borderless with resize)
-- Ensure pin, bookmark, note, delete, and view-switch interactions update Timeline and Overview immediately without stale UI.
-- Run a focused interaction QA sweep across empty, sparse, normal, and dense timeline/overview states.
-- Re-verify macOS shell shortcuts, especially `Cmd+,`, after each meaningful shell polish pass.
-- Add a lightweight regression checklist for launch, record, mutate, reopen, and settings flows before pushes.
+For Azure DevOps planning, current implementation work is tracked in the MomentTrace project and commits can reference work items with `AB#<id>` in the commit message. Active roadmap, stability notes, and QA priorities live in [`ai/project-plan.md`](ai/project-plan.md).
 
 ## Development Notes
 
@@ -806,19 +786,6 @@ Current stability punch list:
 - Do not commit `bin`, `obj`, `.vs`, `publish`, or local user settings.
 - Treat privacy as a product feature: activity history is local-first, and future recording controls should make data capture obvious and user-controlled.
 
-## Roadmap
+## Planning
 
-- Harden Avalonia shell startup, show-window, and reopen reliability on Windows
-- ~~Remove redundant left-rail navigation items (Browse, Search, Insights) that duplicated Timeline and Overview~~ (done)
-- ~~Fix sidebar label truncation caused by missing Grid.Column placement~~ (done)
-- ~~Tighten content layout: reduced outer padding, aligned content start with left-rail nav, removed excess right margin~~ (done)
-- ~~Fix cross-platform build error from SystemSounds on non-Windows target~~ (done)
-- Finish the immediate-refresh pass for local mutations and view changes across Timeline and Overview
-- Run a dedicated stability QA sweep across Windows and macOS shell interactions
-- Finish final timeline visual polish around empty/loading states and remaining card edge cases
-- Refresh the sanitized README preview artwork so it fully reflects the latest low-data Overview treatment
-- Add a lightweight visual QA pass for the primary dark, Starbucks, Nero, Costa, espresso, and light themes so future UI changes do not collapse them back toward the same look
-- Add regression tests for privacy exclusions, settings persistence, and warning-free build expectations
-- Add a settings option to delete local data when the user wants a full privacy cleanup
-- Add first-run onboarding for privacy, startup behavior, and local storage
-- Replace the macOS probe capture path with a proper `MomentTrace.Mac` platform service using native AppKit/Accessibility APIs
+See [`ai/project-plan.md`](ai/project-plan.md) for the active roadmap, Azure DevOps mapping, QA checklist, and current stability punch list.

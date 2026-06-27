@@ -9,3 +9,6 @@ artifacts/
 dist/
 .codex-screens/
 .tmp_fluent_extract/
+ai/local-secrets.ps1
+ai/*.local.*
+ai/.local/
