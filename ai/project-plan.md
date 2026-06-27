@@ -20,7 +20,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 ---
 
-## Current State (2026-06-27)
+## Current State (2026-06-27 09:33 UTC+1)
 
 **Phase:** Late-alpha hardening and polish.
 
@@ -31,10 +31,12 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Overview drill-ins: heatmap range focus, moment timeline navigation, direct open, and pin actions.
 - Left rail simplified into primary workspace views, Library filters, and Source filters.
 - Windows custom chrome with resize handles and no duplicate native caption buttons.
+- Immediate local mutation refresh across Timeline, Overview, detail pane, and Library filters.
+- Explorer folder moments capture and reopen the captured folder path.
 - Shared presentation builders for timeline, overview, and detail context.
 - Local SQLite activity store and Windows foreground recorder.
 
-**Last pushed:** `1bde1d3` — Windows resize chrome fix.
+**Last pushed:** `9cac53f` — desktop refresh and folder moment opening fix.
 
 ---
 
@@ -46,7 +48,7 @@ Choose one track below. Each is scoped for a single focused agent session or sma
 
 **Why:** Mutations should feel instant and trustworthy.
 
-**Status:** Recommended next.
+**Status:** Completed 2026-06-27 09:28 UTC+1.
 
 **Scope:**
 
@@ -74,6 +76,8 @@ Choose one track below. Each is scoped for a single focused agent session or sma
 ### Option B — Stability QA Sweep
 
 **Why:** Recent shell work touched layout, chrome, navigation, and Overview interactions.
+
+**Status:** Recommended next as of 2026-06-27 09:33 UTC+1.
 
 **Scope:**
 
@@ -128,10 +132,13 @@ Choose one track below. Each is scoped for a single focused agent session or sma
 
 ## Recommended Priority
 
-1. **Option A** — Immediate refresh pass.
-2. **Option B** — Stability QA sweep.
-3. **Option C** — README preview refresh.
-4. **Option D** — macOS shortcut verification.
+1. **Option B** — Stability QA sweep.
+2. **Option C** — README preview refresh.
+3. **Option D** — macOS shortcut verification.
+
+Completed:
+
+- [2026-06-27 09:28 UTC+1] **Option A** — Immediate refresh pass.
 
 ---
 

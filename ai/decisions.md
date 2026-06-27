@@ -17,8 +17,8 @@
 - The left rail should avoid redundant navigation. Workspace contains primary views, Library contains saved-memory filters, and Sources contains source filters.
 - The remaining known macOS UX bug is `Cmd+,` not reliably opening Settings from the main shell.
 - Codex/Cursor conversation history is local tooling state and should not be assumed to live in Git.
-- Local shell mutations should invalidate Timeline, Overview, detail, and rail caches together, and reload requests made during an active reload should queue one follow-up pass.
-- Windows Explorer folder moments should persist the captured folder path in `TimelineActivity.Resource`; the desktop opener should not fall back to launching generic Explorer when no folder path can be resolved.
+- [2026-06-27 09:28 UTC+1] Local shell mutations should invalidate Timeline, Overview, detail, and rail caches together, and reload requests made during an active reload should queue one follow-up pass.
+- [2026-06-27 09:28 UTC+1] Windows Explorer folder moments should persist the captured folder path in `TimelineActivity.Resource`; the desktop opener should not fall back to launching generic Explorer when no folder path can be resolved.
 
 ## Recently Completed
 
@@ -29,8 +29,8 @@
 - Removed redundant `Browse`, `Search`, and `Insights` left-rail items.
 - Restored Windows edge/corner resize while preventing native caption buttons from reappearing.
 - Split active planning content out of `README.md` into the repo-local `ai/` structure.
-- Completed the immediate refresh pass for pin, bookmark, note, delete, and timeline view-mode changes.
-- Fixed Explorer folder moments so new captures reopen the captured folder path instead of bare Explorer.
+- [2026-06-27 09:28 UTC+1] Completed the immediate refresh pass for pin, bookmark, note, delete, and timeline view-mode changes.
+- [2026-06-27 09:28 UTC+1] Fixed Explorer folder moments so new captures reopen the captured folder path instead of bare Explorer.
 
 ## Open Decisions To Revisit
 

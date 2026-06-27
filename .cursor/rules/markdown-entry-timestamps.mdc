@@ -1,0 +1,17 @@
+---
+description: Timestamp dated Markdown planning entries
+globs: **/*.md
+alwaysApply: false
+---
+
+# Markdown Entry Timestamps
+
+When adding new dated planning, decision, story, QA, or handoff entries to Markdown files, include the local date and time.
+
+Use this format unless the file already has a stronger local convention:
+
+```markdown
+- [2026-06-27 09:33 UTC+1] Entry text.
+```
+
+Do not rewrite old historical entries solely to add timestamps unless the user asks for a backfill.

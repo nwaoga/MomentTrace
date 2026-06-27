@@ -28,8 +28,8 @@
 - [x] Add single-instance behavior that brings the running app back when launched again.
 - [x] Add Overview empty/low-data states and theme-aware dashboard controls.
 - [x] Add macOS probe validation notes for app identity, browser URLs, screenshots, and reopen behavior.
-- [x] Immediate refresh pass for local mutations and view changes across Timeline and Overview.
-- [x] Capture Explorer folder paths so folder moments open the captured folder instead of generic Explorer.
+- [x] [2026-06-27 09:28 UTC+1] Immediate refresh pass for local mutations and view changes across Timeline and Overview.
+- [x] [2026-06-27 09:28 UTC+1] Capture Explorer folder paths so folder moments open the captured folder instead of generic Explorer.
 
 ## QA Notes
 
