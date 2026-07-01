@@ -37,6 +37,12 @@ Use this section for short pass/fail notes during the next stability sweep.
 
 - [2026-06-27 10:05 UTC+1] Immediate refresh follow-up: strengthened Timeline/Overview refresh signatures so pin, bookmark, and note mutations always trigger a fresh render pass.
 - [2026-06-27 18:40 UTC+1] Manual smoke pass succeeded for pin, bookmark, note, and delete refresh behavior; fixed a dark-theme note editor contrast clash in the detail pane.
+- [2026-07-01 11:02 UTC+1] Build verification passed with `dotnet build MomentTrace.slnx` after closing the running desktop process.
+- [2026-07-01 11:02 UTC+1] Single-instance relaunch check passed: launching `MomentTrace.Desktop` a second time kept one running process and reused the existing instance.
+- [2026-07-01 11:12 UTC+1] UI automation pass confirmed Timeline and Overview navigation both render correctly on the current local dataset; Overview summary metrics, key moments, focus rhythm, and heatmap labels were visible.
+- [2026-07-01 11:12 UTC+1] Settings window opened successfully from the shell and showed healthy recorder/database/browser URL/storage status on this machine.
+- [2026-07-01 11:12 UTC+1] Library and Source filter pass succeeded on the current dataset: Saved Moments, Notes, Bookmarks, and Files rendered empty states; Apps, Websites, and Timeline rendered populated states with counts.
+- [2026-07-01 11:12 UTC+1] Windows custom chrome maximize/restore behavior remained inconclusive via UI automation and still needs a manual mouse-driven check for resize handles, drag regions, and caption-button behavior.
 - Windows chrome: last confirmed working with `ExtendClientAreaToDecorationsHint=True` and `WindowDecorations=BorderOnly`.
 - Overview dashboard: #88 closed after build verification and Azure DevOps update.
 - Known open issue: macOS `Cmd+,` main-shell shortcut remains unverified/failing until tested again on a Mac.
