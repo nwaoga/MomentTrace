@@ -2,8 +2,6 @@
 
 ## Backlog
 
-- [ ] Focused stability QA sweep across Windows and macOS shell interactions.
-- [ ] Refresh sanitized README preview artwork for the current Avalonia shell.
 - [ ] Re-verify and fix macOS `Cmd+,` Settings shortcut from the main shell.
 - [ ] Add lightweight visual QA pass for dark, Starbucks, Nero, Costa, espresso, and light themes.
 - [ ] Add regression tests for privacy exclusions, settings persistence, and warning-free build expectations.
@@ -30,6 +28,8 @@
 - [x] Add macOS probe validation notes for app identity, browser URLs, screenshots, and reopen behavior.
 - [x] [2026-06-27 09:28 UTC+1] Immediate refresh pass for local mutations and view changes across Timeline and Overview.
 - [x] [2026-06-27 09:28 UTC+1] Capture Explorer folder paths so folder moments open the captured folder instead of generic Explorer.
+- [x] [2026-07-01 23:34 UTC+1] Focused stability QA sweep across Windows shell interactions; macOS shortcut verification remains a separate follow-up story.
+- [x] [2026-07-01 23:50 UTC+1] Refresh sanitized README preview artwork for the current Avalonia shell using SVG mock previews for Overview, timeline/detail, and theme collage.
 
 ## QA Notes
 
@@ -42,7 +42,10 @@ Use this section for short pass/fail notes during the next stability sweep.
 - [2026-07-01 11:12 UTC+1] UI automation pass confirmed Timeline and Overview navigation both render correctly on the current local dataset; Overview summary metrics, key moments, focus rhythm, and heatmap labels were visible.
 - [2026-07-01 11:12 UTC+1] Settings window opened successfully from the shell and showed healthy recorder/database/browser URL/storage status on this machine.
 - [2026-07-01 11:12 UTC+1] Library and Source filter pass succeeded on the current dataset: Saved Moments, Notes, Bookmarks, and Files rendered empty states; Apps, Websites, and Timeline rendered populated states with counts.
-- [2026-07-01 11:12 UTC+1] Windows custom chrome maximize/restore behavior remained inconclusive via UI automation and still needs a manual mouse-driven check for resize handles, drag regions, and caption-button behavior.
+- [2026-07-01 23:34 UTC+1] Windows custom chrome pass succeeded on this machine: Win32 reported `WS_THICKFRAME` enabled, maximize/restore changed window bounds correctly, and `WS_SYSMENU` was absent so native caption buttons did not reappear over the custom shell controls.
+- [2026-07-01 23:34 UTC+1] Single-instance relaunch check passed again after the chrome verification run.
+- [2026-07-01 23:34 UTC+1] Toolbar drag-region behavior was not mouse-verified in this pass; no regression was observed during maximize/restore automation.
+- [2026-07-01 23:45 UTC+1] Manual mouse verification passed for toolbar drag-region window movement on Windows.
 - Windows chrome: last confirmed working with `ExtendClientAreaToDecorationsHint=True` and `WindowDecorations=BorderOnly`.
 - Overview dashboard: #88 closed after build verification and Azure DevOps update.
 - Known open issue: macOS `Cmd+,` main-shell shortcut remains unverified/failing until tested again on a Mac.

@@ -8,17 +8,15 @@ For active roadmap, Azure DevOps mapping, QA priorities, and current risks, see 
 
 ## Preview
 
-![MomentTrace Avalonia shell preview](docs/assets/momenttrace-avalonia-shell-current.png)
+![MomentTrace Avalonia shell preview](docs/assets/momenttrace-avalonia-shell-current.svg)
 
-MomentTrace uses a Windows Timeline-inspired workspace with a more visual daily-story layer on top: left navigation, date and type filters, grouped moment sections, compact cards with app icons or website screenshots, and a contextual detail surface. The current Avalonia shell preview above reflects the active parity branch with shared presentation logic, custom chrome, and the newer Overview dashboard treatment.
-
-The public previews use sanitized demo activity rather than a live personal timeline, so they can show the current card/list layouts, real app icon slots, screenshots, themed modals, and top command chrome without exposing private work history.
+MomentTrace uses a Windows Timeline-inspired workspace with a more visual daily-story layer on top: Workspace, Library, and Sources navigation, date and type filters, grouped moment sections, compact cards with app icons or website screenshots, custom shell chrome, and the Overview daily story dashboard. The preview above uses sanitized demo activity rather than a live personal timeline.
 
 ### More Screens
 
-![MomentTrace timeline and detail preview](docs/assets/momenttrace-timeline-detail.png)
+![MomentTrace timeline and detail preview](docs/assets/momenttrace-timeline-detail.svg)
 
-![MomentTrace theme collage](docs/assets/momenttrace-theme-collage.png)
+![MomentTrace theme collage](docs/assets/momenttrace-theme-collage.svg)
 
 The recorder is session based. It polls the foreground window, keeps the same activity open while the app/window/resource remains active, and collapses repeated sequential entries in the UI so noisy history reads as one continuous moment. Rule-based local classification then groups nearby activity into memory-oriented sessions such as Website browsing, Development work, Communication, Document review, Research session, and Screenshot capture.
 
@@ -586,7 +584,7 @@ MomentTrace currently ships with seven app themes:
 - `Espresso (Mono)`
 - `Hot White`
 
-![MomentTrace theme collage](docs/assets/momenttrace-theme-collage.png)
+![MomentTrace theme collage](docs/assets/momenttrace-theme-collage.svg)
 
 Themes use six base colour roles: `Base`, `Surface`, `Text`, `MutedText`, `Accent`, and `Stroke`. The app derives supporting colours such as raised surfaces, card surfaces, hover fills, overlays, faint borders, glow accents, semantic status colours, rail/detail surfaces, and contrast-aware accent text from those roles. This keeps the themes coherent across WPF and Avalonia while still giving each workspace a distinct personality.
 

@@ -20,7 +20,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 ---
 
-## Current State (2026-06-27 18:40 UTC+1)
+## Current State (2026-07-01 23:50 UTC+1)
 
 **Phase:** Late-alpha hardening and polish.
 
@@ -34,10 +34,11 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Immediate local mutation refresh across Timeline, Overview, detail pane, and Library filters.
 - Detail-pane note editor now uses a theme-safe dark surface with readable text and focus states.
 - Explorer folder moments capture and reopen the captured folder path.
+- README preview artwork refreshed with sanitized SVG mockups for the current shell, Overview dashboard, timeline/detail pane, and theme collage.
 - Shared presentation builders for timeline, overview, and detail context.
 - Local SQLite activity store and Windows foreground recorder.
 
-**Last pushed:** `9cac53f` — desktop refresh and folder moment opening fix.
+**Last pushed:** `090703d` — record stability QA sweep notes.
 
 ---
 
@@ -78,7 +79,7 @@ Choose one track below. Each is scoped for a single focused agent session or sma
 
 **Why:** Recent shell work touched layout, chrome, navigation, and Overview interactions.
 
-**Status:** Recommended next as of 2026-06-27 18:40 UTC+1.
+**Status:** Completed 2026-07-01 23:34 UTC+1 on Windows. macOS shell verification remains tracked separately under Option D.
 
 **Scope:**
 
@@ -94,11 +95,20 @@ Choose one track below. Each is scoped for a single focused agent session or sma
 - Any confirmed regression has a concrete follow-up story.
 - No blocking shell regressions remain before the next feature slice.
 
+**Progress so far:**
+
+- Build verification passed on Windows.
+- Single-instance relaunch behavior passed.
+- Timeline, Overview, Settings, and Library/Source filter coverage passed on the current local dataset.
+- Windows custom chrome verification passed for thick-frame resize capability, maximize/restore, absence of native caption/sysmenu chrome over the custom shell controls, and manual toolbar drag-region movement.
+
 ---
 
 ### Option C — README Preview Refresh
 
 **Why:** The visible shell changed materially: left rail cleanup, Overview actions, and Windows chrome.
+
+**Status:** Completed 2026-07-01 23:50 UTC+1.
 
 **Scope:**
 
@@ -133,13 +143,13 @@ Choose one track below. Each is scoped for a single focused agent session or sma
 
 ## Recommended Priority
 
-1. **Option B** — Stability QA sweep.
-2. **Option C** — README preview refresh.
-3. **Option D** — macOS shortcut verification.
+1. **Option D** — macOS shortcut verification.
 
 Completed:
 
 - [2026-06-27 09:28 UTC+1] **Option A** — Immediate refresh pass.
+- [2026-07-01 23:34 UTC+1] **Option B** — Stability QA sweep on Windows.
+- [2026-07-01 23:50 UTC+1] **Option C** — README preview refresh.
 
 ---
 

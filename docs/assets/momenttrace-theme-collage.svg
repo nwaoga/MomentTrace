@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760" role="img" aria-labelledby="title desc">
+  <title id="title">MomentTrace theme collage</title>
+  <desc id="desc">Sanitized collage of the seven MomentTrace workspace themes with representative base, surface, text, and accent colours.</desc>
+  <rect width="1400" height="760" fill="#08111F"/>
+  <text x="80" y="72" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700" fill="#F4F7FB">MomentTrace themes</text>
+  <text x="80" y="104" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#A5B0C3">Seven palettes share the same shell structure while keeping category colours and accent contrast theme-aware.</text>
+
+  <!-- Midnight -->
+  <g transform="translate(80 140)">
+    <rect width="360" height="250" rx="18" fill="#08111F" stroke="#26344D"/>
+    <text x="20" y="34" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#F4F7FB">Midnight</text>
+    <rect x="20" y="52" width="320" height="120" rx="14" fill="#121D2F" stroke="#26344D"/>
+    <rect x="36" y="68" width="72" height="12" rx="6" fill="#8B5CF6"/>
+    <rect x="36" y="92" width="140" height="10" rx="5" fill="#F4F7FB"/>
+    <rect x="36" y="112" width="96" height="10" rx="5" fill="#A5B0C3"/>
+    <rect x="36" y="140" width="56" height="18" rx="9" fill="#8B5CF6"/>
+    <rect x="250" y="190" width="18" height="18" rx="4" fill="#08111F" stroke="#26344D"/>
+    <rect x="276" y="190" width="18" height="18" rx="4" fill="#121D2F" stroke="#26344D"/>
+    <rect x="302" y="190" width="18" height="18" rx="4" fill="#F4F7FB"/>
+    <rect x="328" y="190" width="18" height="18" rx="4" fill="#8B5CF6"/>
+  </g>
+
+  <!-- GitHub Light -->
+  <g transform="translate(470 140)">
+    <rect width="360" height="250" rx="18" fill="#F6F8FA" stroke="#D0D7DE"/>
+    <text x="20" y="34" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#24292F">GitHub Light</text>
+    <rect x="20" y="52" width="320" height="120" rx="14" fill="#FFFFFF" stroke="#D0D7DE"/>
+    <rect x="36" y="68" width="72" height="12" rx="6" fill="#0969DA"/>
+    <rect x="36" y="92" width="140" height="10" rx="5" fill="#24292F"/>
+    <rect x="36" y="112" width="96" height="10" rx="5" fill="#57606A"/>
+    <rect x="36" y="140" width="56" height="18" rx="9" fill="#0969DA"/>
+    <rect x="250" y="190" width="18" height="18" rx="4" fill="#F6F8FA" stroke="#D0D7DE"/>
+    <rect x="276" y="190" width="18" height="18" rx="4" fill="#FFFFFF" stroke="#D0D7DE"/>
+    <rect x="302" y="190" width="18" height="18" rx="4" fill="#24292F"/>
+    <rect x="328" y="190" width="18" height="18" rx="4" fill="#0969DA"/>
+  </g>
+
+  <!-- Starbucks Reserve -->
+  <g transform="translate(860 140)">
+    <rect width="360" height="250" rx="18" fill="#0F1512" stroke="#2E4D40"/>
+    <text x="20" y="34" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#F6F5F2">Starbucks Reserve</text>
+    <rect x="20" y="52" width="320" height="120" rx="14" fill="#17201C" stroke="#2E4D40"/>
+    <rect x="36" y="68" width="72" height="12" rx="6" fill="#00754A"/>
+    <rect x="36" y="92" width="140" height="10" rx="5" fill="#F6F5F2"/>
+    <rect x="36" y="112" width="96" height="10" rx="5" fill="#AAB6AF"/>
+    <rect x="36" y="140" width="56" height="18" rx="9" fill="#00754A"/>
+    <rect x="250" y="190" width="18" height="18" rx="4" fill="#0F1512" stroke="#2E4D40"/>
+    <rect x="276" y="190" width="18" height="18" rx="4" fill="#17201C" stroke="#2E4D40"/>
+    <rect x="302" y="190" width="18" height="18" rx="4" fill="#F6F5F2"/>
+    <rect x="328" y="190" width="18" height="18" rx="4" fill="#00754A"/>
+  </g>
+
+  <!-- Nero Roast -->
+  <g transform="translate(80 430)">
+    <rect width="360" height="250" rx="18" fill="#0E1624" stroke="#2D415C"/>
+    <text x="20" y="34" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#F5F2EC">Nero Roast</text>
+    <rect x="20" y="52" width="320" height="120" rx="14" fill="#172235" stroke="#2D415C"/>
+    <rect x="36" y="68" width="72" height="12" rx="6" fill="#6F8FB8"/>
+    <rect x="36" y="92" width="140" height="10" rx="5" fill="#F5F2EC"/>
+    <rect x="36" y="112" width="96" height="10" rx="5" fill="#AAB6C9"/>
+    <rect x="36" y="140" width="56" height="18" rx="9" fill="#6F8FB8"/>
+    <rect x="250" y="190" width="18" height="18" rx="4" fill="#0E1624" stroke="#2D415C"/>
+    <rect x="276" y="190" width="18" height="18" rx="4" fill="#172235" stroke="#2D415C"/>
+    <rect x="302" y="190" width="18" height="18" rx="4" fill="#F5F2EC"/>
+    <rect x="328" y="190" width="18" height="18" rx="4" fill="#6F8FB8"/>
+  </g>
+
+  <!-- Costa Afterglow -->
+  <g transform="translate(470 430)">
+    <rect width="360" height="250" rx="18" fill="#231019" stroke="#5E3044"/>
+    <text x="20" y="34" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#FFF5F7">Costa Afterglow</text>
+    <rect x="20" y="52" width="320" height="120" rx="14" fill="#311722" stroke="#5E3044"/>
+    <rect x="36" y="68" width="72" height="12" rx="6" fill="#C64176"/>
+    <rect x="36" y="92" width="140" height="10" rx="5" fill="#FFF5F7"/>
+    <rect x="36" y="112" width="96" height="10" rx="5" fill="#D8B7C0"/>
+    <rect x="36" y="140" width="56" height="18" rx="9" fill="#C64176"/>
+    <rect x="250" y="190" width="18" height="18" rx="4" fill="#231019" stroke="#5E3044"/>
+    <rect x="276" y="190" width="18" height="18" rx="4" fill="#311722" stroke="#5E3044"/>
+    <rect x="302" y="190" width="18" height="18" rx="4" fill="#FFF5F7"/>
+    <rect x="328" y="190" width="18" height="18" rx="4" fill="#C64176"/>
+  </g>
+
+  <!-- Espresso Mono -->
+  <g transform="translate(860 430)">
+    <rect width="170" height="250" rx="18" fill="#18110B" stroke="#5E432B"/>
+    <text x="20" y="34" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#F8F1E7">Espresso</text>
+    <rect x="20" y="52" width="130" height="120" rx="14" fill="#22170F" stroke="#5E432B"/>
+    <rect x="34" y="68" width="56" height="12" rx="6" fill="#C6844C"/>
+    <rect x="34" y="92" width="96" height="10" rx="5" fill="#F8F1E7"/>
+    <rect x="34" y="140" width="48" height="18" rx="9" fill="#C6844C"/>
+    <rect x="34" y="190" width="16" height="16" rx="4" fill="#C6844C"/>
+  </g>
+
+  <!-- Hot White -->
+  <g transform="translate(1050 430)">
+    <rect width="170" height="250" rx="18" fill="#F7F7F5" stroke="#D9D9D4"/>
+    <text x="20" y="34" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#1F2937">Hot White</text>
+    <rect x="20" y="52" width="130" height="120" rx="14" fill="#FFFFFF" stroke="#D9D9D4"/>
+    <rect x="34" y="68" width="56" height="12" rx="6" fill="#2563EB"/>
+    <rect x="34" y="92" width="96" height="10" rx="5" fill="#1F2937"/>
+    <rect x="34" y="140" width="48" height="18" rx="9" fill="#2563EB"/>
+    <rect x="34" y="190" width="16" height="16" rx="4" fill="#2563EB"/>
+  </g>
+</svg>

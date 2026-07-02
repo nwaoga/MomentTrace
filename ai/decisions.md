@@ -33,6 +33,8 @@
 - Split active planning content out of `README.md` into the repo-local `ai/` structure.
 - [2026-06-27 09:28 UTC+1] Completed the immediate refresh pass for pin, bookmark, note, delete, and timeline view-mode changes.
 - [2026-06-27 18:40 UTC+1] Verified the immediate refresh pass manually and fixed the remaining note-editor contrast clash in the dark shell.
+- [2026-07-01 23:34 UTC+1] Windows stability QA sweep is complete for the current shell; macOS shortcut verification remains a separate follow-up on real hardware.
+- [2026-07-01 23:50 UTC+1] README preview artwork now uses sanitized SVG mockups for the current Workspace/Library/Sources shell, Overview dashboard, timeline/detail pane, and theme collage.
 - [2026-06-27 09:28 UTC+1] Fixed Explorer folder moments so new captures reopen the captured folder path instead of bare Explorer.
 
 ## Open Decisions To Revisit
