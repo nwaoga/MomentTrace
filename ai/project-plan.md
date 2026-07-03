@@ -127,6 +127,8 @@ Choose one track below. Each is scoped for a single focused agent session or sma
 
 **Why:** `Cmd+,` remains the known macOS shell bug.
 
+**Handover:** See `ai/macos-handover.md` before pulling on the Mac.
+
 **Scope:**
 
 - Pull latest `main` on macOS.

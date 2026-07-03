@@ -11,6 +11,10 @@ Start here:
 5. `ai/prompts.md` - guardrails and reusable handoff prompts.
 6. `README.md` - stable product, build, run, architecture, and release documentation.
 
+When the current priority is macOS verification, also read:
+
+7. `ai/macos-handover.md` - current Mac pull/run/verify handoff for the next real-device pass.
+
 Keep `README.md` stable and user/developer-facing. Keep active plans, agent continuity, current priorities, and working notes under `ai/`.
 
 Do not commit local secrets. `ai/local-secrets.ps1` is ignored by Git.
