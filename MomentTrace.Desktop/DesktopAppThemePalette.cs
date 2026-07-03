@@ -98,7 +98,7 @@ public sealed record DesktopAppThemePalette(
     public Color Rail => IsGitHubLight ? Base : Surface;
     public Color TopCommand => IsGitHubLight ? Surface : Mix(Base, Surface, 0.36);
     public Color Detail => Card;
-    public Color AccentText => IsLight(Accent) ? FromHex("#111827") : FromHex("#FFFFFF");
+    public Color AccentText => PickReadableForeground(Accent, FromHex("#111827"), FromHex("#FFFFFF"));
     public Color SubtleText => IsGitHubLight
         ? Mix(MutedText, Surface, 0.92)
         : IsStarbucksReserve
@@ -314,10 +314,35 @@ public sealed record DesktopAppThemePalette(
             (byte)Math.Round((foreground.B * amount) + (background.B * inverse)));
     }
 
-    private static bool IsLight(Color color)
+    private static Color PickReadableForeground(Color background, Color optionA, Color optionB)
     {
-        var luminance = (0.2126 * color.R) + (0.7152 * color.G) + (0.0722 * color.B);
-        return luminance > 150;
+        var optionAContrast = ContrastRatio(background, optionA);
+        var optionBContrast = ContrastRatio(background, optionB);
+        return optionAContrast >= optionBContrast ? optionA : optionB;
+    }
+
+    private static double ContrastRatio(Color background, Color foreground)
+    {
+        var backgroundLuminance = RelativeLuminance(background);
+        var foregroundLuminance = RelativeLuminance(foreground);
+        var lighter = Math.Max(backgroundLuminance, foregroundLuminance);
+        var darker = Math.Min(backgroundLuminance, foregroundLuminance);
+        return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    private static double RelativeLuminance(Color color)
+    {
+        static double Channel(byte channel)
+        {
+            var normalized = channel / 255d;
+            return normalized <= 0.03928
+                ? normalized / 12.92
+                : Math.Pow((normalized + 0.055) / 1.055, 2.4);
+        }
+
+        return (0.2126 * Channel(color.R))
+            + (0.7152 * Channel(color.G))
+            + (0.0722 * Channel(color.B));
     }
 
     private static Color FromHex(string hex) => Color.Parse(hex);

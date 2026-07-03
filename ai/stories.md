@@ -30,6 +30,7 @@
 - [x] [2026-06-27 09:28 UTC+1] Capture Explorer folder paths so folder moments open the captured folder instead of generic Explorer.
 - [x] [2026-07-01 23:34 UTC+1] Focused stability QA sweep across Windows shell interactions; macOS shortcut verification remains a separate follow-up story.
 - [x] [2026-07-01 23:50 UTC+1] Refresh sanitized README preview artwork for the current Avalonia shell using SVG mock previews for Overview, timeline/detail, and theme collage.
+- [x] [2026-07-03 16:40 UTC+1] Fix accent-label contrast selection so active buttons and accent pills stay readable across all shipped desktop themes.
 
 ## QA Notes
 
@@ -46,6 +47,7 @@ Use this section for short pass/fail notes during the next stability sweep.
 - [2026-07-01 23:34 UTC+1] Single-instance relaunch check passed again after the chrome verification run.
 - [2026-07-01 23:34 UTC+1] Toolbar drag-region behavior was not mouse-verified in this pass; no regression was observed during maximize/restore automation.
 - [2026-07-01 23:45 UTC+1] Manual mouse verification passed for toolbar drag-region window movement on Windows.
+- [2026-07-03 16:40 UTC+1] Automated desktop theme contrast audit passed for base, surface, muted, and accent label pairings after switching accent foreground selection from a brightness threshold to a contrast-based pick; a broader manual visual theme sweep still remains open.
 - Windows chrome: last confirmed working with `ExtendClientAreaToDecorationsHint=True` and `WindowDecorations=BorderOnly`.
 - Overview dashboard: #88 closed after build verification and Azure DevOps update.
 - Known open issue: macOS `Cmd+,` main-shell shortcut remains unverified/failing until tested again on a Mac.

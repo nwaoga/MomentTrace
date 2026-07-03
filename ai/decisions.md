@@ -21,6 +21,7 @@
 - [2026-06-27 09:28 UTC+1] Windows Explorer folder moments should persist the captured folder path in `TimelineActivity.Resource`; the desktop opener should not fall back to launching generic Explorer when no folder path can be resolved.
 - [2026-06-27 10:05 UTC+1] Timeline and Overview refresh signatures should include per-moment saved-state metadata so pin, bookmark, and note mutations cannot be skipped as cache-equivalent UI states.
 - [2026-06-27 18:40 UTC+1] The detail-pane note editor should use a dedicated dark-surface textbox style so Avalonia template internals cannot fall back to a light background and low-contrast text.
+- [2026-07-03 16:40 UTC+1] Accent foreground text in the desktop theme palette should be chosen by measured contrast against the accent fill rather than a simple brightness threshold so Nero and espresso theme labels stay readable.
 
 ## Recently Completed
 
@@ -36,6 +37,7 @@
 - [2026-07-01 23:34 UTC+1] Windows stability QA sweep is complete for the current shell; macOS shortcut verification remains a separate follow-up on real hardware.
 - [2026-07-01 23:50 UTC+1] README preview artwork now uses sanitized SVG mockups for the current Workspace/Library/Sources shell, Overview dashboard, timeline/detail pane, and theme collage.
 - [2026-06-27 09:28 UTC+1] Fixed Explorer folder moments so new captures reopen the captured folder path instead of bare Explorer.
+- [2026-07-03 16:40 UTC+1] Fixed theme accent label contrast by switching `DesktopAppThemePalette.AccentText` to a contrast-based foreground selection.
 
 ## Open Decisions To Revisit
 

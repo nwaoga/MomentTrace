@@ -38,7 +38,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Shared presentation builders for timeline, overview, and detail context.
 - Local SQLite activity store and Windows foreground recorder.
 
-**Last pushed:** `6c24632` — add macOS verification handover.
+**Last pushed:** `71361f1` — sync plan handover metadata.
 
 ---
 
