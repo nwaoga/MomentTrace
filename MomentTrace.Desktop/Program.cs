@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using System;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Threading;
 
 namespace MomentTrace.Desktop;
@@ -89,6 +90,7 @@ internal static class SingleInstanceGuard
         return isFirstInstance;
     }
 
+    [SupportedOSPlatform("windows")]
     public static void SignalExistingInstance()
     {
         try

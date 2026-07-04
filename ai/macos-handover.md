@@ -2,15 +2,15 @@
 
 ## Purpose
 
-Use this handover after pulling the latest `main` on a real Mac.
+Use this handover when a future Mac shell sweep needs to re-check desktop shortcuts or native chrome.
 
-The current top Mac-specific priority is **Option D — macOS shortcut verification** from `ai/project-plan.md`.
+The former top Mac-specific priority, **Option D — macOS shortcut verification**, was completed on 2026-07-04 16:28 UTC+1.
 
 ## Current Goal
 
-Re-verify whether the Avalonia shell still has the known macOS shortcut issue where `Cmd+,` does not reliably open Settings from the main window.
+No Mac shortcut blocker is currently open.
 
-Also re-check the nearby shortcuts while the shell is open:
+If macOS shell behavior changes, re-check these shortcuts while the shell is open:
 
 - `Cmd+,`
 - `Cmd+F`
@@ -26,16 +26,22 @@ These do **not** need to be repeated on the Mac unless you see a Mac-specific re
 - Windows stability QA sweep
 - README preview refresh with sanitized SVG mockups
 
-## Known Open Mac Issue
+## Latest Verified Result
 
-Current known issue before this handover:
+Verified on macOS 26.5 with .NET SDK 8.0.422:
 
-- `Cmd+,` may fail to open Settings from the main shell
+- `Cmd+,` opened Settings from the main shell.
+- `Cmd+F` focused search.
+- Physical number-row `Cmd+1` activated Timeline.
+- Physical number-row `Cmd+2` activated Overview.
+- `Cmd+W` closed Settings and then the app.
+- Settings and the main shell used native traffic-light window chrome.
 
 Current expectation:
 
-- Settings windows on macOS should use native traffic-light window chrome
-- The main shell should use native traffic-light controls rather than the Windows custom caption buttons
+- Settings windows on macOS should use native traffic-light window chrome.
+- The main shell should use native traffic-light controls rather than the Windows custom caption buttons.
+- Shell-level Command shortcuts should continue to work when child controls such as search have focus.
 
 ## Pull And Build
 
@@ -94,6 +100,4 @@ Once verified, update:
 - `ai/decisions.md`
 - `README.md` Mac validation notes if behavior changed
 
-If `Cmd+,` still fails, leave `ai/project-plan.md` with Option D as the top remaining priority.
-
-If `Cmd+,` works reliably and the other shortcuts pass, Option D can be marked complete.
+If `Cmd+,` or number-row workspace shortcuts regress, reopen a story in `ai/stories.md` and make the Mac sweep the top priority again.

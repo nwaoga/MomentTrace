@@ -461,17 +461,17 @@ dotnet run --project ./MomentTrace.Desktop/MomentTrace.Desktop.csproj
 Date:
 
 ```text
-2026-06-20
+2026-07-04
 ```
 
 Machine / environment:
 
 ```text
 Mac model: unavailable from sandboxed shell
-macOS version: 26.4.1
-.NET SDK: 9.0.315
+macOS version: 26.5
+.NET SDK: 8.0.422
 Branch: main
-Commit: e306ede015475a786e663f970ace8fd7342eea51
+Commit: local verification after pulling latest main
 ```
 
 Main window chrome result:
@@ -483,17 +483,17 @@ The main window used native macOS traffic-light controls, did not show the older
 Shortcut results:
 
 ```text
-Cmd+, : No. It still did not reliably open Settings from the main window during this sweep, even after broader key matching and a native Preferences menu attempt.
-Cmd+F : Not re-verified during this pass because the sweep narrowed onto the broken Cmd+, path.
-Cmd+1 : Not re-verified during this pass because the sweep narrowed onto the broken Cmd+, path.
-Cmd+2 : Not re-verified during this pass because the sweep narrowed onto the broken Cmd+, path.
-Cmd+W : Yes. It still worked for window close behavior.
+Cmd+, : Yes. It opened Settings reliably from the main shell.
+Cmd+F : Yes. It focused the search box.
+Cmd+1 : Yes. It switched to Timeline when sent as the physical number-row key.
+Cmd+2 : Yes. It switched to Overview when sent as the physical number-row key.
+Cmd+W : Yes. It closed Settings when Settings was focused and closed the app from the main shell.
 ```
 
 Settings result:
 
 ```text
-Settings used native macOS window chrome and did not show the older custom Settings titlebar. Cmd+, inside Settings worked when tested manually, so the remaining shortcut issue appears limited to opening Settings from the main shell.
+Settings used native macOS window chrome and did not show the older custom Settings titlebar. Cmd+, inside Settings closed it cleanly.
 ```
 
 Reopen regression check:
@@ -507,8 +507,9 @@ Notes:
 
 ```text
 - No duplicated chrome controls were observed in the main window or Settings.
-- The remaining known macOS shortcut bug is that Cmd+, does not reliably open Settings from the main window.
-- Reopen behavior was not re-run in this pass because the sweep focused on the shortcut regression.
+- The former Cmd+, main-shell issue is resolved.
+- A tunneling shell key handler keeps Command-key shortcuts available when child controls such as search have focus.
+- Reopen behavior was not re-run in this pass because the sweep focused on shortcut and chrome verification.
 ```
 
 ## Local Data

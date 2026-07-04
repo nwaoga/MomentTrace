@@ -2,7 +2,6 @@
 
 ## Backlog
 
-- [ ] Re-verify and fix macOS `Cmd+,` Settings shortcut from the main shell.
 - [ ] Add lightweight visual QA pass for dark, Starbucks, Nero, Costa, espresso, and light themes.
 - [ ] Add regression tests for privacy exclusions, settings persistence, and warning-free build expectations.
 - [ ] Add a Settings option to delete local data when the user wants full privacy cleanup.
@@ -31,6 +30,7 @@
 - [x] [2026-07-01 23:34 UTC+1] Focused stability QA sweep across Windows shell interactions; macOS shortcut verification remains a separate follow-up story.
 - [x] [2026-07-01 23:50 UTC+1] Refresh sanitized README preview artwork for the current Avalonia shell using SVG mock previews for Overview, timeline/detail, and theme collage.
 - [x] [2026-07-03 16:40 UTC+1] Fix accent-label contrast selection so active buttons and accent pills stay readable across all shipped desktop themes.
+- [x] [2026-07-04 16:28 UTC+1] Verify and fix macOS desktop shortcuts: `Cmd+,`, `Cmd+F`, `Cmd+1`, `Cmd+2`, and `Cmd+W`.
 
 ## QA Notes
 
@@ -48,6 +48,6 @@ Use this section for short pass/fail notes during the next stability sweep.
 - [2026-07-01 23:34 UTC+1] Toolbar drag-region behavior was not mouse-verified in this pass; no regression was observed during maximize/restore automation.
 - [2026-07-01 23:45 UTC+1] Manual mouse verification passed for toolbar drag-region window movement on Windows.
 - [2026-07-03 16:40 UTC+1] Automated desktop theme contrast audit passed for base, surface, muted, and accent label pairings after switching accent foreground selection from a brightness threshold to a contrast-based pick; a broader manual visual theme sweep still remains open.
+- [2026-07-04 16:28 UTC+1] macOS desktop shortcut pass succeeded on macOS 26.5 after routing shell shortcuts through a tunneling key handler. `Cmd+,` opened Settings, `Cmd+,` and `Cmd+W` closed Settings, `Cmd+F` focused search, physical `Cmd+1` activated Timeline, physical `Cmd+2` activated Overview, and `Cmd+W` closed the app. Main and Settings windows both used native traffic-light chrome.
 - Windows chrome: last confirmed working with `ExtendClientAreaToDecorationsHint=True` and `WindowDecorations=BorderOnly`.
 - Overview dashboard: #88 closed after build verification and Azure DevOps update.
-- Known open issue: macOS `Cmd+,` main-shell shortcut remains unverified/failing until tested again on a Mac.

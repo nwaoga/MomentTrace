@@ -20,7 +20,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 ---
 
-## Current State (2026-07-01 23:50 UTC+1)
+## Current State (2026-07-04 16:28 UTC+1)
 
 **Phase:** Late-alpha hardening and polish.
 
@@ -35,6 +35,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Detail-pane note editor now uses a theme-safe dark surface with readable text and focus states.
 - Explorer folder moments capture and reopen the captured folder path.
 - README preview artwork refreshed with sanitized SVG mockups for the current shell, Overview dashboard, timeline/detail pane, and theme collage.
+- macOS shell shortcut verification passed for Settings, search, Timeline, Overview, and close behavior.
 - Shared presentation builders for timeline, overview, and detail context.
 - Local SQLite activity store and Windows foreground recorder.
 
@@ -125,9 +126,11 @@ Choose one track below. Each is scoped for a single focused agent session or sma
 
 ### Option D — macOS Shortcut Verification
 
-**Why:** `Cmd+,` remains the known macOS shell bug.
+**Why:** Confirm the macOS shell shortcut pass after the known `Cmd+,` issue.
 
 **Handover:** See `ai/macos-handover.md` before pulling on the Mac.
+
+**Status:** Completed 2026-07-04 16:28 UTC+1.
 
 **Scope:**
 
@@ -145,13 +148,14 @@ Choose one track below. Each is scoped for a single focused agent session or sma
 
 ## Recommended Priority
 
-1. **Option D** — macOS shortcut verification.
+1. **Theme visual QA pass** — dark, Starbucks, Nero, Costa, espresso, and light themes.
 
 Completed:
 
 - [2026-06-27 09:28 UTC+1] **Option A** — Immediate refresh pass.
 - [2026-07-01 23:34 UTC+1] **Option B** — Stability QA sweep on Windows.
 - [2026-07-01 23:50 UTC+1] **Option C** — README preview refresh.
+- [2026-07-04 16:28 UTC+1] **Option D** — macOS shortcut verification.
 
 ---
 
