@@ -54,6 +54,31 @@
       <Setter Property="CornerRadius" Value="8" />
       <Setter Property="MinHeight" Value="40" />
     </Style>
+    <Style Selector="ComboBox.settingsCombo:dropdownopen">
+      <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="ComboBox.settingsCombo /template/ Border#Background">
+      <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeBrush}" />
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="ComboBox.settingsCombo:pointerover /template/ Border#Background">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="ComboBox.settingsCombo:focus /template/ Border#Background">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="ComboBox.settingsCombo:dropdownopen /template/ Border#Background">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="ComboBox.settingsCombo /template/ ToggleButton">
+      <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+    <Style Selector="ComboBox.settingsCombo /template/ Path">
+      <Setter Property="Fill" Value="{DynamicResource MutedTextBrush}" />
+    </Style>
     <Style Selector="TextBox.settingsText">
       <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
       <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />

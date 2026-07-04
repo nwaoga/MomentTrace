@@ -286,6 +286,89 @@
             <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
         </Style>
+        <Style Selector="ComboBox.filter:dropdownopen">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="ComboBox.filter /template/ Border#Background">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeStrongBrush}" />
+            <Setter Property="CornerRadius" Value="10" />
+        </Style>
+        <Style Selector="ComboBox.filter:pointerover /template/ Border#Background">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="ComboBox.filter:focus /template/ Border#Background">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="ComboBox.filter:dropdownopen /template/ Border#Background">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="ComboBox.filter /template/ ToggleButton">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="ComboBox.filter /template/ ToggleButton:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="ComboBox.filter /template/ ToggleButton:pressed">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="ComboBox.filter /template/ Path">
+            <Setter Property="Fill" Value="{DynamicResource MutedTextBrush}" />
+        </Style>
+        <Style Selector="ComboBoxItem">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="ComboBoxItem:pointerover">
+            <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+        </Style>
+        <Style Selector="ComboBoxItem:selected">
+            <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="ComboBoxItem /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="ComboBox#DateFilterComboBox /template/ Border#Background, ComboBox#TypeFilterComboBox /template/ Border#Background">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeStrongBrush}" />
+            <Setter Property="CornerRadius" Value="10" />
+        </Style>
+        <Style Selector="ComboBox#DateFilterComboBox:pointerover /template/ Border#Background, ComboBox#TypeFilterComboBox:pointerover /template/ Border#Background">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="ComboBox#DateFilterComboBox:focus /template/ Border#Background, ComboBox#TypeFilterComboBox:focus /template/ Border#Background">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="ComboBox#DateFilterComboBox:dropdownopen /template/ Border#Background, ComboBox#TypeFilterComboBox:dropdownopen /template/ Border#Background">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="ComboBox#DateFilterComboBox /template/ ToggleButton, ComboBox#TypeFilterComboBox /template/ ToggleButton">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="ComboBox#DateFilterComboBox /template/ ContentPresenter, ComboBox#TypeFilterComboBox /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="ComboBox#DateFilterComboBox /template/ Path, ComboBox#TypeFilterComboBox /template/ Path">
+            <Setter Property="Fill" Value="{DynamicResource MutedTextBrush}" />
+        </Style>
         <Style Selector="TextBox.searchBox /template/ TextBlock#watermark">
             <Setter Property="Foreground" Value="{DynamicResource SubtleTextBrush}" />
             <Setter Property="Opacity" Value="1" />
