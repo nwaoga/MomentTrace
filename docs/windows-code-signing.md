@@ -6,7 +6,7 @@ MomentTrace Windows releases should be signed so SmartScreen and installer promp
 
 Use an OV, EV, or trusted cloud-backed code signing certificate issued for the publishing entity. The release flow signs:
 
-- `MomentTrace.App.exe` after `dotnet publish`
+- `MomentTrace.Desktop.exe` after `dotnet publish`
 - `MomentTrace-<version>-win-x64-setup.exe` after Inno Setup packaging
 
 Portable zip contents inherit the signed executable.
@@ -43,7 +43,7 @@ To sign existing artifacts directly:
 
 ```powershell
 .\scripts\sign-windows-artifacts.ps1 `
-  -Path .\publish\win-x64\MomentTrace.App.exe, .\dist\MomentTrace-0.1.0-win-x64-setup.exe `
+  -Path .\publish\win-x64\MomentTrace.Desktop.exe, .\dist\MomentTrace-0.1.0-win-x64-setup.exe `
   -CertificateThumbprint "<certificate-thumbprint>"
 ```
 
@@ -67,7 +67,7 @@ The release job:
 3. Publishes the Windows app.
 4. Packages the portable zip.
 5. Builds the Inno Setup installer.
-6. Signs `MomentTrace.App.exe` and the setup executable when a certificate is available.
+6. Signs `MomentTrace.Desktop.exe` and the setup executable when a certificate is available.
 7. Uploads release artifacts.
 
 Prerelease tags such as `v0.1.1-beta.1` are supported. The release workflow keeps assembly and file versions numeric, names artifacts with the prerelease label, and marks the GitHub Release as a prerelease.

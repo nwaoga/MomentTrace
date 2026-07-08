@@ -37,7 +37,7 @@ The first beta is focused on local-first recall. MomentTrace stores data on your
 
 ## Landing Page Outline
 
-A static landing page draft is available at `docs/landing/index.html`. It uses sanitized product visuals from `docs/assets/` and points the beta CTA at `v0.1.1-beta.4`.
+A static landing page draft is available at `docs/landing/index.html`. It uses sanitized product visuals from `docs/assets/` and points the beta CTA at `v0.1.1-beta.5`.
 
 ### Hero
 
@@ -56,7 +56,7 @@ MomentTrace helps you retrace apps, websites, screenshots, notes, and saved mome
 Primary CTA:
 
 ```text
-Download Windows Beta
+Download Beta
 ```
 
 Secondary CTA:
@@ -150,7 +150,7 @@ Length: 45 to 60 seconds.
 ### Launch Post
 
 ```text
-I am launching the first Windows beta of MomentTrace.
+I am launching the first desktop beta of MomentTrace for Windows and macOS.
 
 It is a local-first desktop memory timeline: apps, websites, screenshots, notes, saved moments, and a visual recap of your day.
 
@@ -197,9 +197,10 @@ Productivity, Windows, Privacy, Developer Tools, Personal Analytics
 
 ## Beta Release Checklist
 
-- GitHub prerelease exists for `v0.1.1-beta.4`.
-- Installer and portable zip are attached to the release.
+- GitHub prerelease exists for `v0.1.1-beta.5`.
+- Windows installer, Windows portable zip, and macOS app zip are attached to the release.
 - Clean Windows install smoke test passes.
+- macOS app zip extracts to `MomentTrace.app`.
 - App launches after install.
 - First-run onboarding appears.
 - Timeline starts recording.
@@ -213,7 +214,7 @@ Productivity, Windows, Privacy, Developer Tools, Personal Analytics
 Primary:
 
 ```text
-Download Windows Beta
+Download Beta
 ```
 
 Secondary:

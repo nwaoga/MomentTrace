@@ -40,7 +40,7 @@ On first run, MomentTrace explains the local-first storage model, keeps adult-si
 
 ![MomentTrace release flow](docs/assets/momenttrace-release-flow.svg)
 
-The Windows installer is built with Inno Setup from a self-contained `win-x64` publish. GitHub Actions can create a downloadable release from a version tag, while the same installer script works locally for test builds.
+The Windows installer is built with Inno Setup from a self-contained `MomentTrace.Desktop` `win-x64` publish. GitHub Actions creates Windows and macOS artifacts from the same version tag, while the local installer script still works for test builds.
 
 ## Current Features
 
@@ -720,8 +720,9 @@ No AI provider is registered today. AI summaries, recommendations, and conversat
 ## Publish A Standalone Windows Build
 
 ```powershell
-dotnet publish .\MomentTrace.App\MomentTrace.App.csproj `
+dotnet publish .\MomentTrace.Desktop\MomentTrace.Desktop.csproj `
   -c Release `
+  -f net8.0-windows `
   -r win-x64 `
   --self-contained true `
   -p:PublishSingleFile=true `
@@ -732,10 +733,10 @@ dotnet publish .\MomentTrace.App\MomentTrace.App.csproj `
 The published executable is written to:
 
 ```text
-publish\win-x64\MomentTrace.App.exe
+publish\win-x64\MomentTrace.Desktop.exe
 ```
 
-MomentTrace includes a project-owned app icon at `MomentTrace.App\Assets\MomentTrace.ico`. The icon is embedded into the published executable and is also used by the WPF window, tray icon, installer, Start Menu shortcut, and uninstall entry.
+MomentTrace includes a project-owned app icon at `MomentTrace.App\Assets\MomentTrace.ico`. The icon is embedded into the published executable and is also used by the desktop window, installer, Start Menu shortcut, and uninstall entry.
 
 ## Build The Windows Installer
 
@@ -759,7 +760,7 @@ dist\MomentTrace-0.1.0-win-x64-setup.exe
 
 The installer creates a Start Menu shortcut, optionally creates a Desktop shortcut, uses the MomentTrace icon, launches the app after install when selected, and registers a normal Windows uninstall entry. During uninstall it stops the running app if needed and removes MomentTrace startup registry values for `MomentTrace` and the legacy `Nwaoga Timeline` value.
 
-Windows release signing is documented in [docs/windows-code-signing.md](docs/windows-code-signing.md). The installer script can sign `MomentTrace.App.exe` and the setup executable when a signing certificate thumbprint is supplied, and the GitHub release workflow uses signing secrets when configured.
+Windows release signing is documented in [docs/windows-code-signing.md](docs/windows-code-signing.md). The installer script can sign `MomentTrace.Desktop.exe` and the setup executable when a signing certificate thumbprint is supplied, and the GitHub release workflow uses signing secrets when configured.
 
 Local history and settings under `%AppData%\MomentTrace` are intentionally left in place during uninstall so the setup flow does not accidentally delete the user's timeline. Users who want a full privacy cleanup can use Settings > Local activity data > Delete all local data, which clears local history, previews, icons, settings, and cached privacy blocklists before closing the app.
 
@@ -768,7 +769,7 @@ Local history and settings under `%AppData%\MomentTrace` are intentionally left 
 GitHub Actions are used for build checks and downloadable releases:
 
 - `.github/workflows/ci.yml` builds the solution on pushes and pull requests to `main`.
-- `.github/workflows/release.yml` creates a versioned Windows installer plus a portable zip and attaches both to a GitHub Release.
+- `.github/workflows/release.yml` creates a versioned Windows installer, Windows portable zip, and macOS app zip, then attaches them to one GitHub Release.
 
 To create a release from Git:
 
@@ -777,7 +778,7 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
-The release workflow validates the `vMAJOR.MINOR.PATCH` tag format, imports the Windows signing certificate when signing secrets are configured, publishes the app as a self-contained Windows `win-x64` build, stamps the assembly/file version, creates a setup executable named like `MomentTrace-0.1.0-win-x64-setup.exe`, creates a portable zip named like `MomentTrace-0.1.0-win-x64.zip`, and uploads both to the GitHub Release.
+The release workflow validates the `vMAJOR.MINOR.PATCH` tag format, imports the Windows signing certificate when signing secrets are configured, publishes the Avalonia desktop app as a self-contained Windows `win-x64` build and macOS `osx-arm64` build, stamps the assembly/file version, creates a setup executable named like `MomentTrace-0.1.0-win-x64-setup.exe`, creates a Windows portable zip named like `MomentTrace-0.1.0-win-x64.zip`, creates a macOS app zip named like `MomentTrace-0.1.0-macos-arm64.zip`, and uploads all release artifacts to the GitHub Release.
 
 You can also run the **Release** workflow manually in GitHub Actions and provide a version such as `v0.1.0`. Prerelease tags such as `v0.1.1-beta.1` are supported and are published as GitHub prereleases while keeping assembly/file versions numeric.
 

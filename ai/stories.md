@@ -36,7 +36,8 @@ No open local backlog items. Pull the next Azure DevOps priority when ready.
 - [x] [2026-07-08 23:05 UTC+1] `AB#70`: Add optional Windows code-signing hooks for release artifacts and document verified publisher setup.
 - [x] [2026-07-08 23:22 UTC+1] Add beta tag support to the GitHub release workflow so test releases can ship as prereleases before a stable marketing launch.
 - [x] [2026-07-08 23:34 UTC+1] Add a marketing launch kit with positioning, landing page copy, social posts, demo script, screenshots, and beta-release checklist.
-- [x] [2026-07-08 23:45 UTC+1] Add a static landing page draft under `docs/landing/` for the Windows beta launch.
+- [x] [2026-07-08 23:45 UTC+1] Add a static landing page draft under `docs/landing/` for the desktop beta launch.
+- [x] [2026-07-08 23:58 UTC+1] Update release workflow to build Windows and macOS artifacts together from the Avalonia desktop shell.
 
 ## QA Notes
 

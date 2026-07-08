@@ -3,6 +3,9 @@ param(
     [string]$AssemblyVersion = "",
     [string]$Configuration = "Release",
     [string]$Runtime = "win-x64",
+    [string]$Framework = "net8.0-windows",
+    [string]$ProjectPath = "",
+    [string]$ExecutableName = "MomentTrace.Desktop.exe",
     [string]$PublishDir = "",
     [string]$OutputDir = "",
     [string]$CertificateThumbprint = "",
@@ -15,7 +18,10 @@ param(
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$projectPath = Join-Path $repoRoot "MomentTrace.App\MomentTrace.App.csproj"
+if ([string]::IsNullOrWhiteSpace($ProjectPath)) {
+    $ProjectPath = Join-Path $repoRoot "MomentTrace.Desktop\MomentTrace.Desktop.csproj"
+}
+
 $installerScript = Join-Path $repoRoot "installer\MomentTrace.iss"
 $signScript = Join-Path $repoRoot "scripts\sign-windows-artifacts.ps1"
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "MomentTraceInstaller"
@@ -73,8 +79,9 @@ if (Test-Path $stagingOutputDir) {
 
 New-Item -ItemType Directory -Force -Path $stagingOutputDir | Out-Null
 
-& dotnet publish $projectPath `
+& dotnet publish $ProjectPath `
     --configuration $Configuration `
+    --framework $Framework `
     --runtime $Runtime `
     --self-contained true `
     -p:PublishSingleFile=true `
@@ -91,7 +98,7 @@ if ($LASTEXITCODE -ne 0) {
     throw "dotnet publish failed with exit code $LASTEXITCODE."
 }
 
-$publishedExePath = Join-Path $PublishDir "MomentTrace.App.exe"
+$publishedExePath = Join-Path $PublishDir $ExecutableName
 if (-not [string]::IsNullOrWhiteSpace($CertificateThumbprint)) {
     & $signScript `
         -Path $publishedExePath `
@@ -124,6 +131,7 @@ if ($null -eq $isccPath) {
 
 & $isccPath `
     "/DAppVersion=$Version" `
+    "/DAppExeName=$ExecutableName" `
     "/DSourceDir=$PublishDir" `
     "/O$stagingOutputDir" `
     $installerScript

@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version, for example v0.1.0"
+        description: "Release version, for example v0.1.0 or v0.1.1-beta.5"
         required: true
         type: string
 
@@ -15,9 +15,45 @@ permissions:
   contents: write
 
 jobs:
-  release:
-    name: Build and publish release
+  prepare:
+    name: Resolve release version
+    runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.version.outputs.release_tag }}
+      package_version: ${{ steps.version.outputs.package_version }}
+      package_label: ${{ steps.version.outputs.package_label }}
+      is_prerelease: ${{ steps.version.outputs.is_prerelease }}
+      windows_artifact_name: ${{ steps.version.outputs.windows_artifact_name }}
+      macos_artifact_name: ${{ steps.version.outputs.macos_artifact_name }}
+    steps:
+      - name: Resolve version
+        id: version
+        shell: pwsh
+        run: |
+          $tag = if ("${{ github.event_name }}" -eq "workflow_dispatch") { "${{ inputs.version }}" } else { "${{ github.ref_name }}" }
+          $versionMatch = [regex]::Match($tag, '^v(?<base>\d+\.\d+\.\d+)(?<suffix>-[0-9A-Za-z][0-9A-Za-z.-]*)?$')
+          if (-not $versionMatch.Success) {
+            throw "Version must use vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-prerelease format, for example v0.1.0 or v0.1.1-beta.5."
+          }
+
+          $version = $versionMatch.Groups["base"].Value
+          $suffix = $versionMatch.Groups["suffix"].Value
+          $packageLabel = "$version$suffix"
+          $isPrerelease = -not [string]::IsNullOrWhiteSpace($suffix)
+          $windowsArtifactName = "MomentTrace-$packageLabel-win-x64"
+          $macosArtifactName = "MomentTrace-$packageLabel-macos-arm64"
+
+          "release_tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "package_version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "package_label=$packageLabel" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "is_prerelease=$isPrerelease" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "windows_artifact_name=$windowsArtifactName" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "macos_artifact_name=$macosArtifactName" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+  build-windows:
+    name: Build Windows release
     runs-on: windows-latest
+    needs: prepare
 
     steps:
       - name: Checkout
@@ -29,32 +65,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-
-      - name: Resolve version
-        id: version
-        shell: pwsh
-        run: |
-          $tag = if ("${{ github.event_name }}" -eq "workflow_dispatch") { "${{ inputs.version }}" } else { "${{ github.ref_name }}" }
-          $versionMatch = [regex]::Match($tag, '^v(?<base>\d+\.\d+\.\d+)(?<suffix>-[0-9A-Za-z][0-9A-Za-z.-]*)?$')
-          if (-not $versionMatch.Success) {
-            throw "Version must use vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-prerelease format, for example v0.1.0 or v0.1.1-beta.1."
-          }
-
-          $version = $versionMatch.Groups["base"].Value
-          $suffix = $versionMatch.Groups["suffix"].Value
-          $packageLabel = "$version$suffix"
-          $isPrerelease = -not [string]::IsNullOrWhiteSpace($suffix)
-          $artifactName = "MomentTrace-$packageLabel-win-x64"
-          "RELEASE_TAG=$tag" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "PACKAGE_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "PACKAGE_LABEL=$packageLabel" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "RELEASE_IS_PRERELEASE=$isPrerelease" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "ARTIFACT_NAME=$artifactName" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "release_tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          "package_version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          "package_label=$packageLabel" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          "artifact_name=$artifactName" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          "is_prerelease=$isPrerelease" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Import Windows signing certificate
         shell: pwsh
@@ -74,34 +84,10 @@ jobs:
           "WINDOWS_SIGNING_CERT_THUMBPRINT=$($cert.Thumbprint)" | Out-File -FilePath $env:GITHUB_ENV -Append
           Remove-Item -LiteralPath $certPath -Force
 
-      - name: Restore
-        run: dotnet restore .\MomentTrace.App\MomentTrace.App.csproj --runtime win-x64
-
-      - name: Publish Windows app
-        run: >
-          dotnet publish .\MomentTrace.App\MomentTrace.App.csproj
-          --configuration Release
-          --runtime win-x64
-          --self-contained true
-          --no-restore
-          -p:PublishSingleFile=true
-          -p:IncludeNativeLibrariesForSelfExtract=true
-          -p:Version=${{ steps.version.outputs.package_version }}
-          -p:AssemblyVersion=${{ steps.version.outputs.package_version }}.0
-          -p:FileVersion=${{ steps.version.outputs.package_version }}.0
-          -p:InformationalVersion=${{ steps.version.outputs.release_tag }}
-          --output .\artifacts\${{ steps.version.outputs.artifact_name }}
-
-      - name: Package zip
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path .\dist | Out-Null
-          Compress-Archive -Path ".\artifacts\${{ steps.version.outputs.artifact_name }}\*" -DestinationPath ".\dist\${{ steps.version.outputs.artifact_name }}.zip" -Force
-
       - name: Install Inno Setup
         run: choco install innosetup --no-progress -y
 
-      - name: Package installer
+      - name: Build Windows installer
         shell: pwsh
         run: |
           $signingArgs = @()
@@ -112,19 +98,78 @@ jobs:
           }
 
           .\scripts\build-installer.ps1 `
-            -Version "${{ steps.version.outputs.package_label }}" `
-            -AssemblyVersion "${{ steps.version.outputs.package_version }}" `
-            -PublishDir ".\artifacts\${{ steps.version.outputs.artifact_name }}" `
+            -Version "${{ needs.prepare.outputs.package_label }}" `
+            -AssemblyVersion "${{ needs.prepare.outputs.package_version }}" `
+            -PublishDir ".\artifacts\${{ needs.prepare.outputs.windows_artifact_name }}" `
             -OutputDir ".\dist" `
             @signingArgs
 
-      - name: Upload workflow artifact
+      - name: Package Windows portable zip
+        shell: pwsh
+        run: |
+          Compress-Archive `
+            -Path ".\artifacts\${{ needs.prepare.outputs.windows_artifact_name }}\*" `
+            -DestinationPath ".\dist\${{ needs.prepare.outputs.windows_artifact_name }}.zip" `
+            -Force
+
+      - name: Upload Windows release artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.version.outputs.artifact_name }}
+          name: ${{ needs.prepare.outputs.windows_artifact_name }}
           path: |
-            .\dist\${{ steps.version.outputs.artifact_name }}.zip
-            .\dist\MomentTrace-${{ steps.version.outputs.package_label }}-win-x64-setup.exe
+            .\dist\${{ needs.prepare.outputs.windows_artifact_name }}.zip
+            .\dist\MomentTrace-${{ needs.prepare.outputs.package_label }}-win-x64-setup.exe
+
+  build-macos:
+    name: Build macOS release
+    runs-on: macos-latest
+    needs: prepare
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build macOS app bundle
+        shell: pwsh
+        run: |
+          ./scripts/build-macos-app.ps1 `
+            -Version "${{ needs.prepare.outputs.package_label }}" `
+            -AssemblyVersion "${{ needs.prepare.outputs.package_version }}" `
+            -PublishDir "./artifacts/${{ needs.prepare.outputs.macos_artifact_name }}-publish" `
+            -OutputDir "./dist"
+
+          Move-Item `
+            -LiteralPath "./dist/MomentTrace-${{ needs.prepare.outputs.package_label }}-macos-arm64.zip" `
+            -Destination "./dist/${{ needs.prepare.outputs.macos_artifact_name }}.zip" `
+            -Force
+
+      - name: Upload macOS release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.prepare.outputs.macos_artifact_name }}
+          path: ./dist/${{ needs.prepare.outputs.macos_artifact_name }}.zip
+
+  publish-release:
+    name: Publish GitHub release
+    runs-on: ubuntu-latest
+    needs:
+      - prepare
+      - build-windows
+      - build-macos
+
+    steps:
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./dist
+          merge-multiple: true
 
       - name: Create GitHub Release
         shell: pwsh
@@ -132,19 +177,29 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $notes = @"
-          MomentTrace ${{ steps.version.outputs.release_tag }}
+          MomentTrace ${{ needs.prepare.outputs.release_tag }}
 
-          Download the Windows installer below to install MomentTrace into Program Files.
-          The portable zip is also attached if you prefer to extract and run MomentTrace.App.exe directly.
+          This prerelease includes Windows and macOS builds of the Avalonia desktop shell.
+
+          Windows:
+          - Install with the setup executable.
+          - Or extract the portable zip and run MomentTrace.Desktop.exe.
+
+          macOS:
+          - Extract the macOS zip and run MomentTrace.app.
+          - The macOS build is currently unsigned unless Developer ID signing secrets are added later.
           "@
 
           $releaseArgs = @()
-          if ("${{ steps.version.outputs.is_prerelease }}" -eq "True") {
+          if ("${{ needs.prepare.outputs.is_prerelease }}" -eq "True") {
             $releaseArgs += "--prerelease"
           }
 
-          gh release create "${{ steps.version.outputs.release_tag }}" ".\dist\MomentTrace-${{ steps.version.outputs.package_label }}-win-x64-setup.exe" ".\dist\${{ steps.version.outputs.artifact_name }}.zip" `
-            --title "MomentTrace ${{ steps.version.outputs.release_tag }}" `
+          gh release create "${{ needs.prepare.outputs.release_tag }}" `
+            "./dist/MomentTrace-${{ needs.prepare.outputs.package_label }}-win-x64-setup.exe" `
+            "./dist/${{ needs.prepare.outputs.windows_artifact_name }}.zip" `
+            "./dist/${{ needs.prepare.outputs.macos_artifact_name }}.zip" `
+            --title "MomentTrace ${{ needs.prepare.outputs.release_tag }}" `
             --notes $notes `
             --target "${{ github.sha }}" `
             @releaseArgs

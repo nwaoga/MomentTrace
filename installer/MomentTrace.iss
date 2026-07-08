@@ -1,6 +1,10 @@
 #define MyAppName "MomentTrace"
 #define MyAppPublisher "MomentTrace"
-#define MyAppExeName "MomentTrace.App.exe"
+#ifndef AppExeName
+#define AppExeName "MomentTrace.Desktop.exe"
+#endif
+
+#define MyAppExeName AppExeName
 
 #ifndef AppVersion
 #define AppVersion "0.1.0"
@@ -54,6 +58,7 @@ var
 begin
   if CurUninstallStep = usUninstall then
   begin
+    Exec(ExpandConstant('{cmd}'), '/C taskkill /IM MomentTrace.Desktop.exe /F', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
     Exec(ExpandConstant('{cmd}'), '/C taskkill /IM MomentTrace.App.exe /F', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
     RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'MomentTrace');
     RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'Nwaoga Timeline');

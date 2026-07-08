@@ -5,7 +5,8 @@ This plan covers the release path for `MomentTrace.Desktop` on macOS. The app sh
 ## Target Artifacts
 
 - `MomentTrace.app`: self-contained macOS app bundle for Apple Silicon and Intel builds.
-- `MomentTrace-<version>-macos-arm64.dmg`: signed and notarized Apple Silicon installer image.
+- `MomentTrace-<version>-macos-arm64.zip`: unsigned Apple Silicon app bundle zip for beta releases.
+- `MomentTrace-<version>-macos-arm64.dmg`: signed and notarized Apple Silicon installer image for the later public release path.
 - `MomentTrace-<version>-macos-x64.dmg`: signed and notarized Intel installer image, if Intel support is kept.
 - Checksums for each published artifact.
 
@@ -149,7 +150,7 @@ spctl --assess --type open --verbose=4 "MomentTrace-<version>-macos-arm64.dmg"
 
 ## Open Implementation Tasks
 
-- Add a repeatable `.app` bundling script.
+- Add Developer ID signing and notarized DMG generation once Apple Developer credentials are available.
 - Add an `.icns` asset derived from the current app icon.
 - Decide whether to ship universal, separate `arm64`/`x64`, or `arm64`-only artifacts.
 - Add a macOS release workflow once Apple Developer credentials are available.
