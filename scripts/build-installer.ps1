@@ -3,7 +3,12 @@ param(
     [string]$Configuration = "Release",
     [string]$Runtime = "win-x64",
     [string]$PublishDir = "",
-    [string]$OutputDir = ""
+    [string]$OutputDir = "",
+    [string]$CertificateThumbprint = "",
+    [string]$TimestampUrl = "http://timestamp.digicert.com",
+    [ValidateSet("CurrentUser", "LocalMachine")]
+    [string]$CertificateStore = "CurrentUser",
+    [string]$SignToolPath = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -11,6 +16,7 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $projectPath = Join-Path $repoRoot "MomentTrace.App\MomentTrace.App.csproj"
 $installerScript = Join-Path $repoRoot "installer\MomentTrace.iss"
+$signScript = Join-Path $repoRoot "scripts\sign-windows-artifacts.ps1"
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "MomentTraceInstaller"
 $stagingOutputDir = Join-Path $tempRoot $Version
 $installerFileName = "MomentTrace-$Version-win-x64-setup.exe"
@@ -56,6 +62,16 @@ if ($LASTEXITCODE -ne 0) {
     throw "dotnet publish failed with exit code $LASTEXITCODE."
 }
 
+$publishedExePath = Join-Path $PublishDir "MomentTrace.App.exe"
+if (-not [string]::IsNullOrWhiteSpace($CertificateThumbprint)) {
+    & $signScript `
+        -Path $publishedExePath `
+        -CertificateThumbprint $CertificateThumbprint `
+        -TimestampUrl $TimestampUrl `
+        -CertificateStore $CertificateStore `
+        -SignToolPath $SignToolPath
+}
+
 $iscc = Get-Command iscc -ErrorAction SilentlyContinue
 $isccPath = if ($null -ne $iscc) { $iscc.Source } else { $null }
 if ($null -eq $isccPath) {
@@ -94,4 +110,14 @@ if (-not (Test-Path $stagedInstallerPath)) {
 
 $finalInstallerPath = Join-Path $OutputDir $installerFileName
 Copy-Item -LiteralPath $stagedInstallerPath -Destination $finalInstallerPath -Force
+
+if (-not [string]::IsNullOrWhiteSpace($CertificateThumbprint)) {
+    & $signScript `
+        -Path $finalInstallerPath `
+        -CertificateThumbprint $CertificateThumbprint `
+        -TimestampUrl $TimestampUrl `
+        -CertificateStore $CertificateStore `
+        -SignToolPath $SignToolPath
+}
+
 Write-Host "Installer created: $finalInstallerPath"

@@ -757,6 +757,8 @@ dist\MomentTrace-0.1.0-win-x64-setup.exe
 
 The installer creates a Start Menu shortcut, optionally creates a Desktop shortcut, uses the MomentTrace icon, launches the app after install when selected, and registers a normal Windows uninstall entry. During uninstall it stops the running app if needed and removes MomentTrace startup registry values for `MomentTrace` and the legacy `Nwaoga Timeline` value.
 
+Windows release signing is documented in [docs/windows-code-signing.md](docs/windows-code-signing.md). The installer script can sign `MomentTrace.App.exe` and the setup executable when a signing certificate thumbprint is supplied, and the GitHub release workflow uses signing secrets when configured.
+
 Local history and settings under `%AppData%\MomentTrace` are intentionally left in place during uninstall so the setup flow does not accidentally delete the user's timeline. Users who want a full privacy cleanup can use Settings > Local activity data > Delete all local data, which clears local history, previews, icons, settings, and cached privacy blocklists before closing the app.
 
 ## CI And Releases
@@ -773,7 +775,7 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
-The release workflow validates the `vMAJOR.MINOR.PATCH` tag format, publishes the app as a self-contained Windows `win-x64` build, stamps the assembly/file version, creates a setup executable named like `MomentTrace-0.1.0-win-x64-setup.exe`, creates a portable zip named like `MomentTrace-0.1.0-win-x64.zip`, and uploads both to the GitHub Release.
+The release workflow validates the `vMAJOR.MINOR.PATCH` tag format, imports the Windows signing certificate when signing secrets are configured, publishes the app as a self-contained Windows `win-x64` build, stamps the assembly/file version, creates a setup executable named like `MomentTrace-0.1.0-win-x64-setup.exe`, creates a portable zip named like `MomentTrace-0.1.0-win-x64.zip`, and uploads both to the GitHub Release.
 
 You can also run the **Release** workflow manually in GitHub Actions and provide a version such as `v0.1.0`.
 

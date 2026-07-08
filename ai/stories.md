@@ -33,6 +33,7 @@ No open local backlog items. Pull the next Azure DevOps priority when ready.
 - [x] [2026-07-08 22:11 UTC+1] `AB#72`: Add first-run onboarding for privacy, startup behavior, and local storage expectations.
 - [x] [2026-07-08 22:35 UTC+1] `AB#77`: Replace `MomentTrace.MacProbe` with the first-class `MomentTrace.Mac` platform service and wire it into `MomentTrace.Desktop`.
 - [x] [2026-07-08 22:48 UTC+1] `AB#78`: Document the macOS packaging, Developer ID signing, notarization, DMG, permission, and release pipeline plan.
+- [x] [2026-07-08 23:05 UTC+1] `AB#70`: Add optional Windows code-signing hooks for release artifacts and document verified publisher setup.
 
 ## QA Notes
 

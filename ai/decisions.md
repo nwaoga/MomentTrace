@@ -30,6 +30,7 @@
 - [2026-07-08 22:11 UTC+1] First-run onboarding should appear after the main shell is visible, persist through `DesktopWindowPreferences`, and use existing privacy/startup settings rather than introducing a separate onboarding configuration store.
 - [2026-07-08 22:35 UTC+1] macOS capture now belongs in the first-class `MomentTrace.Mac` platform project and is hosted by `MomentTrace.Desktop` on the cross-platform `net8.0` target.
 - [2026-07-08 22:48 UTC+1] macOS releases should ship as signed and notarized `.app` bundles inside DMGs, with Developer ID credentials stored only in release secrets.
+- [2026-07-08 23:05 UTC+1] Windows release signing should be optional for local/internal builds but automatic in the release workflow when protected signing secrets are configured.
 
 ## Recently Completed
 

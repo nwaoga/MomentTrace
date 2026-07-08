@@ -43,6 +43,24 @@ jobs:
           "PACKAGE_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
           "ARTIFACT_NAME=MomentTrace-$version-win-x64" | Out-File -FilePath $env:GITHUB_ENV -Append
 
+      - name: Import Windows signing certificate
+        shell: pwsh
+        env:
+          WINDOWS_SIGNING_PFX_BASE64: ${{ secrets.WINDOWS_SIGNING_PFX_BASE64 }}
+          WINDOWS_SIGNING_PFX_PASSWORD: ${{ secrets.WINDOWS_SIGNING_PFX_PASSWORD }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_SIGNING_PFX_BASE64) -or [string]::IsNullOrWhiteSpace($env:WINDOWS_SIGNING_PFX_PASSWORD)) {
+            Write-Host "Windows signing secrets are not configured; release artifacts will be unsigned."
+            return
+          }
+
+          $certPath = Join-Path $env:RUNNER_TEMP "momenttrace-signing.pfx"
+          [IO.File]::WriteAllBytes($certPath, [Convert]::FromBase64String($env:WINDOWS_SIGNING_PFX_BASE64))
+          $password = ConvertTo-SecureString $env:WINDOWS_SIGNING_PFX_PASSWORD -AsPlainText -Force
+          $cert = Import-PfxCertificate -FilePath $certPath -CertStoreLocation Cert:\CurrentUser\My -Password $password
+          "WINDOWS_SIGNING_CERT_THUMBPRINT=$($cert.Thumbprint)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          Remove-Item -LiteralPath $certPath -Force
+
       - name: Restore
         run: dotnet restore .\MomentTrace.App\MomentTrace.App.csproj --runtime win-x64
 
@@ -73,10 +91,18 @@ jobs:
       - name: Package installer
         shell: pwsh
         run: |
+          $signingArgs = @()
+          if (-not [string]::IsNullOrWhiteSpace($env:WINDOWS_SIGNING_CERT_THUMBPRINT)) {
+            $signingArgs += @(
+              "-CertificateThumbprint", $env:WINDOWS_SIGNING_CERT_THUMBPRINT
+            )
+          }
+
           .\scripts\build-installer.ps1 `
             -Version "${{ env.PACKAGE_VERSION }}" `
             -PublishDir ".\artifacts\${{ env.ARTIFACT_NAME }}" `
-            -OutputDir ".\dist"
+            -OutputDir ".\dist" `
+            @signingArgs
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
