@@ -20,9 +20,9 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 ---
 
-## Current State (2026-07-08 22:35 UTC+1)
+## Current State (2026-07-09 00:30 UTC+1)
 
-**Phase:** Late-alpha hardening and polish.
+**Phase:** Beta release readiness and marketing prep.
 
 **Working today:**
 
@@ -41,14 +41,82 @@ Users should be able to quickly revisit what happened during a day, recover past
 - README preview artwork refreshed with sanitized SVG mockups for the current shell, Overview dashboard, timeline/detail pane, and theme collage.
 - macOS shell shortcut verification passed for Settings, search, Timeline, Overview, and close behavior.
 - macOS foreground capture is now in the first-class `MomentTrace.Mac` platform service and is hosted by `MomentTrace.Desktop` on the cross-platform target.
+- Release tags now build the Avalonia desktop shell for Windows and macOS together.
+- Latest beta tag pushed: `v0.1.1-beta.6`.
+- Windows release artifacts should include an installer and portable zip for `MomentTrace.Desktop.exe`.
+- macOS release artifacts should include an unsigned `MomentTrace.app` zip for `osx-arm64`.
+- README preview SVG rendering has been fixed and validated locally.
+- Marketing launch kit and static landing page draft are in `docs/`.
 - Shared presentation builders for timeline, overview, and detail context.
 - Local SQLite activity store and Windows foreground recorder.
+- Azure DevOps currently has no open MomentTrace work items.
 
-**Last pushed:** `71361f1` — sync plan handover metadata.
+**Last pushed:** `04464ce` — update plan for beta release follow-ups.
 
 ---
 
 ## Pick Next Work
+
+### Active Next Work — Beta Release Verification
+
+**Why:** The release train now creates Windows and macOS artifacts together, but the beta should not be marketed until the generated assets are confirmed.
+
+**Status:** Next.
+
+**Scope:**
+
+- Verify the `v0.1.1-beta.6` GitHub Actions release run finishes green.
+- Confirm the GitHub Release has all expected artifacts:
+  - `MomentTrace-0.1.1-beta.6-win-x64-setup.exe`
+  - `MomentTrace-0.1.1-beta.6-win-x64.zip`
+  - `MomentTrace-0.1.1-beta.6-macos-arm64.zip`
+- Download and smoke test the Windows installer on a clean or disposable Windows profile.
+- Download and inspect the macOS zip on a Mac, confirming it extracts to `MomentTrace.app` and launches far enough to show the shell/onboarding.
+- Update `docs/marketing-launch-kit.md` with any beta caveats discovered during install testing.
+
+**Acceptance criteria:**
+
+- Release artifacts are present and named correctly.
+- Windows installer launches the Avalonia shell, not the old WPF shell.
+- macOS zip contains `MomentTrace.app`.
+- Any signing, Gatekeeper, SmartScreen, or first-launch caveat is documented before public sharing.
+- `stories.md` records the smoke-test result.
+
+### Next After Release Verification — Marketing Launch Pass
+
+**Why:** Once the artifacts are real, the marketing work should move from draft copy to public-facing launch assets.
+
+**Scope:**
+
+- Refresh README/landing CTA links if the final beta tag changes.
+- Capture or select final sanitized screenshots from the beta build.
+- Publish or export the static landing page draft from `docs/landing/index.html`.
+- Prepare launch post, privacy post, and founder-story post from `docs/marketing-launch-kit.md`.
+- Decide where feedback should go: GitHub Issues, email, form, or waitlist.
+
+**Acceptance criteria:**
+
+- Public download link points to a green release.
+- Launch page uses only sanitized images.
+- Feedback route is clear.
+- Known beta caveats are visible and honest.
+
+### Next After Marketing — Signing And Trust
+
+**Why:** Unsigned artifacts are acceptable for an internal beta, but public distribution needs trust polish.
+
+**Scope:**
+
+- Add real Windows signing certificate secrets.
+- Confirm Windows installer shows the expected verified publisher.
+- Add Apple Developer ID signing and notarization secrets when available.
+- Upgrade macOS output from unsigned zip toward signed/notarized DMG.
+
+**Acceptance criteria:**
+
+- Windows artifacts are signed in release workflow.
+- macOS signing/notarization path is implemented or explicitly scheduled.
+- User-facing install warnings are reduced and documented.
 
 Choose one track below. Each is scoped for a single focused agent session or small PR series. Update `stories.md`, `decisions.md`, and Azure DevOps when done.
 
