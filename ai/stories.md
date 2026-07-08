@@ -38,6 +38,7 @@ No open local backlog items. Pull the next Azure DevOps priority when ready.
 - [x] [2026-07-08 23:34 UTC+1] Add a marketing launch kit with positioning, landing page copy, social posts, demo script, screenshots, and beta-release checklist.
 - [x] [2026-07-08 23:45 UTC+1] Add a static landing page draft under `docs/landing/` for the desktop beta launch.
 - [x] [2026-07-08 23:58 UTC+1] Update release workflow to build Windows and macOS artifacts together from the Avalonia desktop shell.
+- [x] [2026-07-09 00:18 UTC+1] Fix README preview SVG rendering and the GitHub release publish job for `v0.1.1-beta.6`.
 
 ## QA Notes
 
@@ -61,6 +62,7 @@ Use this section for short pass/fail notes during the next stability sweep.
 - [2026-07-08 17:32 UTC+1] Regression coverage now includes 9 automated tests in `MomentTrace.Tests` for domain/app privacy filtering, lock-screen/self exclusion rules, settings save/load round trips, legacy settings migration, and built-in privacy defaults. `dotnet test MomentTrace.Tests/MomentTrace.Tests.csproj` passed, and `dotnet build MomentTrace.slnx` passed with 0 warnings and 0 errors after closing a running desktop process that had locked desktop output assemblies.
 - [2026-07-08 17:46 UTC+1] Full privacy cleanup now has a dedicated Settings action that deletes all local app data and then closes the app. Automated coverage includes a `LocalDataCleanupService` test, bringing `MomentTrace.Tests` to 10 passing tests, and `dotnet build MomentTrace.slnx` passed with 0 warnings and 0 errors.
 - [2026-07-08 22:11 UTC+1] First-run onboarding now appears once after the main shell loads, explains local-first storage and cleanup controls, keeps adult-site filtering enabled by default, offers Start with Windows, and persists completion in `DesktopWindowPreferences`. `dotnet test MomentTrace.Tests/MomentTrace.Tests.csproj --no-build` passed with 10 tests, and `dotnet build MomentTrace.slnx` passed with 0 warnings and 0 errors.
+- [2026-07-09 00:18 UTC+1] Release follow-up pass: all README SVG assets parse as valid XML and README image paths resolve locally. `v0.1.1-beta.6` publish job now sets `GH_REPO` so `gh release create` can publish without a checkout-backed `.git` directory.
 - Windows chrome: last confirmed working with `ExtendClientAreaToDecorationsHint=True` and `WindowDecorations=BorderOnly`.
 - Overview dashboard: #88 closed after build verification and Azure DevOps update.
 

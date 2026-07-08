@@ -167,6 +167,7 @@ Completed:
 - [2026-07-08 23:34 UTC+1] **Marketing launch kit** — added launch positioning, website copy, social posts, demo video script, screenshot checklist, and beta feedback prompts.
 - [2026-07-08 23:45 UTC+1] **Landing page draft** — added a static product landing page at `docs/landing/index.html` using sanitized product visuals and beta CTAs.
 - [2026-07-08 23:58 UTC+1] **Win/Mac release train** — release tags now build Windows installer/portable zip and macOS app zip together from `MomentTrace.Desktop`.
+- [2026-07-09 00:18 UTC+1] **Release follow-up fixes** — fixed README SVG rendering and `v0.1.1-beta.6` release publishing by giving the no-checkout publish job explicit GitHub repository context.
 
 ---
 
