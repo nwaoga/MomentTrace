@@ -6,6 +6,7 @@ The long-term goal is a cross-platform desktop timeline for Windows and macOS. T
 
 For active roadmap, Azure DevOps mapping, QA priorities, and current risks, see [`ai/project-plan.md`](ai/project-plan.md).
 For launch positioning, website copy, social posts, demo script, and beta checklist, see [`docs/marketing-launch-kit.md`](docs/marketing-launch-kit.md).
+For a static landing page draft, open [`docs/landing/index.html`](docs/landing/index.html).
 
 ## Preview
 

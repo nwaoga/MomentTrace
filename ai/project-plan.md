@@ -165,6 +165,7 @@ Completed:
 - [2026-07-08 23:05 UTC+1] **AB#70 Windows verified publisher flow** — added optional `signtool` signing for Windows app/installer artifacts, wired release secrets, and documented certificate handling.
 - [2026-07-08 23:22 UTC+1] **Prerelease workflow** — release tags such as `v0.1.1-beta.1` now produce GitHub prereleases with beta-labelled artifacts.
 - [2026-07-08 23:34 UTC+1] **Marketing launch kit** — added launch positioning, website copy, social posts, demo video script, screenshot checklist, and beta feedback prompts.
+- [2026-07-08 23:45 UTC+1] **Landing page draft** — added a static product landing page at `docs/landing/index.html` using sanitized product visuals and beta CTAs.
 
 ---
 

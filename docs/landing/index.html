@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MomentTrace - Private Workday Memory Timeline</title>
+  <meta name="description" content="MomentTrace is a local-first desktop memory timeline for apps, websites, screenshots, notes, and saved moments from your workday.">
+  <style>
+    :root {
+      color-scheme: dark light;
+      --ink: #f7f3eb;
+      --muted: #c6c1b5;
+      --deep: #141512;
+      --panel: #20211c;
+      --line: rgba(247, 243, 235, 0.16);
+      --green: #7bd39a;
+      --amber: #f1bd65;
+      --paper: #f4efe4;
+      --paper-ink: #1d211c;
+      --rust: #a6533b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--deep);
+      color: var(--ink);
+      letter-spacing: 0;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .topbar {
+      position: fixed;
+      z-index: 10;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px clamp(20px, 4vw, 64px);
+      background: rgba(20, 21, 18, 0.76);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: conic-gradient(from 210deg, var(--green), var(--amber), var(--rust), var(--green));
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      text-decoration: none;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .button.primary {
+      background: var(--green);
+      color: #102016;
+    }
+
+    .button.secondary {
+      border-color: var(--line);
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .hero {
+      position: relative;
+      min-height: 92vh;
+      display: grid;
+      align-items: end;
+      padding: 112px clamp(20px, 5vw, 72px) 64px;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(20, 21, 18, 0.96) 0%, rgba(20, 21, 18, 0.8) 42%, rgba(20, 21, 18, 0.26) 100%),
+        linear-gradient(0deg, rgba(20, 21, 18, 0.92) 0%, rgba(20, 21, 18, 0.12) 44%, rgba(20, 21, 18, 0.74) 100%),
+        url("../assets/momenttrace-avalonia-shell-current.png") center / cover no-repeat;
+      transform: scale(1.02);
+    }
+
+    .hero-content {
+      position: relative;
+      max-width: 780px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 0 10px;
+      border: 1px solid rgba(123, 211, 154, 0.42);
+      border-radius: 8px;
+      color: var(--green);
+      background: rgba(20, 21, 18, 0.72);
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 22px 0 18px;
+      font-size: clamp(46px, 7vw, 92px);
+      line-height: 0.95;
+      letter-spacing: 0;
+      max-width: 860px;
+    }
+
+    .lede {
+      max-width: 660px;
+      color: var(--muted);
+      font-size: clamp(18px, 2vw, 23px);
+      line-height: 1.48;
+      margin: 0 0 28px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .hero-note {
+      margin-top: 18px;
+      color: #d7d2c6;
+      font-size: 14px;
+    }
+
+    section {
+      padding: clamp(54px, 8vw, 104px) clamp(20px, 5vw, 72px);
+    }
+
+    .section-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .section-head {
+      max-width: 760px;
+      margin-bottom: 34px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: clamp(30px, 4vw, 56px);
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    .section-copy {
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.58;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .feature {
+      min-height: 190px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .feature strong {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .feature p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .showcase {
+      background: var(--paper);
+      color: var(--paper-ink);
+    }
+
+    .showcase .section-copy {
+      color: #55594f;
+    }
+
+    .media-row {
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 22px;
+      align-items: center;
+    }
+
+    .media-row img {
+      width: 100%;
+      display: block;
+      border-radius: 8px;
+      border: 1px solid rgba(29, 33, 28, 0.14);
+      box-shadow: 0 24px 70px rgba(20, 21, 18, 0.24);
+    }
+
+    .list {
+      display: grid;
+      gap: 16px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .list li {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(29, 33, 28, 0.16);
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    .privacy {
+      background: #1a1d19;
+    }
+
+    .privacy-band {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 34px;
+      align-items: start;
+    }
+
+    .privacy-points {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .privacy-point {
+      border-left: 3px solid var(--green);
+      background: rgba(255, 255, 255, 0.045);
+      padding: 16px 18px;
+      min-height: 112px;
+    }
+
+    .privacy-point strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .privacy-point span {
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .beta {
+      background: #221b17;
+      border-top: 1px solid rgba(241, 189, 101, 0.24);
+    }
+
+    .beta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .beta-item {
+      border: 1px solid rgba(241, 189, 101, 0.28);
+      border-radius: 8px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .footer {
+      padding: 28px clamp(20px, 5vw, 72px);
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      font-size: 14px;
+    }
+
+    @media (max-width: 920px) {
+      .nav a:not(.button) {
+        display: none;
+      }
+
+      .feature-grid,
+      .media-row,
+      .privacy-band,
+      .beta-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .privacy-points {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: 86vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar" aria-label="Primary">
+    <div class="brand"><span class="mark" aria-hidden="true"></span> MomentTrace</div>
+    <nav class="nav">
+      <a href="#features">Features</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#beta" class="button primary">Download Beta</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-content">
+        <span class="eyebrow">Windows beta now available</span>
+        <h1>Your private memory timeline for the workday.</h1>
+        <p class="lede">MomentTrace helps you retrace apps, websites, screenshots, notes, and saved moments from your day, with activity history stored locally on your device.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="https://github.com/nwaoga/MomentTrace/releases/tag/v0.1.1-beta.2">Download Windows Beta</a>
+          <a class="button secondary" href="#showcase">See how it works</a>
+        </div>
+        <p class="hero-note">Local-first. Private by default. Built for people who need to recover context fast.</p>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="section-inner">
+        <div class="section-head">
+          <h2>Recover context without manual tracking.</h2>
+          <p class="section-copy">MomentTrace turns the day into useful moments, then gives you the controls to search, save, revisit, and clean up your history.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature">
+            <strong>Timeline</strong>
+            <p>See your workday as a timeline of real app, website, document, and screenshot moments.</p>
+          </article>
+          <article class="feature">
+            <strong>Overview</strong>
+            <p>Get a visual recap of attention, top apps, focus blocks, activity patterns, and key moments.</p>
+          </article>
+          <article class="feature">
+            <strong>Recall</strong>
+            <p>Reopen captured websites, folders, and saved work so you can get back to the thing itself.</p>
+          </article>
+          <article class="feature">
+            <strong>Privacy</strong>
+            <p>Keep data local, filter sensitive activity, export or delete history, and clear all local app data.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="showcase" class="showcase">
+      <div class="section-inner media-row">
+        <img src="../assets/momenttrace-timeline-detail.png" alt="MomentTrace timeline with screenshot detail pane">
+        <div>
+          <h2>Find the moment, then get back to the work.</h2>
+          <p class="section-copy">Search or scan through captured activity, save important moments, add notes, and use previews to recognize what you were doing before you reopen the source.</p>
+          <ul class="list">
+            <li>Capture apps, websites, screenshots, folders, and timestamps.</li>
+            <li>Bookmark and pin the moments that matter.</li>
+            <li>Use Overview when you want the story of the day instead of a raw event log.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="privacy" class="privacy">
+      <div class="section-inner privacy-band">
+        <div>
+          <h2>Your timeline belongs on your machine.</h2>
+          <p class="section-copy">The beta stores activity history, screenshots, settings, and privacy filters locally. It does not require a cloud account.</p>
+        </div>
+        <div class="privacy-points">
+          <div class="privacy-point"><strong>Local storage</strong><span>Captured data is written under your device's MomentTrace app data folder.</span></div>
+          <div class="privacy-point"><strong>Privacy filters</strong><span>Block apps or websites and keep adult-site filtering enabled by default.</span></div>
+          <div class="privacy-point"><strong>Cleanup controls</strong><span>Delete activity history or clear all local app data when you want a clean slate.</span></div>
+          <div class="privacy-point"><strong>No account required</strong><span>The MVP is fully local and deterministic, with AI provider hooks left off by default.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="beta" class="beta">
+      <div class="section-inner">
+        <div class="section-head">
+          <h2>Try the Windows beta.</h2>
+          <p class="section-copy">Install it, use it for a real work session, then tell us what helped you recover context and what felt too sensitive or noisy.</p>
+        </div>
+        <div class="beta-grid">
+          <div class="beta-item">
+            <h3>Beta checklist</h3>
+            <p>Install, complete onboarding, let Timeline run, check Overview, save a moment, open Settings, and inspect privacy controls.</p>
+          </div>
+          <div class="beta-item">
+            <h3>Known release note</h3>
+            <p>The verified-publisher flow is ready, but public installers need a real Windows signing certificate configured in release secrets.</p>
+          </div>
+        </div>
+        <p style="margin-top:24px"><a class="button primary" href="https://github.com/nwaoga/MomentTrace/releases/tag/v0.1.1-beta.2">Download Windows Beta</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>MomentTrace beta</span>
+    <span>Private workday recall, stored locally.</span>
+  </footer>
+</body>
+</html>
