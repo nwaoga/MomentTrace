@@ -5,5 +5,6 @@
   <Project Path="MomentTrace.MacProbe/MomentTrace.MacProbe.csproj" />
   <Project Path="MomentTrace.Presentation/MomentTrace.Presentation.csproj" />
   <Project Path="MomentTrace.Storage/MomentTrace.Storage.csproj" />
+  <Project Path="MomentTrace.Tests/MomentTrace.Tests.csproj" />
   <Project Path="MomentTrace.Windows/MomentTrace.Windows.csproj" />
 </Solution>

@@ -34,6 +34,8 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Immediate local mutation refresh across Timeline, Overview, detail pane, and Library filters.
 - Detail-pane note editor now uses a theme-safe dark surface with readable text and focus states.
 - Theme visual QA pass completed across Midnight, Starbucks Reserve, Nero Roast, Costa Afterglow, Espresso (Mono), and Hot White, with scripted screenshot capture for Timeline, Overview, and Saved Moments.
+- Regression coverage now includes automated checks for privacy exclusions, settings persistence, and warning-free build verification.
+- Settings now includes a full local-data cleanup action that deletes local history, previews, icons, settings, and cached privacy blocklists before shutting down the app.
 - Explorer folder moments capture and reopen the captured folder path.
 - README preview artwork refreshed with sanitized SVG mockups for the current shell, Overview dashboard, timeline/detail pane, and theme collage.
 - macOS shell shortcut verification passed for Settings, search, Timeline, Overview, and close behavior.

@@ -752,7 +752,7 @@ dist\MomentTrace-0.1.0-win-x64-setup.exe
 
 The installer creates a Start Menu shortcut, optionally creates a Desktop shortcut, uses the MomentTrace icon, launches the app after install when selected, and registers a normal Windows uninstall entry. During uninstall it stops the running app if needed and removes MomentTrace startup registry values for `MomentTrace` and the legacy `Nwaoga Timeline` value.
 
-Local history and settings under `%AppData%\MomentTrace` are intentionally left in place for now so uninstalling the app does not accidentally delete the user's timeline. Full local data deletion should be handled by an explicit privacy cleanup control in the app rather than by default uninstall behavior.
+Local history and settings under `%AppData%\MomentTrace` are intentionally left in place during uninstall so the setup flow does not accidentally delete the user's timeline. Users who want a full privacy cleanup can use Settings > Local activity data > Delete all local data, which clears local history, previews, icons, settings, and cached privacy blocklists before closing the app.
 
 ## CI And Releases
 

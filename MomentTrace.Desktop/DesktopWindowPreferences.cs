@@ -9,6 +9,8 @@ namespace MomentTrace.Desktop;
 public sealed class DesktopWindowPreferences
 {
     private static readonly JsonSerializerOptions SerializerOptions = new() { WriteIndented = true };
+    internal static string? PreferencesPathOverride { get; set; }
+    internal static string? LegacyPreferencesPathOverride { get; set; }
 
     public static readonly string[] BuiltInAdultDomains =
     [
@@ -57,8 +59,8 @@ public sealed class DesktopWindowPreferences
     {
         get
         {
-            var preferencesPath = Path.Combine(MomentTracePaths.AppDataDirectory, "settings.json");
-            var legacyPreferencesPath = Path.Combine(MomentTracePaths.LegacyAppDataDirectory, "settings.json");
+            var preferencesPath = PreferencesPathOverride ?? Path.Combine(MomentTracePaths.AppDataDirectory, "settings.json");
+            var legacyPreferencesPath = LegacyPreferencesPathOverride ?? Path.Combine(MomentTracePaths.LegacyAppDataDirectory, "settings.json");
 
             if (!File.Exists(preferencesPath) && File.Exists(legacyPreferencesPath))
             {

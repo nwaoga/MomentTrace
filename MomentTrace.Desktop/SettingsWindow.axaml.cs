@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Interactivity;
@@ -30,6 +31,7 @@ public partial class SettingsWindow : Window
     private readonly IActivityRecorder? _recorder;
     private readonly DesktopWindowPreferences _preferences;
     private readonly DesktopStartupRegistration _startupRegistration;
+    private readonly LocalDataCleanupService _localDataCleanupService;
     private readonly ObservableCollection<PrivacyChoiceViewModel> _recentApps = [];
     private readonly ObservableCollection<PrivacyChoiceViewModel> _recentWebsites = [];
     private readonly Action<double> _opacityChanged;
@@ -64,6 +66,7 @@ public partial class SettingsWindow : Window
         _recorder = recorder;
         _preferences = preferences;
         _startupRegistration = new DesktopStartupRegistration("MomentTrace.Desktop", Environment.ProcessPath ?? AppContext.BaseDirectory);
+        _localDataCleanupService = LocalDataCleanupService.CreateDefault();
         _opacityChanged = opacityChanged;
         _timelineViewModeChanged = timelineViewModeChanged;
         _themeChanged = themeChanged;
@@ -97,6 +100,7 @@ public partial class SettingsWindow : Window
         UpdateAdultBlocklistButton.Click += UpdateAdultBlocklistButton_Click;
         ExportActivityButton.Click += ExportActivityButton_Click;
         DeleteActivityButton.Click += DeleteActivityButton_Click;
+        DeleteAllLocalDataButton.Click += DeleteAllLocalDataButton_Click;
         CloseButton.Click += CloseButton_Click;
 
         LoadCurrentSettings(_preferences.Opacity, currentTimelineViewMode, currentTheme);
@@ -517,6 +521,46 @@ public partial class SettingsWindow : Window
         finally
         {
             DeleteActivityButton.IsEnabled = true;
+        }
+    }
+
+    private async void DeleteAllLocalDataButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (!await ConfirmDeleteAllLocalDataAsync())
+        {
+            return;
+        }
+
+        DeleteAllLocalDataButton.IsEnabled = false;
+        DeleteActivityButton.IsEnabled = false;
+        ExportActivityButton.IsEnabled = false;
+        LocalActivityStatusText.Text = "Deleting all local data and closing MomentTrace...";
+
+        try
+        {
+            if (_recorder is not null && _recorder.IsRecording)
+            {
+                await _recorder.StopAsync();
+            }
+
+            _startupRegistration.SetEnabled(false);
+            await _localDataCleanupService.DeleteAllLocalDataAsync(_store);
+            LocalActivityStatusText.Text = "All local data deleted. Closing MomentTrace...";
+
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                desktop.Shutdown();
+                return;
+            }
+
+            Close();
+        }
+        catch
+        {
+            LocalActivityStatusText.Text = "Full local-data delete failed. Please try again.";
+            DeleteAllLocalDataButton.IsEnabled = true;
+            DeleteActivityButton.IsEnabled = true;
+            ExportActivityButton.IsEnabled = true;
         }
     }
 
@@ -972,6 +1016,93 @@ public partial class SettingsWindow : Window
                     new TextBlock
                     {
                         Text = "This removes the local timeline and cached MomentTrace previews from this device. Your settings and privacy blocklists stay in place.",
+                        Foreground = new SolidColorBrush(palette.MutedText),
+                        TextWrapping = TextWrapping.Wrap,
+                        LineHeight = 20
+                    },
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        Spacing = 10,
+                        Children = { cancelButton, deleteButton }
+                    }
+                }
+            };
+        }
+    }
+
+    private async Task<bool> ConfirmDeleteAllLocalDataAsync()
+    {
+        var palette = DesktopAppThemePalette.Find(_preferences.Theme);
+        var dialog = new Window
+        {
+            Title = "Delete all local data",
+            Width = 460,
+            Height = 256,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            WindowDecorations = Avalonia.Controls.WindowDecorations.None,
+            Background = Brushes.Transparent
+        };
+
+        dialog.Content = new Border
+        {
+            Background = new SolidColorBrush(palette.Base),
+            BorderBrush = new SolidColorBrush(palette.Stroke),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(14),
+            Padding = new Thickness(22),
+            Child = BuildContent()
+        };
+
+        return await dialog.ShowDialog<bool>(this);
+
+        StackPanel BuildContent()
+        {
+            var deleteButton = new Button
+            {
+                Content = "Delete everything",
+                Background = new SolidColorBrush(palette.DangerFill),
+                BorderBrush = new SolidColorBrush(palette.Danger),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(9),
+                Foreground = new SolidColorBrush(palette.Text),
+                Padding = new Thickness(16, 9),
+                MinWidth = 132,
+                HorizontalContentAlignment = HorizontalAlignment.Center
+            };
+            var cancelButton = new Button
+            {
+                Content = "Cancel",
+                Background = new SolidColorBrush(palette.Toolbar),
+                BorderBrush = new SolidColorBrush(palette.PanelEdgeStrong),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(9),
+                Foreground = new SolidColorBrush(palette.Text),
+                Padding = new Thickness(16, 9),
+                MinWidth = 86,
+                HorizontalContentAlignment = HorizontalAlignment.Center
+            };
+
+            deleteButton.Click += (_, _) => dialog.Close(true);
+            cancelButton.Click += (_, _) => dialog.Close(false);
+
+            return new StackPanel
+            {
+                Spacing = 18,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = "Delete all local data?",
+                        Foreground = new SolidColorBrush(palette.Text),
+                        FontSize = 20,
+                        FontWeight = FontWeight.SemiBold
+                    },
+                    new TextBlock
+                    {
+                        Text = "This removes the local timeline, screenshots, thumbnails, icons, settings, cached privacy blocklists, and turns off startup for this device. MomentTrace will close when the cleanup finishes.",
                         Foreground = new SolidColorBrush(palette.MutedText),
                         TextWrapping = TextWrapping.Wrap,
                         LineHeight = 20

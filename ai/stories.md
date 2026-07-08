@@ -2,8 +2,6 @@
 
 ## Backlog
 
-- [ ] Add regression tests for privacy exclusions, settings persistence, and warning-free build expectations.
-- [ ] Add a Settings option to delete local data when the user wants full privacy cleanup.
 - [ ] Add first-run onboarding for privacy, startup behavior, and local storage.
 - [ ] Replace `MomentTrace.MacProbe` with a proper `MomentTrace.Mac` platform service.
 
@@ -31,6 +29,8 @@
 - [x] [2026-07-03 16:40 UTC+1] Fix accent-label contrast selection so active buttons and accent pills stay readable across all shipped desktop themes.
 - [x] [2026-07-04 16:28 UTC+1] Verify and fix macOS desktop shortcuts: `Cmd+,`, `Cmd+F`, `Cmd+1`, `Cmd+2`, and `Cmd+W`.
 - [x] [2026-07-08 17:03 UTC+1] `AB#121`: Run lightweight visual QA across shipped desktop themes, including a scripted screenshot pass for Timeline, Overview, and Saved Moments.
+- [x] [2026-07-08 17:32 UTC+1] Add regression tests for privacy exclusions, settings persistence, and warning-free build expectations with a new `MomentTrace.Tests` project covering domain/app filtering and desktop settings save/load behavior.
+- [x] [2026-07-08 17:46 UTC+1] Add a Settings option to delete all local data for full privacy cleanup, including timeline history, previews, icons, settings, cached privacy blocklists, and startup disablement before app shutdown.
 
 ## QA Notes
 
@@ -51,5 +51,7 @@ Use this section for short pass/fail notes during the next stability sweep.
 - [2026-07-04 16:28 UTC+1] macOS desktop shortcut pass succeeded on macOS 26.5 after routing shell shortcuts through a tunneling key handler. `Cmd+,` opened Settings, `Cmd+,` and `Cmd+W` closed Settings, `Cmd+F` focused search, physical `Cmd+1` activated Timeline, physical `Cmd+2` activated Overview, and `Cmd+W` closed the app. Main and Settings windows both used native traffic-light chrome.
 - [2026-07-08 16:09 UTC+1] Theme QA follow-up found that active rail items kept idle text colors against the selected-state surface in several themes. Active workspace, library, and source nav rows now switch icon/title/subtitle foregrounds to the active accent foreground, and `dotnet build MomentTrace.slnx` passed cleanly after the fix.
 - [2026-07-08 17:03 UTC+1] Proper desktop theme QA pass completed with scripted screenshot capture across Timeline, Overview, and Saved Moments for Midnight, Starbucks Reserve, Nero Roast, Costa Afterglow, Espresso (Mono), and Hot White. Side-by-side contact sheets under `ai/theme-qa-output/` confirmed the themes render as distinct variants, and no second theme-specific regression stood out after the active-nav foreground fix.
+- [2026-07-08 17:32 UTC+1] Regression coverage now includes 9 automated tests in `MomentTrace.Tests` for domain/app privacy filtering, lock-screen/self exclusion rules, settings save/load round trips, legacy settings migration, and built-in privacy defaults. `dotnet test MomentTrace.Tests/MomentTrace.Tests.csproj` passed, and `dotnet build MomentTrace.slnx` passed with 0 warnings and 0 errors after closing a running desktop process that had locked desktop output assemblies.
+- [2026-07-08 17:46 UTC+1] Full privacy cleanup now has a dedicated Settings action that deletes all local app data and then closes the app. Automated coverage includes a `LocalDataCleanupService` test, bringing `MomentTrace.Tests` to 10 passing tests, and `dotnet build MomentTrace.slnx` passed with 0 warnings and 0 errors.
 - Windows chrome: last confirmed working with `ExtendClientAreaToDecorationsHint=True` and `WindowDecorations=BorderOnly`.
 - Overview dashboard: #88 closed after build verification and Azure DevOps update.

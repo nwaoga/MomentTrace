@@ -533,6 +533,10 @@
                       Classes="settings"
                       Content="Delete local activity"
                       Width="166" />
+              <Button x:Name="DeleteAllLocalDataButton"
+                      Classes="settings"
+                      Content="Delete all local data"
+                      Width="176" />
             </StackPanel>
             <TextBlock x:Name="LocalActivityStatusText"
                        FontSize="12"
