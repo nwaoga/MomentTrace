@@ -36,6 +36,8 @@ public sealed class DesktopWindowPreferences
 
     public bool ExcludeAdultWebsites { get; set; } = true;
 
+    public bool HasCompletedFirstRunOnboarding { get; set; }
+
     public string[] AdultBlocklistDomains
     {
         get => _adultBlocklistDomains.Length == 0 ? BuiltInAdultDomains : _adultBlocklistDomains;

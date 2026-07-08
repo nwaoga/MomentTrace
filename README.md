@@ -32,6 +32,8 @@ The **Overview** page now behaves like a more visual daily-story dashboard witho
 
 Privacy controls are part of Settings rather than hidden configuration. Recent apps and websites can be selected into block lists, adult-site filtering can be enabled, and manual allow/block domains remain available for fine control.
 
+On first run, MomentTrace explains the local-first storage model, keeps adult-site filtering enabled by default, and lets the user choose whether the app should start with Windows.
+
 ![MomentTrace Settings privacy preview](docs/assets/momenttrace-settings-privacy-preview.svg)
 
 ![MomentTrace release flow](docs/assets/momenttrace-release-flow.svg)
@@ -55,6 +57,7 @@ The Windows installer is built with Inno Setup from a self-contained `win-x64` p
 - Sleep/resume and day-rollover handling so long-running sessions split cleanly
 - Start recording when the app launches
 - Optional "Start with Windows" setting
+- First-run onboarding for privacy, startup behavior, and local storage expectations
 - Minimize-to-tray behavior
 - Tray menu for open, pause, resume, and exit
 - Timestamped activity history
@@ -66,7 +69,7 @@ The Windows installer is built with Inno Setup from a self-contained `win-x64` p
 - Real app icon extraction when executable metadata is available, including platform-specific Windows icon resolution for classic and packaged apps
 - Browser URL capture plus local screenshot and thumbnail previews for captured moments
 - Privacy filters with recent app/website selection, adult website filtering, optional cached blocklist updates, and manual allow/block lists
-- Local activity export and delete controls for user-owned history cleanup
+- Local activity export, activity deletion, and full local-data cleanup controls for user-owned history cleanup
 - Single-instance behavior that brings the running app back when launched again
 - Noise filtering for MomentTrace itself and Windows lock-screen activity
 - Themed Settings modal with startup, recording, timeline view mode, appearance, and privacy controls
@@ -698,6 +701,7 @@ MomentTrace treats privacy as part of the product experience:
 - Timeline and Overview hide matching privacy-filtered rows from existing history without deleting the database.
 - Local activity can be exported to JSON from Settings before cleanup.
 - Local activity can be deleted from Settings, including cached MomentTrace screenshot and thumbnail previews. Settings and privacy blocklists are kept.
+- Full local-data cleanup can also be run from Settings to clear local history, previews, icons, settings, and cached privacy blocklists before closing the app.
 
 ## AI Extensibility
 

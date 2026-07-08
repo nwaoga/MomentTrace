@@ -2,7 +2,6 @@
 
 ## Backlog
 
-- [ ] Add first-run onboarding for privacy, startup behavior, and local storage.
 - [ ] Replace `MomentTrace.MacProbe` with a proper `MomentTrace.Mac` platform service.
 
 ## Done
@@ -31,6 +30,7 @@
 - [x] [2026-07-08 17:03 UTC+1] `AB#121`: Run lightweight visual QA across shipped desktop themes, including a scripted screenshot pass for Timeline, Overview, and Saved Moments.
 - [x] [2026-07-08 17:32 UTC+1] Add regression tests for privacy exclusions, settings persistence, and warning-free build expectations with a new `MomentTrace.Tests` project covering domain/app filtering and desktop settings save/load behavior.
 - [x] [2026-07-08 17:46 UTC+1] Add a Settings option to delete all local data for full privacy cleanup, including timeline history, previews, icons, settings, cached privacy blocklists, and startup disablement before app shutdown.
+- [x] [2026-07-08 22:11 UTC+1] `AB#72`: Add first-run onboarding for privacy, startup behavior, and local storage expectations.
 
 ## QA Notes
 
@@ -53,5 +53,6 @@ Use this section for short pass/fail notes during the next stability sweep.
 - [2026-07-08 17:03 UTC+1] Proper desktop theme QA pass completed with scripted screenshot capture across Timeline, Overview, and Saved Moments for Midnight, Starbucks Reserve, Nero Roast, Costa Afterglow, Espresso (Mono), and Hot White. Side-by-side contact sheets under `ai/theme-qa-output/` confirmed the themes render as distinct variants, and no second theme-specific regression stood out after the active-nav foreground fix.
 - [2026-07-08 17:32 UTC+1] Regression coverage now includes 9 automated tests in `MomentTrace.Tests` for domain/app privacy filtering, lock-screen/self exclusion rules, settings save/load round trips, legacy settings migration, and built-in privacy defaults. `dotnet test MomentTrace.Tests/MomentTrace.Tests.csproj` passed, and `dotnet build MomentTrace.slnx` passed with 0 warnings and 0 errors after closing a running desktop process that had locked desktop output assemblies.
 - [2026-07-08 17:46 UTC+1] Full privacy cleanup now has a dedicated Settings action that deletes all local app data and then closes the app. Automated coverage includes a `LocalDataCleanupService` test, bringing `MomentTrace.Tests` to 10 passing tests, and `dotnet build MomentTrace.slnx` passed with 0 warnings and 0 errors.
+- [2026-07-08 22:11 UTC+1] First-run onboarding now appears once after the main shell loads, explains local-first storage and cleanup controls, keeps adult-site filtering enabled by default, offers Start with Windows, and persists completion in `DesktopWindowPreferences`. `dotnet test MomentTrace.Tests/MomentTrace.Tests.csproj --no-build` passed with 10 tests, and `dotnet build MomentTrace.slnx` passed with 0 warnings and 0 errors.
 - Windows chrome: last confirmed working with `ExtendClientAreaToDecorationsHint=True` and `WindowDecorations=BorderOnly`.
 - Overview dashboard: #88 closed after build verification and Azure DevOps update.

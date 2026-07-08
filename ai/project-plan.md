@@ -36,6 +36,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Theme visual QA pass completed across Midnight, Starbucks Reserve, Nero Roast, Costa Afterglow, Espresso (Mono), and Hot White, with scripted screenshot capture for Timeline, Overview, and Saved Moments.
 - Regression coverage now includes automated checks for privacy exclusions, settings persistence, and warning-free build verification.
 - Settings now includes a full local-data cleanup action that deletes local history, previews, icons, settings, and cached privacy blocklists before shutting down the app.
+- First-run onboarding now explains local-first storage, privacy filtering, startup behavior, and cleanup controls before marking onboarding complete.
 - Explorer folder moments capture and reopen the captured folder path.
 - README preview artwork refreshed with sanitized SVG mockups for the current shell, Overview dashboard, timeline/detail pane, and theme collage.
 - macOS shell shortcut verification passed for Settings, search, Timeline, Overview, and close behavior.

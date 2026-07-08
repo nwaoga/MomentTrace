@@ -129,6 +129,7 @@ public partial class MainWindow : Window
             InitializeProfileRail();
             _refreshTimer.Start();
             await ReloadAsync();
+            await ShowFirstRunOnboardingAsync();
         };
         Closed += (_, _) =>
         {
@@ -246,6 +247,17 @@ public partial class MainWindow : Window
     private void OpenSettingsWindow()
     {
         SettingsNavButton_Click(SettingsNavButton, new RoutedEventArgs());
+    }
+
+    private async Task ShowFirstRunOnboardingAsync()
+    {
+        if (_preferences.HasCompletedFirstRunOnboarding)
+        {
+            return;
+        }
+
+        var onboarding = new FirstRunOnboardingWindow(_preferences);
+        await onboarding.ShowDialog(this);
     }
 
     private async Task ReloadAsync()

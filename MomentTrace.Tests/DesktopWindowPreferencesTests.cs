@@ -25,6 +25,7 @@ public sealed class DesktopWindowPreferencesTests : IDisposable
         Assert.Equal("Cards", preferences.TimelineViewMode);
         Assert.Equal("Midnight", preferences.Theme);
         Assert.True(preferences.ExcludeAdultWebsites);
+        Assert.False(preferences.HasCompletedFirstRunOnboarding);
         Assert.Equal(DesktopWindowPreferences.BuiltInAdultDomains, preferences.AdultBlocklistDomains);
     }
 
@@ -37,6 +38,7 @@ public sealed class DesktopWindowPreferencesTests : IDisposable
             TimelineViewMode = "List",
             Theme = "NeroRoast",
             ExcludeAdultWebsites = false,
+            HasCompletedFirstRunOnboarding = true,
             AdultBlocklistDomains = ["customadult.example"],
             CustomBlockedDomains = ["blocked.example"],
             CustomAllowedDomains = ["allowed.example"],
@@ -51,6 +53,7 @@ public sealed class DesktopWindowPreferencesTests : IDisposable
         Assert.Equal(saved.TimelineViewMode, reloaded.TimelineViewMode);
         Assert.Equal(saved.Theme, reloaded.Theme);
         Assert.Equal(saved.ExcludeAdultWebsites, reloaded.ExcludeAdultWebsites);
+        Assert.Equal(saved.HasCompletedFirstRunOnboarding, reloaded.HasCompletedFirstRunOnboarding);
         Assert.Equal(saved.AdultBlocklistDomains, reloaded.AdultBlocklistDomains);
         Assert.Equal(saved.CustomBlockedDomains, reloaded.CustomBlockedDomains);
         Assert.Equal(saved.CustomAllowedDomains, reloaded.CustomAllowedDomains);

@@ -27,6 +27,7 @@
 - [2026-07-08 16:09 UTC+1] Active rail selection should explicitly swap icon and label foregrounds to the theme accent foreground instead of relying on idle text brushes over `ActiveSurface`; this keeps Timeline, Overview, Library, and Source selections readable across Nero, espresso, and the other shipped themes.
 - [2026-07-08 17:32 UTC+1] `DesktopWindowPreferences` should allow internal path overrides for tests so settings persistence and legacy migration can be verified without touching the real roaming app-data directory.
 - [2026-07-08 17:46 UTC+1] Full privacy cleanup should be a separate Settings action from activity-only deletion, and it should disable startup plus close the app after deleting local timeline data, previews, icons, settings, and cached privacy blocklists so the app does not immediately recreate fresh local state in the same session.
+- [2026-07-08 22:11 UTC+1] First-run onboarding should appear after the main shell is visible, persist through `DesktopWindowPreferences`, and use existing privacy/startup settings rather than introducing a separate onboarding configuration store.
 
 ## Recently Completed
 
