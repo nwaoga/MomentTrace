@@ -2,7 +2,7 @@
   <Project Path="MomentTrace.App/MomentTrace.App.csproj" />
   <Project Path="MomentTrace.Core/MomentTrace.Core.csproj" />
   <Project Path="MomentTrace.Desktop/MomentTrace.Desktop.csproj" />
-  <Project Path="MomentTrace.MacProbe/MomentTrace.MacProbe.csproj" />
+  <Project Path="MomentTrace.Mac/MomentTrace.Mac.csproj" />
   <Project Path="MomentTrace.Presentation/MomentTrace.Presentation.csproj" />
   <Project Path="MomentTrace.Storage/MomentTrace.Storage.csproj" />
   <Project Path="MomentTrace.Tests/MomentTrace.Tests.csproj" />

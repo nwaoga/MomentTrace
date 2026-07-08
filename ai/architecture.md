@@ -36,10 +36,10 @@
 - `MomentTrace.Windows` owns Windows foreground recording, startup registration, and Windows-specific helpers such as icon/provider behavior.
 - WPF-specific tray/installer ownership remains in `MomentTrace.App` while Avalonia shell parity is active.
 
-### macOS probe
+### macOS Platform Service
 
-- `MomentTrace.MacProbe` is exploratory capture work for macOS.
-- It is not the main UI surface, but it validates bundle IDs, app identity, browser URLs, and screenshot capture behavior.
+- `MomentTrace.Mac` owns macOS foreground recording and capture behavior for the Avalonia desktop shell.
+- It validates bundle IDs, app identity, browser URLs, screenshot capture behavior, and shared SQLite persistence through the cross-platform desktop host.
 
 ## Design Constraints
 
@@ -74,3 +74,4 @@
 | Core rules/models | `MomentTrace.Core/` |
 | Stable project docs | `README.md` |
 | Active plan | `ai/project-plan.md` |
+

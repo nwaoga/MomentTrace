@@ -15,7 +15,7 @@
 - Sparse and zero-data days should feel intentionally designed, not merely empty.
 - Windows custom chrome should use `ExtendClientAreaToDecorationsHint=True` with `WindowDecorations=BorderOnly` so resize handles work without duplicate native caption buttons.
 - The left rail should avoid redundant navigation. Workspace contains primary views, Library contains saved-memory filters, and Sources contains source filters.
-- The remaining known macOS UX bug is `Cmd+,` not reliably opening Settings from the main shell.
+- macOS shell shortcuts have been verified on real hardware after routing Command-key handling through the main window.
 - Codex/Cursor conversation history is local tooling state and should not be assumed to live in Git.
 - [2026-06-27 09:28 UTC+1] Local shell mutations should invalidate Timeline, Overview, detail, and rail caches together, and reload requests made during an active reload should queue one follow-up pass.
 - [2026-06-27 09:28 UTC+1] Windows Explorer folder moments should persist the captured folder path in `TimelineActivity.Resource`; the desktop opener should not fall back to launching generic Explorer when no folder path can be resolved.
@@ -28,6 +28,7 @@
 - [2026-07-08 17:32 UTC+1] `DesktopWindowPreferences` should allow internal path overrides for tests so settings persistence and legacy migration can be verified without touching the real roaming app-data directory.
 - [2026-07-08 17:46 UTC+1] Full privacy cleanup should be a separate Settings action from activity-only deletion, and it should disable startup plus close the app after deleting local timeline data, previews, icons, settings, and cached privacy blocklists so the app does not immediately recreate fresh local state in the same session.
 - [2026-07-08 22:11 UTC+1] First-run onboarding should appear after the main shell is visible, persist through `DesktopWindowPreferences`, and use existing privacy/startup settings rather than introducing a separate onboarding configuration store.
+- [2026-07-08 22:35 UTC+1] macOS capture now belongs in the first-class `MomentTrace.Mac` platform project and is hosted by `MomentTrace.Desktop` on the cross-platform `net8.0` target.
 
 ## Recently Completed
 
@@ -45,9 +46,10 @@
 - [2026-06-27 09:28 UTC+1] Fixed Explorer folder moments so new captures reopen the captured folder path instead of bare Explorer.
 - [2026-07-03 16:40 UTC+1] Fixed theme accent label contrast by switching `DesktopAppThemePalette.AccentText` to a contrast-based foreground selection.
 - [2026-07-04 16:28 UTC+1] Fixed and verified macOS desktop shortcuts for Settings, search, Timeline, Overview, and window close behavior.
+- [2026-07-08 22:35 UTC+1] Replaced the old macOS probe project with `MomentTrace.Mac` and wired it into the Avalonia desktop shell.
 
 ## Open Decisions To Revisit
 
 - Whether `AGENT.md` should remain as a root-level compatibility handoff or become a short pointer to `ai/`.
-- Whether the macOS probe should graduate into a first-class `MomentTrace.Mac` platform project.
 - Whether to add automated UI/presentation tests before the broader hardening pass.
+

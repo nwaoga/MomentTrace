@@ -10,7 +10,7 @@ using MomentTrace.Storage;
 #if WINDOWS
 using MomentTrace.Windows;
 #else
-using MomentTrace.MacProbe;
+using MomentTrace.Mac;
 #endif
 
 namespace MomentTrace.Desktop;

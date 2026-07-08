@@ -2,7 +2,7 @@
 
 ## Backlog
 
-- [ ] Replace `MomentTrace.MacProbe` with a proper `MomentTrace.Mac` platform service.
+No open local backlog items. Pull the next Azure DevOps priority when ready.
 
 ## Done
 
@@ -20,7 +20,7 @@
 - [x] Fix `SystemSounds` compile issue on the non-Windows `net8.0` target with a Windows compile guard.
 - [x] Add single-instance behavior that brings the running app back when launched again.
 - [x] Add Overview empty/low-data states and theme-aware dashboard controls.
-- [x] Add macOS probe validation notes for app identity, browser URLs, screenshots, and reopen behavior.
+- [x] Add macOS Platform Service validation notes for app identity, browser URLs, screenshots, and reopen behavior.
 - [x] [2026-06-27 09:28 UTC+1] Immediate refresh pass for local mutations and view changes across Timeline and Overview.
 - [x] [2026-06-27 09:28 UTC+1] Capture Explorer folder paths so folder moments open the captured folder instead of generic Explorer.
 - [x] [2026-07-01 23:34 UTC+1] Focused stability QA sweep across Windows shell interactions; macOS shortcut verification remains a separate follow-up story.
@@ -31,6 +31,7 @@
 - [x] [2026-07-08 17:32 UTC+1] Add regression tests for privacy exclusions, settings persistence, and warning-free build expectations with a new `MomentTrace.Tests` project covering domain/app filtering and desktop settings save/load behavior.
 - [x] [2026-07-08 17:46 UTC+1] Add a Settings option to delete all local data for full privacy cleanup, including timeline history, previews, icons, settings, cached privacy blocklists, and startup disablement before app shutdown.
 - [x] [2026-07-08 22:11 UTC+1] `AB#72`: Add first-run onboarding for privacy, startup behavior, and local storage expectations.
+- [x] [2026-07-08 22:35 UTC+1] `AB#77`: Replace `MomentTrace.MacProbe` with the first-class `MomentTrace.Mac` platform service and wire it into `MomentTrace.Desktop`.
 
 ## QA Notes
 
@@ -56,3 +57,4 @@ Use this section for short pass/fail notes during the next stability sweep.
 - [2026-07-08 22:11 UTC+1] First-run onboarding now appears once after the main shell loads, explains local-first storage and cleanup controls, keeps adult-site filtering enabled by default, offers Start with Windows, and persists completion in `DesktopWindowPreferences`. `dotnet test MomentTrace.Tests/MomentTrace.Tests.csproj --no-build` passed with 10 tests, and `dotnet build MomentTrace.slnx` passed with 0 warnings and 0 errors.
 - Windows chrome: last confirmed working with `ExtendClientAreaToDecorationsHint=True` and `WindowDecorations=BorderOnly`.
 - Overview dashboard: #88 closed after build verification and Azure DevOps update.
+

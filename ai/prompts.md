@@ -17,7 +17,7 @@
 - Immediate refresh pass for pin, bookmark, note, delete, and view-switch changes across Timeline and Overview.
 - Stability QA sweep across empty, sparse, normal, and dense data states.
 - Windows custom chrome must keep resize handles and avoid duplicate native caption buttons.
-- macOS `Cmd+,` Settings shortcut still needs real-device verification.
+- macOS `Cmd+,`, `Cmd+F`, `Cmd+1`, `Cmd+2`, and `Cmd+W` shortcut behavior has been verified on real hardware.
 
 ## Handoff Summary
 
@@ -27,7 +27,7 @@
 - Main shell: `MomentTrace.Desktop/MainWindow.axaml` and `MainWindow.axaml.cs`.
 - Presentation: `MomentTrace.Presentation` owns timeline/overview/detail shaping.
 - Storage: local SQLite through `MomentTrace.Storage`.
-- Recorder: Windows foreground recorder through `MomentTrace.Windows`; macOS capture remains exploratory in `MomentTrace.MacProbe`.
+- Recorder: Windows foreground recorder through `MomentTrace.Windows`; macOS foreground capture through `MomentTrace.Mac`.
 
 ## Useful Start Prompt
 
@@ -36,3 +36,4 @@ Read ai/project-plan.md, ai/architecture.md, ai/stories.md, and ai/decisions.md.
 Pick the next highest-priority story, inspect the relevant code first, and keep changes scoped.
 Run the narrowest useful build/test command before summarizing.
 ```
+

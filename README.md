@@ -86,7 +86,7 @@ MomentTrace.slnx
 ├─ MomentTrace.App           WPF app shell, UI, tray icon, settings wiring
 ├─ MomentTrace.Core          Shared models, interfaces, local classification/search/session services
 ├─ MomentTrace.Desktop       Avalonia desktop shell for Windows/macOS UI reuse and parity work
-├─ MomentTrace.MacProbe      First macOS recorder probe for active app/window capture
+├─ MomentTrace.Mac           macOS foreground recorder and capture service
 ├─ MomentTrace.Presentation  Shared memory/timeline view models and shell service contracts
 ├─ MomentTrace.Storage       SQLite persistence
 └─ MomentTrace.Windows       Windows foreground recorder and startup registration
@@ -149,9 +149,9 @@ dotnet run --project .\MomentTrace.App\MomentTrace.App.csproj -- --minimized
 
 In Visual Studio, open `MomentTrace.slnx`, set `MomentTrace.App` as the startup project, and press `F5`.
 
-## macOS Probe
+## macOS Platform Service
 
-MomentTrace includes an early macOS recorder probe so the Mac capture model can be tested before the full UI is ported. It reuses `MomentTrace.Core` and `MomentTrace.Storage`, writes to the same SQLite schema, and records:
+MomentTrace includes a first-class `MomentTrace.Mac` platform service for active app/window capture. It is wired into the Avalonia desktop shell on macOS, reuses `MomentTrace.Core` and `MomentTrace.Storage`, writes to the same SQLite schema, and records:
 
 - active app name
 - bundle identifier when available
@@ -162,17 +162,17 @@ MomentTrace includes an early macOS recorder probe so the Mac capture model can 
 - local screenshot and thumbnail paths when macOS Screen Recording permission allows capture, now cropped to the frontmost window bounds when available
 - start/end timestamps
 
-Run it on a Mac from the repository root:
+Run the Avalonia shell on a Mac from the repository root:
 
 ```bash
-dotnet run --project ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
+dotnet run --project ./MomentTrace.Desktop/MomentTrace.Desktop.csproj -f net8.0
 ```
 
 The first run may require macOS privacy approval for Terminal, Visual Studio Code, Rider, or the launched host process to control System Events, read accessibility metadata, capture screenshots, and read browser tab URLs through AppleScript where supported.
 
-On non-macOS machines, the project builds but exits with a message instead of recording.
+On non-macOS machines, the desktop shell builds without starting the macOS recorder.
 
-Verified macOS probe result:
+Verified macOS Platform Service result:
 
 - Tested from `/Users/blakboi/Documents/Codex/2026-05-30/help-me-build-this-users-blakboi/work/MomentTrace-verify`
 - .NET SDK `9.0.315`
@@ -192,17 +192,17 @@ From Terminal on the Mac:
 ```bash
 git clone https://github.com/nwaoga/MomentTrace.git
 cd MomentTrace
-dotnet build ./MomentTrace.slnx
-dotnet run --project ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
+dotnet build ./MomentTrace.slnx -p:EnableWindowsTargeting=true
+dotnet run --project ./MomentTrace.Desktop/MomentTrace.Desktop.csproj -f net8.0
 ```
 
 Quick checklist for the Mac run:
 
 - Install the .NET SDK first.
 - Keep `-p:EnableWindowsTargeting=true` on solution builds because the repo still includes the Windows project.
-- If macOS prompts for Accessibility or Screen Recording permissions, allow them and rerun the probe.
+- If macOS prompts for Accessibility or Screen Recording permissions, allow them and rerun the desktop shell.
 - Switch between a few apps with visible windows, such as Finder, Terminal, Safari, Codex, or System Settings.
-- Confirm the console prints foreground changes as they happen.
+- Confirm new foreground rows appear in the local database as you switch between apps.
 - Confirm rows are written under `~/Library/Application Support/MomentTrace/timeline.db`.
 - Confirm recorded rows now prefer stable app identity such as `app://com.apple.finder` instead of raw `pid:` markers when bundle IDs are available.
 - Confirm Safari and supported Chromium browsers store real page URLs in `resource` when browser scripting access is available.
@@ -214,8 +214,8 @@ If the repo is already cloned:
 ```bash
 cd MomentTrace
 git pull
-dotnet build ./MomentTrace.slnx
-dotnet run --project ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
+dotnet build ./MomentTrace.slnx -p:EnableWindowsTargeting=true
+dotnet run --project ./MomentTrace.Desktop/MomentTrace.Desktop.csproj -f net8.0
 ```
 
 If building the whole solution on macOS, include Windows targeting because the solution still contains the Windows WPF project:
@@ -224,23 +224,23 @@ If building the whole solution on macOS, include Windows targeting because the s
 dotnet build ./MomentTrace.slnx -p:EnableWindowsTargeting=true
 ```
 
-For the first Mac spike, Terminal is the simplest way to run the probe because the output is immediate and permission prompts are easier to reason about. Visual Studio Code is the best lightweight IDE for editing and debugging on macOS. Visual Studio for Mac is discontinued, so do not plan the Mac workflow around it. If using a full JetBrains IDE, Rider is a good option once the cross-platform UI work starts.
+Terminal is the simplest way to run the macOS shell during validation because permission prompts are easier to reason about. Visual Studio Code is the best lightweight IDE for editing and debugging on macOS. Visual Studio for Mac is discontinued, so do not plan the Mac workflow around it. If using a full JetBrains IDE, Rider is a good option.
 
 ### Mac Validation Checklist
 
 Use this when you want a quick pass/fail validation on a real Mac after pulling the latest branch, then paste the results back into this Codex thread for review.
 
-1. Build the probe or the solution:
+1. Build the macOS service or the solution:
 
 ```bash
-dotnet build ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
+dotnet build ./MomentTrace.Mac/MomentTrace.Mac.csproj
 dotnet build ./MomentTrace.slnx -p:EnableWindowsTargeting=true
 ```
 
-2. Run the probe:
+2. Run the Avalonia shell with the macOS service:
 
 ```bash
-dotnet run --project ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
+dotnet run --project ./MomentTrace.Desktop/MomentTrace.Desktop.csproj -f net8.0
 ```
 
 3. Interact with a few apps for 20 to 40 seconds:
@@ -250,9 +250,9 @@ dotnet run --project ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
 - Safari or Chrome
 - System Settings
 
-4. Verify live console output:
+4. Verify activity capture:
 
-- New foreground changes should print as `HH:mm:ss AppName - Window Title`.
+- New foreground changes should be written to the local timeline database.
 - Window titles may be blank or reduced until Accessibility permission is granted.
 
 5. Verify stored data:
@@ -263,15 +263,14 @@ sqlite3 "$HOME/Library/Application Support/MomentTrace/timeline.db" "select star
 
 6. Paste these two artifacts back into Codex:
 
-- the live console output from the probe after switching between a few apps
+- a note on which apps you switched through while the desktop shell was running
 - the SQLite query result from the command above
 
 Suggested capture format:
 
 ```text
-Console:
-14:32:10 Finder - Downloads
-14:32:18 Safari - OpenAI
+Apps exercised:
+Finder, Safari, System Settings
 
 SQLite:
 2026-06-17T14:32:18.0000000+01:00 | Safari | com.apple.Safari | https://openai.com/ | /Applications/Safari.app | /Users/.../screenshots/...png | /Users/.../thumbnails/...jpg
@@ -287,7 +286,7 @@ Expected validation result:
 
 If validation fails:
 
-- No console output usually means the app never became frontmost long enough, or the probe was not running on macOS.
+- No new rows usually means the desktop shell never became active long enough, the app lacked macOS permissions, or the shell was not running on macOS.
 - Missing titles usually means Accessibility permission was not granted yet.
 - Missing screenshots usually means Screen Recording permission was not granted yet.
 - Repeated `pid:` resources are acceptable only for apps where bundle ID and path could not be resolved.
@@ -310,7 +309,7 @@ Branch: main
 Commit: 42323be69e4e31a2f1679fc3f33e22afcb8ddfb0
 ```
 
-Probe console output:
+Archived standalone-recorder output from the earlier validation run:
 
 ```text
 11:31:15 Codex - Codex
@@ -792,3 +791,4 @@ For Azure DevOps planning, current implementation work is tracked in the MomentT
 ## Planning
 
 See [`ai/project-plan.md`](ai/project-plan.md) for the active roadmap, Azure DevOps mapping, QA checklist, and current stability punch list.
+

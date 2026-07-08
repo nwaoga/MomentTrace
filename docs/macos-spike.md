@@ -13,7 +13,7 @@ Use an Avalonia desktop shell for the eventual cross-platform UI, while keeping 
 - `MomentTrace.Windows`: Windows recorder, startup, tray, screenshot, URL capture.
 - `MomentTrace.Mac`: macOS recorder, login item, menu bar, screenshot, URL capture.
 
-Do not start by porting the full UI. Start with a macOS recorder probe that writes rows through `MomentTrace.Storage`, then display those rows in a thin Avalonia shell.
+The macOS recorder now lives behind `MomentTrace.Mac` and is hosted by the Avalonia shell, while deeper AppKit/Accessibility bindings remain future polish.
 
 ## macOS Recorder MVP
 
@@ -74,28 +74,28 @@ With a Mac linked to Visual Studio, there are two useful test loops:
 
 2. Direct Mac CLI loop:
    - Clone the repo on the Mac.
-   - Run the recorder probe or Avalonia shell with `dotnet run`.
+   - Run the Avalonia shell with `dotnet run`.
    - Inspect `%AppData%` equivalent under the user Library/Application Support path.
 
-The first visible milestone should be a simple Mac recorder probe showing rows in SQLite. The second should be a thin Avalonia UI showing those rows as MomentTrace moments.
+The first visible milestone was a Mac recorder service writing rows in SQLite. The current path is the Avalonia shell showing those rows as MomentTrace moments.
 
-## Current Probe
+## Current Service
 
-The repository now includes `MomentTrace.MacProbe`, a minimal .NET console recorder that runs only on macOS and reuses the existing shared store.
+The repository now includes `MomentTrace.Mac`, a macOS platform service that runs inside `MomentTrace.Desktop` on macOS and reuses the existing shared store.
 
-Run it on a Mac from the repository root:
+Run the shell on a Mac from the repository root:
 
 ```bash
-dotnet run --project ./MomentTrace.MacProbe/MomentTrace.MacProbe.csproj
+dotnet run --project ./MomentTrace.Desktop/MomentTrace.Desktop.csproj -f net8.0
 ```
 
-The probe writes to the same SQLite schema as the Windows app. It captures active app name, bundle identifier, executable path, a stable app resource marker, active window title when macOS permissions allow it, and start/end timestamps.
+The macOS service writes to the same SQLite schema as the Windows app. It captures active app name, bundle identifier, executable path, a stable app resource marker, active window title when macOS permissions allow it, screenshots/thumbnails when Screen Recording is allowed, and start/end timestamps.
 
 It is intentionally not the final macOS implementation. It uses `osascript` and System Events as a fast proof path so we can validate permissions, storage, grouping, and developer workflow before replacing the capture layer with native AppKit/Accessibility bindings in `MomentTrace.Mac`.
 
 ## Verified Result
 
-The probe has been tested successfully on a Mac clone at:
+The macOS service has been tested successfully on a Mac clone at:
 
 ```text
 /Users/blakboi/Documents/src/MomentTrace/MomentTrace
@@ -112,7 +112,7 @@ The full solution builds on macOS with Windows targeting enabled:
 dotnet build MomentTrace.slnx -p:EnableWindowsTargeting=true
 ```
 
-The probe runs and writes foreground app/window activity into:
+The macOS service runs through `MomentTrace.Desktop` and writes foreground app/window activity into:
 
 ```text
 /Users/blakboi/Library/Application Support/MomentTrace/timeline.db
@@ -122,7 +122,7 @@ Observed foreground rows included Codex and System Settings, including the Acces
 
 ## Current Validation Status
 
-The recorder spike is no longer just theoretical. Real-machine validation now confirms:
+The original recorder spike is no longer just theoretical. Real-machine validation now confirms:
 
 - `bundle_identifier` is being stored for normal bundled macOS apps
 - `resource` prefers `app://...` identity for app reopen and real `https://...` URLs for supported browsers
@@ -130,7 +130,7 @@ The recorder spike is no longer just theoretical. Real-machine validation now co
 - screenshots can be cropped to the frontmost app window rather than only the full display
 - reopen targeting for captured Safari and Codex moments has been validated on a Mac clone
 
-The remaining known macOS shell issue is not recorder-side. It is a UX bug in the Avalonia shell where `Cmd+,` does not reliably open Settings from the main window and should be re-verified after the next shell polish pass.
+The previous macOS shell shortcut issue was re-verified and fixed in the Avalonia shell.
 
 ## Shared Presentation Boundary
 
@@ -166,3 +166,4 @@ The WPF app now adapts `ActivityMomentViewModel` through `ActivityItemViewModel`
 - Apple Accessibility APIs expose app UI elements through `AXUIElement`.
 - Apple ScreenCaptureKit captures displays, apps, and windows and prompts for Screen Recording permission on first use.
 - Apple `SMAppService` registers login items and launch agents on macOS 13 and later.
+

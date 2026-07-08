@@ -20,7 +20,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 ---
 
-## Current State (2026-07-08 17:03 UTC+1)
+## Current State (2026-07-08 22:35 UTC+1)
 
 **Phase:** Late-alpha hardening and polish.
 
@@ -40,6 +40,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Explorer folder moments capture and reopen the captured folder path.
 - README preview artwork refreshed with sanitized SVG mockups for the current shell, Overview dashboard, timeline/detail pane, and theme collage.
 - macOS shell shortcut verification passed for Settings, search, Timeline, Overview, and close behavior.
+- macOS foreground capture is now in the first-class `MomentTrace.Mac` platform service and is hosted by `MomentTrace.Desktop` on the cross-platform target.
 - Shared presentation builders for timeline, overview, and detail context.
 - Local SQLite activity store and Windows foreground recorder.
 
@@ -84,7 +85,7 @@ Choose one track below. Each is scoped for a single focused agent session or sma
 
 **Why:** Recent shell work touched layout, chrome, navigation, and Overview interactions.
 
-**Status:** Completed 2026-07-01 23:34 UTC+1 on Windows. macOS shell verification remains tracked separately under Option D.
+**Status:** Completed 2026-07-01 23:34 UTC+1 on Windows. macOS shell verification later passed under Option D.
 
 **Scope:**
 
@@ -159,6 +160,7 @@ Completed:
 - [2026-07-01 23:50 UTC+1] **Option C** — README preview refresh.
 - [2026-07-04 16:28 UTC+1] **Option D** — macOS shortcut verification.
 - [2026-07-08 17:03 UTC+1] **Theme visual QA pass** — shipped desktop theme sweep with screenshot evidence and active-nav readability fix.
+- [2026-07-08 22:35 UTC+1] **AB#77 macOS platform service** — replaced `MomentTrace.MacProbe` with `MomentTrace.Mac` and wired it into `MomentTrace.Desktop`.
 
 ---
 

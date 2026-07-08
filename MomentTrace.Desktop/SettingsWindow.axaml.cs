@@ -293,7 +293,7 @@ public partial class SettingsWindow : Window
 
         if (OperatingSystem.IsMacOS())
         {
-            return "Reduced mode on this platform · browser URL extraction not wired into this probe";
+            return "Reduced mode on this platform · browser URL extraction is not wired here";
         }
 
         return "Unavailable on this platform";

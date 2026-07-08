@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using MomentTrace.Core;
 
-namespace MomentTrace.MacProbe;
+namespace MomentTrace.Mac;
 
 public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActivityRecorder
 {
@@ -76,7 +76,7 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
             }
             catch
             {
-                // A permission prompt or transient app switch should not stop the probe.
+                // A permission prompt or transient app switch should not stop recording.
             }
 
             await Task.Delay(PollInterval, cancellationToken);
