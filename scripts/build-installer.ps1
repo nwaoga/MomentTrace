@@ -37,6 +37,16 @@ if ($AssemblyVersion -notmatch '^\d+\.\d+\.\d+$') {
 
 $assemblyVersionValue = "$AssemblyVersion.0"
 
+function Resolve-InstallerPath {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    if ([System.IO.Path]::IsPathRooted($Path)) {
+        return [System.IO.Path]::GetFullPath($Path)
+    }
+
+    return [System.IO.Path]::GetFullPath((Join-Path (Get-Location) $Path))
+}
+
 if ([string]::IsNullOrWhiteSpace($PublishDir)) {
     $PublishDir = Join-Path $repoRoot "publish\$Runtime"
 }
@@ -44,6 +54,9 @@ if ([string]::IsNullOrWhiteSpace($PublishDir)) {
 if ([string]::IsNullOrWhiteSpace($OutputDir)) {
     $OutputDir = Join-Path $repoRoot "dist"
 }
+
+$PublishDir = Resolve-InstallerPath -Path $PublishDir
+$OutputDir = Resolve-InstallerPath -Path $OutputDir
 
 New-Item -ItemType Directory -Force -Path $PublishDir | Out-Null
 New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
