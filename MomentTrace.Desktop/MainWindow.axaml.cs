@@ -2457,25 +2457,25 @@ public partial class MainWindow : Window
     {
         var isOverview = OverviewPage.IsVisible;
 
-        SetNavItemState(TimelineNavHighlight, TimelineNavAccent, TimelineNavButton,
+        SetNavItemState(TimelineNavHighlight, TimelineNavAccent, TimelineNavButton, TimelineNavIcon, TimelineNavTitle, TimelineNavSubtitle,
             !isOverview && _activeWorkspaceNav == WorkspaceNav.Timeline && _selectedRailSelection == RailSelection.Timeline);
-        SetNavItemState(OverviewNavHighlight, OverviewNavAccent, OverviewNavButton,
+        SetNavItemState(OverviewNavHighlight, OverviewNavAccent, OverviewNavButton, OverviewNavIcon, OverviewNavTitle, OverviewNavSubtitle,
             isOverview && _activeWorkspaceNav == WorkspaceNav.Overview);
-        SetNavItemState(SavedMomentsNavHighlight, SavedMomentsNavAccent, SavedMomentsNavButton,
+        SetNavItemState(SavedMomentsNavHighlight, SavedMomentsNavAccent, SavedMomentsNavButton, SavedMomentsNavIcon, SavedMomentsNavTitle, SavedMomentsNavSubtitle,
             !isOverview && _selectedRailSelection == RailSelection.SavedMoments);
-        SetNavItemState(NotesNavHighlight, NotesNavAccent, NotesNavButton,
+        SetNavItemState(NotesNavHighlight, NotesNavAccent, NotesNavButton, NotesNavIcon, NotesNavTitle, NotesNavSubtitle,
             !isOverview && _selectedRailSelection == RailSelection.Notes);
-        SetNavItemState(BookmarksNavHighlight, BookmarksNavAccent, BookmarksNavButton,
+        SetNavItemState(BookmarksNavHighlight, BookmarksNavAccent, BookmarksNavButton, BookmarksNavIcon, BookmarksNavTitle, BookmarksNavSubtitle,
             !isOverview && _selectedRailSelection == RailSelection.Bookmarks);
-        SetNavItemState(AppsNavHighlight, AppsNavAccent, AppsNavButton,
+        SetNavItemState(AppsNavHighlight, AppsNavAccent, AppsNavButton, AppsNavIcon, AppsNavTitle, AppsNavSubtitle,
             !isOverview && _selectedRailSelection == RailSelection.Apps);
-        SetNavItemState(WebsitesNavHighlight, WebsitesNavAccent, WebsitesNavButton,
+        SetNavItemState(WebsitesNavHighlight, WebsitesNavAccent, WebsitesNavButton, WebsitesNavIcon, WebsitesNavTitle, WebsitesNavSubtitle,
             !isOverview && _selectedRailSelection == RailSelection.Websites);
-        SetNavItemState(FilesNavHighlight, FilesNavAccent, FilesNavButton,
+        SetNavItemState(FilesNavHighlight, FilesNavAccent, FilesNavButton, FilesNavIcon, FilesNavTitle, FilesNavSubtitle,
             !isOverview && _selectedRailSelection == RailSelection.Files);
     }
 
-    private void SetNavItemState(Border highlight, Border accent, Button button, bool isActive)
+    private void SetNavItemState(Border highlight, Border accent, Button button, TextBlock icon, TextBlock title, TextBlock subtitle, bool isActive)
     {
         highlight.Background = isActive
             ? new SolidColorBrush(_currentTheme.ActiveSurface)
@@ -2484,6 +2484,15 @@ public partial class MainWindow : Window
             ? new SolidColorBrush(_currentTheme.Accent)
             : Brushes.Transparent;
         button.Background = Brushes.Transparent;
+        icon.Foreground = isActive
+            ? new SolidColorBrush(_currentTheme.AccentText)
+            : new SolidColorBrush(_currentTheme.MutedText);
+        title.Foreground = isActive
+            ? new SolidColorBrush(_currentTheme.AccentText)
+            : new SolidColorBrush(_currentTheme.Text);
+        subtitle.Foreground = isActive
+            ? new SolidColorBrush(_currentTheme.AccentText)
+            : new SolidColorBrush(_currentTheme.SubtleText);
     }
 
     private void UpdateRailNavSubtitles()

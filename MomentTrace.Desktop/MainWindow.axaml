@@ -558,13 +558,14 @@
                                     Click="TimelineNavButton_Click"
                                     HorizontalContentAlignment="Stretch">
                                 <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
-                                    <TextBlock Text="∿"
+                                    <TextBlock x:Name="TimelineNavIcon"
+                                               Text="∿"
                                                Foreground="{DynamicResource AccentBrush}"
                                                FontSize="14"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center" />
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
-                                        <TextBlock Text="Timeline" Classes="navTitle" />
+                                        <TextBlock x:Name="TimelineNavTitle" Text="Timeline" Classes="navTitle" />
                                         <TextBlock x:Name="TimelineNavSubtitle"
                                                    Text="Moments today"
                                                    Classes="navSubtitle" />
@@ -582,14 +583,15 @@
                                     Click="OverviewNavButton_Click"
                                     HorizontalContentAlignment="Stretch">
                                 <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
-                                    <TextBlock Text="▦"
+                                    <TextBlock x:Name="OverviewNavIcon"
+                                               Text="▦"
                                                Foreground="{DynamicResource MutedTextBrush}"
                                                FontSize="13"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center" />
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
-                                        <TextBlock Text="Overview" Classes="navTitle" />
-                                        <TextBlock Text="Daily summary" Classes="navSubtitle" />
+                                        <TextBlock x:Name="OverviewNavTitle" Text="Overview" Classes="navTitle" />
+                                        <TextBlock x:Name="OverviewNavSubtitle" Text="Daily summary" Classes="navSubtitle" />
                                     </StackPanel>
                                 </Grid>
                             </Button>
@@ -616,14 +618,15 @@
                                             Click="SavedMomentsNavButton_Click"
                                             HorizontalContentAlignment="Stretch">
                                         <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
-                                            <TextBlock Text="★"
+                                            <TextBlock x:Name="SavedMomentsNavIcon"
+                                                       Text="★"
                                                        Foreground="{DynamicResource MutedTextBrush}"
                                                        FontSize="13"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center" />
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
-                                                <TextBlock Text="Saved Moments" Classes="navTitle" />
-                                                <TextBlock Text="Pinned and bookmarked" Classes="navSubtitle" />
+                                                <TextBlock x:Name="SavedMomentsNavTitle" Text="Saved Moments" Classes="navTitle" />
+                                                <TextBlock x:Name="SavedMomentsNavSubtitle" Text="Pinned and bookmarked" Classes="navSubtitle" />
                                             </StackPanel>
                                         </Grid>
                                     </Button>
@@ -638,14 +641,15 @@
                                             Click="NotesNavButton_Click"
                                             HorizontalContentAlignment="Stretch">
                                         <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
-                                            <TextBlock Text="☰"
+                                            <TextBlock x:Name="NotesNavIcon"
+                                                       Text="☰"
                                                        Foreground="{DynamicResource MutedTextBrush}"
                                                        FontSize="13"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center" />
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
-                                                <TextBlock Text="Notes" Classes="navTitle" />
-                                                <TextBlock Text="Moments with notes" Classes="navSubtitle" />
+                                                <TextBlock x:Name="NotesNavTitle" Text="Notes" Classes="navTitle" />
+                                                <TextBlock x:Name="NotesNavSubtitle" Text="Moments with notes" Classes="navSubtitle" />
                                             </StackPanel>
                                         </Grid>
                                     </Button>
@@ -660,14 +664,15 @@
                                             Click="BookmarksNavButton_Click"
                                             HorizontalContentAlignment="Stretch">
                                         <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
-                                            <TextBlock Text="⌑"
+                                            <TextBlock x:Name="BookmarksNavIcon"
+                                                       Text="⌑"
                                                        Foreground="{DynamicResource MutedTextBrush}"
                                                        FontSize="13"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center" />
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
-                                                <TextBlock Text="Bookmarks" Classes="navTitle" />
-                                                <TextBlock Text="Saved for later" Classes="navSubtitle" />
+                                                <TextBlock x:Name="BookmarksNavTitle" Text="Bookmarks" Classes="navTitle" />
+                                                <TextBlock x:Name="BookmarksNavSubtitle" Text="Saved for later" Classes="navSubtitle" />
                                             </StackPanel>
                                         </Grid>
                                     </Button>
@@ -686,14 +691,15 @@
                                             Click="AppsNavButton_Click"
                                             HorizontalContentAlignment="Stretch">
                                         <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
-                                            <TextBlock Text="▦"
+                                            <TextBlock x:Name="AppsNavIcon"
+                                                       Text="▦"
                                                        Foreground="{DynamicResource MutedTextBrush}"
                                                        FontSize="13"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center" />
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
-                                                <TextBlock Text="Apps" Classes="navTitle" />
-                                                <TextBlock Text="Desktop and tools" Classes="navSubtitle" />
+                                                <TextBlock x:Name="AppsNavTitle" Text="Apps" Classes="navTitle" />
+                                                <TextBlock x:Name="AppsNavSubtitle" Text="Desktop and tools" Classes="navSubtitle" />
                                             </StackPanel>
                                         </Grid>
                                     </Button>
@@ -708,14 +714,15 @@
                                             Click="WebsitesNavButton_Click"
                                             HorizontalContentAlignment="Stretch">
                                         <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
-                                            <TextBlock Text="◎"
+                                            <TextBlock x:Name="WebsitesNavIcon"
+                                                       Text="◎"
                                                        Foreground="{DynamicResource MutedTextBrush}"
                                                        FontSize="13"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center" />
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
-                                                <TextBlock Text="Websites" Classes="navTitle" />
-                                                <TextBlock Text="Browser activity" Classes="navSubtitle" />
+                                                <TextBlock x:Name="WebsitesNavTitle" Text="Websites" Classes="navTitle" />
+                                                <TextBlock x:Name="WebsitesNavSubtitle" Text="Browser activity" Classes="navSubtitle" />
                                             </StackPanel>
                                         </Grid>
                                     </Button>
@@ -730,14 +737,15 @@
                                             Click="FilesNavButton_Click"
                                             HorizontalContentAlignment="Stretch">
                                         <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
-                                            <TextBlock Text="□"
+                                            <TextBlock x:Name="FilesNavIcon"
+                                                       Text="□"
                                                        Foreground="{DynamicResource MutedTextBrush}"
                                                        FontSize="13"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center" />
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
-                                                <TextBlock Text="Files" Classes="navTitle" />
-                                                <TextBlock Text="Documents and paths" Classes="navSubtitle" />
+                                                <TextBlock x:Name="FilesNavTitle" Text="Files" Classes="navTitle" />
+                                                <TextBlock x:Name="FilesNavSubtitle" Text="Documents and paths" Classes="navSubtitle" />
                                             </StackPanel>
                                         </Grid>
                                     </Button>

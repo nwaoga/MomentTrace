@@ -20,7 +20,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 ---
 
-## Current State (2026-07-04 16:28 UTC+1)
+## Current State (2026-07-08 17:03 UTC+1)
 
 **Phase:** Late-alpha hardening and polish.
 
@@ -33,6 +33,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Windows custom chrome with resize handles and no duplicate native caption buttons.
 - Immediate local mutation refresh across Timeline, Overview, detail pane, and Library filters.
 - Detail-pane note editor now uses a theme-safe dark surface with readable text and focus states.
+- Theme visual QA pass completed across Midnight, Starbucks Reserve, Nero Roast, Costa Afterglow, Espresso (Mono), and Hot White, with scripted screenshot capture for Timeline, Overview, and Saved Moments.
 - Explorer folder moments capture and reopen the captured folder path.
 - README preview artwork refreshed with sanitized SVG mockups for the current shell, Overview dashboard, timeline/detail pane, and theme collage.
 - macOS shell shortcut verification passed for Settings, search, Timeline, Overview, and close behavior.
@@ -148,14 +149,13 @@ Choose one track below. Each is scoped for a single focused agent session or sma
 
 ## Recommended Priority
 
-1. **Theme visual QA pass** — dark, Starbucks, Nero, Costa, espresso, and light themes.
-
 Completed:
 
 - [2026-06-27 09:28 UTC+1] **Option A** — Immediate refresh pass.
 - [2026-07-01 23:34 UTC+1] **Option B** — Stability QA sweep on Windows.
 - [2026-07-01 23:50 UTC+1] **Option C** — README preview refresh.
 - [2026-07-04 16:28 UTC+1] **Option D** — macOS shortcut verification.
+- [2026-07-08 17:03 UTC+1] **Theme visual QA pass** — shipped desktop theme sweep with screenshot evidence and active-nav readability fix.
 
 ---
 
