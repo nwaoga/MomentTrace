@@ -5,6 +5,7 @@ MomentTrace is a Windows-first desktop app that builds a private memory timeline
 The long-term goal is a cross-platform desktop timeline for Windows and macOS. The current implementation focuses on a shippable Windows MVP while keeping the core model and storage code separate from Windows-specific integrations.
 
 For active roadmap, Azure DevOps mapping, QA priorities, and current risks, see [`ai/project-plan.md`](ai/project-plan.md).
+For launch positioning, website copy, social posts, demo script, and beta checklist, see [`docs/marketing-launch-kit.md`](docs/marketing-launch-kit.md).
 
 ## Preview
 
