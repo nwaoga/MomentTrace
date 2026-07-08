@@ -37,7 +37,7 @@ The first beta is focused on local-first recall. MomentTrace stores data on your
 
 ## Landing Page Outline
 
-A static landing page draft is available at `docs/landing/index.html`. It uses sanitized product visuals from `docs/assets/` and points the beta CTA at `v0.1.1-beta.5`.
+A static landing page draft is available at `docs/landing/index.html`. It uses sanitized product visuals from `docs/assets/` and points the beta CTA at `v0.1.1-beta.6`.
 
 ### Hero
 
@@ -197,7 +197,7 @@ Productivity, Windows, Privacy, Developer Tools, Personal Analytics
 
 ## Beta Release Checklist
 
-- GitHub prerelease exists for `v0.1.1-beta.5`.
+- GitHub prerelease exists for `v0.1.1-beta.6`.
 - Windows installer, Windows portable zip, and macOS app zip are attached to the release.
 - Clean Windows install smoke test passes.
 - macOS app zip extracts to `MomentTrace.app`.

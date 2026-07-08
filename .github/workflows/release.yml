@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version, for example v0.1.0 or v0.1.1-beta.5"
+        description: "Release version, for example v0.1.0 or v0.1.1-beta.6"
         required: true
         type: string
 
@@ -33,7 +33,7 @@ jobs:
           $tag = if ("${{ github.event_name }}" -eq "workflow_dispatch") { "${{ inputs.version }}" } else { "${{ github.ref_name }}" }
           $versionMatch = [regex]::Match($tag, '^v(?<base>\d+\.\d+\.\d+)(?<suffix>-[0-9A-Za-z][0-9A-Za-z.-]*)?$')
           if (-not $versionMatch.Success) {
-            throw "Version must use vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-prerelease format, for example v0.1.0 or v0.1.1-beta.5."
+            throw "Version must use vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-prerelease format, for example v0.1.0 or v0.1.1-beta.6."
           }
 
           $version = $versionMatch.Groups["base"].Value
@@ -175,6 +175,7 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           $notes = @"
           MomentTrace ${{ needs.prepare.outputs.release_tag }}
