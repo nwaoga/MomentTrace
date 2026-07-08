@@ -29,6 +29,7 @@
 - [2026-07-08 17:46 UTC+1] Full privacy cleanup should be a separate Settings action from activity-only deletion, and it should disable startup plus close the app after deleting local timeline data, previews, icons, settings, and cached privacy blocklists so the app does not immediately recreate fresh local state in the same session.
 - [2026-07-08 22:11 UTC+1] First-run onboarding should appear after the main shell is visible, persist through `DesktopWindowPreferences`, and use existing privacy/startup settings rather than introducing a separate onboarding configuration store.
 - [2026-07-08 22:35 UTC+1] macOS capture now belongs in the first-class `MomentTrace.Mac` platform project and is hosted by `MomentTrace.Desktop` on the cross-platform `net8.0` target.
+- [2026-07-08 22:48 UTC+1] macOS releases should ship as signed and notarized `.app` bundles inside DMGs, with Developer ID credentials stored only in release secrets.
 
 ## Recently Completed
 

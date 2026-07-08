@@ -161,6 +161,7 @@ Completed:
 - [2026-07-04 16:28 UTC+1] **Option D** — macOS shortcut verification.
 - [2026-07-08 17:03 UTC+1] **Theme visual QA pass** — shipped desktop theme sweep with screenshot evidence and active-nav readability fix.
 - [2026-07-08 22:35 UTC+1] **AB#77 macOS platform service** — replaced `MomentTrace.MacProbe` with `MomentTrace.Mac` and wired it into `MomentTrace.Desktop`.
+- [2026-07-08 22:48 UTC+1] **AB#78 macOS release plan** — documented `.app` bundling, Developer ID signing, notarization, DMG creation, credentials, permissions, and pipeline outline.
 
 ---
 

@@ -32,6 +32,7 @@ No open local backlog items. Pull the next Azure DevOps priority when ready.
 - [x] [2026-07-08 17:46 UTC+1] Add a Settings option to delete all local data for full privacy cleanup, including timeline history, previews, icons, settings, cached privacy blocklists, and startup disablement before app shutdown.
 - [x] [2026-07-08 22:11 UTC+1] `AB#72`: Add first-run onboarding for privacy, startup behavior, and local storage expectations.
 - [x] [2026-07-08 22:35 UTC+1] `AB#77`: Replace `MomentTrace.MacProbe` with the first-class `MomentTrace.Mac` platform service and wire it into `MomentTrace.Desktop`.
+- [x] [2026-07-08 22:48 UTC+1] `AB#78`: Document the macOS packaging, Developer ID signing, notarization, DMG, permission, and release pipeline plan.
 
 ## QA Notes
 

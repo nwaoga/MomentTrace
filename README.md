@@ -162,6 +162,8 @@ MomentTrace includes a first-class `MomentTrace.Mac` platform service for active
 - local screenshot and thumbnail paths when macOS Screen Recording permission allows capture, now cropped to the frontmost window bounds when available
 - start/end timestamps
 
+The packaging, signing, notarization, and DMG release path is tracked in [docs/macos-release.md](docs/macos-release.md).
+
 Run the Avalonia shell on a Mac from the repository root:
 
 ```bash
