@@ -49,11 +49,11 @@
   <rect x="944" y="74" width="86" height="34" rx="10" fill="#08111F" stroke="#26344D"/>
   <text x="968" y="96" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#F4F7FB">All</text>
   <rect x="1050" y="72" width="42" height="38" rx="11" fill="#08111F" stroke="#26344D"/>
-  <text x="1071" y="98" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#F4F7FB"></text>
+  <text x="1071" y="98" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#F4F7FB">-</text>
   <rect x="1102" y="72" width="42" height="38" rx="11" fill="#08111F" stroke="#26344D"/>
-  <text x="1123" y="97" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#F4F7FB">�</text>
+  <text x="1123" y="97" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#F4F7FB">o</text>
   <rect x="1154" y="72" width="42" height="38" rx="11" fill="#08111F" stroke="#26344D"/>
-  <text x="1175" y="98" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#F4F7FB">�</text>
+  <text x="1175" y="98" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#F4F7FB">o</text>
 
   <!-- Overview header -->
   <text x="360" y="168" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700" fill="#F4F7FB">Today</text>
@@ -104,11 +104,11 @@
   <rect x="360" y="516" width="220" height="150" rx="14" fill="#121D2F" stroke="#8B5CF6" stroke-width="2"/>
   <rect x="360" y="516" width="220" height="72" rx="14" fill="#1E293B"/>
   <text x="382" y="612" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#F4F7FB">Design review</text>
-  <text x="382" y="636" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#A5B0C3">Figma � Seen 18m</text>
+  <text x="382" y="636" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#A5B0C3">Figma o Seen 18m</text>
   <rect x="598" y="516" width="220" height="150" rx="14" fill="#121D2F" stroke="#26344D"/>
   <rect x="598" y="516" width="220" height="72" rx="14" fill="#172033"/>
   <text x="620" y="612" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#F4F7FB">Code editor</text>
-  <text x="620" y="636" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#A5B0C3">Development � Seen 36m</text>
+  <text x="620" y="636" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#A5B0C3">Development o Seen 36m</text>
   <rect x="836" y="516" width="220" height="150" rx="14" fill="#121D2F" stroke="#26344D"/>
   <text x="858" y="612" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#F4F7FB">Research notes</text>
   <text x="858" y="636" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#A5B0C3">docs.example.local</text>
@@ -131,3 +131,4 @@
   <text x="1206" y="612" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#A5B0C3">Browser</text>
   <text x="1288" y="612" text-anchor="end" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#F4F7FB">42m</text>
 </svg>
+
