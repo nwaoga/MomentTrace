@@ -70,6 +70,8 @@ The release job:
 6. Signs `MomentTrace.App.exe` and the setup executable when a certificate is available.
 7. Uploads release artifacts.
 
+Prerelease tags such as `v0.1.1-beta.1` are supported. The release workflow keeps assembly and file versions numeric, names artifacts with the prerelease label, and marks the GitHub Release as a prerelease.
+
 ## Certificate Handling Notes
 
 - Prefer GitHub environment protection for production signing secrets.

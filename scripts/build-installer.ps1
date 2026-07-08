@@ -1,5 +1,6 @@
 param(
     [string]$Version = "0.1.0",
+    [string]$AssemblyVersion = "",
     [string]$Configuration = "Release",
     [string]$Runtime = "win-x64",
     [string]$PublishDir = "",
@@ -20,6 +21,21 @@ $signScript = Join-Path $repoRoot "scripts\sign-windows-artifacts.ps1"
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "MomentTraceInstaller"
 $stagingOutputDir = Join-Path $tempRoot $Version
 $installerFileName = "MomentTrace-$Version-win-x64-setup.exe"
+
+if ([string]::IsNullOrWhiteSpace($AssemblyVersion)) {
+    if ($Version -match '^(\d+\.\d+\.\d+)') {
+        $AssemblyVersion = $Matches[1]
+    }
+    else {
+        throw "Version must start with MAJOR.MINOR.PATCH when AssemblyVersion is not supplied."
+    }
+}
+
+if ($AssemblyVersion -notmatch '^\d+\.\d+\.\d+$') {
+    throw "AssemblyVersion must use MAJOR.MINOR.PATCH format."
+}
+
+$assemblyVersionValue = "$AssemblyVersion.0"
 
 if ([string]::IsNullOrWhiteSpace($PublishDir)) {
     $PublishDir = Join-Path $repoRoot "publish\$Runtime"
@@ -50,9 +66,9 @@ New-Item -ItemType Directory -Force -Path $stagingOutputDir | Out-Null
     --self-contained true `
     -p:PublishSingleFile=true `
     -p:IncludeNativeLibrariesForSelfExtract=true `
-    -p:Version=$Version `
-    -p:AssemblyVersion="$Version.0" `
-    -p:FileVersion="$Version.0" `
+    -p:Version=$AssemblyVersion `
+    -p:AssemblyVersion=$assemblyVersionValue `
+    -p:FileVersion=$assemblyVersionValue `
     -p:InformationalVersion="v$Version" `
     --output $PublishDir `
     -m:1 `

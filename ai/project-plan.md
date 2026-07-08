@@ -163,6 +163,7 @@ Completed:
 - [2026-07-08 22:35 UTC+1] **AB#77 macOS platform service** — replaced `MomentTrace.MacProbe` with `MomentTrace.Mac` and wired it into `MomentTrace.Desktop`.
 - [2026-07-08 22:48 UTC+1] **AB#78 macOS release plan** — documented `.app` bundling, Developer ID signing, notarization, DMG creation, credentials, permissions, and pipeline outline.
 - [2026-07-08 23:05 UTC+1] **AB#70 Windows verified publisher flow** — added optional `signtool` signing for Windows app/installer artifacts, wired release secrets, and documented certificate handling.
+- [2026-07-08 23:22 UTC+1] **Prerelease workflow** — release tags such as `v0.1.1-beta.1` now produce GitHub prereleases with beta-labelled artifacts.
 
 ---
 

@@ -777,7 +777,7 @@ git push origin v0.1.0
 
 The release workflow validates the `vMAJOR.MINOR.PATCH` tag format, imports the Windows signing certificate when signing secrets are configured, publishes the app as a self-contained Windows `win-x64` build, stamps the assembly/file version, creates a setup executable named like `MomentTrace-0.1.0-win-x64-setup.exe`, creates a portable zip named like `MomentTrace-0.1.0-win-x64.zip`, and uploads both to the GitHub Release.
 
-You can also run the **Release** workflow manually in GitHub Actions and provide a version such as `v0.1.0`.
+You can also run the **Release** workflow manually in GitHub Actions and provide a version such as `v0.1.0`. Prerelease tags such as `v0.1.1-beta.1` are supported and are published as GitHub prereleases while keeping assembly/file versions numeric.
 
 For Azure DevOps planning, current implementation work is tracked in the MomentTrace project and commits can reference work items with `AB#<id>` in the commit message. Active roadmap, stability notes, and QA priorities live in [`ai/project-plan.md`](ai/project-plan.md).
 

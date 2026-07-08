@@ -31,17 +31,30 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Resolve version
+        id: version
         shell: pwsh
         run: |
           $tag = if ("${{ github.event_name }}" -eq "workflow_dispatch") { "${{ inputs.version }}" } else { "${{ github.ref_name }}" }
-          if ($tag -notmatch '^v\d+\.\d+\.\d+$') {
-            throw "Version must use vMAJOR.MINOR.PATCH format, for example v0.1.0."
+          $versionMatch = [regex]::Match($tag, '^v(?<base>\d+\.\d+\.\d+)(?<suffix>-[0-9A-Za-z][0-9A-Za-z.-]*)?$')
+          if (-not $versionMatch.Success) {
+            throw "Version must use vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-prerelease format, for example v0.1.0 or v0.1.1-beta.1."
           }
 
-          $version = $tag.TrimStart('v')
+          $version = $versionMatch.Groups["base"].Value
+          $suffix = $versionMatch.Groups["suffix"].Value
+          $packageLabel = "$version$suffix"
+          $isPrerelease = -not [string]::IsNullOrWhiteSpace($suffix)
+          $artifactName = "MomentTrace-$packageLabel-win-x64"
           "RELEASE_TAG=$tag" | Out-File -FilePath $env:GITHUB_ENV -Append
           "PACKAGE_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "ARTIFACT_NAME=MomentTrace-$version-win-x64" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "PACKAGE_LABEL=$packageLabel" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "RELEASE_IS_PRERELEASE=$isPrerelease" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "ARTIFACT_NAME=$artifactName" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "release_tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "package_version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "package_label=$packageLabel" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "artifact_name=$artifactName" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "is_prerelease=$isPrerelease" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Import Windows signing certificate
         shell: pwsh
@@ -73,17 +86,17 @@ jobs:
           --no-restore
           -p:PublishSingleFile=true
           -p:IncludeNativeLibrariesForSelfExtract=true
-          -p:Version=${{ env.PACKAGE_VERSION }}
-          -p:AssemblyVersion=${{ env.PACKAGE_VERSION }}.0
-          -p:FileVersion=${{ env.PACKAGE_VERSION }}.0
-          -p:InformationalVersion=${{ env.RELEASE_TAG }}
-          --output .\artifacts\${{ env.ARTIFACT_NAME }}
+          -p:Version=${{ steps.version.outputs.package_version }}
+          -p:AssemblyVersion=${{ steps.version.outputs.package_version }}.0
+          -p:FileVersion=${{ steps.version.outputs.package_version }}.0
+          -p:InformationalVersion=${{ steps.version.outputs.release_tag }}
+          --output .\artifacts\${{ steps.version.outputs.artifact_name }}
 
       - name: Package zip
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path .\dist | Out-Null
-          Compress-Archive -Path ".\artifacts\${{ env.ARTIFACT_NAME }}\*" -DestinationPath ".\dist\${{ env.ARTIFACT_NAME }}.zip" -Force
+          Compress-Archive -Path ".\artifacts\${{ steps.version.outputs.artifact_name }}\*" -DestinationPath ".\dist\${{ steps.version.outputs.artifact_name }}.zip" -Force
 
       - name: Install Inno Setup
         run: choco install innosetup --no-progress -y
@@ -99,18 +112,19 @@ jobs:
           }
 
           .\scripts\build-installer.ps1 `
-            -Version "${{ env.PACKAGE_VERSION }}" `
-            -PublishDir ".\artifacts\${{ env.ARTIFACT_NAME }}" `
+            -Version "${{ steps.version.outputs.package_label }}" `
+            -AssemblyVersion "${{ steps.version.outputs.package_version }}" `
+            -PublishDir ".\artifacts\${{ steps.version.outputs.artifact_name }}" `
             -OutputDir ".\dist" `
             @signingArgs
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.ARTIFACT_NAME }}
+          name: ${{ steps.version.outputs.artifact_name }}
           path: |
-            .\dist\${{ env.ARTIFACT_NAME }}.zip
-            .\dist\MomentTrace-${{ env.PACKAGE_VERSION }}-win-x64-setup.exe
+            .\dist\${{ steps.version.outputs.artifact_name }}.zip
+            .\dist\MomentTrace-${{ steps.version.outputs.package_label }}-win-x64-setup.exe
 
       - name: Create GitHub Release
         shell: pwsh
@@ -118,13 +132,19 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $notes = @"
-          MomentTrace ${{ env.RELEASE_TAG }}
+          MomentTrace ${{ steps.version.outputs.release_tag }}
 
           Download the Windows installer below to install MomentTrace into Program Files.
           The portable zip is also attached if you prefer to extract and run MomentTrace.App.exe directly.
           "@
 
-          gh release create "${{ env.RELEASE_TAG }}" ".\dist\MomentTrace-${{ env.PACKAGE_VERSION }}-win-x64-setup.exe" ".\dist\${{ env.ARTIFACT_NAME }}.zip" `
-            --title "MomentTrace ${{ env.RELEASE_TAG }}" `
+          $releaseArgs = @()
+          if ("${{ steps.version.outputs.is_prerelease }}" -eq "True") {
+            $releaseArgs += "--prerelease"
+          }
+
+          gh release create "${{ steps.version.outputs.release_tag }}" ".\dist\MomentTrace-${{ steps.version.outputs.package_label }}-win-x64-setup.exe" ".\dist\${{ steps.version.outputs.artifact_name }}.zip" `
+            --title "MomentTrace ${{ steps.version.outputs.release_tag }}" `
             --notes $notes `
-            --target "${{ github.sha }}"
+            --target "${{ github.sha }}" `
+            @releaseArgs
