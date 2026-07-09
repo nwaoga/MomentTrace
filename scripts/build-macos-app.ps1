@@ -134,8 +134,12 @@ $infoPlist = @"
 
 Set-Content -LiteralPath $infoPlistPath -Value $infoPlist -Encoding UTF8
 
-$macOsFiles = Get-ChildItem -LiteralPath $macOsPath -File
-foreach ($macOsFile in $macOsFiles) {
+$appExecutableFile = Get-Item -LiteralPath $publishedExecutable
+$macOsFiles = Get-ChildItem -LiteralPath $macOsPath -File |
+    Where-Object { $_.FullName -ne $appExecutableFile.FullName } |
+    Sort-Object FullName
+
+foreach ($macOsFile in $macOsFiles + $appExecutableFile) {
     & codesign --force --sign $CodeSignIdentity $macOsFile.FullName
     if ($LASTEXITCODE -ne 0) {
         throw "codesign failed for $($macOsFile.FullName)."
