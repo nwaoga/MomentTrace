@@ -186,7 +186,11 @@ public partial class SettingsWindow : Window
 
     private void LoadWhereILive()
     {
-        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Development";
+        var version = Assembly.GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion
+            ?? Assembly.GetExecutingAssembly().GetName().Version?.ToString()
+            ?? "Development";
 
         VersionText.Text = version;
         InstallPathText.Text = AppContext.BaseDirectory;

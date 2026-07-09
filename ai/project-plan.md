@@ -42,7 +42,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - macOS shell shortcut verification passed for Settings, search, Timeline, Overview, and close behavior.
 - macOS foreground capture is now in the first-class `MomentTrace.Mac` platform service and is hosted by `MomentTrace.Desktop` on the cross-platform target.
 - Release tags now build the Avalonia desktop shell for Windows and macOS together.
-- Latest beta tag pushed: `v0.1.1-beta.9`.
+- Latest beta tag pushed: `v0.1.1-beta.10`.
 - Windows release artifacts should include an installer and portable zip for `MomentTrace.Desktop.exe`.
 - macOS release artifacts should include an ad-hoc signed `MomentTrace.app` zip for `osx-arm64` until Developer ID signing/notarization is configured.
 - README preview SVG rendering has been fixed and validated locally.
@@ -65,11 +65,11 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 **Scope:**
 
-- Verify the `v0.1.1-beta.6` GitHub Actions release run finishes green.
+- Verify the `v0.1.1-beta.10` GitHub Actions release run finishes green.
 - Confirm the GitHub Release has all expected artifacts:
-  - `MomentTrace-0.1.1-beta.6-win-x64-setup.exe`
-  - `MomentTrace-0.1.1-beta.6-win-x64.zip`
-  - `MomentTrace-0.1.1-beta.6-macos-arm64.zip`
+  - `MomentTrace-0.1.1-beta.10-win-x64-setup.exe`
+  - `MomentTrace-0.1.1-beta.10-win-x64.zip`
+  - `MomentTrace-0.1.1-beta.10-macos-arm64.zip`
 - Download and smoke test the Windows installer on a clean or disposable Windows profile.
 - Download and inspect the macOS zip on a Mac, confirming it extracts to `MomentTrace.app` and launches far enough to show the shell/onboarding.
 - Update `docs/marketing-launch-kit.md` with any beta caveats discovered during install testing.
@@ -88,6 +88,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - [2026-07-09] `v0.1.1-beta.7` confirmed the app bundle itself was ad-hoc signed, but strict verification still failed on unsigned nested files under `Contents/MacOS`. Sign those published files before sealing the outer bundle, then rebuild as the next replacement beta.
 - [2026-07-09] `v0.1.1-beta.8` failed during CI because `MomentTrace.Desktop` was signed before sibling managed assemblies such as `System.Web.dll`. Sign sibling files first, then the app executable, then the outer bundle.
 - [2026-07-09] `v0.1.1-beta.9` release workflow passed. The macOS zip digest matched the GitHub asset digest and `unzip -t` reported no archive errors. Native `ditto` extraction preserved AppleDouble signature metadata and the extracted `MomentTrace.app` passed `codesign --verify --deep --strict`; command-line `unzip` extraction still drops managed-assembly signature metadata and should not be used for launch validation.
+- [2026-07-09] `v0.1.1-beta.9` Windows assets were named and stamped as beta.9, but app Settings read the numeric assembly version instead of `AssemblyInformationalVersion`, and launch/landing docs still linked to beta.6. Settings now displays the informational prerelease version and public beta links target the replacement beta.
 
 ### Next After Release Verification — Marketing Launch Pass
 
