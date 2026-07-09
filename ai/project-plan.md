@@ -87,6 +87,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - [2026-07-09] `v0.1.1-beta.6` macOS zip downloaded with the expected SHA-256 digest and passed `unzip -t`, but the extracted `MomentTrace.app` failed `codesign --verify --deep --strict` with `code has no resources but signature indicates they must be present`. Rebuild the macOS artifact after ad-hoc signing the bundle before public sharing.
 - [2026-07-09] `v0.1.1-beta.7` confirmed the app bundle itself was ad-hoc signed, but strict verification still failed on unsigned nested files under `Contents/MacOS`. Sign those published files before sealing the outer bundle, then rebuild as the next replacement beta.
 - [2026-07-09] `v0.1.1-beta.8` failed during CI because `MomentTrace.Desktop` was signed before sibling managed assemblies such as `System.Web.dll`. Sign sibling files first, then the app executable, then the outer bundle.
+- [2026-07-09] `v0.1.1-beta.9` release workflow passed. The macOS zip digest matched the GitHub asset digest and `unzip -t` reported no archive errors. Native `ditto` extraction preserved AppleDouble signature metadata and the extracted `MomentTrace.app` passed `codesign --verify --deep --strict`; command-line `unzip` extraction still drops managed-assembly signature metadata and should not be used for launch validation.
 
 ### Next After Release Verification — Marketing Launch Pass
 

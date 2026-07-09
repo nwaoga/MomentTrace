@@ -93,6 +93,8 @@ spctl --assess --type execute --verbose=4 "MomentTrace.app"
 
 Ad-hoc signed beta zips are still not Developer ID signed or notarized, so Gatekeeper can require right-click > Open. A failed `codesign --verify --deep --strict` check is not acceptable for release artifacts, even for unsigned/internal beta builds.
 
+When validating beta zips, extract with Finder/Archive Utility or `ditto -x -k`. Command-line `unzip` can discard AppleDouble signature metadata for managed assemblies and make an otherwise valid ad-hoc signed beta app fail strict verification.
+
 Start with no special entitlements. Add an entitlements file only when a concrete macOS API requires it.
 
 ## DMG Creation

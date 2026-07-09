@@ -187,8 +187,9 @@ jobs:
           - Or extract the portable zip and run MomentTrace.Desktop.exe.
 
           macOS:
-          - Extract the macOS zip and run MomentTrace.app.
+          - Extract the macOS zip with Finder/Archive Utility and run MomentTrace.app.
           - The macOS app is ad-hoc signed for bundle integrity, but not Developer ID signed or notarized yet. macOS may require right-click > Open until Apple signing secrets are configured.
+          - Command-line unzip can drop AppleDouble signature metadata from managed assemblies; use Finder/Archive Utility or ditto when validating the beta zip on macOS.
           "@
 
           $releaseArgs = @()
