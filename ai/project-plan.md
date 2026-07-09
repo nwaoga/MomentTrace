@@ -42,7 +42,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - macOS shell shortcut verification passed for Settings, search, Timeline, Overview, and close behavior.
 - macOS foreground capture is now in the first-class `MomentTrace.Mac` platform service and is hosted by `MomentTrace.Desktop` on the cross-platform target.
 - Release tags now build the Avalonia desktop shell for Windows and macOS together.
-- Latest beta tag pushed: `v0.1.1-beta.6`.
+- Latest beta tag pushed: `v0.1.1-beta.8`.
 - Windows release artifacts should include an installer and portable zip for `MomentTrace.Desktop.exe`.
 - macOS release artifacts should include an ad-hoc signed `MomentTrace.app` zip for `osx-arm64` until Developer ID signing/notarization is configured.
 - README preview SVG rendering has been fixed and validated locally.

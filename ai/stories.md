@@ -2,7 +2,7 @@
 
 ## Backlog
 
-- [ ] Verify `v0.1.1-beta.6` release artifacts on GitHub: Windows installer, Windows portable zip, and macOS app zip.
+- [ ] Verify the replacement beta release artifacts on GitHub: Windows installer, Windows portable zip, and macOS app zip.
 - [ ] Smoke test the Windows installer and confirm it launches `MomentTrace.Desktop.exe`.
 - [ ] Rebuild the beta release after fixing macOS app bundle signing, then smoke test the macOS app zip on a Mac and document any Gatekeeper/permissions caveats.
 - [ ] Promote marketing launch assets after release artifacts are verified.
