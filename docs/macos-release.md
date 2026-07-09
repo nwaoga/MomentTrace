@@ -5,7 +5,7 @@ This plan covers the release path for `MomentTrace.Desktop` on macOS. The app sh
 ## Target Artifacts
 
 - `MomentTrace.app`: self-contained macOS app bundle for Apple Silicon and Intel builds.
-- `MomentTrace-<version>-macos-arm64.zip`: unsigned Apple Silicon app bundle zip for beta releases.
+- `MomentTrace-<version>-macos-arm64.zip`: ad-hoc signed Apple Silicon app bundle zip for beta releases.
 - `MomentTrace-<version>-macos-arm64.dmg`: signed and notarized Apple Silicon installer image for the later public release path.
 - `MomentTrace-<version>-macos-x64.dmg`: signed and notarized Intel installer image, if Intel support is kept.
 - Checksums for each published artifact.
@@ -70,7 +70,11 @@ MomentTrace currently needs clear permission copy for Accessibility-guided metad
 
 ## Signing
 
-Sign nested native/dylib content first if present, then sign the app bundle with hardened runtime enabled:
+Beta builds should at least ad-hoc sign the generated `.app` before zipping so macOS sees a coherent bundle signature instead of a damaged app. Public builds should sign nested native/dylib content first if present, then sign the app bundle with hardened runtime enabled:
+
+```bash
+codesign --force --deep --sign - "MomentTrace.app"
+```
 
 ```bash
 codesign --force --timestamp --options runtime \
@@ -84,6 +88,8 @@ Verify:
 codesign --verify --deep --strict --verbose=2 "MomentTrace.app"
 spctl --assess --type execute --verbose=4 "MomentTrace.app"
 ```
+
+Ad-hoc signed beta zips are still not Developer ID signed or notarized, so Gatekeeper can require right-click > Open. A failed `codesign --verify --deep --strict` check is not acceptable for release artifacts, even for unsigned/internal beta builds.
 
 Start with no special entitlements. Add an entitlements file only when a concrete macOS API requires it.
 

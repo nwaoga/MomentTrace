@@ -5,7 +5,8 @@ param(
     [string]$Runtime = "osx-arm64",
     [string]$Framework = "net8.0",
     [string]$PublishDir = "",
-    [string]$OutputDir = ""
+    [string]$OutputDir = "",
+    [string]$CodeSignIdentity = "-"
 )
 
 $ErrorActionPreference = "Stop"
@@ -132,6 +133,11 @@ $infoPlist = @"
 "@
 
 Set-Content -LiteralPath $infoPlistPath -Value $infoPlist -Encoding UTF8
+
+& codesign --force --deep --sign $CodeSignIdentity $bundlePath
+if ($LASTEXITCODE -ne 0) {
+    throw "codesign failed for $bundlePath."
+}
 
 & ditto -c -k --sequesterRsrc --keepParent $bundlePath $zipPath
 if ($LASTEXITCODE -ne 0) {

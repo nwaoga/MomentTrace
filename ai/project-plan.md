@@ -44,7 +44,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Release tags now build the Avalonia desktop shell for Windows and macOS together.
 - Latest beta tag pushed: `v0.1.1-beta.6`.
 - Windows release artifacts should include an installer and portable zip for `MomentTrace.Desktop.exe`.
-- macOS release artifacts should include an unsigned `MomentTrace.app` zip for `osx-arm64`.
+- macOS release artifacts should include an ad-hoc signed `MomentTrace.app` zip for `osx-arm64` until Developer ID signing/notarization is configured.
 - README preview SVG rendering has been fixed and validated locally.
 - Marketing launch kit and static landing page draft are in `docs/`.
 - Shared presentation builders for timeline, overview, and detail context.
@@ -81,6 +81,10 @@ Users should be able to quickly revisit what happened during a day, recover past
 - macOS zip contains `MomentTrace.app`.
 - Any signing, Gatekeeper, SmartScreen, or first-launch caveat is documented before public sharing.
 - `stories.md` records the smoke-test result.
+
+**Progress so far:**
+
+- [2026-07-09] `v0.1.1-beta.6` macOS zip downloaded with the expected SHA-256 digest and passed `unzip -t`, but the extracted `MomentTrace.app` failed `codesign --verify --deep --strict` with `code has no resources but signature indicates they must be present`. Rebuild the macOS artifact after ad-hoc signing the bundle before public sharing.
 
 ### Next After Release Verification — Marketing Launch Pass
 

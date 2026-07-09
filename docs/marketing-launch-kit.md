@@ -207,7 +207,7 @@ Productivity, Windows, Privacy, Developer Tools, Personal Analytics
 - Settings opens.
 - Full local-data cleanup confirmation opens but is not executed during public demo.
 - README download link points to the latest beta release.
-- Known caveat is stated clearly: Windows verified publisher requires the signing certificate secrets to be configured.
+- Known caveat is stated clearly: Windows verified publisher requires signing certificate secrets, and macOS is ad-hoc signed but not Developer ID signed or notarized yet.
 
 ## Website CTA Copy
 
@@ -236,5 +236,4 @@ MomentTrace is in beta. Your feedback can shape the recall, privacy, and release
 - Was the local cleanup/privacy model clear?
 - Which moment views were actually useful after a few hours of use?
 - What would make this worth keeping installed?
-
 

@@ -4,7 +4,7 @@
 
 - [ ] Verify `v0.1.1-beta.6` release artifacts on GitHub: Windows installer, Windows portable zip, and macOS app zip.
 - [ ] Smoke test the Windows installer and confirm it launches `MomentTrace.Desktop.exe`.
-- [ ] Smoke test the macOS app zip on a Mac and document any Gatekeeper/permissions caveats.
+- [ ] Rebuild the beta release after fixing macOS app bundle signing, then smoke test the macOS app zip on a Mac and document any Gatekeeper/permissions caveats.
 - [ ] Promote marketing launch assets after release artifacts are verified.
 - [ ] Add real Windows signing secrets and plan macOS Developer ID signing/notarization when credentials are available.
 
@@ -67,6 +67,6 @@ Use this section for short pass/fail notes during the next stability sweep.
 - [2026-07-08 17:46 UTC+1] Full privacy cleanup now has a dedicated Settings action that deletes all local app data and then closes the app. Automated coverage includes a `LocalDataCleanupService` test, bringing `MomentTrace.Tests` to 10 passing tests, and `dotnet build MomentTrace.slnx` passed with 0 warnings and 0 errors.
 - [2026-07-08 22:11 UTC+1] First-run onboarding now appears once after the main shell loads, explains local-first storage and cleanup controls, keeps adult-site filtering enabled by default, offers Start with Windows, and persists completion in `DesktopWindowPreferences`. `dotnet test MomentTrace.Tests/MomentTrace.Tests.csproj --no-build` passed with 10 tests, and `dotnet build MomentTrace.slnx` passed with 0 warnings and 0 errors.
 - [2026-07-09 00:18 UTC+1] Release follow-up pass: all README SVG assets parse as valid XML and README image paths resolve locally. `v0.1.1-beta.6` publish job now sets `GH_REPO` so `gh release create` can publish without a checkout-backed `.git` directory.
+- [2026-07-09] Beta artifact check found `MomentTrace-0.1.1-beta.6-macos-arm64.zip` was not corrupt: its SHA-256 matched the GitHub release digest and `unzip -t` passed. The extracted `MomentTrace.app` failed `codesign --verify --deep --strict` because the bundle was not signed coherently, which can surface to users as a broken or damaged app. Packaging now needs to ad-hoc sign the app bundle before zipping, then publish a replacement beta.
 - Windows chrome: last confirmed working with `ExtendClientAreaToDecorationsHint=True` and `WindowDecorations=BorderOnly`.
 - Overview dashboard: #88 closed after build verification and Azure DevOps update.
-

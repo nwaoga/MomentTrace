@@ -31,6 +31,7 @@
 - [2026-07-08 22:35 UTC+1] macOS capture now belongs in the first-class `MomentTrace.Mac` platform project and is hosted by `MomentTrace.Desktop` on the cross-platform `net8.0` target.
 - [2026-07-08 22:48 UTC+1] macOS releases should ship as signed and notarized `.app` bundles inside DMGs, with Developer ID credentials stored only in release secrets.
 - [2026-07-08 23:05 UTC+1] Windows release signing should be optional for local/internal builds but automatic in the release workflow when protected signing secrets are configured.
+- [2026-07-09] Internal macOS beta zips should ad-hoc sign `MomentTrace.app` before packaging. This does not replace Developer ID signing/notarization, but it prevents invalid bundle-signature states that macOS can report as damaged.
 
 ## Recently Completed
 
@@ -54,4 +55,3 @@
 
 - Whether `AGENT.md` should remain as a root-level compatibility handoff or become a short pointer to `ai/`.
 - Whether to add automated UI/presentation tests before the broader hardening pass.
-

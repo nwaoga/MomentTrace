@@ -188,7 +188,7 @@ jobs:
 
           macOS:
           - Extract the macOS zip and run MomentTrace.app.
-          - The macOS build is currently unsigned unless Developer ID signing secrets are added later.
+          - The macOS app is ad-hoc signed for bundle integrity, but not Developer ID signed or notarized yet. macOS may require right-click > Open until Apple signing secrets are configured.
           "@
 
           $releaseArgs = @()
