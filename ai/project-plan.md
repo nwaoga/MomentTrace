@@ -50,6 +50,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Shared presentation builders for timeline, overview, and detail context.
 - Local SQLite activity store and Windows foreground recorder.
 - Windows beta smoke testing has now found two release-follow-up issues in the Avalonia shell: dense-day performance lag and missing tray/background behavior in the shipped desktop app.
+- The desktop shell now includes shared background-shell behavior in code: Windows tray icon plus macOS menu bar status item, pending real release-build verification on each platform.
 - Azure DevOps currently has no open MomentTrace work items.
 
 **Last pushed:** `04464ce` — update plan for beta release follow-ups.
@@ -74,13 +75,14 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Download and smoke test the Windows installer on a clean or disposable Windows profile.
 - Download and inspect the macOS zip on a Mac, confirming it extracts to `MomentTrace.app` and launches far enough to show the shell/onboarding.
 - Update `docs/marketing-launch-kit.md` with any beta caveats discovered during install testing.
-- Fix any blocking shell regressions found during smoke testing before calling the beta marketable, including tray/background behavior and dense-day responsiveness.
+- Fix or verify any blocking shell regressions found during smoke testing before calling the beta marketable, including tray/background behavior and dense-day responsiveness.
 
 **Acceptance criteria:**
 
 - Release artifacts are present and named correctly.
 - Windows installer launches the Avalonia shell, not the old WPF shell.
 - Windows installer build preserves expected tray/background behavior for a memory-capture app.
+- macOS release build exposes an equivalent menu bar status item so users can tell MomentTrace is still running in the background after closing the main window.
 - macOS zip contains `MomentTrace.app`.
 - Any signing, Gatekeeper, SmartScreen, or first-launch caveat is documented before public sharing.
 - `stories.md` records the smoke-test result.
