@@ -51,9 +51,10 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Local SQLite activity store and Windows foreground recorder.
 - Windows beta smoke testing has now found two release-follow-up issues in the Avalonia shell: dense-day performance lag and missing tray/background behavior in the shipped desktop app.
 - The desktop shell now includes shared background-shell behavior in code: Windows tray icon plus macOS menu bar status item, pending real release-build verification on each platform.
+- `v0.1.1-beta.12` is the current beta candidate after fixing macOS app identity and repeated Screen Recording prompt behavior.
 - Azure DevOps currently has no open MomentTrace work items.
 
-**Last pushed:** `04464ce` — update plan for beta release follow-ups.
+**Last pushed:** `dca9ead` — fix macOS app identity and screen prompt backoff.
 
 ---
 
@@ -95,6 +96,14 @@ Users should be able to quickly revisit what happened during a day, recover past
 - [2026-07-09] `v0.1.1-beta.9` release workflow passed. The macOS zip digest matched the GitHub asset digest and `unzip -t` reported no archive errors. Native `ditto` extraction preserved AppleDouble signature metadata and the extracted `MomentTrace.app` passed `codesign --verify --deep --strict`; command-line `unzip` extraction still drops managed-assembly signature metadata and should not be used for launch validation.
 - [2026-07-09] `v0.1.1-beta.9` Windows assets were named and stamped as beta.9, but app Settings read the numeric assembly version instead of `AssemblyInformationalVersion`, and launch/landing docs still linked to beta.6. Settings now displays the informational prerelease version and public beta links target the replacement beta.
 - [2026-07-09] macOS beta.11 follow-up: the application menu still displayed the Avalonia fallback name and repeated Screen Recording prompts could continue after permission was toggled before relaunch. Set the Avalonia application name and assembly metadata to MomentTrace, and throttle failed screenshot capture attempts so a stale/denied TCC state does not prompt continuously.
+- [2026-07-09] `v0.1.1-beta.12` release workflow passed and published Windows plus macOS assets. The macOS zip SHA-256 matched the GitHub release digest, `unzip -t` passed, native `ditto` extraction produced an app that passed `codesign --verify --deep --strict`, and the extracted bundle reports `CFBundleName` and `CFBundleDisplayName` as `MomentTrace`.
+
+**Pick up on 2026-07-11:**
+
+- Install/download `v0.1.1-beta.12` on macOS and confirm the app menu says `MomentTrace`, not `Avalonia Application`.
+- Fully quit and reopen MomentTrace after granting Screen & System Audio Recording permission, then confirm the permission prompt does not repeat during normal capture.
+- Smoke test Windows `v0.1.1-beta.12` for tray/background behavior and dense-day responsiveness on the same dataset that exposed beta.10 lag.
+- If both platform smoke tests pass, move to Marketing Launch Pass; otherwise fix the remaining blocker and cut the next beta.
 
 ### Next After Release Verification — Marketing Launch Pass
 
