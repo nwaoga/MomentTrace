@@ -34,7 +34,9 @@ public partial class App : Application
 
     public override void Initialize()
     {
+        Name = "MomentTrace";
         AvaloniaXamlLoader.Load(this);
+        Name = "MomentTrace";
     }
 
     public override void OnFrameworkInitializationCompleted()

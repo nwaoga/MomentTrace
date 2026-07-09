@@ -5,6 +5,9 @@
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>..\MomentTrace.App\Assets\MomentTrace.ico</ApplicationIcon>
+    <AssemblyTitle>MomentTrace</AssemblyTitle>
+    <Product>MomentTrace</Product>
+    <Company>MomentTrace</Company>
     <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
     <NoWarn>$(NoWarn);AVLN3001</NoWarn>
   </PropertyGroup>

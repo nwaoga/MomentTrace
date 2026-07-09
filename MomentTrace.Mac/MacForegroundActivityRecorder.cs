@@ -10,6 +10,7 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan EndUpdateInterval = TimeSpan.FromSeconds(15);
     private static readonly TimeSpan ActivityGapThreshold = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan ScreenCaptureRetryDelay = TimeSpan.FromMinutes(5);
 
     private readonly IActivityStore _store = store;
     private CancellationTokenSource? _recordingCts;
@@ -462,13 +463,19 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
         {
             try
             {
+                var now = DateTimeOffset.Now;
+                if (now < _screenCaptureRetryAfter)
+                {
+                    return null;
+                }
+
                 var screenshotDirectory = Path.Combine(
                     MomentTracePaths.ScreenshotsDirectory);
                 Directory.CreateDirectory(screenshotDirectory);
 
                 var screenshotPath = Path.Combine(
                     screenshotDirectory,
-                    $"{DateTimeOffset.Now:yyyyMMdd-HHmmss-fff}-{Guid.NewGuid():N}.png");
+                    $"{now:yyyyMMdd-HHmmss-fff}-{Guid.NewGuid():N}.png");
 
                 var startInfo = new ProcessStartInfo
                 {
@@ -498,13 +505,28 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
                 }
 
                 process.WaitForExit();
-                return process.ExitCode == 0 && File.Exists(screenshotPath) ? screenshotPath : null;
+                if (process.ExitCode == 0 && File.Exists(screenshotPath))
+                {
+                    _screenCaptureRetryAfter = DateTimeOffset.MinValue;
+                    return screenshotPath;
+                }
+
+                _screenCaptureRetryAfter = DateTimeOffset.Now.Add(ScreenCaptureRetryDelay);
+                if (File.Exists(screenshotPath))
+                {
+                    File.Delete(screenshotPath);
+                }
+
+                return null;
             }
             catch
             {
+                _screenCaptureRetryAfter = DateTimeOffset.Now.Add(ScreenCaptureRetryDelay);
                 return null;
             }
         }
+
+        private static DateTimeOffset _screenCaptureRetryAfter = DateTimeOffset.MinValue;
 
         public static string? TryCreateImageThumbnail(string? imagePath)
         {
