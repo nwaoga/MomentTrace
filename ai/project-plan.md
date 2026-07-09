@@ -42,7 +42,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - macOS shell shortcut verification passed for Settings, search, Timeline, Overview, and close behavior.
 - macOS foreground capture is now in the first-class `MomentTrace.Mac` platform service and is hosted by `MomentTrace.Desktop` on the cross-platform target.
 - Release tags now build the Avalonia desktop shell for Windows and macOS together.
-- Latest beta tag pushed and downloaded for release verification: `v0.1.1-beta.10`.
+- Latest beta tag pushed and downloaded for release verification: `v0.1.1-beta.11`.
 - Windows release artifacts should include an installer and portable zip for `MomentTrace.Desktop.exe`.
 - macOS release artifacts should include an ad-hoc signed `MomentTrace.app` zip for `osx-arm64` until Developer ID signing/notarization is configured.
 - README preview SVG rendering has been fixed and validated locally.
@@ -67,11 +67,11 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 **Scope:**
 
-- Verify the `v0.1.1-beta.10` GitHub Actions release run finishes green.
+- Verify the `v0.1.1-beta.11` GitHub Actions release run finishes green.
 - Confirm the GitHub Release has all expected artifacts:
-  - `MomentTrace-0.1.1-beta.10-win-x64-setup.exe`
-  - `MomentTrace-0.1.1-beta.10-win-x64.zip`
-  - `MomentTrace-0.1.1-beta.10-macos-arm64.zip`
+  - `MomentTrace-0.1.1-beta.11-win-x64-setup.exe`
+  - `MomentTrace-0.1.1-beta.11-win-x64.zip`
+  - `MomentTrace-0.1.1-beta.11-macos-arm64.zip`
 - Download and smoke test the Windows installer on a clean or disposable Windows profile.
 - Download and inspect the macOS zip on a Mac, confirming it extracts to `MomentTrace.app` and launches far enough to show the shell/onboarding.
 - Update `docs/marketing-launch-kit.md` with any beta caveats discovered during install testing.
