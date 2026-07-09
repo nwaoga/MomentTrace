@@ -134,6 +134,14 @@ $infoPlist = @"
 
 Set-Content -LiteralPath $infoPlistPath -Value $infoPlist -Encoding UTF8
 
+$macOsFiles = Get-ChildItem -LiteralPath $macOsPath -File
+foreach ($macOsFile in $macOsFiles) {
+    & codesign --force --sign $CodeSignIdentity $macOsFile.FullName
+    if ($LASTEXITCODE -ne 0) {
+        throw "codesign failed for $($macOsFile.FullName)."
+    }
+}
+
 & codesign --force --deep --sign $CodeSignIdentity $bundlePath
 if ($LASTEXITCODE -ne 0) {
     throw "codesign failed for $bundlePath."

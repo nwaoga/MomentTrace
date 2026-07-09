@@ -70,9 +70,10 @@ MomentTrace currently needs clear permission copy for Accessibility-guided metad
 
 ## Signing
 
-Beta builds should at least ad-hoc sign the generated `.app` before zipping so macOS sees a coherent bundle signature instead of a damaged app. Public builds should sign nested native/dylib content first if present, then sign the app bundle with hardened runtime enabled:
+Beta builds should at least ad-hoc sign the published files inside the generated `.app` before zipping, then sign the app bundle so macOS sees a coherent bundle signature instead of a damaged app. Public builds should sign nested native/dylib content first if present, then sign the app bundle with hardened runtime enabled:
 
 ```bash
+find "MomentTrace.app/Contents/MacOS" -maxdepth 1 -type f -exec codesign --force --sign - {} \;
 codesign --force --deep --sign - "MomentTrace.app"
 ```
 
