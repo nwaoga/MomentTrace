@@ -10,12 +10,15 @@ public sealed class TimelinePresentationBuilder(
     private readonly IActivityClassifier _classifier = classifier;
     private readonly ISessionSummarizer _summarizer = summarizer;
 
-    public IReadOnlyList<ActivityMomentViewModel> BuildSessions(IReadOnlyList<TimelineActivity> activities)
+    public IReadOnlyList<ActivityMomentViewModel> BuildSessions(IReadOnlyList<TimelineActivity> activities, bool isSortedDescending = false)
     {
         var sessions = new List<ActivityMomentViewModel>();
         TimelineSessionBuilder? session = null;
+        IEnumerable<TimelineActivity> orderedActivities = isSortedDescending
+            ? activities
+            : activities.OrderByDescending(activity => activity.StartedAt);
 
-        foreach (var activity in activities.OrderByDescending(activity => activity.StartedAt))
+        foreach (var activity in orderedActivities)
         {
             if (session is not null && session.CanInclude(activity))
             {

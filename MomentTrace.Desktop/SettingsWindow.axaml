@@ -230,7 +230,7 @@
                        FontWeight="SemiBold"
                        Foreground="{DynamicResource TextBrush}" />
             <CheckBox x:Name="StartWithWindowsCheckBox"
-                      Content="Start with Windows"
+                      Content="Start automatically when you sign in"
                       Foreground="{DynamicResource TextBrush}" />
             <Border Background="{DynamicResource SubtlePanelBrush}"
                     BorderBrush="{DynamicResource PanelEdgeBrush}"

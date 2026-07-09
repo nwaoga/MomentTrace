@@ -45,6 +45,7 @@ public partial class MainWindow : Window
     private readonly DesktopWindowPreferences _preferences;
     private readonly DispatcherTimer _refreshTimer;
     private readonly List<TimelineActivity> _visibleActivities = [];
+    private IReadOnlyList<TimelineActivity> _selectedDateActivities = [];
     private IReadOnlyList<ActivityMomentViewModel> _sessions = [];
     private IReadOnlyList<TimelineSessionGroup> _timelineGroups = [];
     private readonly Dictionary<string, bool> _timelineGroupExpansionStates = new(StringComparer.Ordinal);
@@ -63,6 +64,7 @@ public partial class MainWindow : Window
     private bool _isScrollDragging;
     private bool _isReloading;
     private bool _reloadPending;
+    private bool _storeInitialized;
     private bool _isSelectingDateForOverviewNavigation;
     private DispatcherTimer? _overviewMomentsScrollAnimationTimer;
     private double _overviewMomentsScrollFrom;
@@ -87,6 +89,7 @@ public partial class MainWindow : Window
     private static readonly Thickness DefaultTopCommandMargin = new(12, 0, 4, 0);
     private static readonly Thickness DefaultTopCommandPadding = new(8);
     private bool _isMacChromeMode;
+    private static readonly Dictionary<string, Bitmap> BitmapCache = new(StringComparer.OrdinalIgnoreCase);
 
     public MainWindow(SqliteActivityStore? store = null, IActivityRecorder? recorder = null)
     {
@@ -274,7 +277,11 @@ public partial class MainWindow : Window
             do
             {
                 _reloadPending = false;
-                await _store.InitializeAsync();
+                if (!_storeInitialized)
+                {
+                    await _store.InitializeAsync();
+                    _storeInitialized = true;
+                }
 
                 var activities = await _store.QueryAsync(new TimelineQuery { Limit = 1500 });
                 var storeSignature = BuildStoreSignature(activities);
@@ -310,11 +317,13 @@ public partial class MainWindow : Window
         await Task.Yield();
 
         var selectedDate = GetSelectedDate();
+        var selectedDayActivities = _visibleActivities
+            .Where(activity => activity.StartedAt.LocalDateTime.Date == selectedDate)
+            .OrderByDescending(activity => activity.StartedAt)
+            .ToList();
+        _selectedDateActivities = selectedDayActivities;
         var shouldResetDetailTab = false;
-        _sessions = _timelineBuilder.BuildSessions(
-            _visibleActivities
-                .Where(activity => activity.StartedAt.LocalDateTime.Date == selectedDate)
-                .ToList())
+        _sessions = _timelineBuilder.BuildSessions(selectedDayActivities, isSortedDescending: true)
             .Where(MatchesSearch)
             .Where(MatchesRailSelection)
             .Where(MatchesTimelineFocus)
@@ -870,7 +879,7 @@ public partial class MainWindow : Window
 
     private void ShowDetail(ActivityMomentViewModel selected)
     {
-        var detail = _detailContextBuilder.Build(selected, _visibleActivities);
+        var detail = _detailContextBuilder.Build(selected, _selectedDateActivities);
         DetailGlyphText.Text = selected.IconGlyph;
         DetailGlyphText.Foreground = Brush.Parse(selected.IconForeground);
         SetDetailIcon(selected);
@@ -1120,15 +1129,11 @@ public partial class MainWindow : Window
             return;
         }
 
-        try
+        var previewImage = GetPreviewImage(previewPath);
+        if (previewImage is not null)
         {
-            DetailPreviewImage.Source = new Bitmap(previewPath);
+            DetailPreviewImage.Source = previewImage;
             DetailPreviewHost.IsVisible = true;
-        }
-        catch
-        {
-            DetailPreviewImage.Source = null;
-            DetailPreviewHost.IsVisible = false;
         }
     }
 
@@ -2760,7 +2765,14 @@ public partial class MainWindow : Window
 
         try
         {
-            return new Bitmap(path);
+            if (BitmapCache.TryGetValue(path, out var cachedBitmap))
+            {
+                return cachedBitmap;
+            }
+
+            var bitmap = new Bitmap(path);
+            BitmapCache[path] = bitmap;
+            return bitmap;
         }
         catch
         {
@@ -2778,7 +2790,14 @@ public partial class MainWindow : Window
 
         try
         {
-            return new Bitmap(path);
+            if (BitmapCache.TryGetValue(path, out var cachedBitmap))
+            {
+                return cachedBitmap;
+            }
+
+            var bitmap = new Bitmap(path);
+            BitmapCache[path] = bitmap;
+            return bitmap;
         }
         catch
         {

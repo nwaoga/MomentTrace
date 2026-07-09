@@ -34,7 +34,7 @@ The **Overview** page now behaves like a more visual daily-story dashboard witho
 
 Privacy controls are part of Settings rather than hidden configuration. Recent apps and websites can be selected into block lists, adult-site filtering can be enabled, and manual allow/block domains remain available for fine control.
 
-On first run, MomentTrace explains the local-first storage model, keeps adult-site filtering enabled by default, and lets the user choose whether the app should start with Windows.
+On first run, MomentTrace explains the local-first storage model, keeps adult-site filtering enabled by default, and lets the user choose whether the app should start automatically at sign-in.
 
 ![MomentTrace Settings privacy preview](docs/assets/momenttrace-settings-privacy-preview.svg)
 
@@ -58,7 +58,7 @@ The Windows installer is built with Inno Setup from a self-contained `MomentTrac
 - Foreground app/window activity recording with session collapsing
 - Sleep/resume and day-rollover handling so long-running sessions split cleanly
 - Start recording when the app launches
-- Optional "Start with Windows" setting
+- Optional start-at-sign-in setting
 - First-run onboarding for privacy, startup behavior, and local storage expectations
 - Minimize-to-tray behavior
 - Tray menu for open, pause, resume, and exit
@@ -105,9 +105,9 @@ This split is intentional. Future macOS support should add platform-specific ser
 - detail-panel narrative text, grouped raw entries, and related moment selection
 - shell contracts for app icons, local paths, and user profile metadata
 
-The WPF app now acts more like a Windows shell over shared timeline data. It still owns WPF controls, tray behavior, custom window chrome, Windows icons, screenshot previews, settings, and installer/startup wiring.
+The WPF app now acts more like a Windows shell over shared timeline data. It still owns WPF controls, some legacy tray/startup wiring, custom window chrome, Windows icons, screenshot previews, settings, and installer/startup wiring.
 
-`MomentTrace.Desktop` is the active Avalonia shell for cross-platform UI work. It targets both `net8.0` and `net8.0-windows`, reads the same local SQLite timeline through `MomentTrace.Storage`, and binds timeline groups, Overview analytics, and the right-side detail surface from `MomentTrace.Presentation`. The Windows target now starts the shared Windows foreground recorder, shows local screenshot previews, resolves real app icons through `MomentTrace.Windows`, supports single-instance reopen behavior, and refreshes the shell when new activity lands. On macOS, the shell now defers to native traffic-light window controls, keeps the titlebar visually blended with the app surface, and wires common Command-key shortcuts like settings, search, and close. Custom chrome remains in use for the Windows shell, delete confirmations, and the first Settings health/status panel. Main window creation now happens before background recorder startup so the Avalonia shell appears reliably even if recorder initialization is slow. Tray behavior, installer packaging, and full Windows startup integration remain owned by `MomentTrace.App` and `MomentTrace.Windows`.
+`MomentTrace.Desktop` is the active Avalonia shell for cross-platform UI work. It targets both `net8.0` and `net8.0-windows`, reads the same local SQLite timeline through `MomentTrace.Storage`, and binds timeline groups, Overview analytics, and the right-side detail surface from `MomentTrace.Presentation`. The Windows target now starts the shared Windows foreground recorder, shows local screenshot previews, resolves real app icons through `MomentTrace.Windows`, supports single-instance reopen behavior, provides tray/background behavior for the shipped Windows shell, and refreshes the UI when new activity lands. On macOS, the shell now defers to native traffic-light window controls, keeps the titlebar visually blended with the app surface, and wires common Command-key shortcuts like settings, search, and close. Custom chrome remains in use for the Windows shell, delete confirmations, and the first Settings health/status panel. Main window creation now happens before background recorder startup so the Avalonia shell appears reliably even if recorder initialization is slow. Installer packaging and the remaining Windows startup integration still live in `MomentTrace.App` and `MomentTrace.Windows`.
 
 ## Requirements
 

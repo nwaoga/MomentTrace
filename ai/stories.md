@@ -5,6 +5,9 @@
 - [ ] Verify the replacement beta release artifacts on GitHub: Windows installer, Windows portable zip, and macOS app zip.
 - [ ] Smoke test the Windows installer and confirm it launches `MomentTrace.Desktop.exe`.
 - [ ] Rebuild the beta release after fixing macOS app bundle signing, then smoke test the macOS app zip on a Mac and document any Gatekeeper/permissions caveats.
+- [ ] Restore tray/background behavior in the shipped Avalonia Windows desktop app so install verification matches product expectations.
+- [ ] Reduce dense-day lag in the Avalonia shell after Windows beta smoke testing found multi-second card selection delays around ~700 moments/day.
+- [ ] Smoke test the macOS app zip on a Mac and document any Gatekeeper/permissions caveats.
 - [ ] Promote marketing launch assets after release artifacts are verified.
 - [ ] Add real Windows signing secrets and plan macOS Developer ID signing/notarization when credentials are available.
 
@@ -72,5 +75,7 @@ Use this section for short pass/fail notes during the next stability sweep.
 - [2026-07-09] `v0.1.1-beta.8` failed in CI before upload because `codesign` reached the app executable before all sibling managed assemblies were signed. The signing order now puts sibling files before `MomentTrace.Desktop`, then seals the outer `.app`.
 - [2026-07-09] `v0.1.1-beta.9` release workflow passed and published Windows plus macOS assets. The macOS zip SHA-256 matched GitHub's digest, `unzip -t` passed, and `ditto` extraction produced an app that passed `codesign --verify --deep --strict`. `spctl` still rejects the app because beta builds are ad-hoc signed rather than Developer ID signed/notarized.
 - [2026-07-09] Windows beta.9 follow-up: the published portable `MomentTrace.Desktop.exe` contained `v0.1.1-beta.9`, but Settings displayed the numeric assembly version because the Avalonia shell did not read `AssemblyInformationalVersion`. The Settings version field now matches the stamped prerelease version, and stale beta.6 public links were updated.
+- [2026-07-09 22:42 UTC+1] Windows beta smoke test on downloaded `v0.1.1-beta.10`: the Avalonia shell launched, but no system tray icon appeared even though the app was running. This confirmed the release is shipping `MomentTrace.Desktop.exe` without the old WPF tray host behavior.
+- [2026-07-09 22:42 UTC+1] Same Windows beta smoke test found dense-day responsiveness issues on a local dataset with roughly 700 moments for the day; even selecting a card could take a few seconds before the detail pane updated.
 - Windows chrome: last confirmed working with `ExtendClientAreaToDecorationsHint=True` and `WindowDecorations=BorderOnly`.
 - Overview dashboard: #88 closed after build verification and Azure DevOps update.

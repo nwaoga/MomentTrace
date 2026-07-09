@@ -18,10 +18,10 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
     {
         var dayActivities = activities
             .Where(activity => activity.StartedAt.LocalDateTime.Date == selectedDate)
-            .OrderBy(activity => activity.StartedAt)
+            .OrderByDescending(activity => activity.StartedAt)
             .ToList();
         var totalActive = dayActivities.Aggregate(TimeSpan.Zero, (total, activity) => total + activity.Duration);
-        var sessions = _timelineBuilder.BuildSessions(dayActivities)
+        var sessions = _timelineBuilder.BuildSessions(dayActivities, isSortedDescending: true)
             .OrderBy(activity => activity.SessionStartedAt)
             .ToList();
         var topApplications = BuildTopApplications(dayActivities, totalActive).ToList();
@@ -114,34 +114,58 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
 
     private static IEnumerable<HeatmapSegmentViewModel> BuildHeatmap(IReadOnlyList<TimelineActivity> activities, DateTime day)
     {
+        const int bucketCount = 96;
         var blockLength = TimeSpan.FromMinutes(15);
         var maxSeconds = blockLength.TotalSeconds;
+        var dayStart = day.Date;
+        var dayEnd = dayStart.AddDays(1);
+        var activeSeconds = new double[bucketCount];
+        var captureCounts = new int[bucketCount];
+        var kindSeconds = new Dictionary<ActivityKind, double>[bucketCount];
+        var appSeconds = new Dictionary<string, double>[bucketCount];
 
-        for (var index = 0; index < 96; index++)
+        foreach (var activity in activities)
         {
-            var start = day.AddTicks(blockLength.Ticks * index);
-            var end = start.Add(blockLength);
-            var overlapping = activities
-                .Select(activity => new
-                {
-                    Activity = activity,
-                    Seconds = GetOverlapSeconds(activity.StartedAt.LocalDateTime, activity.EndedAt.LocalDateTime, start, end)
-                })
-                .Where(item => item.Seconds > 0)
-                .ToList();
+            var activityStart = activity.StartedAt.LocalDateTime;
+            var activityEnd = activity.EndedAt.LocalDateTime;
+            var clippedStart = activityStart > dayStart ? activityStart : dayStart;
+            var clippedEnd = activityEnd < dayEnd ? activityEnd : dayEnd;
+            if (clippedEnd <= clippedStart)
+            {
+                continue;
+            }
 
-            var activeSeconds = overlapping.Sum(item => item.Seconds);
-            var dominant = overlapping
-                .GroupBy(item => item.Activity.Kind)
-                .OrderByDescending(group => group.Sum(item => item.Seconds))
-                .FirstOrDefault()?.Key;
-            var topApp = overlapping
-                .GroupBy(item => item.Activity.AppName)
-                .OrderByDescending(group => group.Sum(item => item.Seconds))
-                .FirstOrDefault()?.Key ?? "No activity";
-            var intensity = Math.Clamp(activeSeconds / maxSeconds, 0, 1);
+            var startIndex = (int)Math.Floor((clippedStart - dayStart).TotalMinutes / 15d);
+            var endIndex = (int)Math.Ceiling((clippedEnd - dayStart).TotalMinutes / 15d) - 1;
+            startIndex = Math.Clamp(startIndex, 0, bucketCount - 1);
+            endIndex = Math.Clamp(endIndex, 0, bucketCount - 1);
+
+            for (var index = startIndex; index <= endIndex; index++)
+            {
+                var start = dayStart.AddTicks(blockLength.Ticks * index);
+                var end = start.Add(blockLength);
+                var seconds = GetOverlapSeconds(clippedStart, clippedEnd, start, end);
+                if (seconds <= 0)
+                {
+                    continue;
+                }
+
+                activeSeconds[index] += seconds;
+                captureCounts[index]++;
+                AddKindDuration(kindSeconds, index, activity.Kind, seconds);
+                AddAppDuration(appSeconds, index, activity.AppName, seconds);
+            }
+        }
+
+        for (var index = 0; index < bucketCount; index++)
+        {
+            var start = dayStart.AddTicks(blockLength.Ticks * index);
+            var end = start.Add(blockLength);
+            var dominant = GetLargestKind(kindSeconds[index]);
+            var topApp = GetLargestApp(appSeconds[index]);
+            var intensity = Math.Clamp(activeSeconds[index] / maxSeconds, 0, 1);
             var categoryLabel = GetHeatmapCategoryLabel(dominant);
-            var tooltip = $"{start:HH:mm} - {end:HH:mm}\n{topApp}\n{categoryLabel}\nSeen {FormatDuration(TimeSpan.FromSeconds(activeSeconds))}\n{overlapping.Count} captures";
+            var tooltip = $"{start:HH:mm} - {end:HH:mm}\n{(string.IsNullOrWhiteSpace(topApp) ? "No activity" : topApp)}\n{categoryLabel}\nSeen {FormatDuration(TimeSpan.FromSeconds(activeSeconds[index]))}\n{captureCounts[index]} captures";
 
             yield return new HeatmapSegmentViewModel(
                 GetHeatmapFill(dominant, intensity),
@@ -151,6 +175,80 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
                 categoryLabel,
                 intensity);
         }
+    }
+
+    private static void AddKindDuration(Dictionary<ActivityKind, double>?[] buckets, int index, ActivityKind key, double seconds)
+    {
+        var bucket = buckets[index];
+        if (bucket is null)
+        {
+            bucket = new Dictionary<ActivityKind, double>();
+            buckets[index] = bucket;
+        }
+
+        bucket[key] = bucket.TryGetValue(key, out var currentSeconds)
+            ? currentSeconds + seconds
+            : seconds;
+    }
+
+    private static void AddAppDuration(Dictionary<string, double>?[] buckets, int index, string key, double seconds)
+    {
+        var bucket = buckets[index];
+        if (bucket is null)
+        {
+            bucket = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+            buckets[index] = bucket;
+        }
+
+        bucket[key] = bucket.TryGetValue(key, out var currentSeconds)
+            ? currentSeconds + seconds
+            : seconds;
+    }
+
+    private static ActivityKind? GetLargestKind(Dictionary<ActivityKind, double>? values)
+    {
+        if (values is null || values.Count == 0)
+        {
+            return null;
+        }
+
+        ActivityKind? largest = null;
+        var largestSeconds = double.MinValue;
+        foreach (var pair in values)
+        {
+            if (pair.Value <= largestSeconds)
+            {
+                continue;
+            }
+
+            largest = pair.Key;
+            largestSeconds = pair.Value;
+        }
+
+        return largest;
+    }
+
+    private static string? GetLargestApp(Dictionary<string, double>? values)
+    {
+        if (values is null || values.Count == 0)
+        {
+            return null;
+        }
+
+        string? largest = null;
+        var largestSeconds = double.MinValue;
+        foreach (var pair in values)
+        {
+            if (pair.Value <= largestSeconds)
+            {
+                continue;
+            }
+
+            largest = pair.Key;
+            largestSeconds = pair.Value;
+        }
+
+        return largest;
     }
 
     private static IEnumerable<TopApplicationViewModel> BuildTopApplications(IReadOnlyList<TimelineActivity> activities, TimeSpan totalActive)

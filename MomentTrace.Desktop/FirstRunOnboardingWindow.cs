@@ -32,7 +32,7 @@ public sealed class FirstRunOnboardingWindow : Window
         Background = Brushes.Transparent;
 
         _adultFilterCheckBox = BuildCheckBox("Exclude adult websites before saving history", preferences.ExcludeAdultWebsites, palette);
-        _startWithWindowsCheckBox = BuildCheckBox("Start MomentTrace when Windows starts", _startupRegistration.IsEnabled(), palette);
+        _startWithWindowsCheckBox = BuildCheckBox("Start MomentTrace automatically when you sign in", _startupRegistration.IsEnabled(), palette);
 
         Content = new Border
         {

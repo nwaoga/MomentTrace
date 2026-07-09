@@ -20,7 +20,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 ---
 
-## Current State (2026-07-09 00:30 UTC+1)
+## Current State (2026-07-09 22:42 UTC+1)
 
 **Phase:** Beta release readiness and marketing prep.
 
@@ -42,13 +42,14 @@ Users should be able to quickly revisit what happened during a day, recover past
 - macOS shell shortcut verification passed for Settings, search, Timeline, Overview, and close behavior.
 - macOS foreground capture is now in the first-class `MomentTrace.Mac` platform service and is hosted by `MomentTrace.Desktop` on the cross-platform target.
 - Release tags now build the Avalonia desktop shell for Windows and macOS together.
-- Latest beta tag pushed: `v0.1.1-beta.10`.
+- Latest beta tag pushed and downloaded for release verification: `v0.1.1-beta.10`.
 - Windows release artifacts should include an installer and portable zip for `MomentTrace.Desktop.exe`.
 - macOS release artifacts should include an ad-hoc signed `MomentTrace.app` zip for `osx-arm64` until Developer ID signing/notarization is configured.
 - README preview SVG rendering has been fixed and validated locally.
 - Marketing launch kit and static landing page draft are in `docs/`.
 - Shared presentation builders for timeline, overview, and detail context.
 - Local SQLite activity store and Windows foreground recorder.
+- Windows beta smoke testing has now found two release-follow-up issues in the Avalonia shell: dense-day performance lag and missing tray/background behavior in the shipped desktop app.
 - Azure DevOps currently has no open MomentTrace work items.
 
 **Last pushed:** `04464ce` — update plan for beta release follow-ups.
@@ -61,7 +62,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 **Why:** The release train now creates Windows and macOS artifacts together, but the beta should not be marketed until the generated assets are confirmed.
 
-**Status:** Next.
+**Status:** In progress.
 
 **Scope:**
 
@@ -73,11 +74,13 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Download and smoke test the Windows installer on a clean or disposable Windows profile.
 - Download and inspect the macOS zip on a Mac, confirming it extracts to `MomentTrace.app` and launches far enough to show the shell/onboarding.
 - Update `docs/marketing-launch-kit.md` with any beta caveats discovered during install testing.
+- Fix any blocking shell regressions found during smoke testing before calling the beta marketable, including tray/background behavior and dense-day responsiveness.
 
 **Acceptance criteria:**
 
 - Release artifacts are present and named correctly.
 - Windows installer launches the Avalonia shell, not the old WPF shell.
+- Windows installer build preserves expected tray/background behavior for a memory-capture app.
 - macOS zip contains `MomentTrace.app`.
 - Any signing, Gatekeeper, SmartScreen, or first-launch caveat is documented before public sharing.
 - `stories.md` records the smoke-test result.
@@ -244,6 +247,7 @@ Completed:
 - [2026-07-08 23:45 UTC+1] **Landing page draft** — added a static product landing page at `docs/landing/index.html` using sanitized product visuals and beta CTAs.
 - [2026-07-08 23:58 UTC+1] **Win/Mac release train** — release tags now build Windows installer/portable zip and macOS app zip together from `MomentTrace.Desktop`.
 - [2026-07-09 00:18 UTC+1] **Release follow-up fixes** — fixed README SVG rendering and `v0.1.1-beta.6` release publishing by giving the no-checkout publish job explicit GitHub repository context.
+- [2026-07-09 22:42 UTC+1] **Windows beta smoke findings** — local install verification of `v0.1.1-beta.10` found missing tray/background behavior and dense-day interaction lag in the shipped Avalonia desktop shell.
 
 ---
 

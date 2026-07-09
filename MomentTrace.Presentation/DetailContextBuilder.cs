@@ -8,33 +8,52 @@ public sealed class DetailContextBuilder(IActivityClassifier classifier)
 
     public DetailContextModel Build(ActivityMomentViewModel selected, IReadOnlyList<TimelineActivity> activities)
     {
-        var rawEntries = activities
-            .Where(activity => IsRawEntryForMoment(selected, activity))
-            .OrderBy(activity => activity.StartedAt)
-            .ToList();
+        var rawEntries = new List<TimelineActivity>();
+        var relatedCandidates = new List<RelatedCandidate>();
+        var selectedCategory = _classifier.Classify(selected.Activity).Category;
+
+        foreach (var activity in activities)
+        {
+            if (IsRawEntryForMoment(selected, activity))
+            {
+                rawEntries.Add(activity);
+            }
+
+            if (activity.Id == selected.Id)
+            {
+                continue;
+            }
+
+            var sameApp = string.Equals(activity.AppName, selected.AppName, StringComparison.OrdinalIgnoreCase);
+            var sameTarget = SameMomentTarget(activity, selected.Activity);
+            ActivityCategory? category = null;
+            if (!sameApp && !sameTarget)
+            {
+                category = _classifier.Classify(activity).Category;
+                if (category != selectedCategory)
+                {
+                    continue;
+                }
+            }
+
+            category ??= _classifier.Classify(activity).Category;
+            relatedCandidates.Add(new RelatedCandidate(
+                activity,
+                category.Value,
+                Math.Abs((activity.StartedAt - selected.SessionStartedAt).TotalSeconds)));
+        }
+
+        rawEntries.Sort((left, right) => left.StartedAt.CompareTo(right.StartedAt));
 
         if (rawEntries.Count == 0)
         {
             rawEntries.Add(selected.Activity);
         }
 
-        var selectedCategory = _classifier.Classify(selected.Activity).Category;
-        var related = activities
-            .Where(activity => activity.Id != selected.Id)
-            .Select(activity => new
-            {
-                Activity = activity,
-                Category = _classifier.Classify(activity).Category,
-                Distance = Math.Abs((activity.StartedAt - selected.SessionStartedAt).TotalSeconds)
-            })
-            .Where(item => string.Equals(item.Activity.AppName, selected.AppName, StringComparison.OrdinalIgnoreCase)
-                || item.Category == selectedCategory
-                || SameMomentTarget(item.Activity, selected.Activity))
+        var related = relatedCandidates
             .OrderBy(item => item.Distance)
             .Take(6)
-            .Select(item => new RelatedMomentViewModel(
-                new ActivityMomentViewModel(item.Activity),
-                item.Category == selectedCategory ? "Same activity type" : "Same source"))
+            .Select(item => new RelatedMomentViewModel(new ActivityMomentViewModel(item.Activity), item.Category == selectedCategory ? "Same activity type" : "Same source"))
             .ToList();
 
         return new DetailContextModel
@@ -111,4 +130,6 @@ public sealed class DetailContextBuilder(IActivityClassifier classifier)
             _ => selected.MemoryDescription
         };
     }
+
+    private sealed record RelatedCandidate(TimelineActivity Activity, ActivityCategory Category, double Distance);
 }
