@@ -161,7 +161,7 @@ MomentTrace includes a first-class `MomentTrace.Mac` platform service for active
 - stable app resource identity, preferring `app://<bundle-id>` and then app path before falling back to `pid:`
 - browser URL capture for Safari and Chromium-family browsers when AppleScript access is available
 - active window title when macOS permissions allow it
-- local screenshot and thumbnail paths when macOS Screen Recording permission allows capture, now cropped to the frontmost window bounds when available
+- local screenshot and thumbnail paths when macOS Screen Recording permission allows capture, preferring the real frontmost window ID (`screencapture -l`) and falling back to Accessibility window bounds when needed
 - start/end timestamps
 
 The packaging, signing, notarization, and DMG release path is tracked in [docs/macos-release.md](docs/macos-release.md).
@@ -211,7 +211,7 @@ Quick checklist for the Mac run:
 - Confirm recorded rows now prefer stable app identity such as `app://com.apple.finder` instead of raw `pid:` markers when bundle IDs are available.
 - Confirm Safari and supported Chromium browsers store real page URLs in `resource` when browser scripting access is available.
 - Confirm screenshot and thumbnail files appear under `~/Library/Application Support/MomentTrace/screenshots` and `~/Library/Application Support/MomentTrace/thumbnails` when Screen Recording is allowed.
-- Confirm new screenshots are cropped to the frontmost app window when macOS exposes usable window bounds.
+- Confirm new screenshots capture the frontmost app window by window ID when possible, with Accessibility rectangle crop as fallback.
 
 If the repo is already cloned:
 

@@ -33,6 +33,7 @@
 - [2026-07-08 23:05 UTC+1] Windows release signing should be optional for local/internal builds but automatic in the release workflow when protected signing secrets are configured.
 - [2026-07-09] Internal macOS beta zips should ad-hoc sign `MomentTrace.app` before packaging. This does not replace Developer ID signing/notarization, but it prevents invalid bundle-signature states that macOS can report as damaged.
 - [2026-07-09 22:42 UTC+1] The Windows beta now ships the Avalonia desktop shell as the actual release app, so tray/background behavior can no longer live only in `MomentTrace.App`; Windows release builds of `MomentTrace.Desktop` must provide a real tray icon and explicit background/exit behavior.
+- [2026-07-10 21:35 UTC+1] macOS screenshots should capture by CGWindowID (`screencapture -l`) first, using Accessibility rectangle crop only as fallback. Window IDs are resolved with on-screen, layer-0 windows for the active PID, preferring title matches then largest area.
 
 ## Recently Completed
 

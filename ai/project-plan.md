@@ -56,6 +56,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - `v0.1.1-beta.12` is the current beta candidate after fixing macOS app identity and repeated Screen Recording prompt behavior.
 - The desktop shell icon path now has a shared parity pass in code: full-colour app icon for Windows/window surfaces, monochrome template icon for the macOS status item, and macOS bundle `.icns` generation from the same source artwork.
 - Azure DevOps now tracks the macOS screenshot reliability follow-up as `AB#130`, `AB#131`, and `AB#132`.
+- `AB#130` code path is in progress: macOS capture now prefers window-ID screenshots (`screencapture -l`) with rectangle/full-display fallbacks; real Mac verification is still outstanding.
 
 **Last pushed:** `dca9ead` — fix macOS app identity and screen prompt backoff.
 
@@ -104,13 +105,12 @@ Users should be able to quickly revisit what happened during a day, recover past
 - [2026-07-09] macOS beta.11 follow-up: the application menu still displayed the Avalonia fallback name and repeated Screen Recording prompts could continue after permission was toggled before relaunch. Set the Avalonia application name and assembly metadata to MomentTrace, and throttle failed screenshot capture attempts so a stale/denied TCC state does not prompt continuously.
 - [2026-07-09] `v0.1.1-beta.12` release workflow passed and published Windows plus macOS assets. The macOS zip SHA-256 matched the GitHub release digest, `unzip -t` passed, native `ditto` extraction produced an app that passed `codesign --verify --deep --strict`, and the extracted bundle reports `CFBundleName` and `CFBundleDisplayName` as `MomentTrace`.
 
-**Pick up on 2026-07-11:**
+**Pick up now:**
 
-- Install/download `v0.1.1-beta.12` on macOS and confirm the app menu says `MomentTrace`, not `Avalonia Application`.
-- Fully quit and reopen MomentTrace after granting Screen & System Audio Recording permission, then confirm the permission prompt does not repeat during normal capture.
-- Smoke test Windows `v0.1.1-beta.12` for tray/background behavior and dense-day responsiveness on the same dataset that exposed beta.10 lag.
-- Pull `AB#130` first for real window-targeted macOS capture, then `AB#131` for fallback diagnostics, with `AB#132` held as the architecture decision follow-up if shell capture still proves flaky.
-- If both platform smoke tests pass, move to Marketing Launch Pass; otherwise fix the remaining blocker and cut the next beta.
+- Finish `AB#130` on a real Mac: confirm new moments use window-ID capture (`LastScreenshotCaptureMethod` / visual window crop) for normal apps, browsers, and multi-monitor cases; rectangle/full-display should only appear as fallback.
+- Then `AB#131` for user-visible fallback diagnostics, with `AB#132` held if shell capture still proves flaky.
+- Still open from beta.12 smoke: macOS app menu name, Screen Recording prompt after quit/reopen, Windows tray/background behavior, and dense-day responsiveness.
+- If platform smoke tests pass after screenshot verification, move to Marketing Launch Pass; otherwise fix the remaining blocker and cut the next beta.
 
 ### Next After Release Verification — Marketing Launch Pass
 

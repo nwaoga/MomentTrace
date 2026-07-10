@@ -9,7 +9,7 @@
 - [ ] Verify icon parity in the shipped Windows and macOS builds, including app window, installer/app bundle, tray icon, Dock icon, Finder icon, and macOS menu bar status item visuals.
 - [ ] Reduce dense-day lag in the Avalonia shell after Windows beta smoke testing found multi-second card selection delays around ~700 moments/day.
 - [ ] Smoke test the macOS app zip on a Mac and document any Gatekeeper/permissions caveats.
-- [ ] `AB#130`: Capture the actual macOS app window by window ID instead of relying only on screen-rectangle screenshots.
+- [ ] `AB#130` (in progress): Capture the actual macOS app window by window ID instead of relying only on screen-rectangle screenshots. Code now prefers `screencapture -l` via CGWindowList; still needs real Mac smoke verification.
 - [ ] `AB#131`: Add macOS screenshot fallback diagnostics so missed or degraded captures explain whether we hit window capture, rectangle fallback, or no capture path.
 - [ ] `AB#132`: Evaluate ScreenCaptureKit window capture as the durable macOS replacement path if shell-based capture still misses the app window.
 - [ ] Promote marketing launch assets after release artifacts are verified.
@@ -86,5 +86,6 @@ Use this section for short pass/fail notes during the next stability sweep.
 - [2026-07-09] `v0.1.1-beta.12` release workflow passed and published all expected assets. Downloaded macOS zip matched GitHub SHA-256, passed archive integrity, extracted with `ditto`, passed strict code-sign verification, and reported `MomentTrace` for both `CFBundleName` and `CFBundleDisplayName`. Tomorrow's smoke pass should verify the visible macOS app menu name, Screen Recording prompt behavior after full quit/reopen, Windows tray/background behavior, and dense-day responsiveness.
 - [2026-07-10 10:40 UTC+1] Icon parity follow-up now routes the Avalonia shell through shared full-colour and template icon assets: the window and Windows tray use the same full-colour mark, while macOS status-item behavior uses a monochrome template icon and the macOS bundle script now generates a real `.icns` from the shared source PNG.
 - [2026-07-10 11:18 UTC+1] Azure DevOps follow-up created `AB#130`, `AB#131`, and `AB#132` to cover macOS screenshot reliability work before the next implementation pass.
+- [2026-07-10 21:35 UTC+1] `AB#130` implementation started: macOS screenshot capture now resolves the frontmost process CGWindowID through JXA/CoreGraphics and prefers `screencapture -l`, keeping Accessibility `-R` bounds and full-display capture as fallbacks. `LastScreenshotCaptureMethod` records which path succeeded for the upcoming diagnostics story. Real Mac verification is still required before closing the work item.
 - Windows chrome: last confirmed working with `ExtendClientAreaToDecorationsHint=True` and `WindowDecorations=BorderOnly`.
 - Overview dashboard: #88 closed after build verification and Azure DevOps update.

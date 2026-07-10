@@ -195,6 +195,17 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
         };
     }
 
+    private enum ScreenshotCaptureMethod
+    {
+        None,
+        WindowId,
+        Rectangle,
+        FullDisplay
+    }
+
+    // Exposed for Settings/diagnostics follow-up (AB#131).
+    public static string LastScreenshotCaptureMethod { get; private set; } = nameof(ScreenshotCaptureMethod.None);
+
     private sealed record Snapshot(
         string ProcessName,
         string AppName,
@@ -202,6 +213,7 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
         string? BundleIdentifier,
         string? Resource,
         string? ExecutablePath,
+        int? ProcessId,
         int? WindowX,
         int? WindowY,
         int? WindowWidth,
@@ -267,6 +279,7 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
             var windowY = ParseOptionalInt(lines.ElementAtOrDefault(6));
             var windowWidth = ParseOptionalInt(lines.ElementAtOrDefault(7));
             var windowHeight = ParseOptionalInt(lines.ElementAtOrDefault(8));
+            var processId = ParseOptionalInt(pid);
 
             if (string.IsNullOrWhiteSpace(appName))
             {
@@ -284,6 +297,7 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
                 string.IsNullOrWhiteSpace(bundleIdentifier) ? null : bundleIdentifier,
                 resource,
                 string.IsNullOrWhiteSpace(appPath) ? null : appPath,
+                processId,
                 windowX,
                 windowY,
                 windowWidth,
@@ -466,6 +480,7 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
                 var now = DateTimeOffset.Now;
                 if (now < _screenCaptureRetryAfter)
                 {
+                    LastScreenshotCaptureMethod = nameof(ScreenshotCaptureMethod.None);
                     return null;
                 }
 
@@ -477,6 +492,57 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
                     screenshotDirectory,
                     $"{now:yyyyMMdd-HHmmss-fff}-{Guid.NewGuid():N}.png");
 
+                var windowId = TryResolveFrontmostWindowId(snapshot.ProcessId, snapshot.WindowTitle);
+                if (windowId is > 0
+                    && TryRunScreenCapture(screenshotPath, "-x", "-o", "-l", windowId.Value.ToString()))
+                {
+                    _screenCaptureRetryAfter = DateTimeOffset.MinValue;
+                    LastScreenshotCaptureMethod = nameof(ScreenshotCaptureMethod.WindowId);
+                    return screenshotPath;
+                }
+
+                if (snapshot.WindowX is >= 0
+                    && snapshot.WindowY is >= 0
+                    && snapshot.WindowWidth is > 0
+                    && snapshot.WindowHeight is > 0
+                    && TryRunScreenCapture(
+                        screenshotPath,
+                        "-x",
+                        "-o",
+                        "-R",
+                        $"{snapshot.WindowX.Value},{snapshot.WindowY.Value},{snapshot.WindowWidth.Value},{snapshot.WindowHeight.Value}"))
+                {
+                    _screenCaptureRetryAfter = DateTimeOffset.MinValue;
+                    LastScreenshotCaptureMethod = nameof(ScreenshotCaptureMethod.Rectangle);
+                    return screenshotPath;
+                }
+
+                if (TryRunScreenCapture(screenshotPath, "-x", "-o"))
+                {
+                    _screenCaptureRetryAfter = DateTimeOffset.MinValue;
+                    LastScreenshotCaptureMethod = nameof(ScreenshotCaptureMethod.FullDisplay);
+                    return screenshotPath;
+                }
+
+                _screenCaptureRetryAfter = DateTimeOffset.Now.Add(ScreenCaptureRetryDelay);
+                LastScreenshotCaptureMethod = nameof(ScreenshotCaptureMethod.None);
+                TryDeleteFile(screenshotPath);
+                return null;
+            }
+            catch
+            {
+                _screenCaptureRetryAfter = DateTimeOffset.Now.Add(ScreenCaptureRetryDelay);
+                LastScreenshotCaptureMethod = nameof(ScreenshotCaptureMethod.None);
+                return null;
+            }
+        }
+
+        private static bool TryRunScreenCapture(string screenshotPath, params string[] arguments)
+        {
+            try
+            {
+                TryDeleteFile(screenshotPath);
+
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = "/usr/sbin/screencapture",
@@ -484,16 +550,10 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
                     RedirectStandardOutput = true,
                     UseShellExecute = false
                 };
-                startInfo.ArgumentList.Add("-x");
-                startInfo.ArgumentList.Add("-o");
 
-                if (snapshot.WindowX is >= 0
-                    && snapshot.WindowY is >= 0
-                    && snapshot.WindowWidth is > 0
-                    && snapshot.WindowHeight is > 0)
+                foreach (var argument in arguments)
                 {
-                    startInfo.ArgumentList.Add("-R");
-                    startInfo.ArgumentList.Add($"{snapshot.WindowX!.Value},{snapshot.WindowY!.Value},{snapshot.WindowWidth!.Value},{snapshot.WindowHeight!.Value}");
+                    startInfo.ArgumentList.Add(argument);
                 }
 
                 startInfo.ArgumentList.Add(screenshotPath);
@@ -501,28 +561,135 @@ public sealed class MacForegroundActivityRecorder(IActivityStore store) : IActiv
                 using var process = Process.Start(startInfo);
                 if (process is null)
                 {
-                    return null;
+                    return false;
                 }
 
                 process.WaitForExit();
                 if (process.ExitCode == 0 && File.Exists(screenshotPath))
                 {
-                    _screenCaptureRetryAfter = DateTimeOffset.MinValue;
-                    return screenshotPath;
+                    return true;
                 }
 
-                _screenCaptureRetryAfter = DateTimeOffset.Now.Add(ScreenCaptureRetryDelay);
-                if (File.Exists(screenshotPath))
-                {
-                    File.Delete(screenshotPath);
-                }
-
-                return null;
+                TryDeleteFile(screenshotPath);
+                return false;
             }
             catch
             {
-                _screenCaptureRetryAfter = DateTimeOffset.Now.Add(ScreenCaptureRetryDelay);
+                TryDeleteFile(screenshotPath);
+                return false;
+            }
+        }
+
+        private static int? TryResolveFrontmostWindowId(int? processId, string? windowTitle)
+        {
+            if (processId is not > 0)
+            {
                 return null;
+            }
+
+            try
+            {
+                // Resolve the real CGWindowID for the frontmost process so screencapture -l
+                // can target the window itself instead of a guessed Accessibility rectangle.
+                const string script = """
+                    ObjC.import('CoreGraphics');
+                    ObjC.import('Foundation');
+                    function run(argv) {
+                      var pid = parseInt(argv[0], 10);
+                      var wantedTitle = argv.length > 1 ? String(argv[1] || '') : '';
+                      if (!pid) { return ''; }
+
+                      $.bind = ObjC.bindFunction.bind($);
+                      $.bind('CFMakeCollectable', ['id', ['void *']]);
+                      var unwrap = ObjC.deepUnwrap.bind(ObjC);
+                      var raw = $.CGWindowListCopyWindowInfo(
+                        $.kCGWindowListOptionOnScreenOnly | $.kCGWindowListExcludeDesktopElements,
+                        $.kCGNullWindowID);
+                      if (!raw) { return ''; }
+
+                      var windows = unwrap($.CFMakeCollectable(raw)) || [];
+                      var bestId = null;
+                      var bestScore = -1;
+
+                      for (var i = 0; i < windows.length; i++) {
+                        var w = windows[i];
+                        if (!w || w.kCGWindowOwnerPID !== pid) { continue; }
+                        if ((w.kCGWindowLayer || 0) !== 0) { continue; }
+
+                        var bounds = w.kCGWindowBounds || {};
+                        var width = bounds.Width || 0;
+                        var height = bounds.Height || 0;
+                        if (width < 50 || height < 50) { continue; }
+
+                        var name = w.kCGWindowName || '';
+                        var score = width * height;
+                        if (wantedTitle) {
+                          if (name === wantedTitle) { score += 1000000000; }
+                          else if (name.indexOf(wantedTitle) >= 0 || wantedTitle.indexOf(name) >= 0) { score += 100000000; }
+                        }
+
+                        if (score > bestScore) {
+                          bestScore = score;
+                          bestId = w.kCGWindowNumber;
+                        }
+                      }
+
+                      return bestId == null ? '' : String(bestId);
+                    }
+                    """;
+
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = "/usr/bin/osascript",
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false
+                };
+                startInfo.ArgumentList.Add("-l");
+                startInfo.ArgumentList.Add("JavaScript");
+                startInfo.ArgumentList.Add("-e");
+                startInfo.ArgumentList.Add(script);
+                startInfo.ArgumentList.Add("--");
+                startInfo.ArgumentList.Add(processId.Value.ToString());
+                if (!string.IsNullOrWhiteSpace(windowTitle))
+                {
+                    startInfo.ArgumentList.Add(windowTitle);
+                }
+
+                using var process = Process.Start(startInfo);
+                if (process is null)
+                {
+                    return null;
+                }
+
+                var output = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+                if (process.ExitCode != 0)
+                {
+                    return null;
+                }
+
+                return int.TryParse(output.Trim(), out var windowId) && windowId > 0
+                    ? windowId
+                    : null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static void TryDeleteFile(string path)
+        {
+            try
+            {
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+            }
+            catch
+            {
             }
         }
 
