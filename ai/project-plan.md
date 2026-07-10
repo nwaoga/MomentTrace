@@ -55,7 +55,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - The desktop shell icon path now has a shared parity pass in code: full-colour app icon for Windows/window surfaces, monochrome template icon for the macOS status item, and macOS bundle `.icns` generation from the same source artwork.
 - `v0.1.1-beta.12` is the current beta candidate after fixing macOS app identity and repeated Screen Recording prompt behavior.
 - The desktop shell icon path now has a shared parity pass in code: full-colour app icon for Windows/window surfaces, monochrome template icon for the macOS status item, and macOS bundle `.icns` generation from the same source artwork.
-- Azure DevOps currently has no open MomentTrace work items.
+- Azure DevOps now tracks the macOS screenshot reliability follow-up as `AB#130`, `AB#131`, and `AB#132`.
 
 **Last pushed:** `dca9ead` — fix macOS app identity and screen prompt backoff.
 
@@ -81,6 +81,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Update `docs/marketing-launch-kit.md` with any beta caveats discovered during install testing.
 - Fix or verify any blocking shell regressions found during smoke testing before calling the beta marketable, including tray/background behavior and dense-day responsiveness.
 - Verify icon consistency across the shipped Windows and macOS artifacts before public sharing.
+- Keep the next macOS screenshot reliability implementation mapped in Azure DevOps before engineering starts, with capture, diagnostics, and architecture follow-up split across `AB#130`, `AB#131`, and `AB#132`.
 
 **Acceptance criteria:**
 
@@ -108,6 +109,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Install/download `v0.1.1-beta.12` on macOS and confirm the app menu says `MomentTrace`, not `Avalonia Application`.
 - Fully quit and reopen MomentTrace after granting Screen & System Audio Recording permission, then confirm the permission prompt does not repeat during normal capture.
 - Smoke test Windows `v0.1.1-beta.12` for tray/background behavior and dense-day responsiveness on the same dataset that exposed beta.10 lag.
+- Pull `AB#130` first for real window-targeted macOS capture, then `AB#131` for fallback diagnostics, with `AB#132` held as the architecture decision follow-up if shell capture still proves flaky.
 - If both platform smoke tests pass, move to Marketing Launch Pass; otherwise fix the remaining blocker and cut the next beta.
 
 ### Next After Release Verification — Marketing Launch Pass
