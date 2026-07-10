@@ -6,6 +6,7 @@
 - [ ] Smoke test the Windows installer and confirm it launches `MomentTrace.Desktop.exe`.
 - [ ] Rebuild the beta release after fixing macOS app bundle signing, then smoke test the macOS app zip on a Mac and document any Gatekeeper/permissions caveats.
 - [ ] Verify tray/background behavior in the shipped Avalonia desktop app on real Windows and macOS release builds, including the Windows tray icon and the macOS menu bar status item.
+- [ ] Verify icon parity in the shipped Windows and macOS builds, including app window, installer/app bundle, tray icon, Dock icon, Finder icon, and macOS menu bar status item visuals.
 - [ ] Reduce dense-day lag in the Avalonia shell after Windows beta smoke testing found multi-second card selection delays around ~700 moments/day.
 - [ ] Smoke test the macOS app zip on a Mac and document any Gatekeeper/permissions caveats.
 - [ ] Promote marketing launch assets after release artifacts are verified.
@@ -78,7 +79,11 @@ Use this section for short pass/fail notes during the next stability sweep.
 - [2026-07-09 22:42 UTC+1] Windows beta smoke test on downloaded `v0.1.1-beta.10`: the Avalonia shell launched, but no system tray icon appeared even though the app was running. This confirmed the release is shipping `MomentTrace.Desktop.exe` without the old WPF tray host behavior.
 - [2026-07-09 22:42 UTC+1] Same Windows beta smoke test found dense-day responsiveness issues on a local dataset with roughly 700 moments for the day; even selecting a card could take a few seconds before the detail pane updated.
 - [2026-07-09 23:10 UTC+1] Desktop follow-up implementation now adds shared background-shell behavior in `MomentTrace.Desktop`: Windows gets a tray icon again, and macOS now gets the equivalent menu bar status item with show, pause, resume, and exit actions. Real release-build smoke verification on both platforms still remains open.
+<<<<<<< HEAD
 - [2026-07-09] macOS identity and permissions follow-up: the Avalonia shell now sets the app name and assembly product metadata to MomentTrace, and failed macOS screenshot captures back off briefly so Screen Recording permission prompts are not repeated on every recorder poll while macOS is still applying or denying permission.
 - [2026-07-09] `v0.1.1-beta.12` release workflow passed and published all expected assets. Downloaded macOS zip matched GitHub SHA-256, passed archive integrity, extracted with `ditto`, passed strict code-sign verification, and reported `MomentTrace` for both `CFBundleName` and `CFBundleDisplayName`. Tomorrow's smoke pass should verify the visible macOS app menu name, Screen Recording prompt behavior after full quit/reopen, Windows tray/background behavior, and dense-day responsiveness.
+=======
+- [2026-07-10 10:40 UTC+1] Icon parity follow-up now routes the Avalonia shell through shared full-colour and template icon assets: the window and Windows tray use the same full-colour mark, while macOS status-item behavior uses a monochrome template icon and the macOS bundle script now generates a real `.icns` from the shared source PNG.
+>>>>>>> 7cfa466 (Align Windows and macOS app icons)
 - Windows chrome: last confirmed working with `ExtendClientAreaToDecorationsHint=True` and `WindowDecorations=BorderOnly`.
 - Overview dashboard: #88 closed after build verification and Azure DevOps update.

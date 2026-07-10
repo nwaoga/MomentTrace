@@ -6,7 +6,7 @@
         mc:Ignorable="d"
         x:Class="MomentTrace.Desktop.MainWindow"
         Title="MomentTrace"
-        Icon="avares://MomentTrace.Desktop/Assets/MomentTrace.ico"
+        Icon="avares://MomentTrace.Desktop/Assets/MomentTrace.png"
 	        Width="1360"
 	        Height="840"
 	        MinWidth="1120"

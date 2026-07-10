@@ -14,6 +14,8 @@
 
   <ItemGroup>
     <AvaloniaResource Include="..\MomentTrace.App\Assets\MomentTrace.ico" Link="Assets\MomentTrace.ico" />
+    <AvaloniaResource Include="..\MomentTrace.App\Assets\MomentTrace.png" Link="Assets\MomentTrace.png" />
+    <AvaloniaResource Include="..\MomentTrace.App\Assets\MomentTrace.Template.png" Link="Assets\MomentTrace.Template.png" />
   </ItemGroup>
 
   <ItemGroup>

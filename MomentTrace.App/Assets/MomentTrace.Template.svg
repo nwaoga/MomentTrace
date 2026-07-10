@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <path d="M266 706C342 564 420 468 500 417C596 356 696 356 796 417"
+        fill="none"
+        stroke="#FFFFFF"
+        stroke-width="86"
+        stroke-linecap="round"/>
+  <circle cx="290" cy="700" r="82" fill="none" stroke="#FFFFFF" stroke-width="44"/>
+  <circle cx="512" cy="430" r="86" fill="none" stroke="#FFFFFF" stroke-width="44"/>
+  <circle cx="790" cy="420" r="82" fill="none" stroke="#FFFFFF" stroke-width="44"/>
+  <path d="M338 704L454 704C510 704 546 665 546 612V454"
+        fill="none"
+        stroke="#FFFFFF"
+        stroke-width="54"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+  <circle cx="546" cy="612" r="36" fill="#FFFFFF"/>
+</svg>

@@ -52,6 +52,9 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Windows beta smoke testing has now found two release-follow-up issues in the Avalonia shell: dense-day performance lag and missing tray/background behavior in the shipped desktop app.
 - The desktop shell now includes shared background-shell behavior in code: Windows tray icon plus macOS menu bar status item, pending real release-build verification on each platform.
 - `v0.1.1-beta.12` is the current beta candidate after fixing macOS app identity and repeated Screen Recording prompt behavior.
+- The desktop shell icon path now has a shared parity pass in code: full-colour app icon for Windows/window surfaces, monochrome template icon for the macOS status item, and macOS bundle `.icns` generation from the same source artwork.
+- `v0.1.1-beta.12` is the current beta candidate after fixing macOS app identity and repeated Screen Recording prompt behavior.
+- The desktop shell icon path now has a shared parity pass in code: full-colour app icon for Windows/window surfaces, monochrome template icon for the macOS status item, and macOS bundle `.icns` generation from the same source artwork.
 - Azure DevOps currently has no open MomentTrace work items.
 
 **Last pushed:** `dca9ead` — fix macOS app identity and screen prompt backoff.
@@ -77,12 +80,14 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Download and inspect the macOS zip on a Mac, confirming it extracts to `MomentTrace.app` and launches far enough to show the shell/onboarding.
 - Update `docs/marketing-launch-kit.md` with any beta caveats discovered during install testing.
 - Fix or verify any blocking shell regressions found during smoke testing before calling the beta marketable, including tray/background behavior and dense-day responsiveness.
+- Verify icon consistency across the shipped Windows and macOS artifacts before public sharing.
 
 **Acceptance criteria:**
 
 - Release artifacts are present and named correctly.
 - Windows installer launches the Avalonia shell, not the old WPF shell.
 - Windows installer build preserves expected tray/background behavior for a memory-capture app.
+- Windows and macOS release builds use matching MomentTrace branding across installer/app bundle, window, tray, Dock, Finder, and menu bar surfaces.
 - macOS release build exposes an equivalent menu bar status item so users can tell MomentTrace is still running in the background after closing the main window.
 - macOS zip contains `MomentTrace.app`.
 - Any signing, Gatekeeper, SmartScreen, or first-launch caveat is documented before public sharing.

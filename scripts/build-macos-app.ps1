@@ -56,12 +56,19 @@ $contentsPath = Join-Path $bundlePath "Contents"
 $macOsPath = Join-Path $contentsPath "MacOS"
 $resourcesPath = Join-Path $contentsPath "Resources"
 $zipPath = Join-Path $OutputDir "MomentTrace-$Version-macos-arm64.zip"
+$iconSourcePath = Join-Path $repoRoot "MomentTrace.App\Assets\MomentTrace.png"
+$iconSetPath = Join-Path $OutputDir "MomentTrace.iconset"
+$icnsPath = Join-Path $resourcesPath "MomentTrace.icns"
 
 New-Item -ItemType Directory -Force -Path $PublishDir | Out-Null
 New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
 
 if (Test-Path -LiteralPath $bundlePath) {
     Remove-Item -LiteralPath $bundlePath -Recurse -Force
+}
+
+if (Test-Path -LiteralPath $iconSetPath) {
+    Remove-Item -LiteralPath $iconSetPath -Recurse -Force
 }
 
 if (Test-Path -LiteralPath $zipPath) {
@@ -90,6 +97,37 @@ New-Item -ItemType Directory -Force -Path $macOsPath | Out-Null
 New-Item -ItemType Directory -Force -Path $resourcesPath | Out-Null
 Copy-Item -Path (Join-Path $PublishDir "*") -Destination $macOsPath -Recurse -Force
 
+if (-not (Test-Path -LiteralPath $iconSourcePath)) {
+    throw "macOS icon source was not found: $iconSourcePath"
+}
+
+New-Item -ItemType Directory -Force -Path $iconSetPath | Out-Null
+$iconSizes = @(
+    @{ Size = 16; Name = "icon_16x16.png" },
+    @{ Size = 32; Name = "icon_16x16@2x.png" },
+    @{ Size = 32; Name = "icon_32x32.png" },
+    @{ Size = 64; Name = "icon_32x32@2x.png" },
+    @{ Size = 128; Name = "icon_128x128.png" },
+    @{ Size = 256; Name = "icon_128x128@2x.png" },
+    @{ Size = 256; Name = "icon_256x256.png" },
+    @{ Size = 512; Name = "icon_256x256@2x.png" },
+    @{ Size = 512; Name = "icon_512x512.png" },
+    @{ Size = 1024; Name = "icon_512x512@2x.png" }
+)
+
+foreach ($iconSize in $iconSizes) {
+    $iconDestination = Join-Path $iconSetPath $iconSize.Name
+    & sips --resampleHeightWidth $iconSize.Size $iconSize.Size $iconSourcePath --out $iconDestination | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "sips failed while creating $iconDestination."
+    }
+}
+
+& iconutil --convert icns $iconSetPath --output $icnsPath
+if ($LASTEXITCODE -ne 0) {
+    throw "iconutil failed while creating $icnsPath."
+}
+
 $publishedExecutable = Join-Path $macOsPath $executableName
 if (-not (Test-Path -LiteralPath $publishedExecutable)) {
     throw "Published executable was not found: $publishedExecutable"
@@ -116,6 +154,8 @@ $infoPlist = @"
   <string>$appName</string>
   <key>CFBundleDisplayName</key>
   <string>$appName</string>
+  <key>CFBundleIconFile</key>
+  <string>MomentTrace.icns</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>

@@ -170,7 +170,10 @@ public partial class App : Application
 
     private static WindowIcon LoadTrayIcon()
     {
-        return new WindowIcon(AssetLoader.Open(new Uri("avares://MomentTrace.Desktop/Assets/MomentTrace.ico")));
+        var iconPath = OperatingSystem.IsMacOS()
+            ? "avares://MomentTrace.Desktop/Assets/MomentTrace.Template.png"
+            : "avares://MomentTrace.Desktop/Assets/MomentTrace.png";
+        return new WindowIcon(AssetLoader.Open(new Uri(iconPath)));
     }
 
     private void ShowMainWindow()
