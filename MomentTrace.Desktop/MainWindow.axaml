@@ -755,6 +755,7 @@
                     </StackPanel>
                 </ScrollViewer>
 
+                <!-- User profile rail section: commented out for now; revisit account/identity UI later. Settings remains. -->
                 <Border Grid.Row="3"
                         Margin="0,16,0,0"
                         Background="{DynamicResource ElevatedPanelBrush}"
@@ -762,7 +763,8 @@
                         BorderThickness="1"
                         CornerRadius="12"
                         Padding="12,10">
-                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <!--
                         <Border Width="36"
                                 Height="36"
                                 Background="{DynamicResource AccentBrush}"
@@ -793,11 +795,13 @@
                                    Foreground="{DynamicResource SubtleTextBrush}"
                                    FontSize="16"
                                    VerticalAlignment="Center" />
+                        -->
                         <Button x:Name="SettingsNavButton"
-                                Grid.Column="3"
+                                Grid.Column="1"
                                 Classes="shellControl"
                                 Click="SettingsNavButton_Click"
                                 ToolTip.Tip="Settings"
+                                HorizontalAlignment="Right"
                                 Width="36"
                                 Height="36">
                             <TextBlock Text="⚙"
@@ -1720,11 +1724,11 @@
                 </Panel>
                 </Grid>
 
-            <ScrollViewer x:Name="OverviewPage" Grid.Row="1" IsVisible="False" AllowAutoHide="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <StackPanel Spacing="14"
-                            Margin="0,0,4,0">
+            <ScrollViewer x:Name="OverviewPage" Grid.Row="1" IsVisible="False" AllowAutoHide="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                          Margin="12,8,4,0">
+                <StackPanel Spacing="14">
                     <StackPanel Spacing="2"
-                                Margin="2,6,0,0">
+                                Margin="0,6,0,0">
                         <TextBlock x:Name="OverviewDateText"
                                    Text="Today"
                                    Foreground="{DynamicResource TextBrush}"

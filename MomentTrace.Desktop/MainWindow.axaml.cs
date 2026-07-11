@@ -87,7 +87,8 @@ public partial class MainWindow : Window
     private static readonly Thickness DefaultOuterShellPadding = new(20, 16, 8, 16);
     private static readonly Thickness DefaultRailSurfacePadding = new(14, 14, 14, 14);
     private static readonly Thickness DefaultTopCommandMargin = new(12, 0, 4, 0);
-    private static readonly Thickness DefaultTopCommandPadding = new(8);
+    // Vertical-only so the search bar left edge matches Timeline/Overview content (margin 12).
+    private static readonly Thickness DefaultTopCommandPadding = new(0, 8, 0, 8);
     private bool _isMacChromeMode;
     private static readonly Dictionary<string, Bitmap> BitmapCache = new(StringComparer.OrdinalIgnoreCase);
 
@@ -129,7 +130,8 @@ public partial class MainWindow : Window
         {
             ApplyPlatformLayoutMetrics();
             ApplyOverviewResponsiveLayout();
-            InitializeProfileRail();
+            // User profile rail is commented out for now; revisit account/identity UI later.
+            // InitializeProfileRail();
             _refreshTimer.Start();
             await ReloadAsync();
             await ShowFirstRunOnboardingAsync();
@@ -2523,13 +2525,14 @@ public partial class MainWindow : Window
         };
     }
 
+    // User profile rail is commented out for now; revisit account/identity UI later.
     private void InitializeProfileRail()
     {
-        var userName = Environment.UserName;
-        ProfileNameText.Text = string.IsNullOrWhiteSpace(userName) ? "Local user" : userName;
-        ProfileInitialText.Text = string.IsNullOrWhiteSpace(userName)
-            ? "?"
-            : char.ToUpperInvariant(userName[0]).ToString();
+        // var userName = Environment.UserName;
+        // ProfileNameText.Text = string.IsNullOrWhiteSpace(userName) ? "Local user" : userName;
+        // ProfileInitialText.Text = string.IsNullOrWhiteSpace(userName)
+        //     ? "?"
+        //     : char.ToUpperInvariant(userName[0]).ToString();
     }
 
     private static void StartupTrace(string message)
