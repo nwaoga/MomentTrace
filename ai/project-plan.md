@@ -112,6 +112,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 **Pick up now:**
 
 - Finish the remaining `AB#130` verification on a real Mac: normal app and Safari visual crops passed locally on 2026-07-12; still confirm multi-monitor behavior and avoid closing the work item solely on visual evidence because the exact method is not persisted.
+- Update Azure DevOps from a machine with ADO access: add the 2026-07-12 real Mac smoke note to `AB#130`, keep `AB#130` open for multi-monitor/exact-method confirmation, and add the preview-modal verification note to the relevant UI/release-train work item if tracking separately.
 - Then `AB#131` for user-visible fallback diagnostics, including surfacing whether a moment used window-ID capture, rectangle fallback, full-display fallback, or no capture. Keep `AB#132` held unless shell capture still proves flaky.
 - Still open from beta.12 smoke: macOS app menu name, Screen Recording prompt after quit/reopen, Windows tray/background behavior, and dense-day responsiveness.
 - If platform smoke tests pass after screenshot verification, move to Marketing Launch Pass; otherwise fix the remaining blocker and cut the next beta.
