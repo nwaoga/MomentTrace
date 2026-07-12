@@ -57,7 +57,8 @@ Users should be able to quickly revisit what happened during a day, recover past
 - `v0.1.1-beta.12` is the current beta candidate after fixing macOS app identity and repeated Screen Recording prompt behavior.
 - The desktop shell icon path now has a shared parity pass in code: full-colour app icon for Windows/window surfaces, monochrome template icon for the macOS status item, and macOS bundle `.icns` generation from the same source artwork.
 - Azure DevOps now tracks the macOS screenshot reliability follow-up as `AB#130`, `AB#131`, and `AB#132`.
-- `AB#130` code path is in progress: macOS capture now prefers window-ID screenshots (`screencapture -l`) with rectangle/full-display fallbacks; real Mac verification is still outstanding.
+- `AB#130` code path is in progress: macOS capture now prefers window-ID screenshots (`screencapture -l`) with rectangle/full-display fallbacks; real Mac visual verification passed for normal app and Safari browser crops, with multi-monitor and direct capture-method diagnostics still outstanding.
+- Timeline screenshot previews now have a dedicated expand action that opens a larger in-window modal without changing normal tile selection behavior.
 
 **Last pushed:** `4b5ab5f` — match Settings text boxes to Notes style and document AB#133.
 
@@ -105,11 +106,13 @@ Users should be able to quickly revisit what happened during a day, recover past
 - [2026-07-09] `v0.1.1-beta.9` Windows assets were named and stamped as beta.9, but app Settings read the numeric assembly version instead of `AssemblyInformationalVersion`, and launch/landing docs still linked to beta.6. Settings now displays the informational prerelease version and public beta links target the replacement beta.
 - [2026-07-09] macOS beta.11 follow-up: the application menu still displayed the Avalonia fallback name and repeated Screen Recording prompts could continue after permission was toggled before relaunch. Set the Avalonia application name and assembly metadata to MomentTrace, and throttle failed screenshot capture attempts so a stale/denied TCC state does not prompt continuously.
 - [2026-07-09] `v0.1.1-beta.12` release workflow passed and published Windows plus macOS assets. The macOS zip SHA-256 matched the GitHub release digest, `unzip -t` passed, native `ditto` extraction produced an app that passed `codesign --verify --deep --strict`, and the extracted bundle reports `CFBundleName` and `CFBundleDisplayName` as `MomentTrace`.
+- [2026-07-12] Real Mac local smoke verified fresh screenshot rows and tight visual crops for GitKraken and Safari, confirming the macOS capture output is no longer full-display for those normal app/browser cases. `LastScreenshotCaptureMethod` is not persisted yet, so `AB#131` should make the exact capture path visible.
+- [2026-07-12] Added a larger screenshot preview modal with a dedicated expand icon in the timeline tile detail band and detail preview surface; normal tile click behavior remains unchanged.
 
 **Pick up now:**
 
-- Finish `AB#130` on a real Mac: confirm new moments use window-ID capture (`LastScreenshotCaptureMethod` / visual window crop) for normal apps, browsers, and multi-monitor cases; rectangle/full-display should only appear as fallback.
-- Then `AB#131` for user-visible fallback diagnostics, with `AB#132` held if shell capture still proves flaky.
+- Finish the remaining `AB#130` verification on a real Mac: normal app and Safari visual crops passed locally on 2026-07-12; still confirm multi-monitor behavior and avoid closing the work item solely on visual evidence because the exact method is not persisted.
+- Then `AB#131` for user-visible fallback diagnostics, including surfacing whether a moment used window-ID capture, rectangle fallback, full-display fallback, or no capture. Keep `AB#132` held unless shell capture still proves flaky.
 - Still open from beta.12 smoke: macOS app menu name, Screen Recording prompt after quit/reopen, Windows tray/background behavior, and dense-day responsiveness.
 - If platform smoke tests pass after screenshot verification, move to Marketing Launch Pass; otherwise fix the remaining blocker and cut the next beta.
 

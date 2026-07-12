@@ -501,7 +501,23 @@
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
         </Style>
+        <Style Selector="Border.previewExpandButton">
+            <Setter Property="Background" Value="#CC08111F" />
+            <Setter Property="BorderBrush" Value="{DynamicResource FaintBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="Margin" Value="8" />
+        </Style>
+        <Style Selector="Border.previewExpandButton:pointerover">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
     </Window.Styles>
+    <Grid>
     <Border x:Name="OuterShell"
             Margin="0"
             Background="{DynamicResource PageBackgroundBrush}"
@@ -1172,11 +1188,22 @@
                                                                                                    FontSize="13"
                                                                                                    MaxWidth="154"
                                                                                                    TextTrimming="CharacterEllipsis" />
-                                                                                        <TextBlock Grid.Column="2"
-                                                                                                   Text="⋮"
-                                                                                                   Foreground="{DynamicResource MutedTextBrush}"
-                                                                                                   FontSize="16"
-                                                                                                   VerticalAlignment="Top" />
+                                                                                        <Border Grid.Column="2"
+                                                                                                Classes="previewExpandButton"
+                                                                                                Width="28"
+                                                                                                Height="28"
+                                                                                                Margin="0,-4,0,0"
+                                                                                                IsVisible="{Binding ShowPreviewImage}"
+                                                                                                PointerPressed="TimelinePreviewExpandButton_PointerPressed"
+                                                                                                Tag="{Binding Id}"
+                                                                                                ToolTip.Tip="Expand preview">
+                                                                                            <TextBlock Text="⤢"
+                                                                                                       Foreground="{DynamicResource TextBrush}"
+                                                                                                       FontSize="14"
+                                                                                                       FontWeight="SemiBold"
+                                                                                                       HorizontalAlignment="Center"
+                                                                                                       VerticalAlignment="Center" />
+                                                                                        </Border>
                                                                                     </Grid>
                                                                                     <TextBlock Grid.Row="1"
                                                                                                Text="{Binding Subtitle}"
@@ -1300,6 +1327,22 @@
                                                                                                Foreground="{DynamicResource TextBrush}"
                                                                                                FontSize="11"
                                                                                                FontWeight="SemiBold" />
+                                                                                </Border>
+                                                                                <Border Classes="previewExpandButton"
+                                                                                        Width="28"
+                                                                                        Height="28"
+                                                                                        Margin="0,8,0,0"
+                                                                                        IsVisible="{Binding ShowPreviewImage}"
+                                                                                        PointerPressed="TimelinePreviewExpandButton_PointerPressed"
+                                                                                        Tag="{Binding Id}"
+                                                                                        ToolTip.Tip="Expand preview"
+                                                                                        HorizontalAlignment="Right">
+                                                                                    <TextBlock Text="⤢"
+                                                                                               Foreground="{DynamicResource TextBrush}"
+                                                                                               FontSize="14"
+                                                                                               FontWeight="SemiBold"
+                                                                                               HorizontalAlignment="Center"
+                                                                                               VerticalAlignment="Center" />
                                                                                 </Border>
                                                                             </StackPanel>
                                                                         </Grid>
@@ -1530,8 +1573,22 @@
                                                         ClipToBounds="True"
                                                         Height="132"
                                                         IsVisible="False">
-                                                    <Image x:Name="DetailPreviewImage"
-                                                           Stretch="UniformToFill" />
+                                                    <Grid>
+                                                        <Image x:Name="DetailPreviewImage"
+                                                               Stretch="UniformToFill" />
+                                                        <Border Classes="previewExpandButton"
+                                                                Width="34"
+                                                                Height="34"
+                                                                PointerPressed="DetailPreviewExpandButton_PointerPressed"
+                                                                ToolTip.Tip="Expand preview">
+                                                            <TextBlock Text="⤢"
+                                                                       Foreground="{DynamicResource TextBrush}"
+                                                                       FontSize="16"
+                                                                       FontWeight="SemiBold"
+                                                                       HorizontalAlignment="Center"
+                                                                       VerticalAlignment="Center" />
+                                                        </Border>
+                                                    </Grid>
                                                 </Border>
                                             </Border>
                                         </StackPanel>
@@ -2125,4 +2182,78 @@
             </Grid>
         </Grid>
     </Border>
+    <Grid x:Name="PreviewModalOverlay"
+          IsVisible="False"
+          Background="#D908111F"
+          PointerPressed="PreviewModalBackdrop_PointerPressed">
+        <Border x:Name="PreviewModalSurface"
+                Background="{DynamicResource CardBrush}"
+                BorderBrush="{DynamicResource FaintBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="16"
+                Padding="16"
+                Margin="44"
+                MaxWidth="1180"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Stretch"
+                PointerPressed="PreviewModalSurface_PointerPressed">
+            <Grid RowDefinitions="Auto,*,Auto"
+                  RowSpacing="12">
+                <Grid ColumnDefinitions="*,Auto"
+                      ColumnSpacing="14">
+                    <StackPanel Spacing="3">
+                        <TextBlock x:Name="PreviewModalTitleText"
+                                   Text="Preview"
+                                   Foreground="{DynamicResource TextBrush}"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="PreviewModalSubtitleText"
+                                   Text="Captured screenshot"
+                                   Foreground="{DynamicResource MutedTextBrush}"
+                                   FontSize="12"
+                                   TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                    <Button Grid.Column="1"
+                            Classes="shellControl"
+                            Click="ClosePreviewModalButton_Click"
+                            ToolTip.Tip="Close preview"
+                            Width="38"
+                            Height="38"
+                            VerticalAlignment="Top">
+                        <TextBlock Text="×"
+                                   FontSize="18"
+                                   Foreground="{DynamicResource MutedTextBrush}" />
+                    </Button>
+                </Grid>
+                <Border Grid.Row="1"
+                        Background="{DynamicResource PageBackgroundBrush}"
+                        BorderBrush="{DynamicResource PanelEdgeStrongBrush}"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        ClipToBounds="True"
+                        MinHeight="360">
+                    <Image x:Name="PreviewModalImage"
+                           Stretch="Uniform"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+                </Border>
+                <Grid Grid.Row="2"
+                      ColumnDefinitions="*,Auto"
+                      ColumnSpacing="12">
+                    <TextBlock x:Name="PreviewModalPathText"
+                               Foreground="{DynamicResource SubtleTextBrush}"
+                               FontSize="11"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1"
+                               Text="Esc closes"
+                               Foreground="{DynamicResource SubtleTextBrush}"
+                               FontSize="11"
+                               VerticalAlignment="Center" />
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+    </Grid>
 </Window>

@@ -214,6 +214,13 @@ public partial class MainWindow : Window
 
     private void MainWindow_KeyDown(object? sender, KeyEventArgs e)
     {
+        if (e.Key == Key.Escape && PreviewModalOverlay.IsVisible)
+        {
+            ClosePreviewModal();
+            e.Handled = true;
+            return;
+        }
+
         if (e.Key == Key.Escape && _activeWorkspaceNav == WorkspaceNav.Settings)
         {
             LeaveSettingsPage();
@@ -1107,6 +1114,93 @@ public partial class MainWindow : Window
         OpenActivity(selected);
     }
 
+    private void TimelinePreviewExpandButton_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        e.Handled = true;
+
+        var momentId = sender switch
+        {
+            Control { Tag: long id } => id,
+            Control { Tag: int id } => id,
+            Control { DataContext: MomentRow row } => row.Id,
+            _ => 0
+        };
+
+        if (momentId <= 0)
+        {
+            return;
+        }
+
+        var selected = FindOverviewMoment(momentId);
+        if (selected is null)
+        {
+            return;
+        }
+
+        OpenPreviewModal(selected);
+    }
+
+    private void DetailPreviewExpandButton_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        e.Handled = true;
+
+        var selected = GetSelectedMoment();
+        if (selected is null)
+        {
+            return;
+        }
+
+        OpenPreviewModal(selected);
+    }
+
+    private void PreviewModalBackdrop_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        ClosePreviewModal();
+        e.Handled = true;
+    }
+
+    private void PreviewModalSurface_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        e.Handled = true;
+    }
+
+    private void ClosePreviewModalButton_Click(object? sender, RoutedEventArgs e)
+    {
+        ClosePreviewModal();
+    }
+
+    private void OpenPreviewModal(ActivityMomentViewModel selected)
+    {
+        var previewPath = GetBestPreviewPath(selected);
+        if (previewPath is null)
+        {
+            return;
+        }
+
+        var previewImage = GetPreviewImage(previewPath);
+        if (previewImage is null)
+        {
+            return;
+        }
+
+        PreviewModalImage.Source = previewImage;
+        PreviewModalTitleText.Text = selected.Title;
+        PreviewModalSubtitleText.Text = $"{selected.AppName} · {selected.CapturedSpan}";
+        PreviewModalPathText.Text = previewPath;
+        ToolTip.SetTip(PreviewModalPathText, previewPath);
+        PreviewModalOverlay.IsVisible = true;
+    }
+
+    private void ClosePreviewModal()
+    {
+        PreviewModalOverlay.IsVisible = false;
+        PreviewModalImage.Source = null;
+        PreviewModalTitleText.Text = "Preview";
+        PreviewModalSubtitleText.Text = "Captured screenshot";
+        PreviewModalPathText.Text = string.Empty;
+        ToolTip.SetTip(PreviewModalPathText, null);
+    }
+
     private void SetActionButtonActive(Button button, bool isActive)
     {
         button.Background = new SolidColorBrush(isActive ? _currentTheme.Accent : _currentTheme.Toolbar);
@@ -1133,11 +1227,8 @@ public partial class MainWindow : Window
         DetailPreviewImage.Source = null;
         DetailPreviewHost.IsVisible = false;
 
-        var previewPath = !string.IsNullOrWhiteSpace(selected.ScreenshotPath) && File.Exists(selected.ScreenshotPath)
-            ? selected.ScreenshotPath
-            : selected.ThumbnailPath;
-
-        if (string.IsNullOrWhiteSpace(previewPath) || !File.Exists(previewPath))
+        var previewPath = GetBestPreviewPath(selected);
+        if (previewPath is null)
         {
             return;
         }
@@ -1148,6 +1239,21 @@ public partial class MainWindow : Window
             DetailPreviewImage.Source = previewImage;
             DetailPreviewHost.IsVisible = true;
         }
+    }
+
+    private static string? GetBestPreviewPath(ActivityMomentViewModel selected)
+    {
+        if (!string.IsNullOrWhiteSpace(selected.ScreenshotPath) && File.Exists(selected.ScreenshotPath))
+        {
+            return selected.ScreenshotPath;
+        }
+
+        if (!string.IsNullOrWhiteSpace(selected.ThumbnailPath) && File.Exists(selected.ThumbnailPath))
+        {
+            return selected.ThumbnailPath;
+        }
+
+        return null;
     }
 
     private void SetDetailIcon(ActivityMomentViewModel selected)

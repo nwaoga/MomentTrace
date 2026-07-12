@@ -9,7 +9,7 @@
 - [ ] Verify icon parity in the shipped Windows and macOS builds, including app window, installer/app bundle, tray icon, Dock icon, Finder icon, and macOS menu bar status item visuals.
 - [ ] Reduce dense-day lag in the Avalonia shell after Windows beta smoke testing found multi-second card selection delays around ~700 moments/day.
 - [ ] Smoke test the macOS app zip on a Mac and document any Gatekeeper/permissions caveats.
-- [ ] `AB#130` (in progress): Capture the actual macOS app window by window ID instead of relying only on screen-rectangle screenshots. Code now prefers `screencapture -l` via CGWindowList; still needs real Mac smoke verification.
+- [ ] `AB#130` (in progress): Capture the actual macOS app window by window ID instead of relying only on screen-rectangle screenshots. Code now prefers `screencapture -l` via CGWindowList; real Mac visual smoke passed for normal app and Safari browser crops, with multi-monitor and exact-method diagnostics still outstanding.
 - [ ] `AB#131`: Add macOS screenshot fallback diagnostics so missed or degraded captures explain whether we hit window capture, rectangle fallback, or no capture path.
 - [ ] `AB#132`: Evaluate ScreenCaptureKit window capture as the durable macOS replacement path if shell-based capture still misses the app window.
 - [ ] Promote marketing launch assets after release artifacts are verified.
@@ -39,6 +39,7 @@
 - [x] [2026-07-03 16:40 UTC+1] Fix accent-label contrast selection so active buttons and accent pills stay readable across all shipped desktop themes.
 - [x] [2026-07-04 16:28 UTC+1] Verify and fix macOS desktop shortcuts: `Cmd+,`, `Cmd+F`, `Cmd+1`, `Cmd+2`, and `Cmd+W`.
 - [x] [2026-07-12 01:13 UTC+1] `AB#133`: Convert Settings from a modal dialog to an in-shell page with Overview-matching cards, rail active state, and Notes-style text boxes; hide rail user profile for later revisit.
+- [x] [2026-07-12] Add larger screenshot preview modal with a dedicated expand icon on timeline tiles and detail previews, keeping normal tile click behavior unchanged.
 - [x] [2026-07-08 17:03 UTC+1] `AB#121`: Run lightweight visual QA across shipped desktop themes, including a scripted screenshot pass for Timeline, Overview, and Saved Moments.
 - [x] [2026-07-08 17:32 UTC+1] Add regression tests for privacy exclusions, settings persistence, and warning-free build expectations with a new `MomentTrace.Tests` project covering domain/app filtering and desktop settings save/load behavior.
 - [x] [2026-07-08 17:46 UTC+1] Add a Settings option to delete all local data for full privacy cleanup, including timeline history, previews, icons, settings, cached privacy blocklists, and startup disablement before app shutdown.
@@ -89,5 +90,7 @@ Use this section for short pass/fail notes during the next stability sweep.
 - [2026-07-10 11:18 UTC+1] Azure DevOps follow-up created `AB#130`, `AB#131`, and `AB#132` to cover macOS screenshot reliability work before the next implementation pass.
 - [2026-07-10 21:35 UTC+1] `AB#130` implementation started: macOS screenshot capture now resolves the frontmost process CGWindowID through JXA/CoreGraphics and prefers `screencapture -l`, keeping Accessibility `-R` bounds and full-display capture as fallbacks. `LastScreenshotCaptureMethod` records which path succeeded for the upcoming diagnostics story. Real Mac verification is still required before closing the work item.
 - [2026-07-12 01:13 UTC+1] `AB#133` closed: Settings moved from modal dialog to in-shell page with Overview-matching card panels, Notes-style domain text boxes, rail active state, and Esc return to the previous workspace page. Rail user profile remains commented out for later revisit.
+- [2026-07-12] `AB#130` real Mac smoke update: fresh local moments saved screenshot paths for GitKraken, Safari, ChatGPT, MomentTrace, and System Settings. Visual inspection confirmed tight app/browser window crops for GitKraken and Safari rather than full-display screenshots. `LastScreenshotCaptureMethod` is still in-memory only, so exact window-ID versus rectangle fallback status needs `AB#131` diagnostics before closing the reliability thread.
+- [2026-07-12] Screenshot preview modal verification: `dotnet build ./MomentTrace.Desktop/MomentTrace.Desktop.csproj -f net8.0` passed with 0 warnings and 0 errors after adding the modal and moving the timeline expand icon into the tile detail band. `dotnet test ./MomentTrace.Tests/MomentTrace.Tests.csproj -f net8.0` still has the unrelated existing `PrivacyFilterTests.UserPrivacyFilter_ExcludesConfiguredAppsAcrossProcessAppAndExecutableNames` failure.
 - Windows chrome: last confirmed working with `ExtendClientAreaToDecorationsHint=True` and `WindowDecorations=BorderOnly`.
 - Overview dashboard: #88 closed after build verification and Azure DevOps update.
