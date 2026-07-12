@@ -59,7 +59,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Azure DevOps now tracks the macOS screenshot reliability follow-up as `AB#130`, `AB#131`, and `AB#132`.
 - `AB#130` code path is in progress: macOS capture now prefers window-ID screenshots (`screencapture -l`) with rectangle/full-display fallbacks; real Mac verification is still outstanding.
 
-**Last pushed:** `cd868c3` — move Settings into the main shell as a page.
+**Last pushed:** `4b5ab5f` — match Settings text boxes to Notes style and document AB#133.
 
 ---
 
