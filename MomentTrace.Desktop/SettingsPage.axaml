@@ -79,12 +79,37 @@
       <Setter Property="Fill" Value="{DynamicResource MutedTextBrush}" />
     </Style>
     <Style Selector="TextBox.settingsText">
-      <Setter Property="Background" Value="{DynamicResource ElevatedPanelBrush}" />
+      <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
       <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource FaintBorderBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeStrongBrush}" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="10" />
-      <Setter Property="Padding" Value="12,10" />
+      <Setter Property="Padding" Value="10" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="CaretBrush" Value="{DynamicResource AccentBrush}" />
+      <Setter Property="SelectionBrush" Value="{DynamicResource AccentGlowBrush}" />
+    </Style>
+    <Style Selector="TextBox.settingsText:pointerover">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="TextBox.settingsText:focus">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="TextBox.settingsText /template/ Border#border">
+      <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeStrongBrush}" />
+    </Style>
+    <Style Selector="TextBox.settingsText:focus /template/ Border#border">
+      <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="TextBox.settingsText /template/ Border#PART_BorderElement">
+      <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeStrongBrush}" />
+    </Style>
+    <Style Selector="TextBox.settingsText:focus /template/ Border#PART_BorderElement">
+      <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
     </Style>
     <Style Selector="CheckBox.privacyItem">
       <Setter Property="Margin" Value="0,0,0,8" />
@@ -403,7 +428,13 @@
                            Foreground="{DynamicResource TextBrush}" />
                 <TextBox x:Name="CustomBlockedDomainsTextBox"
                          Classes="settingsText"
+                         Background="{DynamicResource PanelBrush}"
+                         BorderBrush="{DynamicResource FaintBorderBrush}"
+                         BorderThickness="1"
+                         Foreground="{DynamicResource TextBrush}"
                          Height="96"
+                         Padding="10"
+                         FontSize="12"
                          AcceptsReturn="True"
                          TextWrapping="Wrap" />
               </StackPanel>
@@ -414,7 +445,13 @@
                            Foreground="{DynamicResource TextBrush}" />
                 <TextBox x:Name="CustomAllowedDomainsTextBox"
                          Classes="settingsText"
+                         Background="{DynamicResource PanelBrush}"
+                         BorderBrush="{DynamicResource FaintBorderBrush}"
+                         BorderThickness="1"
+                         Foreground="{DynamicResource TextBrush}"
                          Height="96"
+                         Padding="10"
+                         FontSize="12"
                          AcceptsReturn="True"
                          TextWrapping="Wrap" />
               </StackPanel>

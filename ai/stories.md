@@ -38,6 +38,7 @@
 - [x] [2026-07-01 23:50 UTC+1] Refresh sanitized README preview artwork for the current Avalonia shell using SVG mock previews for Overview, timeline/detail, and theme collage.
 - [x] [2026-07-03 16:40 UTC+1] Fix accent-label contrast selection so active buttons and accent pills stay readable across all shipped desktop themes.
 - [x] [2026-07-04 16:28 UTC+1] Verify and fix macOS desktop shortcuts: `Cmd+,`, `Cmd+F`, `Cmd+1`, `Cmd+2`, and `Cmd+W`.
+- [x] [2026-07-12 01:13 UTC+1] `AB#133`: Convert Settings from a modal dialog to an in-shell page with Overview-matching cards, rail active state, and Notes-style text boxes; hide rail user profile for later revisit.
 - [x] [2026-07-08 17:03 UTC+1] `AB#121`: Run lightweight visual QA across shipped desktop themes, including a scripted screenshot pass for Timeline, Overview, and Saved Moments.
 - [x] [2026-07-08 17:32 UTC+1] Add regression tests for privacy exclusions, settings persistence, and warning-free build expectations with a new `MomentTrace.Tests` project covering domain/app filtering and desktop settings save/load behavior.
 - [x] [2026-07-08 17:46 UTC+1] Add a Settings option to delete all local data for full privacy cleanup, including timeline history, previews, icons, settings, cached privacy blocklists, and startup disablement before app shutdown.
@@ -87,5 +88,6 @@ Use this section for short pass/fail notes during the next stability sweep.
 - [2026-07-10 10:40 UTC+1] Icon parity follow-up now routes the Avalonia shell through shared full-colour and template icon assets: the window and Windows tray use the same full-colour mark, while macOS status-item behavior uses a monochrome template icon and the macOS bundle script now generates a real `.icns` from the shared source PNG.
 - [2026-07-10 11:18 UTC+1] Azure DevOps follow-up created `AB#130`, `AB#131`, and `AB#132` to cover macOS screenshot reliability work before the next implementation pass.
 - [2026-07-10 21:35 UTC+1] `AB#130` implementation started: macOS screenshot capture now resolves the frontmost process CGWindowID through JXA/CoreGraphics and prefers `screencapture -l`, keeping Accessibility `-R` bounds and full-display capture as fallbacks. `LastScreenshotCaptureMethod` records which path succeeded for the upcoming diagnostics story. Real Mac verification is still required before closing the work item.
+- [2026-07-12 01:13 UTC+1] `AB#133` closed: Settings moved from modal dialog to in-shell page with Overview-matching card panels, Notes-style domain text boxes, rail active state, and Esc return to the previous workspace page. Rail user profile remains commented out for later revisit.
 - Windows chrome: last confirmed working with `ExtendClientAreaToDecorationsHint=True` and `WindowDecorations=BorderOnly`.
 - Overview dashboard: #88 closed after build verification and Azure DevOps update.

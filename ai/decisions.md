@@ -34,6 +34,9 @@
 - [2026-07-09] Internal macOS beta zips should ad-hoc sign `MomentTrace.app` before packaging. This does not replace Developer ID signing/notarization, but it prevents invalid bundle-signature states that macOS can report as damaged.
 - [2026-07-09 22:42 UTC+1] The Windows beta now ships the Avalonia desktop shell as the actual release app, so tray/background behavior can no longer live only in `MomentTrace.App`; Windows release builds of `MomentTrace.Desktop` must provide a real tray icon and explicit background/exit behavior.
 - [2026-07-10 21:35 UTC+1] macOS screenshots should capture by CGWindowID (`screencapture -l`) first, using Accessibility rectangle crop only as fallback. Window IDs are resolved with on-screen, layer-0 windows for the active PID, preferring title matches then largest area.
+- [2026-07-12 01:13 UTC+1] Settings should live as an in-shell page beside Timeline and Overview, not as a modal window; Esc returns to the previous workspace page, and Settings rail selection uses the same active-nav treatment.
+- [2026-07-12 01:13 UTC+1] Settings multi-line text boxes should reuse the Notes editor (`noteBox`) surface treatment so PanelBrush/focus borders stay consistent across the shell.
+- [2026-07-12 01:13 UTC+1] The left-rail user profile block is intentionally hidden for now; revisit account/identity UI later while keeping Settings as a normal rail item.
 
 ## Recently Completed
 
@@ -52,6 +55,7 @@
 - [2026-07-03 16:40 UTC+1] Fixed theme accent label contrast by switching `DesktopAppThemePalette.AccentText` to a contrast-based foreground selection.
 - [2026-07-04 16:28 UTC+1] Fixed and verified macOS desktop shortcuts for Settings, search, Timeline, Overview, and window close behavior.
 - [2026-07-08 22:35 UTC+1] Replaced the old macOS probe project with `MomentTrace.Mac` and wired it into the Avalonia desktop shell.
+- [2026-07-12 01:13 UTC+1] Closed `AB#133`: Settings is now an in-shell page with Overview-matching cards and Notes-style text boxes.
 
 ## Open Decisions To Revisit
 

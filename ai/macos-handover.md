@@ -31,6 +31,7 @@ These do **not** need to be repeated on the Mac unless you see a Mac-specific re
 Verified on macOS 26.5 with .NET SDK 8.0.422:
 
 - `Cmd+,` opened Settings from the main shell.
+- Settings is an in-shell page (not a separate modal window) as of 2026-07-12.
 - `Cmd+F` focused search.
 - Physical number-row `Cmd+1` activated Timeline.
 - Physical number-row `Cmd+2` activated Overview.
@@ -39,7 +40,7 @@ Verified on macOS 26.5 with .NET SDK 8.0.422:
 
 Current expectation:
 
-- Settings windows on macOS should use native traffic-light window chrome.
+- Settings windows on macOS should use native traffic-light window chrome. Historical note: Settings is now an in-shell page in the main window rather than a separate modal.
 - The main shell should use native traffic-light controls rather than the Windows custom caption buttons.
 - Shell-level Command shortcuts should continue to work when child controls such as search have focus.
 

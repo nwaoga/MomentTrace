@@ -11,7 +11,7 @@
 ### Avalonia desktop shell
 
 - `MomentTrace.Desktop` is the main current UI surface.
-- Renders Timeline, Overview, Settings, custom chrome, detail pane, shell navigation, and reusable Avalonia controls.
+- Renders Timeline, Overview, and Settings as in-shell pages, plus custom chrome, detail pane, shell navigation, and reusable Avalonia controls.
 - Binds shared presentation models from `MomentTrace.Presentation`.
 - Owns desktop interaction state such as selected date, filters, detail pane visibility, and Overview drill-ins.
 

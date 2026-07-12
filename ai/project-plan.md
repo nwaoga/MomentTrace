@@ -20,13 +20,14 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 ---
 
-## Current State (2026-07-09 22:42 UTC+1)
+## Current State (2026-07-12 01:13 UTC+1)
 
 **Phase:** Beta release readiness and marketing prep.
 
 **Working today:**
 
-- Avalonia desktop shell with Timeline and Overview.
+- Avalonia desktop shell with Timeline, Overview, and in-shell Settings pages.
+- Settings is a third shell page (not a modal), restyled with Overview card panels and Notes-matching text boxes; rail user profile remains deferred.
 - Overview daily story dashboard with summary cards, heatmap, Moments Today, activity breakdown, and focus rhythm.
 - Overview drill-ins: heatmap range focus, moment timeline navigation, direct open, and pin actions.
 - Left rail simplified into primary workspace views, Library filters, and Source filters.
@@ -58,7 +59,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Azure DevOps now tracks the macOS screenshot reliability follow-up as `AB#130`, `AB#131`, and `AB#132`.
 - `AB#130` code path is in progress: macOS capture now prefers window-ID screenshots (`screencapture -l`) with rectangle/full-display fallbacks; real Mac verification is still outstanding.
 
-**Last pushed:** `dca9ead` — fix macOS app identity and screen prompt backoff.
+**Last pushed:** `cd868c3` — move Settings into the main shell as a page.
 
 ---
 
