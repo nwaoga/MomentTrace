@@ -9,6 +9,8 @@
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="14" />
       <Setter Property="Padding" Value="16" />
+      <Setter Property="VerticalAlignment" Value="Top" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
     </Style>
     <Style Selector="Border.settingsMetric">
       <Setter Property="Background" Value="{DynamicResource ElevatedPanelBrush}" />
@@ -173,6 +175,40 @@
     <Style Selector="RepeatButton.ScrollBarPageButton">
       <Setter Property="Background" Value="{DynamicResource ScrollTrackBrush}" />
     </Style>
+    <Style Selector="Button.settingsSection">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="12,10" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+    </Style>
+    <Style Selector="Button.settingsSection:pointerover">
+      <Setter Property="Background" Value="{DynamicResource CardHoverBrush}" />
+    </Style>
+    <Style Selector="Button.settingsSection.active">
+      <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+    </Style>
+    <Style Selector="Button.settingsSection.active:pointerover">
+      <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+    </Style>
+    <Style Selector="TextBlock.settingsSectionTitle">
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Button.settingsSection.active TextBlock.settingsSectionTitle">
+      <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+    </Style>
+    <Style Selector="TextBlock.settingsSectionSubtitle">
+      <Setter Property="Foreground" Value="{DynamicResource SubtleTextBrush}" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Margin" Value="0,2,0,0" />
+    </Style>
+    <Style Selector="Button.settingsSection.active TextBlock.settingsSectionSubtitle">
+      <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+    </Style>
   </UserControl.Styles>
 
   <Grid RowDefinitions="Auto,*">
@@ -184,21 +220,90 @@
       <TextBlock Text="Preferences"
                  Foreground="{DynamicResource SubtleTextBrush}"
                  FontSize="12" />
-      <TextBlock Text="Startup, recording, appearance, privacy, and local storage"
+      <TextBlock Text="Choose a section to manage startup, privacy, appearance, and local data"
                  Foreground="{DynamicResource MutedTextBrush}"
                  FontSize="12" />
     </StackPanel>
 
-    <ScrollViewer x:Name="SettingsScrollViewer"
-                  Grid.Row="1"
-                  Margin="0,18,0,0"
-                  VerticalScrollBarVisibility="Auto"
-                  HorizontalScrollBarVisibility="Disabled"
-                  AllowAutoHide="False">
-      <StackPanel Spacing="14"
-                  Margin="0,0,12,12">
+    <Grid Grid.Row="1"
+          Margin="0,18,0,0"
+          ColumnDefinitions="200,*"
+          ColumnSpacing="16">
+      <StackPanel Spacing="4">
+        <TextBlock Text="SECTIONS"
+                   Foreground="{DynamicResource SubtleTextBrush}"
+                   FontSize="11"
+                   FontWeight="SemiBold"
+                   LetterSpacing="1.2"
+                   Margin="4,0,0,8" />
+        <Button x:Name="RecordingSectionButton"
+                Classes="settingsSection active"
+                Tag="Recording"
+                Click="SettingsSectionButton_Click">
+          <StackPanel>
+            <TextBlock Text="Recording" Classes="settingsSectionTitle" />
+            <TextBlock Text="Startup and capture" Classes="settingsSectionSubtitle" />
+          </StackPanel>
+        </Button>
+        <Button x:Name="HealthSectionButton"
+                Classes="settingsSection"
+                Tag="Health"
+                Click="SettingsSectionButton_Click">
+          <StackPanel>
+            <TextBlock Text="App health" Classes="settingsSectionTitle" />
+            <TextBlock Text="Recorder and storage" Classes="settingsSectionSubtitle" />
+          </StackPanel>
+        </Button>
+        <Button x:Name="AppearanceSectionButton"
+                Classes="settingsSection"
+                Tag="Appearance"
+                Click="SettingsSectionButton_Click">
+          <StackPanel>
+            <TextBlock Text="Appearance" Classes="settingsSectionTitle" />
+            <TextBlock Text="Theme and density" Classes="settingsSectionSubtitle" />
+          </StackPanel>
+        </Button>
+        <Button x:Name="PrivacySectionButton"
+                Classes="settingsSection"
+                Tag="Privacy"
+                Click="SettingsSectionButton_Click">
+          <StackPanel>
+            <TextBlock Text="Privacy" Classes="settingsSectionTitle" />
+            <TextBlock Text="Filters and exclusions" Classes="settingsSectionSubtitle" />
+          </StackPanel>
+        </Button>
+        <Button x:Name="DataSectionButton"
+                Classes="settingsSection"
+                Tag="Data"
+                Click="SettingsSectionButton_Click">
+          <StackPanel>
+            <TextBlock Text="Local data" Classes="settingsSectionTitle" />
+            <TextBlock Text="Export and cleanup" Classes="settingsSectionSubtitle" />
+          </StackPanel>
+        </Button>
+        <Button x:Name="AboutSectionButton"
+                Classes="settingsSection"
+                Tag="About"
+                Click="SettingsSectionButton_Click">
+          <StackPanel>
+            <TextBlock Text="Where I Live" Classes="settingsSectionTitle" />
+            <TextBlock Text="Paths and version" Classes="settingsSectionSubtitle" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
 
-        <Border Classes="settingsPanel">
+      <ScrollViewer x:Name="SettingsScrollViewer"
+                    Grid.Column="1"
+                    VerticalScrollBarVisibility="Auto"
+                    HorizontalScrollBarVisibility="Disabled"
+                    AllowAutoHide="False"
+                    VerticalContentAlignment="Top"
+                    HorizontalContentAlignment="Stretch">
+        <Grid Margin="0,0,12,12"
+              VerticalAlignment="Top">
+
+        <Border x:Name="RecordingSection"
+                Classes="settingsPanel">
           <StackPanel Spacing="14">
             <StackPanel Spacing="2">
               <TextBlock Text="Recording"
@@ -234,7 +339,9 @@
           </StackPanel>
         </Border>
 
-        <Border Classes="settingsPanel">
+        <Border x:Name="HealthSection"
+                Classes="settingsPanel"
+                IsVisible="False">
           <StackPanel Spacing="14">
             <Grid ColumnDefinitions="*,Auto">
               <StackPanel Spacing="2">
@@ -299,7 +406,9 @@
           </StackPanel>
         </Border>
 
-        <Border Classes="settingsPanel">
+        <Border x:Name="AppearanceSection"
+                Classes="settingsPanel"
+                IsVisible="False">
           <StackPanel Spacing="16">
             <StackPanel Spacing="2">
               <TextBlock Text="Appearance"
@@ -381,7 +490,9 @@
           </StackPanel>
         </Border>
 
-        <Border Classes="settingsPanel">
+        <Border x:Name="PrivacySection"
+                Classes="settingsPanel"
+                IsVisible="False">
           <StackPanel Spacing="14">
             <StackPanel Spacing="2">
               <TextBlock Text="Privacy filters"
@@ -508,7 +619,9 @@
           </StackPanel>
         </Border>
 
-        <Border Classes="settingsPanel">
+        <Border x:Name="DataSection"
+                Classes="settingsPanel"
+                IsVisible="False">
           <StackPanel Spacing="14">
             <StackPanel Spacing="2">
               <TextBlock Text="Local activity data"
@@ -543,7 +656,9 @@
           </StackPanel>
         </Border>
 
-        <Border Classes="settingsPanel">
+        <Border x:Name="AboutSection"
+                Classes="settingsPanel"
+                IsVisible="False">
           <StackPanel Spacing="14">
             <StackPanel Spacing="2">
               <TextBlock Text="Where I Live"
@@ -611,7 +726,8 @@
             </Grid>
           </StackPanel>
         </Border>
-      </StackPanel>
-    </ScrollViewer>
+        </Grid>
+      </ScrollViewer>
+    </Grid>
   </Grid>
 </UserControl>

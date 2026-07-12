@@ -97,6 +97,7 @@ public partial class SettingsPage : UserControl
         LoadCurrentSettings(_preferences.Opacity, currentTimelineViewMode, currentTheme);
         LoadPrivacySettings();
         LoadWhereILive();
+        ShowSettingsSection("Recording");
         _ = LoadRecentPrivacyChoicesAsync();
         _ = LoadHealthStatusAsync();
     }
@@ -107,6 +108,38 @@ public partial class SettingsPage : UserControl
         LoadWhereILive();
         await LoadRecentPrivacyChoicesAsync();
         await LoadHealthStatusAsync();
+    }
+
+    private void SettingsSectionButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: string section })
+        {
+            ShowSettingsSection(section);
+        }
+    }
+
+    private void ShowSettingsSection(string section)
+    {
+        RecordingSection.IsVisible = section == "Recording";
+        HealthSection.IsVisible = section == "Health";
+        AppearanceSection.IsVisible = section == "Appearance";
+        PrivacySection.IsVisible = section == "Privacy";
+        DataSection.IsVisible = section == "Data";
+        AboutSection.IsVisible = section == "About";
+
+        SetSectionButtonState(RecordingSectionButton, section == "Recording");
+        SetSectionButtonState(HealthSectionButton, section == "Health");
+        SetSectionButtonState(AppearanceSectionButton, section == "Appearance");
+        SetSectionButtonState(PrivacySectionButton, section == "Privacy");
+        SetSectionButtonState(DataSectionButton, section == "Data");
+        SetSectionButtonState(AboutSectionButton, section == "About");
+
+        SettingsScrollViewer.Offset = new Vector(0, 0);
+    }
+
+    private static void SetSectionButtonState(Button button, bool isActive)
+    {
+        button.Classes.Set("active", isActive);
     }
 
     private void LoadCurrentSettings(double currentOpacity, string currentTimelineViewMode, string currentTheme)
