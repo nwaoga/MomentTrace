@@ -22,7 +22,7 @@ using MomentTrace.Storage;
 
 namespace MomentTrace.Desktop;
 
-public partial class SettingsWindow : Window
+public partial class SettingsPage : UserControl
 {
     private const string AdultBlocklistUrl = "https://raw.githubusercontent.com/blocklistproject/Lists/master/porn.txt";
     private static readonly TimeSpan CaptureStaleThreshold = TimeSpan.FromMinutes(2);
@@ -48,10 +48,8 @@ public partial class SettingsWindow : Window
     private bool _isScrollDragging;
     private static readonly Cursor ScrollReadyCursor = new(StandardCursorType.Hand);
     private static readonly Cursor ScrollDraggingCursor = new(StandardCursorType.SizeAll);
-    private static readonly Thickness DefaultSettingsRootBorderThickness = new(1);
-    private bool _isMacChromeMode;
 
-    public SettingsWindow(
+    public SettingsPage(
         IActivityStore store,
         IActivityRecorder? recorder,
         DesktopWindowPreferences preferences,
@@ -73,17 +71,11 @@ public partial class SettingsWindow : Window
         _activityDataChanged = activityDataChanged;
 
         InitializeComponent();
-        ConfigurePlatformChrome();
         AddHandler(InputElement.PointerWheelChangedEvent, GlobalPointerWheelChanged, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(InputElement.PointerPressedEvent, GlobalPointerPressed, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(InputElement.PointerMovedEvent, GlobalPointerMoved, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(InputElement.PointerReleasedEvent, GlobalPointerReleased, RoutingStrategies.Tunnel, handledEventsToo: true);
-        KeyDown += SettingsWindow_KeyDown;
         SettingsScrollViewer.Cursor = ScrollReadyCursor;
-
-        var currentPalette = DesktopAppThemePalette.Find(currentTheme);
-        currentPalette.ApplyTo(this);
-        ApplyWindowPalette(currentPalette);
 
         RecentAppsList.ItemsSource = _recentApps;
         RecentWebsitesList.ItemsSource = _recentWebsites;
@@ -101,57 +93,20 @@ public partial class SettingsWindow : Window
         ExportActivityButton.Click += ExportActivityButton_Click;
         DeleteActivityButton.Click += DeleteActivityButton_Click;
         DeleteAllLocalDataButton.Click += DeleteAllLocalDataButton_Click;
-        CloseButton.Click += CloseButton_Click;
 
         LoadCurrentSettings(_preferences.Opacity, currentTimelineViewMode, currentTheme);
         LoadPrivacySettings();
         LoadWhereILive();
         _ = LoadRecentPrivacyChoicesAsync();
         _ = LoadHealthStatusAsync();
-        Opened += (_, _) => ApplyPlatformLayoutMetrics();
     }
 
-    private void ConfigurePlatformChrome()
+    public async Task OnShownAsync()
     {
-        _isMacChromeMode = OperatingSystem.IsMacOS();
-        if (!_isMacChromeMode)
-        {
-            return;
-        }
-
-        WindowDecorations = WindowDecorations.Full;
-        ExtendClientAreaToDecorationsHint = true;
-        ExtendClientAreaTitleBarHeightHint = -1;
-        SettingsTitleBar.IsVisible = false;
-        SettingsRootSurface.CornerRadius = new CornerRadius(0);
-        ApplyPlatformLayoutMetrics();
-    }
-
-    private void ApplyPlatformLayoutMetrics()
-    {
-        if (!_isMacChromeMode)
-        {
-            SettingsRootSurface.BorderThickness = DefaultSettingsRootBorderThickness;
-            SettingsRootGrid.RowDefinitions[0].Height = new GridLength(54);
-            return;
-        }
-
-        SettingsRootSurface.BorderThickness = new Thickness(0, 0, 0, 1);
-        SettingsRootGrid.RowDefinitions[0].Height = new GridLength(Math.Max(WindowDecorationMargin.Top, 28) + 10);
-    }
-
-    private void SettingsWindow_KeyDown(object? sender, KeyEventArgs e)
-    {
-        if (!_isMacChromeMode || (e.KeyModifiers & KeyModifiers.Meta) == 0)
-        {
-            return;
-        }
-
-        if (e.Key is Key.W or Key.OemComma)
-        {
-            Close();
-            e.Handled = true;
-        }
+        LoadPrivacySettings();
+        LoadWhereILive();
+        await LoadRecentPrivacyChoicesAsync();
+        await LoadHealthStatusAsync();
     }
 
     private void LoadCurrentSettings(double currentOpacity, string currentTimelineViewMode, string currentTheme)
@@ -367,19 +322,13 @@ public partial class SettingsWindow : Window
             return;
         }
 
-        theme.ApplyTo(this);
-        ApplyWindowPalette(theme);
         _themeChanged(theme.Key);
     }
 
-    private void ApplyWindowPalette(DesktopAppThemePalette theme)
+    private Window GetOwnerWindow()
     {
-        var pageStrength = _isMacChromeMode ? 0.82 : 1.0;
-        var panelStrength = _isMacChromeMode ? 0.9 : 1.0;
-
-        Background = new SolidColorBrush(theme.WithAlpha(theme.Base, pageStrength));
-        SettingsRootSurface.Background = new SolidColorBrush(theme.WithAlpha(theme.Surface, panelStrength));
-        SettingsRootSurface.BorderBrush = new SolidColorBrush(theme.Stroke);
+        return TopLevel.GetTopLevel(this) as Window
+            ?? throw new InvalidOperationException("SettingsPage must be hosted in a Window.");
     }
 
     private void ExcludeAdultWebsitesCheckBox_Changed(object? sender, RoutedEventArgs e)
@@ -557,7 +506,7 @@ public partial class SettingsWindow : Window
                 return;
             }
 
-            Close();
+            GetOwnerWindow().Close();
         }
         catch
         {
@@ -769,39 +718,6 @@ public partial class SettingsWindow : Window
         Directory.CreateDirectory(target);
     }
 
-    private void CloseButton_Click(object? sender, RoutedEventArgs e)
-    {
-        Close();
-    }
-
-    private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e)
-    {
-        if (_isMacChromeMode)
-        {
-            return;
-        }
-
-        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed is false)
-        {
-            return;
-        }
-
-        if (e.Source is Visual sourceVisual && sourceVisual.GetSelfAndVisualAncestors().Any(visual =>
-                visual is Button
-                    or TextBox
-                    or ComboBox
-                    or Slider
-                    or ScrollBar
-                    or Thumb
-                    or Track
-                    or ScrollViewer))
-        {
-            return;
-        }
-
-        BeginMoveDrag(e);
-    }
-
     private void GlobalPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
         if (!SettingsScrollViewer.IsVisible
@@ -973,7 +889,7 @@ public partial class SettingsWindow : Window
             Child = BuildContent()
         };
 
-        return await dialog.ShowDialog<bool>(this);
+        return await dialog.ShowDialog<bool>(GetOwnerWindow());
 
         StackPanel BuildContent()
         {
@@ -1060,7 +976,7 @@ public partial class SettingsWindow : Window
             Child = BuildContent()
         };
 
-        return await dialog.ShowDialog<bool>(this);
+        return await dialog.ShowDialog<bool>(GetOwnerWindow());
 
         StackPanel BuildContent()
         {

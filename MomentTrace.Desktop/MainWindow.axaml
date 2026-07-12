@@ -755,7 +755,8 @@
                     </StackPanel>
                 </ScrollViewer>
 
-                <!-- User profile rail section: commented out for now; revisit account/identity UI later. Settings remains. -->
+                <!-- User profile rail section: commented out for now; revisit account/identity UI later. -->
+                <!--
                 <Border Grid.Row="3"
                         Margin="0,16,0,0"
                         Background="{DynamicResource ElevatedPanelBrush}"
@@ -763,8 +764,7 @@
                         BorderThickness="1"
                         CornerRadius="12"
                         Padding="12,10">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                        <!--
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
                         <Border Width="36"
                                 Height="36"
                                 Background="{DynamicResource AccentBrush}"
@@ -795,18 +795,43 @@
                                    Foreground="{DynamicResource SubtleTextBrush}"
                                    FontSize="16"
                                    VerticalAlignment="Center" />
-                        -->
-                        <Button x:Name="SettingsNavButton"
-                                Grid.Column="1"
-                                Classes="shellControl"
-                                Click="SettingsNavButton_Click"
+                        <Button Classes="shellControl"
                                 ToolTip.Tip="Settings"
-                                HorizontalAlignment="Right"
                                 Width="36"
                                 Height="36">
                             <TextBlock Text="⚙"
                                        FontSize="14"
                                        Foreground="{DynamicResource MutedTextBrush}" />
+                        </Button>
+                    </Grid>
+                </Border>
+                -->
+                <Border x:Name="SettingsNavHighlight"
+                        Grid.Row="3"
+                        Classes="navItem"
+                        Margin="0,16,0,0">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Border x:Name="SettingsNavAccent" Classes="navAccent" />
+                        <Button x:Name="SettingsNavButton"
+                                Classes="nav"
+                                Grid.Column="1"
+                                Click="SettingsNavButton_Click"
+                                HorizontalContentAlignment="Stretch"
+                                ToolTip.Tip="Settings">
+                            <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
+                                <TextBlock x:Name="SettingsNavIcon"
+                                           Text="⚙"
+                                           Foreground="{DynamicResource MutedTextBrush}"
+                                           FontSize="14"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
+                                    <TextBlock x:Name="SettingsNavTitle" Text="Settings" Classes="navTitle" />
+                                    <TextBlock x:Name="SettingsNavSubtitle"
+                                               Text="Privacy, startup, and local data"
+                                               Classes="navSubtitle" />
+                                </StackPanel>
+                            </Grid>
                         </Button>
                     </Grid>
                 </Border>
@@ -2092,6 +2117,11 @@
                     </Grid>
                 </StackPanel>
             </ScrollViewer>
+
+            <Panel x:Name="SettingsPageHost"
+                   Grid.Row="1"
+                   IsVisible="False"
+                   Margin="12,8,4,0" />
             </Grid>
         </Grid>
     </Border>

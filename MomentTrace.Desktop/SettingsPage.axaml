@@ -1,0 +1,580 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MomentTrace.Desktop.SettingsPage"
+             Background="Transparent">
+  <UserControl.Styles>
+    <Style Selector="Border.settingsPanel">
+      <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource FaintBorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="Padding" Value="16" />
+    </Style>
+    <Style Selector="Border.settingsMetric">
+      <Setter Property="Background" Value="{DynamicResource ElevatedPanelBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource FaintBorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Padding" Value="14" />
+    </Style>
+    <Style Selector="Button.settings">
+      <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource FaintBorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="12,8" />
+      <Setter Property="MinHeight" Value="36" />
+    </Style>
+    <Style Selector="Button.settings:pointerover">
+      <Setter Property="Background" Value="{DynamicResource CardHoverBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="Button.settingsDanger">
+      <Setter Property="Background" Value="{DynamicResource DangerFillBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="12,8" />
+      <Setter Property="MinHeight" Value="36" />
+    </Style>
+    <Style Selector="Button.settingsDanger:pointerover">
+      <Setter Property="Background" Value="{DynamicResource DangerFillBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}" />
+      <Setter Property="Opacity" Value="0.92" />
+    </Style>
+    <Style Selector="ComboBox.settingsCombo">
+      <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeStrongBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="12,7" />
+      <Setter Property="MinHeight" Value="42" />
+    </Style>
+    <Style Selector="ComboBox.settingsCombo:dropdownopen">
+      <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="ComboBox.settingsCombo /template/ Border#Background">
+      <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PanelEdgeStrongBrush}" />
+      <Setter Property="CornerRadius" Value="10" />
+    </Style>
+    <Style Selector="ComboBox.settingsCombo:pointerover /template/ Border#Background">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="ComboBox.settingsCombo:focus /template/ Border#Background">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="ComboBox.settingsCombo:dropdownopen /template/ Border#Background">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="ComboBox.settingsCombo /template/ ToggleButton">
+      <Setter Property="Background" Value="{DynamicResource ToolbarBrush}" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+    <Style Selector="ComboBox.settingsCombo /template/ Path">
+      <Setter Property="Fill" Value="{DynamicResource MutedTextBrush}" />
+    </Style>
+    <Style Selector="TextBox.settingsText">
+      <Setter Property="Background" Value="{DynamicResource ElevatedPanelBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource FaintBorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="12,10" />
+    </Style>
+    <Style Selector="CheckBox.privacyItem">
+      <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+    <Style Selector="CheckBox.privacyItem:pointerover /template/ Border#PrivacyRoot">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="ScrollBar">
+      <Setter Property="Background" Value="{DynamicResource ScrollTrackBrush}" />
+      <Setter Property="Margin" Value="0" />
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="ScrollBar:vertical">
+      <Setter Property="Width" Value="10" />
+      <Setter Property="MinWidth" Value="10" />
+      <Setter Property="Margin" Value="8,0,4,0" />
+    </Style>
+    <Style Selector="ScrollBar:horizontal">
+      <Setter Property="Height" Value="10" />
+      <Setter Property="MinHeight" Value="10" />
+    </Style>
+    <Style Selector="ScrollBar /template/ RepeatButton">
+      <Setter Property="Background" Value="{DynamicResource ScrollTrackBrush}" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Foreground" Value="{DynamicResource SubtleTextBrush}" />
+    </Style>
+    <Style Selector="ScrollBar /template/ Button">
+      <Setter Property="Background" Value="{DynamicResource ScrollTrackBrush}" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Foreground" Value="{DynamicResource SubtleTextBrush}" />
+    </Style>
+    <Style Selector="ScrollBar /template/ Thumb">
+      <Setter Property="Background" Value="{DynamicResource ScrollThumbBrush}" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="MinWidth" Value="8" />
+      <Setter Property="MinHeight" Value="28" />
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="ScrollBar:pointerover /template/ Thumb">
+      <Setter Property="Background" Value="{DynamicResource ScrollThumbHoverBrush}" />
+    </Style>
+    <Style Selector="ScrollBar /template/ Thumb:pressed">
+      <Setter Property="Background" Value="{DynamicResource ScrollThumbHoverBrush}" />
+    </Style>
+    <Style Selector="Thumb.ScrollBarThumb">
+      <Setter Property="Background" Value="{DynamicResource ScrollThumbBrush}" />
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="Thumb.ScrollBarThumb:pointerover">
+      <Setter Property="Background" Value="{DynamicResource ScrollThumbHoverBrush}" />
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="Thumb.ScrollBarThumb:pressed">
+      <Setter Property="Background" Value="{DynamicResource ScrollThumbHoverBrush}" />
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="ScrollBar /template/ Rectangle#TrackRect">
+      <Setter Property="Fill" Value="{DynamicResource ScrollTrackBrush}" />
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="RepeatButton.ScrollBarPageButton">
+      <Setter Property="Background" Value="{DynamicResource ScrollTrackBrush}" />
+    </Style>
+  </UserControl.Styles>
+
+  <Grid RowDefinitions="Auto,*">
+    <StackPanel Spacing="2" Margin="0,6,0,0">
+      <TextBlock Text="Settings"
+                 FontSize="26"
+                 FontWeight="SemiBold"
+                 Foreground="{DynamicResource TextBrush}" />
+      <TextBlock Text="Preferences"
+                 Foreground="{DynamicResource SubtleTextBrush}"
+                 FontSize="12" />
+      <TextBlock Text="Startup, recording, appearance, privacy, and local storage"
+                 Foreground="{DynamicResource MutedTextBrush}"
+                 FontSize="12" />
+    </StackPanel>
+
+    <ScrollViewer x:Name="SettingsScrollViewer"
+                  Grid.Row="1"
+                  Margin="0,18,0,0"
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  AllowAutoHide="False">
+      <StackPanel Spacing="14"
+                  Margin="0,0,12,12">
+
+        <Border Classes="settingsPanel">
+          <StackPanel Spacing="14">
+            <StackPanel Spacing="2">
+              <TextBlock Text="Recording"
+                         FontSize="16"
+                         FontWeight="SemiBold"
+                         Foreground="{DynamicResource TextBrush}" />
+              <TextBlock Text="Keep MomentTrace capturing in the background"
+                         FontSize="11"
+                         Foreground="{DynamicResource SubtleTextBrush}" />
+            </StackPanel>
+            <CheckBox x:Name="StartWithWindowsCheckBox"
+                      Content="Start automatically when you sign in"
+                      Foreground="{DynamicResource TextBrush}" />
+            <Border Background="{DynamicResource ElevatedPanelBrush}"
+                    BorderBrush="{DynamicResource FaintBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Padding="14,12"
+                    HorizontalAlignment="Left">
+              <StackPanel Orientation="Horizontal" Spacing="10">
+                <Border Width="8"
+                        Height="8"
+                        CornerRadius="4"
+                        Background="{DynamicResource AccentBrush}"
+                        VerticalAlignment="Center" />
+                <TextBlock x:Name="RecordingStatusText"
+                           Text="Recorder available in the Windows app"
+                           Foreground="{DynamicResource MutedTextBrush}"
+                           FontSize="12"
+                           VerticalAlignment="Center" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </Border>
+
+        <Border Classes="settingsPanel">
+          <StackPanel Spacing="14">
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel Spacing="2">
+                <TextBlock Text="App health"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextBrush}" />
+                <TextBlock Text="Local recorder, storage, previews, and privacy checks"
+                           FontSize="11"
+                           Foreground="{DynamicResource SubtleTextBrush}" />
+              </StackPanel>
+              <TextBlock x:Name="HealthUpdatedText"
+                         Grid.Column="1"
+                         Foreground="{DynamicResource MutedTextBrush}"
+                         FontSize="11"
+                         VerticalAlignment="Center" />
+            </Grid>
+            <Grid ColumnDefinitions="*,14,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
+              <Border Classes="settingsMetric">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Recorder" Foreground="{DynamicResource SubtleTextBrush}" FontSize="11" />
+                  <TextBlock x:Name="RecorderHealthText" Foreground="{DynamicResource TextBrush}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Column="2" Classes="settingsMetric">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Database" Foreground="{DynamicResource SubtleTextBrush}" FontSize="11" />
+                  <TextBlock x:Name="DatabaseHealthText" Foreground="{DynamicResource TextBrush}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Row="1" Classes="settingsMetric">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Screenshots" Foreground="{DynamicResource SubtleTextBrush}" FontSize="11" />
+                  <TextBlock x:Name="ScreenshotsHealthText" Foreground="{DynamicResource TextBrush}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Row="1" Grid.Column="2" Classes="settingsMetric">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Icons" Foreground="{DynamicResource SubtleTextBrush}" FontSize="11" />
+                  <TextBlock x:Name="IconsHealthText" Foreground="{DynamicResource TextBrush}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Row="2" Classes="settingsMetric">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Settings" Foreground="{DynamicResource SubtleTextBrush}" FontSize="11" />
+                  <TextBlock x:Name="SettingsHealthText" Foreground="{DynamicResource TextBrush}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Row="2" Grid.Column="2" Classes="settingsMetric">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Browser URLs" Foreground="{DynamicResource SubtleTextBrush}" FontSize="11" />
+                  <TextBlock x:Name="BrowserUrlHealthText" Foreground="{DynamicResource TextBrush}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Row="3" Grid.ColumnSpan="3" Classes="settingsMetric">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Privacy" Foreground="{DynamicResource SubtleTextBrush}" FontSize="11" />
+                  <TextBlock x:Name="PrivacyHealthText" Foreground="{DynamicResource TextBrush}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <Border Classes="settingsPanel">
+          <StackPanel Spacing="16">
+            <StackPanel Spacing="2">
+              <TextBlock Text="Appearance"
+                         FontSize="16"
+                         FontWeight="SemiBold"
+                         Foreground="{DynamicResource TextBrush}" />
+              <TextBlock Text="Theme, timeline density, and shell transparency"
+                         FontSize="11"
+                         Foreground="{DynamicResource SubtleTextBrush}" />
+            </StackPanel>
+
+            <Grid ColumnDefinitions="*,220" ColumnSpacing="16">
+              <StackPanel Spacing="2">
+                <TextBlock Text="Theme"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextBrush}" />
+                <TextBlock Text="Choose the app colour palette. Transparency still applies."
+                           FontSize="11"
+                           Foreground="{DynamicResource SubtleTextBrush}"
+                           TextWrapping="Wrap" />
+              </StackPanel>
+              <ComboBox x:Name="ThemeComboBox"
+                        Classes="settingsCombo"
+                        Grid.Column="1"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center" />
+            </Grid>
+
+            <Grid ColumnDefinitions="*,220" ColumnSpacing="16">
+              <StackPanel Spacing="2">
+                <TextBlock Text="Timeline view"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextBrush}" />
+                <TextBlock Text="Choose compact rows or Windows Timeline-style cards."
+                           FontSize="11"
+                           Foreground="{DynamicResource SubtleTextBrush}"
+                           TextWrapping="Wrap" />
+              </StackPanel>
+              <ComboBox x:Name="TimelineViewModeComboBox"
+                        Classes="settingsCombo"
+                        Grid.Column="1"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center">
+                <ComboBoxItem Content="Cards" />
+                <ComboBoxItem Content="List" />
+              </ComboBox>
+            </Grid>
+
+            <StackPanel Spacing="8">
+              <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="2">
+                  <TextBlock Text="Transparency"
+                             FontSize="13"
+                             FontWeight="SemiBold"
+                             Foreground="{DynamicResource TextBrush}" />
+                  <TextBlock Text="Adjusts how clear the shell is while keeping the same colour."
+                             FontSize="11"
+                             Foreground="{DynamicResource SubtleTextBrush}"
+                             TextWrapping="Wrap" />
+                </StackPanel>
+                <Border Grid.Column="1"
+                        Classes="infoChip"
+                        VerticalAlignment="Center"
+                        Background="{DynamicResource ChipBrush}"
+                        BorderBrush="{DynamicResource FaintBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="999"
+                        Padding="10,4">
+                  <TextBlock x:Name="OpacityValueText"
+                             Foreground="{DynamicResource TextBrush}"
+                             FontSize="12"
+                             FontWeight="SemiBold" />
+                </Border>
+              </Grid>
+              <Slider x:Name="OpacitySlider" Minimum="0" Maximum="100" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <Border Classes="settingsPanel">
+          <StackPanel Spacing="14">
+            <StackPanel Spacing="2">
+              <TextBlock Text="Privacy filters"
+                         FontSize="16"
+                         FontWeight="SemiBold"
+                         Foreground="{DynamicResource TextBrush}" />
+              <TextBlock Text="Skip sites and apps before they are saved or screenshotted"
+                         FontSize="11"
+                         Foreground="{DynamicResource SubtleTextBrush}" />
+            </StackPanel>
+
+            <CheckBox x:Name="ExcludeAdultWebsitesCheckBox"
+                      Content="Exclude adult websites from history"
+                      Foreground="{DynamicResource TextBrush}" />
+            <TextBlock Text="Matching sites are skipped before they are saved. Checks stay local on this device."
+                       FontSize="11"
+                       Foreground="{DynamicResource MutedTextBrush}"
+                       TextWrapping="Wrap" />
+
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+              <StackPanel Spacing="2">
+                <TextBlock Text="Adult domain blocklist"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextBrush}" />
+                <TextBlock x:Name="AdultBlocklistStatusText"
+                           FontSize="11"
+                           Foreground="{DynamicResource SubtleTextBrush}"
+                           TextWrapping="Wrap" />
+              </StackPanel>
+              <Button x:Name="UpdateAdultBlocklistButton"
+                      Classes="settings"
+                      Grid.Column="1"
+                      Content="Update list"
+                      MinWidth="120"
+                      VerticalAlignment="Center" />
+            </Grid>
+
+            <Grid ColumnDefinitions="*,14,*">
+              <StackPanel Spacing="6">
+                <TextBlock Text="Always exclude domains"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextBrush}" />
+                <TextBox x:Name="CustomBlockedDomainsTextBox"
+                         Classes="settingsText"
+                         Height="96"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap" />
+              </StackPanel>
+              <StackPanel Grid.Column="2" Spacing="6">
+                <TextBlock Text="Always allow domains"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextBrush}" />
+                <TextBox x:Name="CustomAllowedDomainsTextBox"
+                         Classes="settingsText"
+                         Height="96"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap" />
+              </StackPanel>
+            </Grid>
+
+            <StackPanel Spacing="4">
+              <TextBlock Text="Choose from recent activity"
+                         FontSize="13"
+                         FontWeight="SemiBold"
+                         Foreground="{DynamicResource TextBrush}" />
+              <TextBlock Text="Tick anything you do not want MomentTrace to save from now on."
+                         FontSize="11"
+                         Foreground="{DynamicResource SubtleTextBrush}" />
+            </StackPanel>
+
+            <Grid ColumnDefinitions="*,14,*">
+              <Border Classes="settingsMetric">
+                <StackPanel>
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="Apps"
+                               Foreground="{DynamicResource TextBrush}"
+                               FontSize="13"
+                               FontWeight="SemiBold" />
+                    <TextBlock x:Name="RecentAppsStatusText"
+                               Grid.Column="1"
+                               Foreground="{DynamicResource MutedTextBrush}"
+                               FontSize="11" />
+                  </Grid>
+                  <ItemsControl x:Name="RecentAppsList" Margin="0,10,0,0" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Column="2" Classes="settingsMetric">
+                <StackPanel>
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="Websites"
+                               Foreground="{DynamicResource TextBrush}"
+                               FontSize="13"
+                               FontWeight="SemiBold" />
+                    <TextBlock x:Name="RecentWebsitesStatusText"
+                               Grid.Column="1"
+                               Foreground="{DynamicResource MutedTextBrush}"
+                               FontSize="11" />
+                  </Grid>
+                  <ItemsControl x:Name="RecentWebsitesList" Margin="0,10,0,0" />
+                </StackPanel>
+              </Border>
+            </Grid>
+
+            <Button x:Name="SavePrivacyFiltersButton"
+                    Classes="settings"
+                    Content="Save privacy filters"
+                    MinWidth="168"
+                    HorizontalAlignment="Left" />
+          </StackPanel>
+        </Border>
+
+        <Border Classes="settingsPanel">
+          <StackPanel Spacing="14">
+            <StackPanel Spacing="2">
+              <TextBlock Text="Local activity data"
+                         FontSize="16"
+                         FontWeight="SemiBold"
+                         Foreground="{DynamicResource TextBrush}" />
+              <TextBlock Text="Export or clear timeline data stored on this device"
+                         FontSize="11"
+                         Foreground="{DynamicResource SubtleTextBrush}" />
+            </StackPanel>
+            <TextBlock Text="These actions do not use cloud services."
+                       FontSize="11"
+                       Foreground="{DynamicResource MutedTextBrush}"
+                       TextWrapping="Wrap" />
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <Button x:Name="ExportActivityButton"
+                      Classes="settings"
+                      Content="Export activity"
+                      MinWidth="136" />
+              <Button x:Name="DeleteActivityButton"
+                      Classes="settings"
+                      Content="Delete local activity"
+                      MinWidth="166" />
+              <Button x:Name="DeleteAllLocalDataButton"
+                      Classes="settingsDanger"
+                      Content="Delete all local data"
+                      MinWidth="176" />
+            </StackPanel>
+            <TextBlock x:Name="LocalActivityStatusText"
+                       FontSize="11"
+                       Foreground="{DynamicResource MutedTextBrush}" />
+          </StackPanel>
+        </Border>
+
+        <Border Classes="settingsPanel">
+          <StackPanel Spacing="14">
+            <StackPanel Spacing="2">
+              <TextBlock Text="Where I Live"
+                         FontSize="16"
+                         FontWeight="SemiBold"
+                         Foreground="{DynamicResource TextBrush}" />
+              <TextBlock Text="Local install and data paths on this device"
+                         FontSize="11"
+                         Foreground="{DynamicResource SubtleTextBrush}" />
+            </StackPanel>
+            <Grid ColumnDefinitions="130,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="12">
+              <TextBlock Text="Version"
+                         FontSize="12"
+                         Foreground="{DynamicResource SubtleTextBrush}"
+                         VerticalAlignment="Top" />
+              <TextBlock x:Name="VersionText"
+                         Grid.Column="1"
+                         Foreground="{DynamicResource TextBrush}"
+                         FontSize="13"
+                         TextWrapping="Wrap" />
+              <TextBlock Grid.Row="1"
+                         Text="Installed at"
+                         FontSize="12"
+                         Foreground="{DynamicResource SubtleTextBrush}"
+                         VerticalAlignment="Top" />
+              <TextBlock x:Name="InstallPathText"
+                         Grid.Row="1"
+                         Grid.Column="1"
+                         Foreground="{DynamicResource TextBrush}"
+                         FontSize="13"
+                         TextWrapping="Wrap" />
+              <TextBlock Grid.Row="2"
+                         Text="App data"
+                         FontSize="12"
+                         Foreground="{DynamicResource SubtleTextBrush}"
+                         VerticalAlignment="Top" />
+              <TextBlock x:Name="AppDataPathText"
+                         Grid.Row="2"
+                         Grid.Column="1"
+                         Foreground="{DynamicResource TextBrush}"
+                         FontSize="13"
+                         TextWrapping="Wrap" />
+              <TextBlock Grid.Row="3"
+                         Text="Database"
+                         FontSize="12"
+                         Foreground="{DynamicResource SubtleTextBrush}"
+                         VerticalAlignment="Top" />
+              <TextBlock x:Name="DatabasePathText"
+                         Grid.Row="3"
+                         Grid.Column="1"
+                         Foreground="{DynamicResource TextBrush}"
+                         FontSize="13"
+                         TextWrapping="Wrap" />
+              <TextBlock Grid.Row="4"
+                         Text="Settings file"
+                         FontSize="12"
+                         Foreground="{DynamicResource SubtleTextBrush}"
+                         VerticalAlignment="Top" />
+              <TextBlock x:Name="SettingsPathText"
+                         Grid.Row="4"
+                         Grid.Column="1"
+                         Foreground="{DynamicResource TextBrush}"
+                         FontSize="13"
+                         TextWrapping="Wrap" />
+            </Grid>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

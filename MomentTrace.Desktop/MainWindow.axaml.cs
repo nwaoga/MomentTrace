@@ -55,6 +55,8 @@ public partial class MainWindow : Window
     private bool _isDetailPaneVisible = true;
     private RailSelection _selectedRailSelection = RailSelection.Timeline;
     private WorkspaceNav _activeWorkspaceNav = WorkspaceNav.Timeline;
+    private WorkspaceNav _previousWorkspaceNav = WorkspaceNav.Timeline;
+    private SettingsPage? _settingsPage;
     private DateTime? _timelineFocusStart;
     private DateTime? _timelineFocusEnd;
     private DesktopAppThemePalette _currentTheme;
@@ -112,6 +114,7 @@ public partial class MainWindow : Window
         ApplySurfaceTransparency(_preferences.Opacity);
         ApplyTimelineViewMode(_preferences.TimelineViewMode);
         ApplyDetailPaneVisibility();
+        InitializeSettingsPage();
         SetActiveNavState();
         ConfigurePlatformChrome();
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
@@ -211,6 +214,13 @@ public partial class MainWindow : Window
 
     private void MainWindow_KeyDown(object? sender, KeyEventArgs e)
     {
+        if (e.Key == Key.Escape && _activeWorkspaceNav == WorkspaceNav.Settings)
+        {
+            LeaveSettingsPage();
+            e.Handled = true;
+            return;
+        }
+
         if (!_isMacChromeMode || (e.KeyModifiers & KeyModifiers.Meta) == 0)
         {
             return;
@@ -219,7 +229,7 @@ public partial class MainWindow : Window
         switch (e.Key)
         {
             case Key.OemComma:
-                OpenSettingsWindow();
+                ShowSettingsPage();
                 e.Handled = true;
                 break;
             case Key.F:
@@ -251,7 +261,22 @@ public partial class MainWindow : Window
 
     private void OpenSettingsWindow()
     {
-        SettingsNavButton_Click(SettingsNavButton, new RoutedEventArgs());
+        ShowSettingsPage();
+    }
+
+    private void InitializeSettingsPage()
+    {
+        _settingsPage = new SettingsPage(
+            _store,
+            _recorder,
+            _preferences,
+            _preferences.TimelineViewMode,
+            _preferences.Theme,
+            SaveOpacity,
+            SaveTimelineViewMode,
+            SaveTheme,
+            ReloadAsync);
+        SettingsPageHost.Children.Add(_settingsPage);
     }
 
     private async Task ShowFirstRunOnboardingAsync()
@@ -470,23 +495,9 @@ public partial class MainWindow : Window
         _ = ActivateTimelineSelectionAsync(RailSelection.Files);
     }
 
-    private async void SettingsNavButton_Click(object? sender, RoutedEventArgs e)
+    private void SettingsNavButton_Click(object? sender, RoutedEventArgs e)
     {
-        var settingsWindow = new SettingsWindow(
-            _store,
-            _recorder,
-            _preferences,
-            _preferences.TimelineViewMode,
-            _preferences.Theme,
-            SaveOpacity,
-            SaveTimelineViewMode,
-            SaveTheme,
-            ReloadAsync)
-        {
-            WindowStartupLocation = WindowStartupLocation.CenterOwner
-        };
-
-        await settingsWindow.ShowDialog(this);
+        ShowSettingsPage();
     }
 
     private void ApplyDetailPaneVisibility()
@@ -1720,6 +1731,7 @@ public partial class MainWindow : Window
     {
         TimelinePage.IsVisible = true;
         OverviewPage.IsVisible = false;
+        SettingsPageHost.IsVisible = false;
         SetActiveNavState();
     }
 
@@ -1729,8 +1741,44 @@ public partial class MainWindow : Window
         ApplyDetailPaneVisibility();
         TimelinePage.IsVisible = false;
         OverviewPage.IsVisible = true;
+        SettingsPageHost.IsVisible = false;
         ApplyOverviewTimelineContextState();
         SetActiveNavState();
+    }
+
+    private void ShowSettingsPage()
+    {
+        if (_activeWorkspaceNav != WorkspaceNav.Settings)
+        {
+            _previousWorkspaceNav = _activeWorkspaceNav is WorkspaceNav.Overview
+                ? WorkspaceNav.Overview
+                : WorkspaceNav.Timeline;
+        }
+
+        _isDetailPaneVisible = false;
+        ApplyDetailPaneVisibility();
+        TimelinePage.IsVisible = false;
+        OverviewPage.IsVisible = false;
+        SettingsPageHost.IsVisible = true;
+        _activeWorkspaceNav = WorkspaceNav.Settings;
+        SetActiveNavState();
+        if (_settingsPage is not null)
+        {
+            _ = _settingsPage.OnShownAsync();
+        }
+    }
+
+    private void LeaveSettingsPage()
+    {
+        if (_previousWorkspaceNav == WorkspaceNav.Overview)
+        {
+            _activeWorkspaceNav = WorkspaceNav.Overview;
+            ShowOverviewPage();
+            return;
+        }
+
+        _activeWorkspaceNav = WorkspaceNav.Timeline;
+        ShowTimelinePage();
     }
 
     private string BuildTimelineSubtitle()
@@ -2475,23 +2523,26 @@ public partial class MainWindow : Window
     private void SetActiveNavState()
     {
         var isOverview = OverviewPage.IsVisible;
+        var isSettings = SettingsPageHost.IsVisible;
 
         SetNavItemState(TimelineNavHighlight, TimelineNavAccent, TimelineNavButton, TimelineNavIcon, TimelineNavTitle, TimelineNavSubtitle,
-            !isOverview && _activeWorkspaceNav == WorkspaceNav.Timeline && _selectedRailSelection == RailSelection.Timeline);
+            !isOverview && !isSettings && _activeWorkspaceNav == WorkspaceNav.Timeline && _selectedRailSelection == RailSelection.Timeline);
         SetNavItemState(OverviewNavHighlight, OverviewNavAccent, OverviewNavButton, OverviewNavIcon, OverviewNavTitle, OverviewNavSubtitle,
             isOverview && _activeWorkspaceNav == WorkspaceNav.Overview);
         SetNavItemState(SavedMomentsNavHighlight, SavedMomentsNavAccent, SavedMomentsNavButton, SavedMomentsNavIcon, SavedMomentsNavTitle, SavedMomentsNavSubtitle,
-            !isOverview && _selectedRailSelection == RailSelection.SavedMoments);
+            !isOverview && !isSettings && _selectedRailSelection == RailSelection.SavedMoments);
         SetNavItemState(NotesNavHighlight, NotesNavAccent, NotesNavButton, NotesNavIcon, NotesNavTitle, NotesNavSubtitle,
-            !isOverview && _selectedRailSelection == RailSelection.Notes);
+            !isOverview && !isSettings && _selectedRailSelection == RailSelection.Notes);
         SetNavItemState(BookmarksNavHighlight, BookmarksNavAccent, BookmarksNavButton, BookmarksNavIcon, BookmarksNavTitle, BookmarksNavSubtitle,
-            !isOverview && _selectedRailSelection == RailSelection.Bookmarks);
+            !isOverview && !isSettings && _selectedRailSelection == RailSelection.Bookmarks);
         SetNavItemState(AppsNavHighlight, AppsNavAccent, AppsNavButton, AppsNavIcon, AppsNavTitle, AppsNavSubtitle,
-            !isOverview && _selectedRailSelection == RailSelection.Apps);
+            !isOverview && !isSettings && _selectedRailSelection == RailSelection.Apps);
         SetNavItemState(WebsitesNavHighlight, WebsitesNavAccent, WebsitesNavButton, WebsitesNavIcon, WebsitesNavTitle, WebsitesNavSubtitle,
-            !isOverview && _selectedRailSelection == RailSelection.Websites);
+            !isOverview && !isSettings && _selectedRailSelection == RailSelection.Websites);
         SetNavItemState(FilesNavHighlight, FilesNavAccent, FilesNavButton, FilesNavIcon, FilesNavTitle, FilesNavSubtitle,
-            !isOverview && _selectedRailSelection == RailSelection.Files);
+            !isOverview && !isSettings && _selectedRailSelection == RailSelection.Files);
+        SetNavItemState(SettingsNavHighlight, SettingsNavAccent, SettingsNavButton, SettingsNavIcon, SettingsNavTitle, SettingsNavSubtitle,
+            isSettings && _activeWorkspaceNav == WorkspaceNav.Settings);
     }
 
     private void SetNavItemState(Border highlight, Border accent, Button button, TextBlock icon, TextBlock title, TextBlock subtitle, bool isActive)
@@ -2893,7 +2944,8 @@ public partial class MainWindow : Window
     {
         None,
         Timeline,
-        Overview
+        Overview,
+        Settings
     }
 
     private enum RailSelection
