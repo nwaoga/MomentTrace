@@ -174,17 +174,51 @@ public partial class SettingsPage : UserControl
 
     private void LoadWhereILive()
     {
-        var version = Assembly.GetExecutingAssembly()
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
-            .InformationalVersion
-            ?? Assembly.GetExecutingAssembly().GetName().Version?.ToString()
-            ?? "Development";
-
-        VersionText.Text = version;
+        VersionText.Text = GetDisplayVersion();
         InstallPathText.Text = AppContext.BaseDirectory;
         AppDataPathText.Text = MomentTracePaths.AppDataDirectory;
         DatabasePathText.Text = SqliteActivityStore.DefaultDatabasePath;
         SettingsPathText.Text = DesktopWindowPreferences.PreferencesPath;
+    }
+
+    private static string GetDisplayVersion()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var version = assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion
+            ?? assembly.GetName().Version?.ToString()
+            ?? "Development";
+
+        var parts = new List<string> { version };
+        var buildNumber = GetAssemblyMetadata(assembly, "BuildNumber");
+        var commitSha = GetAssemblyMetadata(assembly, "CommitSha");
+
+        if (!string.IsNullOrWhiteSpace(buildNumber))
+        {
+            parts.Add($"build {buildNumber}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(commitSha))
+        {
+            parts.Add(ShortCommitSha(commitSha));
+        }
+
+        return string.Join(" · ", parts);
+    }
+
+    private static string? GetAssemblyMetadata(Assembly assembly, string key)
+    {
+        return assembly
+            .GetCustomAttributes<AssemblyMetadataAttribute>()
+            .FirstOrDefault(attribute => string.Equals(attribute.Key, key, StringComparison.OrdinalIgnoreCase))
+            ?.Value;
+    }
+
+    private static string ShortCommitSha(string commitSha)
+    {
+        var trimmed = commitSha.Trim();
+        return trimmed.Length <= 7 ? trimmed : trimmed[..7];
     }
 
     private async Task LoadHealthStatusAsync()

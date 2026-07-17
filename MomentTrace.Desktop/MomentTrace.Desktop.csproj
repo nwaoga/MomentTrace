@@ -9,8 +9,20 @@
     <Product>MomentTrace</Product>
     <Company>MomentTrace</Company>
     <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <NoWarn>$(NoWarn);AVLN3001</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(MomentTraceBuildNumber)' != ''">
+      <_Parameter1>BuildNumber</_Parameter1>
+      <_Parameter2>$(MomentTraceBuildNumber)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(MomentTraceCommitSha)' != ''">
+      <_Parameter1>CommitSha</_Parameter1>
+      <_Parameter2>$(MomentTraceCommitSha)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
 
   <ItemGroup>
     <AvaloniaResource Include="..\MomentTrace.App\Assets\MomentTrace.ico" Link="Assets\MomentTrace.ico" />

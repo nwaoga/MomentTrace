@@ -100,6 +100,8 @@ jobs:
           .\scripts\build-installer.ps1 `
             -Version "${{ needs.prepare.outputs.package_label }}" `
             -AssemblyVersion "${{ needs.prepare.outputs.package_version }}" `
+            -BuildNumber "${{ github.run_number }}.${{ github.run_attempt }}" `
+            -CommitSha "${{ github.sha }}" `
             -PublishDir ".\artifacts\${{ needs.prepare.outputs.windows_artifact_name }}" `
             -OutputDir ".\dist" `
             @signingArgs
@@ -142,6 +144,8 @@ jobs:
           ./scripts/build-macos-app.ps1 `
             -Version "${{ needs.prepare.outputs.package_label }}" `
             -AssemblyVersion "${{ needs.prepare.outputs.package_version }}" `
+            -BuildNumber "${{ github.run_number }}.${{ github.run_attempt }}" `
+            -CommitSha "${{ github.sha }}" `
             -PublishDir "./artifacts/${{ needs.prepare.outputs.macos_artifact_name }}-publish" `
             -OutputDir "./dist"
 

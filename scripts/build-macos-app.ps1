@@ -6,7 +6,9 @@ param(
     [string]$Framework = "net8.0",
     [string]$PublishDir = "",
     [string]$OutputDir = "",
-    [string]$CodeSignIdentity = "-"
+    [string]$CodeSignIdentity = "-",
+    [string]$BuildNumber = "",
+    [string]$CommitSha = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -30,6 +32,17 @@ if ($AssemblyVersion -notmatch '^\d+\.\d+\.\d+$') {
 }
 
 $assemblyVersionValue = "$AssemblyVersion.0"
+
+if ([string]::IsNullOrWhiteSpace($BuildNumber) -and -not [string]::IsNullOrWhiteSpace($env:GITHUB_RUN_NUMBER)) {
+    $BuildNumber = $env:GITHUB_RUN_NUMBER
+    if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_RUN_ATTEMPT)) {
+        $BuildNumber = "$BuildNumber.$env:GITHUB_RUN_ATTEMPT"
+    }
+}
+
+if ([string]::IsNullOrWhiteSpace($CommitSha) -and -not [string]::IsNullOrWhiteSpace($env:GITHUB_SHA)) {
+    $CommitSha = $env:GITHUB_SHA
+}
 
 function Resolve-MacBuildPath {
     param([Parameter(Mandatory = $true)][string]$Path)
@@ -85,6 +98,8 @@ if (Test-Path -LiteralPath $zipPath) {
     -p:AssemblyVersion=$assemblyVersionValue `
     -p:FileVersion=$assemblyVersionValue `
     -p:InformationalVersion="v$Version" `
+    -p:MomentTraceBuildNumber=$BuildNumber `
+    -p:MomentTraceCommitSha=$CommitSha `
     --output $PublishDir `
     -m:1 `
     -nr:false

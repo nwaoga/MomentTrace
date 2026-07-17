@@ -12,7 +12,9 @@ param(
     [string]$TimestampUrl = "http://timestamp.digicert.com",
     [ValidateSet("CurrentUser", "LocalMachine")]
     [string]$CertificateStore = "CurrentUser",
-    [string]$SignToolPath = ""
+    [string]$SignToolPath = "",
+    [string]$BuildNumber = "",
+    [string]$CommitSha = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -42,6 +44,17 @@ if ($AssemblyVersion -notmatch '^\d+\.\d+\.\d+$') {
 }
 
 $assemblyVersionValue = "$AssemblyVersion.0"
+
+if ([string]::IsNullOrWhiteSpace($BuildNumber) -and -not [string]::IsNullOrWhiteSpace($env:GITHUB_RUN_NUMBER)) {
+    $BuildNumber = $env:GITHUB_RUN_NUMBER
+    if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_RUN_ATTEMPT)) {
+        $BuildNumber = "$BuildNumber.$env:GITHUB_RUN_ATTEMPT"
+    }
+}
+
+if ([string]::IsNullOrWhiteSpace($CommitSha) -and -not [string]::IsNullOrWhiteSpace($env:GITHUB_SHA)) {
+    $CommitSha = $env:GITHUB_SHA
+}
 
 function Resolve-InstallerPath {
     param([Parameter(Mandatory = $true)][string]$Path)
@@ -90,6 +103,8 @@ New-Item -ItemType Directory -Force -Path $stagingOutputDir | Out-Null
     -p:AssemblyVersion=$assemblyVersionValue `
     -p:FileVersion=$assemblyVersionValue `
     -p:InformationalVersion="v$Version" `
+    -p:MomentTraceBuildNumber=$BuildNumber `
+    -p:MomentTraceCommitSha=$CommitSha `
     --output $PublishDir `
     -m:1 `
     -nr:false

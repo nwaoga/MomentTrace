@@ -778,9 +778,9 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
-The release workflow validates the `vMAJOR.MINOR.PATCH` tag format, imports the Windows signing certificate when signing secrets are configured, publishes the Avalonia desktop app as a self-contained Windows `win-x64` build and macOS `osx-arm64` build, stamps the assembly/file version, creates a setup executable named like `MomentTrace-0.1.0-win-x64-setup.exe`, creates a Windows portable zip named like `MomentTrace-0.1.0-win-x64.zip`, creates an ad-hoc signed macOS app zip named like `MomentTrace-0.1.0-macos-arm64.zip`, and uploads all release artifacts to the GitHub Release.
+The release workflow validates the `vMAJOR.MINOR.PATCH` tag format, imports the Windows signing certificate when signing secrets are configured, publishes the Avalonia desktop app as a self-contained Windows `win-x64` build and macOS `osx-arm64` build, stamps the assembly/file version, embeds the GitHub Actions run number and commit SHA as app build metadata, creates a setup executable named like `MomentTrace-0.1.0-win-x64-setup.exe`, creates a Windows portable zip named like `MomentTrace-0.1.0-win-x64.zip`, creates an ad-hoc signed macOS app zip named like `MomentTrace-0.1.0-macos-arm64.zip`, and uploads all release artifacts to the GitHub Release.
 
-You can also run the **Release** workflow manually in GitHub Actions and provide a version such as `v0.1.0`. Prerelease tags such as `v0.1.1-beta.1` are supported and are published as GitHub prereleases while keeping assembly/file versions numeric.
+You can also run the **Release** workflow manually in GitHub Actions and provide a version such as `v0.1.0`. Prerelease tags such as `v0.1.1-beta.1` are supported and are published as GitHub prereleases while keeping assembly/file versions numeric. The Settings "Where I Live" page shows the release label plus build metadata, for example `v0.1.1-beta.13 · build 42.1 · fc25c14`.
 
 For Azure DevOps planning, current implementation work is tracked in the MomentTrace project and commits can reference work items with `AB#<id>` in the commit message. Active roadmap, stability notes, and QA priorities live in [`ai/project-plan.md`](ai/project-plan.md).
 
