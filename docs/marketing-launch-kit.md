@@ -126,9 +126,13 @@ Use sanitized data only. Avoid showing real client names, private documents, per
 Existing sanitized assets:
 
 - `docs/assets/momenttrace-avalonia-shell-current.svg`
-- `docs/assets/momenttrace-overview-dashboard.svg`
+- `docs/assets/momenttrace-avalonia-shell-current.png`
+- `docs/assets/momenttrace-timeline-detail.svg`
+- `docs/assets/momenttrace-timeline-detail.png`
 - `docs/assets/momenttrace-settings-privacy-preview.svg`
+- `docs/assets/momenttrace-settings-privacy-preview.png`
 - `docs/assets/momenttrace-theme-collage.svg`
+- `docs/assets/momenttrace-theme-collage.png`
 
 ## Demo Video Script
 
@@ -197,8 +201,10 @@ Productivity, Windows, Privacy, Developer Tools, Personal Analytics
 
 ## Beta Release Checklist
 
-- GitHub prerelease exists for `v0.1.1-beta.12`.
+- GitHub prerelease exists for the latest verified beta tag.
+- GitHub Actions artifact storage quota has enough headroom for Windows and macOS release uploads.
 - Windows installer, Windows portable zip, and macOS app zip are attached to the release.
+- Settings > Where I Live shows the expected release label, build number, and short commit.
 - Clean Windows install smoke test passes.
 - macOS app zip extracts to `MomentTrace.app`.
 - App launches after install.

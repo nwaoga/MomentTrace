@@ -37,6 +37,9 @@
 - [2026-07-12 01:13 UTC+1] Settings should live as an in-shell page beside Timeline and Overview, not as a modal window; Esc returns to the previous workspace page, and Settings rail selection uses the same active-nav treatment.
 - [2026-07-12 01:13 UTC+1] Settings multi-line text boxes should reuse the Notes editor (`noteBox`) surface treatment so PanelBrush/focus borders stay consistent across the shell.
 - [2026-07-12 01:13 UTC+1] The left-rail user profile block is intentionally hidden for now; revisit account/identity UI later while keeping Settings as a normal rail item.
+- [2026-07-17] Release tags are immutable once published. If a beta tag already exists on another commit, cut the next beta number rather than moving the old tag.
+- [2026-07-17] GitHub Actions artifact storage quota is treated as a release-operations dependency. A `CreateArtifact` quota failure should be handled by deleting obsolete workflow artifacts/prerelease assets and rerunning the same tag workflow, not by changing app code or moving the tag.
+- [2026-07-17] App build identity should remain separate from semantic assembly/file versioning: Settings may show release label, GitHub run number/attempt, and short commit SHA, while OS-level assembly/file versions stay numeric.
 
 ## Recently Completed
 

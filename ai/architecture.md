@@ -31,6 +31,13 @@
 - `MomentTrace.Storage` owns local SQLite persistence for captured activity history.
 - Activity history, screenshots, settings, and privacy blocklists remain local to the user machine.
 
+### Release operations
+
+- GitHub Actions owns CI and downloadable release packaging.
+- Release tags build Windows installer/portable artifacts and the macOS app zip from `MomentTrace.Desktop`.
+- The release workflow embeds the release label, GitHub Actions run number/attempt, and commit SHA into the desktop assembly so Settings can show the exact build identity.
+- GitHub Actions artifact storage quota is an external release dependency: if quota is exhausted, Windows/macOS build jobs can fail at artifact upload even when compilation and packaging have succeeded. Clear old workflow artifacts/releases and rerun the tag workflow rather than treating this as an app regression.
+
 ### Windows integration
 
 - `MomentTrace.Windows` owns Windows foreground recording, startup registration, and Windows-specific helpers such as icon/provider behavior.
@@ -74,4 +81,3 @@
 | Core rules/models | `MomentTrace.Core/` |
 | Stable project docs | `README.md` |
 | Active plan | `ai/project-plan.md` |
-

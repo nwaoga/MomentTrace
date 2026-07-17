@@ -36,7 +36,7 @@ Privacy controls are part of Settings rather than hidden configuration. Recent a
 
 On first run, MomentTrace explains the local-first storage model, keeps adult-site filtering enabled by default, and lets the user choose whether the app should start automatically at sign-in.
 
-![MomentTrace Settings privacy preview](docs/assets/momenttrace-settings-privacy-preview.svg)
+![MomentTrace Settings privacy preview](docs/assets/momenttrace-settings-privacy-preview.png)
 
 ![MomentTrace release flow](docs/assets/momenttrace-release-flow.svg)
 
@@ -74,7 +74,7 @@ The Windows installer is built with Inno Setup from a self-contained `MomentTrac
 - Local activity export, activity deletion, and full local-data cleanup controls for user-owned history cleanup
 - Single-instance behavior that brings the running app back when launched again
 - Noise filtering for MomentTrace itself and Windows lock-screen activity
-- Themed Settings modal with startup, recording, timeline view mode, appearance, and privacy controls
+- In-shell Settings page with startup, recording, app health, timeline view mode, appearance, privacy, local data, and build identity controls
 - Settings app health panel for recorder availability, database readability, screenshot cache, icon cache, settings file, and privacy exclusion status
 - "Where I Live" diagnostics for install, database, settings, and screenshot locations
 - Custom title bars, top command surfaces, and themed confirmation modals for the main app and Settings
@@ -613,7 +613,7 @@ The six base roles mean:
 | Role | Used for |
 | --- | --- |
 | `Base` | Main app background, glass/tint base, and the page colour under the shell. |
-| `Surface` | Primary panels such as the rail, settings modal body, detail surfaces, and overview panels. |
+| `Surface` | Primary panels such as the rail, Settings page body, detail surfaces, and overview panels. |
 | `Text` | Primary labels, headings, card titles, metric values, and strong body copy. |
 | `MutedText` | Secondary labels, metadata, subtitles, timestamps, and explanatory text. |
 | `Accent` | Selected navigation, primary buttons, focus rings, active borders, metric icons, and strong highlights. |
@@ -770,6 +770,7 @@ GitHub Actions are used for build checks and downloadable releases:
 
 - `.github/workflows/ci.yml` builds the solution on pushes and pull requests to `main`.
 - `.github/workflows/release.yml` creates a versioned Windows installer, Windows portable zip, and macOS app zip, then attaches them to one GitHub Release.
+- Release publication depends on available GitHub Actions artifact storage. If a release run fails with `Failed to CreateArtifact: Artifact storage quota has been hit`, clear old workflow artifacts or obsolete prerelease assets, wait for GitHub usage recalculation if needed, and rerun the same tag workflow. This is an operations blocker, not an app build regression.
 
 To create a release from Git:
 
@@ -781,6 +782,8 @@ git push origin v0.1.0
 The release workflow validates the `vMAJOR.MINOR.PATCH` tag format, imports the Windows signing certificate when signing secrets are configured, publishes the Avalonia desktop app as a self-contained Windows `win-x64` build and macOS `osx-arm64` build, stamps the assembly/file version, embeds the GitHub Actions run number and commit SHA as app build metadata, creates a setup executable named like `MomentTrace-0.1.0-win-x64-setup.exe`, creates a Windows portable zip named like `MomentTrace-0.1.0-win-x64.zip`, creates an ad-hoc signed macOS app zip named like `MomentTrace-0.1.0-macos-arm64.zip`, and uploads all release artifacts to the GitHub Release.
 
 You can also run the **Release** workflow manually in GitHub Actions and provide a version such as `v0.1.0`. Prerelease tags such as `v0.1.1-beta.1` are supported and are published as GitHub prereleases while keeping assembly/file versions numeric. The Settings "Where I Live" page shows the release label plus build metadata, for example `v0.1.1-beta.13 · build 42.1 · fc25c14`.
+
+If a tag already exists locally or remotely, do not move it for a replacement beta. Cut the next beta tag instead so published artifacts remain traceable.
 
 For Azure DevOps planning, current implementation work is tracked in the MomentTrace project and commits can reference work items with `AB#<id>` in the commit message. Active roadmap, stability notes, and QA priorities live in [`ai/project-plan.md`](ai/project-plan.md).
 
