@@ -93,6 +93,7 @@ public partial class MainWindow : Window
     private static readonly Thickness DefaultTopCommandPadding = new(0, 8, 0, 8);
     private bool _isMacChromeMode;
     private static readonly Dictionary<string, Bitmap> BitmapCache = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<string, string?> IconPathCache = new(StringComparer.OrdinalIgnoreCase);
 
     public MainWindow(SqliteActivityStore? store = null, IActivityRecorder? recorder = null)
     {
@@ -2822,10 +2823,10 @@ public partial class MainWindow : Window
 
     private MomentRow ToMomentRow(ActivityMomentViewModel session)
     {
-        var previewImage = GetPreviewImage(session.ThumbnailPath) ?? GetPreviewImage(session.ScreenshotPath);
-        var iconImage = GetIconImage(session);
-        var hasPreview = previewImage is not null;
-        var hasIcon = iconImage is not null;
+        var previewPath = GetExistingPath(session.ThumbnailPath) ?? GetExistingPath(session.ScreenshotPath);
+        var iconPath = GetIconPath(session);
+        var hasPreview = previewPath is not null;
+        var hasIcon = iconPath is not null;
 
         return new MomentRow(
             session.Id,
@@ -2834,8 +2835,8 @@ public partial class MainWindow : Window
             BuildCardMeta(session),
             session.CardTime,
             session.SeenDuration,
-            previewImage,
-            iconImage,
+            previewPath,
+            iconPath,
             session.IconGlyph,
             session.IconBackground,
             session.IconForeground,
@@ -2940,6 +2941,27 @@ public partial class MainWindow : Window
         }
     }
 
+    private static string? GetExistingPath(string? path)
+    {
+        return !string.IsNullOrWhiteSpace(path) && File.Exists(path)
+            ? path
+            : null;
+    }
+
+    private static string? GetIconPath(ActivityMomentViewModel session)
+    {
+        var cacheKey = string.Join('\u001f', session.ExecutablePath, session.AppName, session.ProcessName);
+        if (IconPathCache.TryGetValue(cacheKey, out var cachedPath))
+        {
+            return cachedPath;
+        }
+
+        var path = AppIconProvider.GetIcon(session.ExecutablePath, session.AppName, session.ProcessName);
+        var existingPath = GetExistingPath(path);
+        IconPathCache[cacheKey] = existingPath;
+        return existingPath;
+    }
+
     private static Bitmap? GetIconImage(ActivityMomentViewModel session)
     {
         var path = AppIconProvider.GetIcon(session.ExecutablePath, session.AppName, session.ProcessName);
@@ -2992,8 +3014,8 @@ public partial class MainWindow : Window
         string Meta,
         string TimeLabel,
         string SeenLabel,
-        Bitmap? PreviewImage,
-        Bitmap? IconImage,
+        string? PreviewPath,
+        string? IconPath,
         string Glyph,
         string GlyphBackground,
         string GlyphForeground,
