@@ -112,51 +112,62 @@ Users should be able to quickly revisit what happened during a day, recover past
 - [2026-07-12] Real Mac local smoke verified fresh screenshot rows and tight visual crops for GitKraken and Safari, confirming the macOS capture output is no longer full-display for those normal app/browser cases. `LastScreenshotCaptureMethod` is not persisted yet, so `AB#131` should make the exact capture path visible.
 - [2026-07-12] Added a larger screenshot preview modal with a dedicated expand icon in the timeline tile detail band and detail preview surface; normal tile click behavior remains unchanged.
 - [2026-07-17] `v0.1.1-beta.14` release run failed after tag push because both Windows and macOS jobs hit GitHub Actions artifact storage quota at `CreateArtifact`. Tracked as `AB#134`: delete old artifacts/obsolete prerelease assets, wait for GitHub storage usage to recalculate if necessary, then rerun the same tag workflow. Do not retag or move `v0.1.1-beta.14`.
+- [2026-07-19] Cleared obsolete GitHub Actions workflow artifacts from beta.4 through beta.13, leaving published GitHub Releases intact. Reran `v0.1.1-beta.14` release run `29613812220` as attempt 2; Windows and macOS builds succeeded through packaging but still failed at `CreateArtifact` because GitHub had not recalculated artifact storage usage yet. Wait for the 6-12 hour GitHub storage recalculation window, then rerun the same workflow again.
 
 **Pick up now:**
 
-- Complete `AB#134`: clear GitHub Actions artifact quota and rerun `v0.1.1-beta.14`; once green, verify Settings > Where I Live shows `v0.1.1-beta.14 · build <run>.<attempt> · a273d83`.
+- Complete `AB#134`: wait for GitHub Actions artifact storage recalculation after the 2026-07-19 cleanup, then rerun `v0.1.1-beta.14`; once green, verify Settings > Where I Live shows `v0.1.1-beta.14 · build <run>.<attempt> · a273d83`.
 - Finish the remaining `AB#130` verification on a real Mac: normal app and Safari visual crops passed locally on 2026-07-12; still confirm multi-monitor behavior and avoid closing the work item solely on visual evidence because the exact method is not persisted.
 - Update Azure DevOps from a machine with ADO access: add the 2026-07-12 real Mac smoke note to `AB#130`, keep `AB#130` open for multi-monitor/exact-method confirmation, and add the preview-modal verification note to the relevant UI/release-train work item if tracking separately.
 - Then `AB#131` for user-visible fallback diagnostics, including surfacing whether a moment used window-ID capture, rectangle fallback, full-display fallback, or no capture. Keep `AB#132` held unless shell capture still proves flaky.
 - Still open from beta.12 smoke: macOS app menu name, Screen Recording prompt after quit/reopen, Windows tray/background behavior, and dense-day responsiveness.
-- If platform smoke tests pass after screenshot verification, move to Marketing Launch Pass; otherwise fix the remaining blocker and cut the next beta.
+- If platform smoke tests pass after screenshot verification, move to Signing, Trust, And Updates before marketing; otherwise fix the remaining blocker and cut the next beta.
 
-### Next After Release Verification — Marketing Launch Pass
+### Next After Release Verification — Signing, Trust, And Updates
 
-**Why:** Once the artifacts are real, the marketing work should move from draft copy to public-facing launch assets.
+**Why:** Public marketing should not send users to unsigned, hard-to-update desktop builds. The beta can remain internal/ad-hoc, but the first public push needs a clearer trust story and an update path.
+
+**Scope:**
+
+- Add real Windows signing certificate secrets and keep local/internal unsigned builds supported.
+- Confirm Windows installer and executable show the expected verified publisher.
+- Add Apple Developer ID signing and notarization secrets when available.
+- Upgrade macOS output from ad-hoc signed zip toward a signed/notarized `.dmg` with a `MomentTrace.app` bundle.
+- Add a self-update plan for both platforms before public sharing:
+  - Prefer Velopack for a shared Windows/macOS .NET/Avalonia updater path.
+  - Keep Sparkle as the macOS-native fallback if Velopack proves awkward for the final macOS packaging/signing model.
+  - Start with manual update checks if full automatic update installation is too much for the first paid beta.
+  - Host update metadata and packages on GitHub Releases, static hosting, or an explicit update bucket.
+- Add Settings and tray/menu bar entry points for update checks once the updater backend is chosen.
+- Document first-launch warnings, update behavior, rollback/recovery expectations, and known signing limitations in user-facing docs.
+
+**Acceptance criteria:**
+
+- Windows artifacts are signed in release workflow or signing is explicitly blocked on certificate procurement.
+- macOS signing/notarization path is implemented or explicitly blocked on Apple Developer credentials.
+- The app has at least a manual update check before public marketing; automatic background updating is implemented or scheduled with clear scope.
+- User-facing install and update warnings are reduced and documented.
+- Public marketing does not begin until trust/update caveats are acceptable for the target audience.
+
+### Next After Trust/Updates — Marketing Launch Pass
+
+**Why:** Once the artifacts are real, signed/trustworthy enough, and updateable, the marketing work should move from draft copy to public-facing launch assets.
 
 **Scope:**
 
 - Refresh README/landing CTA links if the final beta tag changes.
-- Capture or select final sanitized screenshots from the beta build.
+- Capture or select final sanitized screenshots from the verified build.
 - Publish or export the static landing page draft from `docs/landing/index.html`.
 - Prepare launch post, privacy post, and founder-story post from `docs/marketing-launch-kit.md`.
-- Decide where feedback should go: GitHub Issues, email, form, or waitlist.
+- Decide where feedback and paid-founder-license interest should go: GitHub Issues, email, form, waitlist, or payment checkout.
 
 **Acceptance criteria:**
 
-- Public download link points to a green release.
+- Public download link points to a green, trust-reviewed release.
 - Launch page uses only sanitized images.
 - Feedback route is clear.
 - Known beta caveats are visible and honest.
-
-### Next After Marketing — Signing And Trust
-
-**Why:** Unsigned artifacts are acceptable for an internal beta, but public distribution needs trust polish.
-
-**Scope:**
-
-- Add real Windows signing certificate secrets.
-- Confirm Windows installer shows the expected verified publisher.
-- Add Apple Developer ID signing and notarization secrets when available.
-- Upgrade macOS output from unsigned zip toward signed/notarized DMG.
-
-**Acceptance criteria:**
-
-- Windows artifacts are signed in release workflow.
-- macOS signing/notarization path is implemented or explicitly scheduled.
-- User-facing install warnings are reduced and documented.
+- Paid beta/founder-license CTA is ready if monetization starts with the public launch.
 
 Choose one track below. Each is scoped for a single focused agent session or small PR series. Update `stories.md`, `decisions.md`, and Azure DevOps when done.
 
