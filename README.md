@@ -12,7 +12,7 @@ For a static landing page draft, open [`docs/landing/index.html`](docs/landing/i
 
 ![MomentTrace Avalonia shell preview](docs/assets/momenttrace-avalonia-shell-current.png)
 
-MomentTrace uses a Windows Timeline-inspired workspace with a more visual daily-story layer on top: Workspace, Library, and Sources navigation, date and type filters, grouped moment sections, compact cards with app icons or website screenshots, custom shell chrome, and the Overview daily story dashboard. The preview above uses sanitized demo activity rather than a live personal timeline.
+MomentTrace uses a Windows Timeline-inspired workspace with a more visual daily-story layer on top: Workspace, Library, and Sources navigation, date and type filters, grouped moment sections, compact cards with app icons or website screenshots, custom shell chrome, and the Overview daily story dashboard. The preview above is captured from the current Avalonia desktop app using local test activity.
 
 ### More Screens
 
@@ -37,6 +37,8 @@ Privacy controls are part of Settings rather than hidden configuration. Recent a
 On first run, MomentTrace explains the local-first storage model, keeps adult-site filtering enabled by default, and lets the user choose whether the app should start automatically at sign-in.
 
 ![MomentTrace Settings privacy preview](docs/assets/momenttrace-settings-privacy-preview.png)
+
+The Settings preview is captured from the running app and cropped to focus on privacy controls without exposing incidental recent activity.
 
 ![MomentTrace release flow](docs/assets/momenttrace-release-flow.svg)
 
