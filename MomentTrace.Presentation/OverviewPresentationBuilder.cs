@@ -4,6 +4,7 @@ namespace MomentTrace.Presentation;
 
 public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder timelineBuilder)
 {
+    private const int HeatmapBlockMinutes = 10;
     private readonly TimelinePresentationBuilder _timelineBuilder = timelineBuilder;
     private static readonly ActivityCategory[] BreakdownOrder =
     [
@@ -114,14 +115,14 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
 
     private static IEnumerable<HeatmapSegmentViewModel> BuildHeatmap(IReadOnlyList<TimelineActivity> activities, DateTime day)
     {
-        const int bucketCount = 96;
-        var blockLength = TimeSpan.FromMinutes(15);
+        var bucketCount = (int)TimeSpan.FromDays(1).TotalMinutes / HeatmapBlockMinutes;
+        var blockLength = TimeSpan.FromMinutes(HeatmapBlockMinutes);
         var maxSeconds = blockLength.TotalSeconds;
         var dayStart = day.Date;
         var dayEnd = dayStart.AddDays(1);
         var activeSeconds = new double[bucketCount];
         var captureCounts = new int[bucketCount];
-        var kindSeconds = new Dictionary<ActivityKind, double>[bucketCount];
+        var categorySeconds = new Dictionary<ActivityCategory, double>[bucketCount];
         var appSeconds = new Dictionary<string, double>[bucketCount];
 
         foreach (var activity in activities)
@@ -135,8 +136,9 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
                 continue;
             }
 
-            var startIndex = (int)Math.Floor((clippedStart - dayStart).TotalMinutes / 15d);
-            var endIndex = (int)Math.Ceiling((clippedEnd - dayStart).TotalMinutes / 15d) - 1;
+            var category = ClassifyForBreakdown(activity);
+            var startIndex = (int)Math.Floor((clippedStart - dayStart).TotalMinutes / HeatmapBlockMinutes);
+            var endIndex = (int)Math.Ceiling((clippedEnd - dayStart).TotalMinutes / HeatmapBlockMinutes) - 1;
             startIndex = Math.Clamp(startIndex, 0, bucketCount - 1);
             endIndex = Math.Clamp(endIndex, 0, bucketCount - 1);
 
@@ -152,7 +154,7 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
 
                 activeSeconds[index] += seconds;
                 captureCounts[index]++;
-                AddKindDuration(kindSeconds, index, activity.Kind, seconds);
+                AddCategoryDuration(categorySeconds, index, category, seconds);
                 AddAppDuration(appSeconds, index, activity.AppName, seconds);
             }
         }
@@ -161,7 +163,7 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
         {
             var start = dayStart.AddTicks(blockLength.Ticks * index);
             var end = start.Add(blockLength);
-            var dominant = GetLargestKind(kindSeconds[index]);
+            var dominant = GetLargestCategory(categorySeconds[index]);
             var topApp = GetLargestApp(appSeconds[index]);
             var intensity = Math.Clamp(activeSeconds[index] / maxSeconds, 0, 1);
             var categoryLabel = GetHeatmapCategoryLabel(dominant);
@@ -177,12 +179,12 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
         }
     }
 
-    private static void AddKindDuration(Dictionary<ActivityKind, double>?[] buckets, int index, ActivityKind key, double seconds)
+    private static void AddCategoryDuration(Dictionary<ActivityCategory, double>?[] buckets, int index, ActivityCategory key, double seconds)
     {
         var bucket = buckets[index];
         if (bucket is null)
         {
-            bucket = new Dictionary<ActivityKind, double>();
+            bucket = new Dictionary<ActivityCategory, double>();
             buckets[index] = bucket;
         }
 
@@ -205,14 +207,14 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
             : seconds;
     }
 
-    private static ActivityKind? GetLargestKind(Dictionary<ActivityKind, double>? values)
+    private static ActivityCategory? GetLargestCategory(Dictionary<ActivityCategory, double>? values)
     {
         if (values is null || values.Count == 0)
         {
             return null;
         }
 
-        ActivityKind? largest = null;
+        ActivityCategory? largest = null;
         var largestSeconds = double.MinValue;
         foreach (var pair in values)
         {
@@ -369,14 +371,14 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
         return end > start ? (end - start).TotalSeconds : 0;
     }
 
-    private static string GetHeatmapCategoryLabel(ActivityKind? kind)
+    private static string GetHeatmapCategoryLabel(ActivityCategory? category)
     {
-        return kind switch
+        return category switch
         {
-            ActivityKind.Browser => "Web browsing",
-            ActivityKind.Development => "Development work",
-            ActivityKind.Document => "Documents",
-            ActivityKind.System => "Idle or system surfaces",
+            ActivityCategory.Browsing => "Web browsing",
+            ActivityCategory.Development => "Development work",
+            ActivityCategory.Documents => "Documents",
+            ActivityCategory.System => "Idle or system surfaces",
             _ => "Apps and tools"
         };
     }
@@ -429,19 +431,19 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
         };
     }
 
-    private static string GetHeatmapFill(ActivityKind? kind, double intensity)
+    private static string GetHeatmapFill(ActivityCategory? category, double intensity)
     {
         if (intensity <= 0)
         {
             return ActivityPalette.Empty;
         }
 
-        return kind switch
+        return category switch
         {
-            ActivityKind.Browser => ActivityPalette.Scale(ActivityPalette.Web, intensity),
-            ActivityKind.Development => ActivityPalette.Scale(ActivityPalette.Development, intensity),
-            ActivityKind.Document => ActivityPalette.Scale(ActivityPalette.Documents, intensity),
-            ActivityKind.System => ActivityPalette.Scale(ActivityPalette.SystemActivity, intensity),
+            ActivityCategory.Browsing => ActivityPalette.Scale(ActivityPalette.Web, intensity),
+            ActivityCategory.Development => ActivityPalette.Scale(ActivityPalette.Development, intensity),
+            ActivityCategory.Documents => ActivityPalette.Scale(ActivityPalette.Documents, intensity),
+            ActivityCategory.System => ActivityPalette.Scale(ActivityPalette.SystemActivity, intensity),
             _ => ActivityPalette.Scale(ActivityPalette.Apps, intensity)
         };
     }

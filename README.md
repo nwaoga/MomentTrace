@@ -28,7 +28,7 @@ MomentTrace now splits recording across long sleep gaps and local day changes, s
 
 When browser activity is detected, MomentTrace attempts to capture the active URL with Windows UI Automation and saves a local PNG screenshot only when a new browser session starts.
 
-The **Overview** page now behaves like a more visual daily-story dashboard without requiring AI features. The current Avalonia work includes summary cards, a theme-aware 15-minute activity heatmap, key-moment cards, category breakdown charts, top applications, and a focus-rhythm strip, all sourced from the existing local activity store. Activity colours keep stable category meaning while adapting to the selected workspace theme, and the overview surfaces now degrade more gracefully on empty and low-activity days.
+The **Overview** page now behaves like a more visual daily-story dashboard without requiring AI features. The current Avalonia work includes summary cards, a theme-aware 10-minute activity heatmap, key-moment cards, category breakdown charts, top applications, and a focus-rhythm strip, all sourced from the existing local activity store. Activity colours keep stable category meaning while adapting to the selected workspace theme, and the overview surfaces now degrade more gracefully on empty and low-activity days.
 
 ![MomentTrace privacy controls](docs/assets/momenttrace-privacy-controls.svg)
 
@@ -571,7 +571,7 @@ The Library section uses a simple saved-memory model:
 The Overview page is the daily summary view. In the current Avalonia shell it summarizes the selected date with:
 
 - A day-header and summary cards for captured moments, active time, apps used, longest activity, and idle/gap time
-- A full-width 15-minute activity heatmap with theme-aware category colours and click-through filtering back into Timeline
+- A full-width 10-minute activity heatmap with theme-aware category colours and click-through filtering back into Timeline
 - A `Moments today` gallery driven from the same local grouped sessions used by the Timeline
 - Activity breakdown visuals and top-application summaries built from deterministic local totals
 - A focus-rhythm strip that maps the flow of captured work back through the day
@@ -645,7 +645,7 @@ The Avalonia Overview dashboard also has theme-aware activity colours:
 
 | Activity colour | Used for |
 | --- | --- |
-| `HeatmapEmpty` | Empty 15-minute blocks and quiet gap cells. |
+| `HeatmapEmpty` | Empty 10-minute blocks and quiet gap cells. |
 | `HeatmapApps` | Apps and tools blocks, app-led focus rhythm items, and the apps legend swatch. |
 | `HeatmapWeb` | Web browsing blocks, browser-led focus rhythm items, and the web legend swatch. |
 | `HeatmapDevelopment` | Development work blocks and coding/tooling activity. |

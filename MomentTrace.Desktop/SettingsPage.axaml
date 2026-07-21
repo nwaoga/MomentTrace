@@ -724,6 +724,17 @@
                          FontSize="13"
                          TextWrapping="Wrap" />
             </Grid>
+            <StackPanel Orientation="Horizontal"
+                        Spacing="10">
+              <Button x:Name="CopyBuildInfoButton"
+                      Classes="settings"
+                      Content="Copy build info"
+                      MinWidth="138" />
+              <TextBlock x:Name="CopyBuildInfoStatusText"
+                         Foreground="{DynamicResource MutedTextBrush}"
+                         FontSize="11"
+                         VerticalAlignment="Center" />
+            </StackPanel>
           </StackPanel>
         </Border>
         </Grid>

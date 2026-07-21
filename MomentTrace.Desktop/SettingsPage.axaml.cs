@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Avalonia;
@@ -14,6 +13,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Interactivity;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.VisualTree;
@@ -93,6 +93,7 @@ public partial class SettingsPage : UserControl
         ExportActivityButton.Click += ExportActivityButton_Click;
         DeleteActivityButton.Click += DeleteActivityButton_Click;
         DeleteAllLocalDataButton.Click += DeleteAllLocalDataButton_Click;
+        CopyBuildInfoButton.Click += CopyBuildInfoButton_Click;
 
         LoadCurrentSettings(_preferences.Opacity, currentTimelineViewMode, currentTheme);
         LoadPrivacySettings();
@@ -174,51 +175,12 @@ public partial class SettingsPage : UserControl
 
     private void LoadWhereILive()
     {
-        VersionText.Text = GetDisplayVersion();
+        VersionText.Text = AppBuildIdentity.FullVersion;
         InstallPathText.Text = AppContext.BaseDirectory;
         AppDataPathText.Text = MomentTracePaths.AppDataDirectory;
         DatabasePathText.Text = SqliteActivityStore.DefaultDatabasePath;
         SettingsPathText.Text = DesktopWindowPreferences.PreferencesPath;
-    }
-
-    private static string GetDisplayVersion()
-    {
-        var assembly = Assembly.GetExecutingAssembly();
-        var version = assembly
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
-            .InformationalVersion
-            ?? assembly.GetName().Version?.ToString()
-            ?? "Development";
-
-        var parts = new List<string> { version };
-        var buildNumber = GetAssemblyMetadata(assembly, "BuildNumber");
-        var commitSha = GetAssemblyMetadata(assembly, "CommitSha");
-
-        if (!string.IsNullOrWhiteSpace(buildNumber))
-        {
-            parts.Add($"build {buildNumber}");
-        }
-
-        if (!string.IsNullOrWhiteSpace(commitSha))
-        {
-            parts.Add(ShortCommitSha(commitSha));
-        }
-
-        return string.Join(" · ", parts);
-    }
-
-    private static string? GetAssemblyMetadata(Assembly assembly, string key)
-    {
-        return assembly
-            .GetCustomAttributes<AssemblyMetadataAttribute>()
-            .FirstOrDefault(attribute => string.Equals(attribute.Key, key, StringComparison.OrdinalIgnoreCase))
-            ?.Value;
-    }
-
-    private static string ShortCommitSha(string commitSha)
-    {
-        var trimmed = commitSha.Trim();
-        return trimmed.Length <= 7 ? trimmed : trimmed[..7];
+        CopyBuildInfoStatusText.Text = string.Empty;
     }
 
     private async Task LoadHealthStatusAsync()
@@ -512,6 +474,25 @@ public partial class SettingsPage : UserControl
         {
             ExportActivityButton.IsEnabled = true;
         }
+    }
+
+    private async void CopyBuildInfoButton_Click(object? sender, RoutedEventArgs e)
+    {
+        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+        if (clipboard is null)
+        {
+            CopyBuildInfoStatusText.Text = "Clipboard unavailable";
+            return;
+        }
+
+        var supportInfo = AppBuildIdentity.SupportInfo(
+            AppContext.BaseDirectory,
+            MomentTracePaths.AppDataDirectory,
+            SqliteActivityStore.DefaultDatabasePath,
+            DesktopWindowPreferences.PreferencesPath);
+
+        await clipboard.SetTextAsync(supportInfo);
+        CopyBuildInfoStatusText.Text = "Copied build info";
     }
 
     private async void DeleteActivityButton_Click(object? sender, RoutedEventArgs e)

@@ -127,6 +127,12 @@
             <Setter Property="Margin" Value="0,2,0,0" />
             <Setter Property="TextWrapping" Value="NoWrap" />
         </Style>
+        <Style Selector="PathIcon.navIcon">
+            <Setter Property="Width" Value="17" />
+            <Setter Property="Height" Value="17" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
         <Style Selector="Border.navItem">
             <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Margin" Value="0,0,0,4" />
@@ -539,17 +545,10 @@
             <Grid RowDefinitions="Auto,Auto,*,Auto">
                 <StackPanel Spacing="4">
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <Border Width="36"
-                                Height="36"
-                                CornerRadius="10"
-                                Background="{DynamicResource AccentBrush}">
-                            <TextBlock Text="MT"
-                                       Foreground="{DynamicResource AccentTextBrush}"
-                                       FontWeight="Bold"
-                                       FontSize="13"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center" />
-                        </Border>
+                        <Image Width="42"
+                               Height="42"
+                               Source="avares://MomentTrace.Desktop/Assets/MomentTrace.png"
+                               Stretch="Uniform" />
                         <StackPanel VerticalAlignment="Center" Spacing="2">
                             <TextBlock Text="MomentTrace"
                                        Foreground="{DynamicResource TextBrush}"
@@ -574,12 +573,10 @@
                                     Click="TimelineNavButton_Click"
                                     HorizontalContentAlignment="Stretch">
                                 <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
-                                    <TextBlock x:Name="TimelineNavIcon"
-                                               Text="∿"
-                                               Foreground="{DynamicResource AccentBrush}"
-                                               FontSize="14"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" />
+                                    <PathIcon x:Name="TimelineNavIcon"
+                                              Classes="navIcon"
+                                              Foreground="{DynamicResource AccentBrush}"
+                                              Data="M13,3 C8.03,3 4,7.03 4,12 L1.7,12 L4.7,15 L7.7,12 L5.5,12 C5.5,7.86 8.86,4.5 13,4.5 C17.14,4.5 20.5,7.86 20.5,12 C20.5,16.14 17.14,19.5 13,19.5 C10.93,19.5 9.06,18.66 7.7,17.3 L6.64,18.36 C8.27,19.99 10.52,21 13,21 C17.97,21 22,16.97 22,12 C22,7.03 17.97,3 13,3 Z M12,7 L13.5,7 L13.5,12.2 L17.2,14.4 L16.45,15.7 L12,13 Z" />
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
                                         <TextBlock x:Name="TimelineNavTitle" Text="Timeline" Classes="navTitle" />
                                         <TextBlock x:Name="TimelineNavSubtitle"
@@ -599,12 +596,10 @@
                                     Click="OverviewNavButton_Click"
                                     HorizontalContentAlignment="Stretch">
                                 <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
-                                    <TextBlock x:Name="OverviewNavIcon"
-                                               Text="▦"
-                                               Foreground="{DynamicResource MutedTextBrush}"
-                                               FontSize="13"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" />
+                                    <PathIcon x:Name="OverviewNavIcon"
+                                              Classes="navIcon"
+                                              Foreground="{DynamicResource MutedTextBrush}"
+                                              Data="M3,3 L11,3 L11,11 L3,11 Z M13,3 L21,3 L21,9 L13,9 Z M3,13 L9,13 L9,21 L3,21 Z M11,13 L21,13 L21,21 L11,21 Z" />
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
                                         <TextBlock x:Name="OverviewNavTitle" Text="Overview" Classes="navTitle" />
                                         <TextBlock x:Name="OverviewNavSubtitle" Text="Daily summary" Classes="navSubtitle" />
@@ -634,12 +629,10 @@
                                             Click="SavedMomentsNavButton_Click"
                                             HorizontalContentAlignment="Stretch">
                                         <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
-                                            <TextBlock x:Name="SavedMomentsNavIcon"
-                                                       Text="★"
-                                                       Foreground="{DynamicResource MutedTextBrush}"
-                                                       FontSize="13"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center" />
+                                            <PathIcon x:Name="SavedMomentsNavIcon"
+                                                      Classes="navIcon"
+                                                      Foreground="{DynamicResource MutedTextBrush}"
+                                                      Data="M12,2 L14.96,8.33 L22,9.27 L16.9,14.18 L18.18,21.1 L12,17.77 L5.82,21.1 L7.1,14.18 L2,9.27 L9.04,8.33 Z" />
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
                                                 <TextBlock x:Name="SavedMomentsNavTitle" Text="Saved Moments" Classes="navTitle" />
                                                 <TextBlock x:Name="SavedMomentsNavSubtitle" Text="Pinned and bookmarked" Classes="navSubtitle" />
@@ -657,12 +650,10 @@
                                             Click="NotesNavButton_Click"
                                             HorizontalContentAlignment="Stretch">
                                         <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
-                                            <TextBlock x:Name="NotesNavIcon"
-                                                       Text="☰"
-                                                       Foreground="{DynamicResource MutedTextBrush}"
-                                                       FontSize="13"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center" />
+                                            <PathIcon x:Name="NotesNavIcon"
+                                                      Classes="navIcon"
+                                                      Foreground="{DynamicResource MutedTextBrush}"
+                                                      Data="M6,2 L14,2 L20,8 L20,20 C20,21.1 19.1,22 18,22 L6,22 C4.9,22 4,21.1 4,20 L4,4 C4,2.9 4.9,2 6,2 Z M13,3.5 L13,9 L18.5,9 Z M7,12 L17,12 L17,13.5 L7,13.5 Z M7,15.5 L17,15.5 L17,17 L7,17 Z M7,19 L14,19 L14,20.5 L7,20.5 Z" />
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
                                                 <TextBlock x:Name="NotesNavTitle" Text="Notes" Classes="navTitle" />
                                                 <TextBlock x:Name="NotesNavSubtitle" Text="Moments with notes" Classes="navSubtitle" />
@@ -680,12 +671,10 @@
                                             Click="BookmarksNavButton_Click"
                                             HorizontalContentAlignment="Stretch">
                                         <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
-                                            <TextBlock x:Name="BookmarksNavIcon"
-                                                       Text="⌑"
-                                                       Foreground="{DynamicResource MutedTextBrush}"
-                                                       FontSize="13"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center" />
+                                            <PathIcon x:Name="BookmarksNavIcon"
+                                                      Classes="navIcon"
+                                                      Foreground="{DynamicResource MutedTextBrush}"
+                                                      Data="M7,3 L17,3 C18.1,3 19,3.9 19,5 L19,22 L12,19 L5,22 L5,5 C5,3.9 5.9,3 7,3 Z" />
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
                                                 <TextBlock x:Name="BookmarksNavTitle" Text="Bookmarks" Classes="navTitle" />
                                                 <TextBlock x:Name="BookmarksNavSubtitle" Text="Saved for later" Classes="navSubtitle" />
@@ -707,12 +696,10 @@
                                             Click="AppsNavButton_Click"
                                             HorizontalContentAlignment="Stretch">
                                         <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
-                                            <TextBlock x:Name="AppsNavIcon"
-                                                       Text="▦"
-                                                       Foreground="{DynamicResource MutedTextBrush}"
-                                                       FontSize="13"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center" />
+                                            <PathIcon x:Name="AppsNavIcon"
+                                                      Classes="navIcon"
+                                                      Foreground="{DynamicResource MutedTextBrush}"
+                                                      Data="M4,4 L10,4 L10,10 L4,10 Z M14,4 L20,4 L20,10 L14,10 Z M4,14 L10,14 L10,20 L4,20 Z M14,14 L20,14 L20,20 L14,20 Z" />
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
                                                 <TextBlock x:Name="AppsNavTitle" Text="Apps" Classes="navTitle" />
                                                 <TextBlock x:Name="AppsNavSubtitle" Text="Desktop and tools" Classes="navSubtitle" />
@@ -730,12 +717,10 @@
                                             Click="WebsitesNavButton_Click"
                                             HorizontalContentAlignment="Stretch">
                                         <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
-                                            <TextBlock x:Name="WebsitesNavIcon"
-                                                       Text="◎"
-                                                       Foreground="{DynamicResource MutedTextBrush}"
-                                                       FontSize="13"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center" />
+                                            <PathIcon x:Name="WebsitesNavIcon"
+                                                      Classes="navIcon"
+                                                      Foreground="{DynamicResource MutedTextBrush}"
+                                                      Data="M12,2 C6.48,2 2,6.48 2,12 C2,17.52 6.48,22 12,22 C17.52,22 22,17.52 22,12 C22,6.48 17.52,2 12,2 Z M18.93,8 L15.98,8 C15.65,6.7 15.14,5.48 14.47,4.48 C16.37,5.12 17.95,6.38 18.93,8 Z M12,4.04 C12.83,5.24 13.48,6.56 13.82,8 L10.18,8 C10.52,6.56 11.17,5.24 12,4.04 Z M4.26,14 C4.09,13.36 4,12.69 4,12 C4,11.31 4.09,10.64 4.26,10 L7.64,10 C7.56,10.66 7.5,11.32 7.5,12 C7.5,12.68 7.56,13.34 7.64,14 Z M5.07,16 L8.02,16 C8.35,17.3 8.86,18.52 9.53,19.52 C7.63,18.88 6.05,17.62 5.07,16 Z M8.02,8 L5.07,8 C6.05,6.38 7.63,5.12 9.53,4.48 C8.86,5.48 8.35,6.7 8.02,8 Z M12,19.96 C11.17,18.76 10.52,17.44 10.18,16 L13.82,16 C13.48,17.44 12.83,18.76 12,19.96 Z M14.25,14 L9.75,14 C9.66,13.34 9.6,12.68 9.6,12 C9.6,11.32 9.66,10.66 9.75,10 L14.25,10 C14.34,10.66 14.4,11.32 14.4,12 C14.4,12.68 14.34,13.34 14.25,14 Z M14.47,19.52 C15.14,18.52 15.65,17.3 15.98,16 L18.93,16 C17.95,17.62 16.37,18.88 14.47,19.52 Z M16.36,14 C16.44,13.34 16.5,12.68 16.5,12 C16.5,11.32 16.44,10.66 16.36,10 L19.74,10 C19.91,10.64 20,11.31 20,12 C20,12.69 19.91,13.36 19.74,14 Z" />
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
                                                 <TextBlock x:Name="WebsitesNavTitle" Text="Websites" Classes="navTitle" />
                                                 <TextBlock x:Name="WebsitesNavSubtitle" Text="Browser activity" Classes="navSubtitle" />
@@ -753,12 +738,10 @@
                                             Click="FilesNavButton_Click"
                                             HorizontalContentAlignment="Stretch">
                                         <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
-                                            <TextBlock x:Name="FilesNavIcon"
-                                                       Text="□"
-                                                       Foreground="{DynamicResource MutedTextBrush}"
-                                                       FontSize="13"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center" />
+                                            <PathIcon x:Name="FilesNavIcon"
+                                                      Classes="navIcon"
+                                                      Foreground="{DynamicResource MutedTextBrush}"
+                                                      Data="M10,4 L12,6 L20,6 C21.1,6 22,6.9 22,8 L22,18 C22,19.1 21.1,20 20,20 L4,20 C2.9,20 2,19.1 2,18 L2,6 C2,4.9 2.9,4 4,4 Z" />
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
                                                 <TextBlock x:Name="FilesNavTitle" Text="Files" Classes="navTitle" />
                                                 <TextBlock x:Name="FilesNavSubtitle" Text="Documents and paths" Classes="navSubtitle" />
@@ -835,12 +818,10 @@
                                 HorizontalContentAlignment="Stretch"
                                 ToolTip.Tip="Settings">
                             <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
-                                <TextBlock x:Name="SettingsNavIcon"
-                                           Text="⚙"
-                                           Foreground="{DynamicResource MutedTextBrush}"
-                                           FontSize="14"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center" />
+                                <PathIcon x:Name="SettingsNavIcon"
+                                          Classes="navIcon"
+                                          Foreground="{DynamicResource MutedTextBrush}"
+                                          Data="M19.43,12.98 C19.47,12.66 19.5,12.34 19.5,12 C19.5,11.66 19.47,11.33 19.42,11.02 L21.54,9.37 L19.54,5.9 L17.04,6.9 C16.53,6.51 15.98,6.19 15.36,5.94 L15,3.28 L11,3.28 L10.64,5.94 C10.02,6.19 9.46,6.52 8.96,6.9 L6.46,5.9 L4.46,9.37 L6.58,11.02 C6.53,11.33 6.5,11.66 6.5,12 C6.5,12.34 6.53,12.66 6.58,12.98 L4.46,14.63 L6.46,18.1 L8.96,17.1 C9.47,17.49 10.02,17.81 10.64,18.06 L11,20.72 L15,20.72 L15.36,18.06 C15.98,17.81 16.54,17.48 17.04,17.1 L19.54,18.1 L21.54,14.63 Z M13,15.5 C11.07,15.5 9.5,13.93 9.5,12 C9.5,10.07 11.07,8.5 13,8.5 C14.93,8.5 16.5,10.07 16.5,12 C16.5,13.93 14.93,15.5 13,15.5 Z" />
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
                                     <TextBlock x:Name="SettingsNavTitle" Text="Settings" Classes="navTitle" />
                                     <TextBlock x:Name="SettingsNavSubtitle"
@@ -1914,7 +1895,7 @@
                                            Foreground="{DynamicResource TextBrush}"
                                            FontSize="16"
                                            FontWeight="SemiBold" />
-                                <TextBlock Text="Your day in 15-minute blocks"
+                                <TextBlock Text="Your day in 10-minute blocks"
                                            Foreground="{DynamicResource SubtleTextBrush}"
                                            FontSize="11" />
                             </StackPanel>
@@ -1931,7 +1912,7 @@
                                                          Grid.Row="1"
                                                          Title=""
                                                          Subtitle=""
-                                                         Caption="15 minute blocks" />
+                                                         Caption="10 minute blocks" />
                     </Grid>
 
                     <Grid x:Name="OverviewStoryGrid"

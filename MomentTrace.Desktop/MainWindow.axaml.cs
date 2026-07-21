@@ -116,6 +116,7 @@ public partial class MainWindow : Window
         ApplyTimelineViewMode(_preferences.TimelineViewMode);
         ApplyDetailPaneVisibility();
         InitializeSettingsPage();
+        SettingsNavSubtitle.Text = AppBuildIdentity.ShortVersion;
         SetActiveNavState();
         ConfigurePlatformChrome();
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
@@ -2652,7 +2653,7 @@ public partial class MainWindow : Window
             isSettings && _activeWorkspaceNav == WorkspaceNav.Settings);
     }
 
-    private void SetNavItemState(Border highlight, Border accent, Button button, TextBlock icon, TextBlock title, TextBlock subtitle, bool isActive)
+    private void SetNavItemState(Border highlight, Border accent, Button button, PathIcon icon, TextBlock title, TextBlock subtitle, bool isActive)
     {
         highlight.Background = isActive
             ? new SolidColorBrush(_currentTheme.ActiveSurface)

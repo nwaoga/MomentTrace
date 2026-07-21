@@ -154,7 +154,7 @@ public partial class App : Application
         _trayIcon = new TrayIcon
         {
             Icon = LoadTrayIcon(),
-            ToolTipText = "MomentTrace",
+            ToolTipText = $"MomentTrace {AppBuildIdentity.ShortVersion}",
             Menu = menu,
             IsVisible = true
         };

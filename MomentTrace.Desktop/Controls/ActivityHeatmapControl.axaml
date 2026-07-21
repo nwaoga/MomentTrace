@@ -42,7 +42,7 @@
             <ItemsControl x:Name="FirstHeatmapRow">
               <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                  <UniformGrid Columns="48"
+                  <UniformGrid Columns="{Binding RowColumnCount, RelativeSource={RelativeSource AncestorType=local:ActivityHeatmapControl}}"
                                Rows="1" />
                 </ItemsPanelTemplate>
               </ItemsControl.ItemsPanel>
@@ -56,9 +56,9 @@
                           CommandParameter="{Binding Segment}">
                     <Border HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
-                            Margin="0,0,3,0"
-                            Height="16"
-                            CornerRadius="4"
+                            Margin="0,0,2,0"
+                            Height="14"
+                            CornerRadius="3"
                             Background="{Binding Brush}"
                             ToolTip.Tip="{Binding Tooltip}" />
                   </Button>
@@ -68,7 +68,7 @@
             <ItemsControl x:Name="SecondHeatmapRow">
               <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                  <UniformGrid Columns="48"
+                  <UniformGrid Columns="{Binding RowColumnCount, RelativeSource={RelativeSource AncestorType=local:ActivityHeatmapControl}}"
                                Rows="1" />
                 </ItemsPanelTemplate>
               </ItemsControl.ItemsPanel>
@@ -82,9 +82,9 @@
                           CommandParameter="{Binding Segment}">
                     <Border HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
-                            Margin="0,0,3,0"
-                            Height="16"
-                            CornerRadius="4"
+                            Margin="0,0,2,0"
+                            Height="14"
+                            CornerRadius="3"
                             Background="{Binding Brush}"
                             ToolTip.Tip="{Binding Tooltip}" />
                   </Button>

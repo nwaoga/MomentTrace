@@ -68,6 +68,10 @@ public sealed class PrivacyFilterTests
     public void ActivityExclusionFilter_ExcludesSelfAndLockScreenSurfaces()
     {
         Assert.True(ActivityExclusionFilter.IsExcluded("momenttrace", "MomentTrace", "MomentTrace"));
+        Assert.True(ActivityExclusionFilter.IsExcluded("MomentTrace.Desktop", "MomentTrace", "MomentTrace"));
+        Assert.True(ActivityExclusionFilter.IsExcluded("MomentTrace.Desktop.exe", "MomentTrace", "MomentTrace"));
+        Assert.True(ActivityExclusionFilter.IsExcluded("explorer", "MomentTrace", "MomentTrace"));
+        Assert.True(ActivityExclusionFilter.IsExcluded("explorer", "Other", "Other", @"C:\Apps\MomentTrace.Desktop.exe"));
         Assert.True(ActivityExclusionFilter.IsExcluded("explorer", "Windows", "Default lock screen"));
         Assert.False(ActivityExclusionFilter.IsExcluded("code", "Codex", "Working on tests"));
     }

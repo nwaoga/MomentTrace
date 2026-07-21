@@ -23,7 +23,10 @@ public partial class ActivityHeatmapControl : UserControl
         AvaloniaProperty.Register<ActivityHeatmapControl, string?>(nameof(Title), "Activity heatmap");
 
     public static readonly StyledProperty<string?> CaptionProperty =
-        AvaloniaProperty.Register<ActivityHeatmapControl, string?>(nameof(Caption), "15 minute blocks");
+        AvaloniaProperty.Register<ActivityHeatmapControl, string?>(nameof(Caption), "10 minute blocks");
+
+    public static readonly StyledProperty<int> RowColumnCountProperty =
+        AvaloniaProperty.Register<ActivityHeatmapControl, int>(nameof(RowColumnCount), 72);
 
     public static readonly StyledProperty<string?> SubtitleProperty =
         AvaloniaProperty.Register<ActivityHeatmapControl, string?>(nameof(Subtitle), "Click a block to jump into that part of the day.");
@@ -61,6 +64,12 @@ public partial class ActivityHeatmapControl : UserControl
         set => SetValue(CaptionProperty, value);
     }
 
+    public int RowColumnCount
+    {
+        get => GetValue(RowColumnCountProperty);
+        set => SetValue(RowColumnCountProperty, value);
+    }
+
     public string? Subtitle
     {
         get => GetValue(SubtitleProperty);
@@ -95,12 +104,13 @@ public partial class ActivityHeatmapControl : UserControl
         var midpoint = (int)System.Math.Ceiling(items.Count / 2d);
         var hasVisibleActivity = items.Any(item => item.Intensity > 0d);
 
+        RowColumnCount = midpoint;
         FirstRowItems = items.Take(midpoint).Select(ToHeatmapCell).ToList();
         SecondRowItems = items.Skip(midpoint).Select(ToHeatmapCell).ToList();
         FirstHeatmapRow.ItemsSource = FirstRowItems;
         SecondHeatmapRow.ItemsSource = SecondRowItems;
         HeatmapLegendItems.ItemsSource = (LegendItems ?? [])
-            .Select(item => new HeatmapLegendViewModel(item.Label, CreateBrush(GetCategoryColor(item.Label), 1d)))
+            .Select(item => new HeatmapLegendViewModel(item.Label, CreateLegendBrush(item)))
             .ToList();
         HeatmapContent.IsVisible = hasVisibleActivity;
         HeatmapEmptyState.IsVisible = !hasVisibleActivity;
@@ -110,44 +120,32 @@ public partial class ActivityHeatmapControl : UserControl
     {
         return new HeatmapCellViewModel(
             segment,
-            CreateBrush(GetCategoryColor(segment.CategoryLabel), segment.Intensity),
+            CreateBrush(segment),
             segment.Tooltip);
     }
 
-    private IBrush CreateBrush(Color categoryColor, double intensity)
+    private IBrush CreateBrush(HeatmapSegmentViewModel segment)
     {
-        if (intensity <= 0d)
+        if (segment.Intensity <= 0d || IsGapLabel(segment.CategoryLabel))
         {
             return new SolidColorBrush(_themePalette.HeatmapEmpty);
         }
 
-        var amount = intensity > 0.66d ? 1.0d : intensity > 0.33d ? 0.76d : 0.52d;
-        return new SolidColorBrush(Mix(categoryColor, _themePalette.HeatmapEmpty, amount));
+        return Brush.Parse(segment.Fill);
     }
 
-    private Color GetCategoryColor(string? categoryLabel)
+    private IBrush CreateLegendBrush(LegendItemViewModel item)
     {
-        return categoryLabel switch
-        {
-            "Web browsing" => _themePalette.HeatmapWeb,
-            "Development work" => _themePalette.HeatmapDevelopment,
-            "Documents" => _themePalette.HeatmapDocuments,
-            "Idle or system surfaces" => _themePalette.HeatmapGap,
-            "Gaps or idle space" => _themePalette.HeatmapGap,
-            "Idle / gaps" => _themePalette.HeatmapGap,
-            _ => _themePalette.HeatmapApps
-        };
+        return IsGapLabel(item.Label)
+            ? new SolidColorBrush(_themePalette.HeatmapEmpty)
+            : Brush.Parse(item.Fill);
     }
 
-    private static Color Mix(Color foreground, Color background, double foregroundAmount)
+    private static bool IsGapLabel(string? label)
     {
-        var amount = System.Math.Clamp(foregroundAmount, 0d, 1d);
-        var inverse = 1d - amount;
-
-        return Color.FromRgb(
-            (byte)System.Math.Round((foreground.R * amount) + (background.R * inverse)),
-            (byte)System.Math.Round((foreground.G * amount) + (background.G * inverse)),
-            (byte)System.Math.Round((foreground.B * amount) + (background.B * inverse)));
+        return string.Equals(label, "Gaps or idle space", System.StringComparison.OrdinalIgnoreCase)
+            || string.Equals(label, "Idle / gaps", System.StringComparison.OrdinalIgnoreCase)
+            || string.Equals(label, "Idle or system surfaces", System.StringComparison.OrdinalIgnoreCase);
     }
 
     private sealed record HeatmapCellViewModel(HeatmapSegmentViewModel Segment, IBrush Brush, string Tooltip);
