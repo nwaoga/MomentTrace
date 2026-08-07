@@ -20,7 +20,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 ---
 
-## Current State (2026-07-12 01:13 UTC+1)
+## Current State (2026-08-08 00:01 UTC+1)
 
 **Phase:** Beta release readiness and marketing prep.
 
@@ -43,25 +43,22 @@ Users should be able to quickly revisit what happened during a day, recover past
 - macOS shell shortcut verification passed for Settings, search, Timeline, Overview, and close behavior.
 - macOS foreground capture is now in the first-class `MomentTrace.Mac` platform service and is hosted by `MomentTrace.Desktop` on the cross-platform target.
 - Release tags now build the Avalonia desktop shell for Windows and macOS together.
-- Latest beta tag pushed and downloaded for release verification: `v0.1.1-beta.12`.
-- Windows release artifacts should include an installer and portable zip for `MomentTrace.Desktop.exe`.
-- macOS release artifacts should include an ad-hoc signed `MomentTrace.app` zip for `osx-arm64` until Developer ID signing/notarization is configured.
+- Current beta candidate with published GitHub Release assets: `v0.1.1-beta.14`.
+- Windows release artifacts include an installer and portable zip for `MomentTrace.Desktop.exe`.
+- macOS release artifacts include an ad-hoc signed `MomentTrace.app` zip for `osx-arm64` until Developer ID signing/notarization is configured.
 - README preview SVG rendering has been fixed and validated locally.
 - Marketing launch kit and static landing page draft are in `docs/`.
 - Shared presentation builders for timeline, overview, and detail context.
 - Local SQLite activity store and Windows foreground recorder.
 - Windows beta smoke testing has now found two release-follow-up issues in the Avalonia shell: dense-day performance lag and missing tray/background behavior in the shipped desktop app.
 - The desktop shell now includes shared background-shell behavior in code: Windows tray icon plus macOS menu bar status item, pending real release-build verification on each platform.
-- `v0.1.1-beta.12` is the current beta candidate after fixing macOS app identity and repeated Screen Recording prompt behavior.
-- The desktop shell icon path now has a shared parity pass in code: full-colour app icon for Windows/window surfaces, monochrome template icon for the macOS status item, and macOS bundle `.icns` generation from the same source artwork.
-- `v0.1.1-beta.12` is the current beta candidate after fixing macOS app identity and repeated Screen Recording prompt behavior.
 - The desktop shell icon path now has a shared parity pass in code: full-colour app icon for Windows/window surfaces, monochrome template icon for the macOS status item, and macOS bundle `.icns` generation from the same source artwork.
 - Azure DevOps now tracks the macOS screenshot reliability follow-up as `AB#130`, `AB#131`, and `AB#132`.
 - `AB#130` code path is in progress: macOS capture now prefers window-ID screenshots (`screencapture -l`) with rectangle/full-display fallbacks; real Mac visual verification passed for normal app and Safari browser crops, with multi-monitor and direct capture-method diagnostics still outstanding.
 - Timeline screenshot previews now have a dedicated expand action that opens a larger in-window modal without changing normal tile selection behavior.
-- `v0.1.1-beta.14` was tagged from `a273d83` to verify deferred timeline image loading and in-app build identity display, but the GitHub Actions release run failed during artifact upload because the repository hit GitHub Actions artifact storage quota. This is tracked as `AB#134` and is a release-operations blocker, not an app regression.
+- `AB#134` is closed: after Actions artifact-quota failures on the `v0.1.1-beta.14` tag-push run, the release assets were published via workflow_dispatch run `29874931579` on `codex-direct-release-assets` (`1a57719`). All three expected assets are on the GitHub Release; active Actions artifacts are currently `0`. Do not retag or move `v0.1.1-beta.14`. The artifact-bypass workflow change is not on `main` yet.
 
-**Last pushed:** `a273d83` — show build identity in Settings.
+**Last pushed:** `355b535` — polish desktop overview and privacy defaults.
 
 ---
 
@@ -69,24 +66,20 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 ### Active Next Work — Beta Release Verification
 
-**Why:** The release train now creates Windows and macOS artifacts together, but the beta should not be marketed until the generated assets are confirmed.
+**Why:** The release train now creates Windows and macOS artifacts together, and `v0.1.1-beta.14` assets are published; the beta should not be marketed until those downloaded assets are smoke-tested.
 
-**Status:** In progress.
+**Status:** In progress — publish/quota blocker cleared; install smoke still open.
 
 **Scope:**
 
-- Clear GitHub Actions artifact storage quota under `AB#134` by deleting obsolete workflow artifacts/prerelease assets, then rerun the `v0.1.1-beta.14` release workflow.
-- Verify the `v0.1.1-beta.14` GitHub Actions release run finishes green.
-- Confirm the GitHub Release has all expected artifacts:
-  - `MomentTrace-0.1.1-beta.14-win-x64-setup.exe`
-  - `MomentTrace-0.1.1-beta.14-win-x64.zip`
-  - `MomentTrace-0.1.1-beta.14-macos-arm64.zip`
 - Download and smoke test the Windows installer on a clean or disposable Windows profile.
 - Download and inspect the macOS zip on a Mac, confirming it extracts to `MomentTrace.app` and launches far enough to show the shell/onboarding.
+- Confirm Settings > Where I Live shows a `v0.1.1-beta.14` label with stamped build metadata; published macOS package embeds `BuildNumber=16.1` and `CommitSha=a273d83…`.
 - Update `docs/marketing-launch-kit.md` with any beta caveats discovered during install testing.
 - Fix or verify any blocking shell regressions found during smoke testing before calling the beta marketable, including tray/background behavior and dense-day responsiveness.
 - Verify icon consistency across the shipped Windows and macOS artifacts before public sharing.
 - Keep the next macOS screenshot reliability implementation mapped in Azure DevOps before engineering starts, with capture, diagnostics, and architecture follow-up split across `AB#130`, `AB#131`, and `AB#132`.
+- Consider merging the `codex-direct-release-assets` artifact-bypass workflow change into `main` before the next tagged release, so future tag pushes do not hit Actions artifact storage again.
 
 **Acceptance criteria:**
 
@@ -97,7 +90,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - macOS release build exposes an equivalent menu bar status item so users can tell MomentTrace is still running in the background after closing the main window.
 - macOS zip contains `MomentTrace.app`.
 - Any signing, Gatekeeper, SmartScreen, or first-launch caveat is documented before public sharing.
-- GitHub Actions artifact storage has enough headroom for release uploads, or obsolete artifacts are cleaned before cutting/rerunning release tags.
+- GitHub Actions artifact storage has enough headroom for release uploads, or release packaging no longer depends on Actions artifact storage for publish.
 - `stories.md` records the smoke-test result.
 
 **Progress so far:**
@@ -113,10 +106,15 @@ Users should be able to quickly revisit what happened during a day, recover past
 - [2026-07-12] Added a larger screenshot preview modal with a dedicated expand icon in the timeline tile detail band and detail preview surface; normal tile click behavior remains unchanged.
 - [2026-07-17] `v0.1.1-beta.14` release run failed after tag push because both Windows and macOS jobs hit GitHub Actions artifact storage quota at `CreateArtifact`. Tracked as `AB#134`: delete old artifacts/obsolete prerelease assets, wait for GitHub storage usage to recalculate if necessary, then rerun the same tag workflow. Do not retag or move `v0.1.1-beta.14`.
 - [2026-07-19] Cleared obsolete GitHub Actions workflow artifacts from beta.4 through beta.13, leaving published GitHub Releases intact. Reran `v0.1.1-beta.14` release run `29613812220` as attempt 2; Windows and macOS builds succeeded through packaging but still failed at `CreateArtifact` because GitHub had not recalculated artifact storage usage yet. Wait for the 6-12 hour GitHub storage recalculation window, then rerun the same workflow again.
+- [2026-08-08 00:01 UTC+1] `AB#134` closed on verification. GitHub Release `v0.1.1-beta.14` has all three expected assets from workflow_dispatch run `29874931579` (`codex-direct-release-assets` / `1a57719`). Active Actions artifacts are `0`. Original failed tag-push run `29613812220` left as historical failure; no tag move. Next work is install smoke testing of the published assets, not another quota recovery.
+- [2026-08-08 00:08 UTC+1] Official macOS zip smoke for `v0.1.1-beta.14` passed on this Mac: digest match, clean archive test, `ditto` extract to `MomentTrace.app`, strict ad-hoc codesign verify, launch to a visible `MomentTrace` window. Embedded identity is `v0.1.1-beta.14` / build `16.1` / commit `a273d83`. `spctl` rejects as expected until Developer ID + notarization.
+- [2026-08-08 00:12 UTC+1] macOS close-to-background pass on the same published app: process retained after main-window close/hide; tray assets and `Show MomentTrace` menu strings are present in the package. Dock/`activate` does not unhide the window (restore is tray Show/click only). Menu-bar glyph visual confirmation still needs a brief human glance.
 
 **Pick up now:**
 
-- Complete `AB#134`: wait for GitHub Actions artifact storage recalculation after the 2026-07-19 cleanup, then rerun `v0.1.1-beta.14`; once green, verify Settings > Where I Live shows `v0.1.1-beta.14 · build <run>.<attempt> · a273d83`.
+- Smoke test published `v0.1.1-beta.14` Windows installer + portable zip.
+- Optional human glance: confirm the macOS menu-bar template status item is visible while the published app is backgrounded, then use Show MomentTrace to restore.
+- Consider merging `codex-direct-release-assets` (`1a57719`, artifact-bypass workflow) into `main` before the next tagged release so future tag pushes do not depend on Actions artifact storage.
 - Finish the remaining `AB#130` verification on a real Mac: normal app and Safari visual crops passed locally on 2026-07-12; still confirm multi-monitor behavior and avoid closing the work item solely on visual evidence because the exact method is not persisted.
 - Update Azure DevOps from a machine with ADO access: add the 2026-07-12 real Mac smoke note to `AB#130`, keep `AB#130` open for multi-monitor/exact-method confirmation, and add the preview-modal verification note to the relevant UI/release-train work item if tracking separately.
 - Then `AB#131` for user-visible fallback diagnostics, including surfacing whether a moment used window-ID capture, rectangle fallback, full-display fallback, or no capture. Keep `AB#132` held unless shell capture still proves flaky.
