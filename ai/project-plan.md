@@ -56,7 +56,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Azure DevOps now tracks the macOS screenshot reliability follow-up as `AB#130`, `AB#131`, and `AB#132`.
 - `AB#130` code path is in progress: macOS capture now prefers window-ID screenshots (`screencapture -l`) with rectangle/full-display fallbacks; real Mac visual verification passed for normal app and Safari browser crops, with multi-monitor and direct capture-method diagnostics still outstanding.
 - Timeline screenshot previews now have a dedicated expand action that opens a larger in-window modal without changing normal tile selection behavior.
-- `AB#134` is closed: after Actions artifact-quota failures on the `v0.1.1-beta.14` tag-push run, the release assets were published via workflow_dispatch run `29874931579` on `codex-direct-release-assets` (`1a57719`). All three expected assets are on the GitHub Release; active Actions artifacts are currently `0`. Do not retag or move `v0.1.1-beta.14`. The artifact-bypass workflow change is not on `main` yet.
+- `AB#134` is closed: after Actions artifact-quota failures on the `v0.1.1-beta.14` tag-push run, the release assets were published via workflow_dispatch run `29874931579` on `codex-direct-release-assets` (`1a57719`). All three expected assets are on the GitHub Release; active Actions artifacts are currently `0`. Do not retag or move `v0.1.1-beta.14`. The artifact-bypass workflow change is now staged on the Windows restore PR branch and should land before the next release tag.
 - Published `v0.1.1-beta.14` Windows installer smoke passed for install and initial launch from a disposable install directory, but relaunching `MomentTrace.Desktop.exe` while the app was hidden in background did not restore the main window in automation. A source fix now routes the single-instance restore signal through the tray/menu restore path; it passed local Windows debug smoke and needs a replacement release artifact before public sharing.
 
 **Last pushed:** `355b535` — polish desktop overview and privacy defaults.
@@ -115,9 +115,9 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 **Pick up now:**
 
-- Cut or otherwise produce a replacement Windows release artifact that includes the hidden-window relaunch fix, then repeat installer smoke.
+- Merge the Windows restore + artifact-bypass workflow branch, then cut or otherwise produce a replacement Windows release artifact that includes the hidden-window relaunch fix and repeat installer smoke.
 - Optional human glance: confirm the macOS menu-bar template status item is visible while the published app is backgrounded, then use Show MomentTrace to restore.
-- Consider merging `codex-direct-release-assets` (`1a57719`, artifact-bypass workflow) into `main` before the next tagged release so future tag pushes do not depend on Actions artifact storage.
+- After merge, confirm the artifact-bypass release workflow is on `main` before tagging so future release publishes do not depend on Actions artifact storage.
 - Finish the remaining `AB#130` verification on a real Mac: normal app and Safari visual crops passed locally on 2026-07-12; still confirm multi-monitor behavior and avoid closing the work item solely on visual evidence because the exact method is not persisted.
 - Update Azure DevOps from a machine with ADO access: add the 2026-07-12 real Mac smoke note to `AB#130`, keep `AB#130` open for multi-monitor/exact-method confirmation, and add the preview-modal verification note to the relevant UI/release-train work item if tracking separately.
 - Then `AB#131` for user-visible fallback diagnostics, including surfacing whether a moment used window-ID capture, rectangle fallback, full-display fallback, or no capture. Keep `AB#132` held unless shell capture still proves flaky.
