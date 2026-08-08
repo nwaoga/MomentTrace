@@ -20,6 +20,8 @@ MomentTrace is a desktop app for people who lose time and context jumping betwee
 
 The first beta is focused on local-first recall. MomentTrace stores data on your device, provides privacy exclusions and adult-site filtering, and includes a full local-data cleanup option. It is built for users who want memory and recovery without turning their desktop history into a cloud product.
 
+Public paid-beta or founder-license offers should wait until Windows and macOS artifacts are available from the same beta tag and have both passed install, launch, and background-running smoke tests. The launch can still explain platform-specific trust caveats, but the commercial offer should feel cross-platform from day one.
+
 ## Core Messages
 
 - Remember your workday without manually tracking it.
@@ -211,6 +213,7 @@ Productivity, Windows, Privacy, Developer Tools, Personal Analytics
 - GitHub prerelease exists for the latest verified beta tag.
 - GitHub Actions artifact storage quota has enough headroom for Windows and macOS release uploads.
 - Windows installer, Windows portable zip, and macOS app zip are attached to the release.
+- Windows and macOS artifacts come from the same beta tag before any paid/founder-license CTA is promoted.
 - Settings > Where I Live shows the expected release label, build number, and short commit.
 - Clean Windows install smoke test passes.
 - macOS app zip extracts to `MomentTrace.app`.

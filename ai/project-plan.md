@@ -17,6 +17,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Keep platform-specific capture and startup behavior in platform projects.
 - Use Azure DevOps project `blakboi/MomentTrace` for work items.
 - Use GitHub `main` for pushed work after user approval.
+- Treat the first paid/public beta as a same-day Windows + macOS offer; do not monetize or publicly market a one-platform-only release.
 
 ---
 
@@ -48,6 +49,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - macOS release artifacts include an ad-hoc signed `MomentTrace.app` zip for `osx-arm64` until Developer ID signing/notarization is configured.
 - README preview SVG rendering has been fixed and validated locally.
 - Marketing launch kit and static landing page draft are in `docs/`.
+- Monetization posture: public marketing and founder-license interest should wait until Windows and macOS artifacts are available from the same release tag and have both passed install/launch/background smoke.
 - Shared presentation builders for timeline, overview, and detail context.
 - Local SQLite activity store and Windows foreground recorder.
 - Windows beta smoke testing has now found two release-follow-up issues in the Avalonia shell: dense-day performance lag and missing tray/background behavior in the shipped desktop app.
@@ -89,6 +91,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Windows installer build preserves expected tray/background behavior for a memory-capture app.
 - Windows and macOS release builds use matching MomentTrace branding across installer/app bundle, window, tray, Dock, Finder, and menu bar surfaces.
 - macOS release build exposes an equivalent menu bar status item so users can tell MomentTrace is still running in the background after closing the main window.
+- Windows and macOS artifacts from the same replacement beta tag both pass enough smoke testing to support a single cross-platform beta CTA.
 - macOS zip contains `MomentTrace.app`.
 - Any signing, Gatekeeper, SmartScreen, or first-launch caveat is documented before public sharing.
 - GitHub Actions artifact storage has enough headroom for release uploads, or release packaging no longer depends on Actions artifact storage for publish.
@@ -149,6 +152,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - The app has at least a manual update check before public marketing; automatic background updating is implemented or scheduled with clear scope.
 - User-facing install and update warnings are reduced and documented.
 - Public marketing does not begin until trust/update caveats are acceptable for the target audience.
+- Paid beta or founder-license offers do not begin until both Windows and macOS are available and smoke-tested from the same release train.
 
 ### Next After Trust/Updates — Marketing Launch Pass
 
@@ -161,6 +165,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Publish or export the static landing page draft from `docs/landing/index.html`.
 - Prepare launch post, privacy post, and founder-story post from `docs/marketing-launch-kit.md`.
 - Decide where feedback and paid-founder-license interest should go: GitHub Issues, email, form, waitlist, or payment checkout.
+- Keep the launch offer cross-platform: Windows and macOS must be available together before asking for money.
 
 **Acceptance criteria:**
 
