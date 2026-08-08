@@ -37,7 +37,7 @@ The first beta is focused on local-first recall. MomentTrace stores data on your
 
 ## Landing Page Outline
 
-A static landing page draft is available at `docs/landing/index.html`. It uses sanitized product visuals from `docs/assets/` and points the beta CTA at `v0.1.1-beta.12`.
+A static landing page draft is available at `docs/landing/index.html`. It uses sanitized product visuals from `docs/assets/` and points the beta CTA at the GitHub Releases page until the replacement beta tag is cut.
 
 ### Hero
 
@@ -125,6 +125,7 @@ Use sanitized data only. Avoid showing real client names, private documents, per
 
 Existing sanitized assets:
 
+- `docs/assets/momenttrace-promotional-poster.png`
 - `docs/assets/momenttrace-avalonia-shell-current.svg`
 - `docs/assets/momenttrace-avalonia-shell-current.png`
 - `docs/assets/momenttrace-timeline-detail.svg`
@@ -133,6 +134,12 @@ Existing sanitized assets:
 - `docs/assets/momenttrace-settings-privacy-preview.png`
 - `docs/assets/momenttrace-theme-collage.svg`
 - `docs/assets/momenttrace-theme-collage.png`
+
+Recommended poster usage:
+
+- Use `docs/assets/momenttrace-promotional-poster.png` as the canonical launch poster for README sharing, the landing page visual section, and social posts where one image needs to explain the product.
+- Use tighter product screenshots for release verification, install notes, or places where exact build identity must be inspected.
+- Refresh the poster after the next replacement beta if the mocked build label becomes prominent in final public crops.
 
 ## Demo Video Script
 

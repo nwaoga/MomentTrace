@@ -10,6 +10,10 @@ For a static landing page draft, open [`docs/landing/index.html`](docs/landing/i
 
 ## Preview
 
+![MomentTrace promotional overview poster](docs/assets/momenttrace-promotional-poster.png)
+
+The promotional overview poster above is a sanitized launch asset for social posts, README sharing, and the static landing page. Use the product screenshots below when exact UI state or release-build details matter.
+
 ![MomentTrace Avalonia shell preview](docs/assets/momenttrace-avalonia-shell-current.png)
 
 MomentTrace uses a Windows Timeline-inspired workspace with a more visual daily-story layer on top: Workspace, Library, and Sources navigation, date and type filters, grouped moment sections, compact cards with app icons or website screenshots, custom shell chrome, and the Overview daily story dashboard. The preview above is captured from the current Avalonia desktop app using local test activity.
