@@ -272,20 +272,7 @@ public partial class App : Application
 
     private void BringMainWindowToFront()
     {
-        if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop
-            || desktop.MainWindow is not Window mainWindow)
-        {
-            return;
-        }
-
-        EnsureMainWindowVisible(mainWindow);
-
-        if (mainWindow.WindowState == WindowState.Minimized)
-        {
-            mainWindow.WindowState = WindowState.Normal;
-        }
-
-        mainWindow.Activate();
+        ShowMainWindow();
     }
 
     private static void StartupTrace(string message)

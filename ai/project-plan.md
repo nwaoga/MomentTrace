@@ -57,6 +57,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - `AB#130` code path is in progress: macOS capture now prefers window-ID screenshots (`screencapture -l`) with rectangle/full-display fallbacks; real Mac visual verification passed for normal app and Safari browser crops, with multi-monitor and direct capture-method diagnostics still outstanding.
 - Timeline screenshot previews now have a dedicated expand action that opens a larger in-window modal without changing normal tile selection behavior.
 - `AB#134` is closed: after Actions artifact-quota failures on the `v0.1.1-beta.14` tag-push run, the release assets were published via workflow_dispatch run `29874931579` on `codex-direct-release-assets` (`1a57719`). All three expected assets are on the GitHub Release; active Actions artifacts are currently `0`. Do not retag or move `v0.1.1-beta.14`. The artifact-bypass workflow change is not on `main` yet.
+- Published `v0.1.1-beta.14` Windows installer smoke passed for install and initial launch from a disposable install directory, but relaunching `MomentTrace.Desktop.exe` while the app was hidden in background did not restore the main window in automation. A source fix now routes the single-instance restore signal through the tray/menu restore path; it passed local Windows debug smoke and needs a replacement release artifact before public sharing.
 
 **Last pushed:** `355b535` — polish desktop overview and privacy defaults.
 
@@ -68,7 +69,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 **Why:** The release train now creates Windows and macOS artifacts together, and `v0.1.1-beta.14` assets are published; the beta should not be marketed until those downloaded assets are smoke-tested.
 
-**Status:** In progress — publish/quota blocker cleared; install smoke still open.
+**Status:** In progress — publish/quota blocker cleared; Windows/macOS launch smoke mostly passed; Windows relaunch restore fixed locally; replacement release smoke and visual status-item/tray checks still open.
 
 **Scope:**
 
@@ -109,10 +110,12 @@ Users should be able to quickly revisit what happened during a day, recover past
 - [2026-08-08 00:01 UTC+1] `AB#134` closed on verification. GitHub Release `v0.1.1-beta.14` has all three expected assets from workflow_dispatch run `29874931579` (`codex-direct-release-assets` / `1a57719`). Active Actions artifacts are `0`. Original failed tag-push run `29613812220` left as historical failure; no tag move. Next work is install smoke testing of the published assets, not another quota recovery.
 - [2026-08-08 00:08 UTC+1] Official macOS zip smoke for `v0.1.1-beta.14` passed on this Mac: digest match, clean archive test, `ditto` extract to `MomentTrace.app`, strict ad-hoc codesign verify, launch to a visible `MomentTrace` window. Embedded identity is `v0.1.1-beta.14` / build `16.1` / commit `a273d83`. `spctl` rejects as expected until Developer ID + notarization.
 - [2026-08-08 00:12 UTC+1] macOS close-to-background pass on the same published app: process retained after main-window close/hide; tray assets and `Show MomentTrace` menu strings are present in the package. Dock/`activate` does not unhide the window (restore is tray Show/click only). Menu-bar glyph visual confirmation still needs a brief human glance.
+- [2026-08-08 11:08 UTC+1] Official Windows installer smoke for `v0.1.1-beta.14` passed install and initial launch: setup hash matched GitHub, unsigned admin Inno install completed with exit code 0 into a disposable install directory, installed `MomentTrace.Desktop.exe` reported `ProductVersion=v0.1.1-beta.14`, and launch opened a responsive `MomentTrace` window. Close-to-background retained the process after the window was closed, but relaunching the executable while hidden did not restore the window; track as a background-shell follow-up before marketing.
+- [2026-08-08 11:22 UTC+1] Windows hidden-window relaunch is fixed locally: single-instance restore now calls the same `ShowMainWindow()` path used by tray/menu restore. Local Windows debug smoke passed for initial launch, close-to-background, relaunch restoring the original window, and single-process behavior. `dotnet build .\MomentTrace.Desktop\MomentTrace.Desktop.csproj -f net8.0-windows` and `dotnet test .\MomentTrace.Tests\MomentTrace.Tests.csproj` passed.
 
 **Pick up now:**
 
-- Smoke test published `v0.1.1-beta.14` Windows installer + portable zip.
+- Cut or otherwise produce a replacement Windows release artifact that includes the hidden-window relaunch fix, then repeat installer smoke.
 - Optional human glance: confirm the macOS menu-bar template status item is visible while the published app is backgrounded, then use Show MomentTrace to restore.
 - Consider merging `codex-direct-release-assets` (`1a57719`, artifact-bypass workflow) into `main` before the next tagged release so future tag pushes do not depend on Actions artifact storage.
 - Finish the remaining `AB#130` verification on a real Mac: normal app and Safari visual crops passed locally on 2026-07-12; still confirm multi-monitor behavior and avoid closing the work item solely on visual evidence because the exact method is not persisted.
