@@ -13,3 +13,4 @@ ai/local-secrets.ps1
 ai/*.local.*
 ai/.local/
 ai/theme-qa-output/
+.smoke/
