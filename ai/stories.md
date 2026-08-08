@@ -14,6 +14,7 @@
 - [ ] Add real Windows signing secrets, sign the Windows executable/installer in release workflow, and verify the installer shows the expected publisher.
 - [ ] Add Apple Developer ID signing and notarization secrets when credentials are available, then produce a signed/notarized macOS `.dmg`.
 - [ ] Add a Windows and macOS self-update path before public marketing, preferring Velopack unless macOS packaging/signing pushes that platform toward Sparkle.
+- [ ] Prepare paid/founder-license launch only after Windows and macOS artifacts from the same beta tag pass install, launch, and background smoke testing.
 - [ ] Promote marketing launch assets after release artifacts, signing/trust caveats, and the update path are verified.
 
 ## Done
