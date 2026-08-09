@@ -21,7 +21,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 ---
 
-## Current State (2026-08-08 00:01 UTC+1)
+## Current State (2026-08-09 23:00 UTC+1)
 
 **Phase:** Beta release readiness and marketing prep.
 
@@ -52,17 +52,17 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Monetization posture: public marketing and founder-license interest should wait until Windows and macOS artifacts are available from the same release tag and have both passed install/launch/background smoke.
 - Shared presentation builders for timeline, overview, and detail context.
 - Local SQLite activity store and Windows foreground recorder.
-- Windows beta smoke testing has now found two release-follow-up issues in the Avalonia shell: dense-day performance lag and missing tray/background behavior in the shipped desktop app.
-- The desktop shell now includes shared background-shell behavior in code: Windows tray icon plus macOS menu bar status item, pending real release-build verification on each platform.
+- Windows beta smoke testing previously found two release-follow-up issues in the Avalonia shell: dense-day performance lag and missing tray/background behavior in the shipped desktop app. The tray/background issue is fixed and verified in the published `v0.1.1-beta.15` Windows artifacts; dense-day responsiveness remains a separate follow-up.
+- The desktop shell now includes shared background-shell behavior in code: Windows tray icon plus macOS menu bar status item, verified on published beta artifacts.
 - The desktop shell icon path now has a shared parity pass in code: full-colour app icon for Windows/window surfaces, monochrome template icon for the macOS status item, and macOS bundle `.icns` generation from the same source artwork.
 - Azure DevOps now tracks the macOS screenshot reliability follow-up as `AB#130`, `AB#131`, and `AB#132`.
 - `AB#130` code path is in progress: macOS capture now prefers window-ID screenshots (`screencapture -l`) with rectangle/full-display fallbacks; real Mac visual verification passed for normal app and Safari browser crops, with multi-monitor and direct capture-method diagnostics still outstanding.
 - Timeline screenshot previews now have a dedicated expand action that opens a larger in-window modal without changing normal tile selection behavior.
 - `AB#134` is closed: after Actions artifact-quota failures on the `v0.1.1-beta.14` tag-push run, the release assets were published via workflow_dispatch run `29874931579` on `codex-direct-release-assets` (`1a57719`). All three expected assets are on the GitHub Release; active Actions artifacts are currently `0`. Do not retag or move `v0.1.1-beta.14`. The artifact-bypass workflow change is now on `main` and was used successfully for `v0.1.1-beta.15`.
-- Published `v0.1.1-beta.14` Windows installer smoke passed for install and initial launch from a disposable install directory, but relaunching `MomentTrace.Desktop.exe` while the app was hidden in background did not restore the main window in automation. A source fix now ships in `v0.1.1-beta.15` and still needs Windows release smoke.
 - Published `v0.1.1-beta.15` macOS zip smoke passed (launch, status-item Show/Exit, stamped `v0.1.1-beta.15` / build `17.1` / `f4dd50e`).
+- Published `v0.1.1-beta.15` Windows setup and portable smoke passed: digests matched GitHub, installed/portable builds launched as `v0.1.1-beta.15`, close-to-background retained the original process, relaunch restored the hidden main window, tray overflow showed the MomentTrace mark, and silent uninstall completed cleanly.
 
-**Last pushed:** `v0.1.1-beta.15` tagged; macOS smoke recorded.
+**Last pushed:** `v0.1.1-beta.15` tagged; macOS and Windows smoke recorded.
 
 ---
 
@@ -70,15 +70,15 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 ### Active Next Work — Beta Release Verification
 
-**Why:** The release train now creates Windows and macOS artifacts together, and `v0.1.1-beta.14` assets are published; the beta should not be marketed until those downloaded assets are smoke-tested.
+**Why:** The release train now creates Windows and macOS artifacts together, and `v0.1.1-beta.15` has passed the core cross-platform artifact smoke gate. Public marketing still needs a clearer trust/update story and the known dense-day responsiveness caveat handled or documented.
 
-**Status:** In progress — `v0.1.1-beta.15` published and macOS smoke passed; Windows installer/portable smoke (relaunch-while-hidden) is the remaining beta.15 gate.
+**Status:** Passed for `v0.1.1-beta.15` — Windows and macOS release artifacts from the same tag passed the core install/launch/background smoke gate. Dense-day responsiveness remains a follow-up before broad marketing, and signing/trust/updates are the next launch-readiness track.
 
 **Scope:**
 
 - Download and smoke test the Windows installer on a clean or disposable Windows profile.
 - Download and inspect the macOS zip on a Mac, confirming it extracts to `MomentTrace.app` and launches far enough to show the shell/onboarding.
-- Confirm Settings > Where I Live shows a `v0.1.1-beta.14` label with stamped build metadata; published macOS package embeds `BuildNumber=16.1` and `CommitSha=a273d83…`.
+- Confirm Settings > Where I Live shows the current beta label with stamped build metadata.
 - Update `docs/marketing-launch-kit.md` with any beta caveats discovered during install testing.
 - Fix or verify any blocking shell regressions found during smoke testing before calling the beta marketable, including tray/background behavior and dense-day responsiveness.
 - Verify icon consistency across the shipped Windows and macOS artifacts before public sharing.
@@ -118,15 +118,15 @@ Users should be able to quickly revisit what happened during a day, recover past
 - [2026-08-08 11:08 UTC+1] Official Windows installer smoke for `v0.1.1-beta.14` passed install and initial launch: setup hash matched GitHub, unsigned admin Inno install completed with exit code 0 into a disposable install directory, installed `MomentTrace.Desktop.exe` reported `ProductVersion=v0.1.1-beta.14`, and launch opened a responsive `MomentTrace` window. Close-to-background retained the process after the window was closed, but relaunching the executable while hidden did not restore the window; track as a background-shell follow-up before marketing.
 - [2026-08-08 11:22 UTC+1] Windows hidden-window relaunch is fixed locally: single-instance restore now calls the same `ShowMainWindow()` path used by tray/menu restore. Local Windows debug smoke passed for initial launch, close-to-background, relaunch restoring the original window, and single-process behavior. `dotnet build .\MomentTrace.Desktop\MomentTrace.Desktop.csproj -f net8.0-windows` and `dotnet test .\MomentTrace.Tests\MomentTrace.Tests.csproj` passed.
 - [2026-08-08 21:50 UTC+1] Official `v0.1.1-beta.15` macOS zip smoke passed on this Mac: digest `sha256:90728321…`, strict ad-hoc codesign, launch to `MomentTrace`, status-item tooltip `MomentTrace v0.1.1-beta.15`, close-to-background then Show restore, Exit clean. Stamped build `17.1` / commit `f4dd50e` from release run `31277447681`.
+- [2026-08-09 23:00 UTC+1] Official `v0.1.1-beta.15` Windows setup and portable zip smoke passed: setup digest `sha256:5cad5ca4…`, zip digest `sha256:81ffbd4a…`, both builds reported `ProductVersion=v0.1.1-beta.15`, launched to the Avalonia `MomentTrace` shell, close-to-background kept the process alive with no main window handle, relaunch restored the original hidden window while the second process exited, and hidden-icons overflow showed the MomentTrace full-colour tray mark. Silent uninstall exited 0 with no remaining app processes.
 
 **Pick up now:**
 
-- Smoke published `v0.1.1-beta.15` Windows setup + portable zip on a disposable Windows profile, especially relaunch-while-hidden restore (the ship-blocking fix in this tag).
-- Confirm Windows tray icon visibility on the same beta.15 release build.
+- Move to Signing, Trust, And Updates before public marketing: Windows verified-publisher signing, Apple Developer ID/notarization, and at least a manual update-check path.
 - Finish the remaining `AB#130` verification on a real Mac: normal app and Safari visual crops passed locally on 2026-07-12; still confirm multi-monitor behavior and avoid closing the work item solely on visual evidence because the exact method is not persisted.
 - Update Azure DevOps from a machine with ADO access: add the 2026-07-12 real Mac smoke note to `AB#130`, keep `AB#130` open for multi-monitor/exact-method confirmation, and add the preview-modal verification note to the relevant UI/release-train work item if tracking separately.
 - Then `AB#131` for user-visible fallback diagnostics, including surfacing whether a moment used window-ID capture, rectangle fallback, full-display fallback, or no capture. Keep `AB#132` held unless shell capture still proves flaky.
-- Still open from beta.12 smoke: macOS app menu name, Screen Recording prompt after quit/reopen, Windows tray/background behavior, and dense-day responsiveness.
+- Still open from beta.12 smoke: macOS app menu name, Screen Recording prompt after quit/reopen, and dense-day responsiveness.
 - If platform smoke tests pass after screenshot verification, move to Signing, Trust, And Updates before marketing; otherwise fix the remaining blocker and cut the next beta.
 
 ### Next After Release Verification — Signing, Trust, And Updates
