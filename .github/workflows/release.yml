@@ -10,6 +10,11 @@ on:
         description: "Release version, for example v0.1.0 or v0.1.1-beta.6"
         required: true
         type: string
+      require_windows_signing:
+        description: "Fail the Windows job if code-signing secrets are missing or artifacts are unsigned"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -25,6 +30,7 @@ jobs:
       is_prerelease: ${{ steps.version.outputs.is_prerelease }}
       windows_artifact_name: ${{ steps.version.outputs.windows_artifact_name }}
       macos_artifact_name: ${{ steps.version.outputs.macos_artifact_name }}
+      requires_windows_signing: ${{ steps.version.outputs.requires_windows_signing }}
     steps:
       - name: Resolve version
         id: version
@@ -42,6 +48,10 @@ jobs:
           $isPrerelease = -not [string]::IsNullOrWhiteSpace($suffix)
           $windowsArtifactName = "MomentTrace-$packageLabel-win-x64"
           $macosArtifactName = "MomentTrace-$packageLabel-macos-arm64"
+          $requiresWindowsSigning = -not $isPrerelease
+          if ("${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ inputs.require_windows_signing }}" -eq "true") {
+            $requiresWindowsSigning = $true
+          }
 
           "release_tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "package_version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
@@ -49,6 +59,7 @@ jobs:
           "is_prerelease=$isPrerelease" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "windows_artifact_name=$windowsArtifactName" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "macos_artifact_name=$macosArtifactName" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "requires_windows_signing=$requiresWindowsSigning" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
   build-windows:
     name: Build Windows release
@@ -80,7 +91,12 @@ jobs:
           WINDOWS_SIGNING_PFX_BASE64: ${{ secrets.WINDOWS_SIGNING_PFX_BASE64 }}
           WINDOWS_SIGNING_PFX_PASSWORD: ${{ secrets.WINDOWS_SIGNING_PFX_PASSWORD }}
         run: |
+          "WINDOWS_ARTIFACTS_SIGNED=false" | Out-File -FilePath $env:GITHUB_ENV -Append
           if ([string]::IsNullOrWhiteSpace($env:WINDOWS_SIGNING_PFX_BASE64) -or [string]::IsNullOrWhiteSpace($env:WINDOWS_SIGNING_PFX_PASSWORD)) {
+            if ("${{ needs.prepare.outputs.requires_windows_signing }}" -eq "True") {
+              throw "Windows signing is required for this release, but WINDOWS_SIGNING_PFX_BASE64 or WINDOWS_SIGNING_PFX_PASSWORD is not configured."
+            }
+
             Write-Host "Windows signing secrets are not configured; release artifacts will be unsigned."
             return
           }
@@ -90,6 +106,7 @@ jobs:
           $password = ConvertTo-SecureString $env:WINDOWS_SIGNING_PFX_PASSWORD -AsPlainText -Force
           $cert = Import-PfxCertificate -FilePath $certPath -CertStoreLocation Cert:\CurrentUser\My -Password $password
           "WINDOWS_SIGNING_CERT_THUMBPRINT=$($cert.Thumbprint)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "WINDOWS_ARTIFACTS_SIGNED=true" | Out-File -FilePath $env:GITHUB_ENV -Append
           Remove-Item -LiteralPath $certPath -Force
 
       - name: Install Inno Setup
@@ -121,6 +138,35 @@ jobs:
             -Path ".\artifacts\${{ needs.prepare.outputs.windows_artifact_name }}\*" `
             -DestinationPath ".\dist\${{ needs.prepare.outputs.windows_artifact_name }}.zip" `
             -Force
+
+      - name: Verify Windows signing status
+        shell: pwsh
+        run: |
+          $mustBeSigned = "${{ needs.prepare.outputs.requires_windows_signing }}" -eq "True"
+          $paths = @(
+            ".\artifacts\${{ needs.prepare.outputs.windows_artifact_name }}\MomentTrace.Desktop.exe",
+            ".\dist\MomentTrace-${{ needs.prepare.outputs.package_label }}-win-x64-setup.exe"
+          )
+
+          foreach ($path in $paths) {
+            if (-not (Test-Path -LiteralPath $path)) {
+              throw "Expected Windows artifact was not found for signing verification: $path"
+            }
+
+            $signature = Get-AuthenticodeSignature -LiteralPath $path
+            if ($signature.Status -eq "Valid") {
+              Write-Host "Valid signature: $path"
+              Write-Host "Signer: $($signature.SignerCertificate.Subject)"
+              continue
+            }
+
+            $message = "Unsigned or invalid Windows artifact: $path (status: $($signature.Status))"
+            if ($mustBeSigned) {
+              throw $message
+            }
+
+            Write-Warning $message
+          }
 
       - name: Upload Windows release assets
         shell: pwsh

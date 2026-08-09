@@ -58,17 +58,19 @@ The signing script verifies each signed artifact with `signtool verify /pa /v`. 
 
 ## Release Workflow
 
-`.github/workflows/release.yml` now imports the signing certificate when both signing secrets are configured. If secrets are absent, the workflow still produces unsigned artifacts for internal test releases and writes a clear log message.
+`.github/workflows/release.yml` imports the signing certificate when both signing secrets are configured. Prerelease builds can still produce unsigned artifacts for internal testing, but stable release tags require signing and fail if the signing secrets are missing or the final Windows artifacts are unsigned. Manual workflow runs also expose `require_windows_signing`; set it to `true` when validating a public-beta candidate before broad sharing.
 
 The release job:
 
 1. Resolves the semantic version tag.
-2. Imports the signing certificate when secrets exist.
-3. Publishes the Windows app.
-4. Packages the portable zip.
+2. Decides whether Windows signing is required. Stable tags require it automatically; prerelease/manual runs can opt in with `require_windows_signing`.
+3. Imports the signing certificate when secrets exist, or fails if signing is required and secrets are absent.
+4. Publishes the Windows app.
 5. Builds the Inno Setup installer.
 6. Signs `MomentTrace.Desktop.exe` and the setup executable when a certificate is available.
-7. Uploads release artifacts.
+7. Packages the portable zip from the signed publish output.
+8. Verifies the Authenticode signature status for `MomentTrace.Desktop.exe` and the setup executable, failing when signing is required.
+9. Uploads release artifacts.
 
 Prerelease tags such as `v0.1.1-beta.1` are supported. The release workflow keeps assembly and file versions numeric, names artifacts with the prerelease label, and marks the GitHub Release as a prerelease.
 
@@ -78,3 +80,10 @@ Prerelease tags such as `v0.1.1-beta.1` are supported. The release workflow keep
 - Rotate the PFX password if it is shared outside the release system.
 - Consider Azure Trusted Signing or another HSM-backed provider before a public launch to avoid long-lived PFX handling.
 - Keep timestamping enabled so signatures remain valid after certificate expiry.
+
+## Public-Beta Readiness Checklist
+
+- Configure `WINDOWS_SIGNING_PFX_BASE64` and `WINDOWS_SIGNING_PFX_PASSWORD` in the protected release environment or repository secrets.
+- Run the Release workflow manually for the beta tag with `require_windows_signing=true`.
+- Confirm the Windows job logs show valid signatures for both `MomentTrace.Desktop.exe` and the setup executable.
+- Smoke the downloaded signed setup artifact on a clean Windows machine and verify File Properties > Digital Signatures plus the UAC verified-publisher prompt.

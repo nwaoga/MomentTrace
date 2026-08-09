@@ -47,6 +47,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Current beta candidate with published GitHub Release assets: `v0.1.1-beta.15`.
 - Windows release artifacts include an installer and portable zip for `MomentTrace.Desktop.exe`.
 - macOS release artifacts include an ad-hoc signed `MomentTrace.app` zip for `osx-arm64` until Developer ID signing/notarization is configured.
+- Windows signing readiness now has an enforceable release gate: stable tags require Authenticode signing, manual prerelease runs can opt in with `require_windows_signing=true`, and the Windows job verifies executable/setup signature status before upload. Real signing certificate procurement/secrets and verified-publisher smoke are tracked as `AB#142`.
 - README preview SVG rendering has been fixed and validated locally.
 - Marketing launch kit and static landing page draft are in `docs/`.
 - Monetization posture: public marketing and founder-license interest should wait until Windows and macOS artifacts are available from the same release tag and have both passed install/launch/background smoke.
@@ -119,10 +120,12 @@ Users should be able to quickly revisit what happened during a day, recover past
 - [2026-08-08 11:22 UTC+1] Windows hidden-window relaunch is fixed locally: single-instance restore now calls the same `ShowMainWindow()` path used by tray/menu restore. Local Windows debug smoke passed for initial launch, close-to-background, relaunch restoring the original window, and single-process behavior. `dotnet build .\MomentTrace.Desktop\MomentTrace.Desktop.csproj -f net8.0-windows` and `dotnet test .\MomentTrace.Tests\MomentTrace.Tests.csproj` passed.
 - [2026-08-08 21:50 UTC+1] Official `v0.1.1-beta.15` macOS zip smoke passed on this Mac: digest `sha256:90728321…`, strict ad-hoc codesign, launch to `MomentTrace`, status-item tooltip `MomentTrace v0.1.1-beta.15`, close-to-background then Show restore, Exit clean. Stamped build `17.1` / commit `f4dd50e` from release run `31277447681`.
 - [2026-08-09 23:00 UTC+1] Official `v0.1.1-beta.15` Windows setup and portable zip smoke passed: setup digest `sha256:5cad5ca4…`, zip digest `sha256:81ffbd4a…`, both builds reported `ProductVersion=v0.1.1-beta.15`, launched to the Avalonia `MomentTrace` shell, close-to-background kept the process alive with no main window handle, relaunch restored the original hidden window while the second process exited, and hidden-icons overflow showed the MomentTrace full-colour tray mark. Silent uninstall exited 0 with no remaining app processes.
+- [2026-08-09 23:20 UTC+1] Windows signing readiness gate added: stable tags now require Windows signing secrets and valid Authenticode signatures, manual prerelease runs can force the same behavior with `require_windows_signing=true`, and `docs/windows-code-signing.md` documents the public-beta readiness checklist.
 
 **Pick up now:**
 
-- Move to Signing, Trust, And Updates before public marketing: Windows verified-publisher signing, Apple Developer ID/notarization, and at least a manual update-check path.
+- `AB#142`: Configure real Windows signing certificate secrets, rerun a prerelease with `require_windows_signing=true`, and smoke the verified-publisher installer prompt.
+- Continue Signing, Trust, And Updates before public marketing: Apple Developer ID/notarization and at least a manual update-check path.
 - Finish the remaining `AB#130` verification on a real Mac: normal app and Safari visual crops passed locally on 2026-07-12; still confirm multi-monitor behavior and avoid closing the work item solely on visual evidence because the exact method is not persisted.
 - Update Azure DevOps from a machine with ADO access: add the 2026-07-12 real Mac smoke note to `AB#130`, keep `AB#130` open for multi-monitor/exact-method confirmation, and add the preview-modal verification note to the relevant UI/release-train work item if tracking separately.
 - Then `AB#131` for user-visible fallback diagnostics, including surfacing whether a moment used window-ID capture, rectangle fallback, full-display fallback, or no capture. Keep `AB#132` held unless shell capture still proves flaky.
