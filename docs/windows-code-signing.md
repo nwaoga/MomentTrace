@@ -20,6 +20,23 @@ For GitHub Actions, configure these repository or environment secrets:
 
 The workflow imports the PFX into the Windows runner certificate store for the release job, signs artifacts by thumbprint, and deletes the temporary PFX file immediately after import. Do not commit certificates, exported private keys, passwords, or thumbprint-specific local scripts.
 
+Use the repo helper to validate a PFX and set the GitHub secrets:
+
+```powershell
+.\scripts\configure-windows-signing-secrets.ps1 `
+  -PfxPath "C:\path\to\publisher-code-signing.pfx" `
+  -PfxPassword (Read-Host "PFX password" -AsSecureString)
+```
+
+To validate the PFX without uploading secrets:
+
+```powershell
+.\scripts\configure-windows-signing-secrets.ps1 `
+  -PfxPath "C:\path\to\publisher-code-signing.pfx" `
+  -PfxPassword (Read-Host "PFX password" -AsSecureString) `
+  -SkipSecretUpload
+```
+
 ## Local Signing
 
 Install the Windows SDK so `signtool.exe` is available. If the certificate is in the current user's personal certificate store, build a signed installer with:
@@ -84,6 +101,7 @@ Prerelease tags such as `v0.1.1-beta.1` are supported. The release workflow keep
 ## Public-Beta Readiness Checklist
 
 - Configure `WINDOWS_SIGNING_PFX_BASE64` and `WINDOWS_SIGNING_PFX_PASSWORD` in the protected release environment or repository secrets.
+- `gh secret list --repo nwaoga/MomentTrace` shows both required secret names.
 - Run the Release workflow manually for the beta tag with `require_windows_signing=true`.
 - Confirm the Windows job logs show valid signatures for both `MomentTrace.Desktop.exe` and the setup executable.
 - Smoke the downloaded signed setup artifact on a clean Windows machine and verify File Properties > Digital Signatures plus the UAC verified-publisher prompt.

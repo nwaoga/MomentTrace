@@ -48,6 +48,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Windows release artifacts include an installer and portable zip for `MomentTrace.Desktop.exe`.
 - macOS release artifacts include an ad-hoc signed `MomentTrace.app` zip for `osx-arm64` until Developer ID signing/notarization is configured.
 - Windows signing readiness now has an enforceable release gate: stable tags require Authenticode signing, manual prerelease runs can opt in with `require_windows_signing=true`, and the Windows job verifies executable/setup signature status before upload. Real signing certificate procurement/secrets and verified-publisher smoke are tracked as `AB#142`.
+- Windows signing secret setup now has a repo helper, `scripts/configure-windows-signing-secrets.ps1`, which validates a PFX for private key, Code Signing EKU, and expiry before setting GitHub secrets. No local/GitHub signing certificate material was found on 2026-08-11, so `AB#142` is blocked on obtaining/providing the real PFX and password.
 - README preview SVG rendering has been fixed and validated locally.
 - Marketing launch kit and static landing page draft are in `docs/`.
 - Monetization posture: public marketing and founder-license interest should wait until Windows and macOS artifacts are available from the same release tag and have both passed install/launch/background smoke.
@@ -121,6 +122,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - [2026-08-08 21:50 UTC+1] Official `v0.1.1-beta.15` macOS zip smoke passed on this Mac: digest `sha256:90728321…`, strict ad-hoc codesign, launch to `MomentTrace`, status-item tooltip `MomentTrace v0.1.1-beta.15`, close-to-background then Show restore, Exit clean. Stamped build `17.1` / commit `f4dd50e` from release run `31277447681`.
 - [2026-08-09 23:00 UTC+1] Official `v0.1.1-beta.15` Windows setup and portable zip smoke passed: setup digest `sha256:5cad5ca4…`, zip digest `sha256:81ffbd4a…`, both builds reported `ProductVersion=v0.1.1-beta.15`, launched to the Avalonia `MomentTrace` shell, close-to-background kept the process alive with no main window handle, relaunch restored the original hidden window while the second process exited, and hidden-icons overflow showed the MomentTrace full-colour tray mark. Silent uninstall exited 0 with no remaining app processes.
 - [2026-08-09 23:20 UTC+1] Windows signing readiness gate added: stable tags now require Windows signing secrets and valid Authenticode signatures, manual prerelease runs can force the same behavior with `require_windows_signing=true`, and `docs/windows-code-signing.md` documents the public-beta readiness checklist.
+- [2026-08-11] `AB#142` signing secret setup pass: GitHub currently has no `WINDOWS_SIGNING_*` secrets, no local PFX/P12 was found in the obvious checked locations, and no local CurrentUser/LocalMachine code-signing certificate was available. Added `scripts/configure-windows-signing-secrets.ps1` so the real PFX can be validated and uploaded to GitHub secrets once available.
 
 **Pick up now:**
 
