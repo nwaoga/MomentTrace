@@ -158,6 +158,85 @@ Length: 45 to 60 seconds.
 9. Say: "Your history stays local, with privacy filters and full local-data cleanup."
 10. End on the download CTA.
 
+## Pre-Investment Hype (before signing spend)
+
+Do not Product Hunt, Show HN, or cold-traffic a Download Beta link until Windows is Authenticode-signed and macOS is Developer ID notarized. First-run SmartScreen / Gatekeeper will write the public story for you.
+
+This phase is demand signal: founder posts, a waitlist of named people, GitHub stars. Offer the current unsigned `v0.1.1-beta.15` only to people who already asked, with the trust caveat in the same message.
+
+**Primary ask:** reply / DM / email to join the first signed-build list.
+
+**Primary image:** `docs/assets/momenttrace-promotional-poster.png`
+
+**Do not ask for money.** Paid/founder-license stays blocked until both platforms ship from the same trusted tag.
+
+### Founder Story Post
+
+```text
+I kept losing context across apps, tabs, documents, and tasks.
+
+So I built MomentTrace: a local-first desktop memory timeline. It quietly records the workday as moments you can search, reopen, and recap.
+
+No cloud account. History stays on your machine.
+
+Windows + macOS beta exists. I am collecting early interest before I spend on code signing / notarization.
+
+If this is a problem you have, reply "timeline" and I will add you to the first signed-build list.
+```
+
+### Privacy Contrast Post
+
+```text
+Most activity tools assume your work history should live in the cloud.
+
+MomentTrace starts from the opposite assumption: your timeline should live on your machine.
+
+Local storage. Privacy filters. Adult-site filtering on by default. Export, delete, or wipe everything.
+
+I am not asking you to install an unsigned build. I am asking whether you want this class of tool at all.
+```
+
+### 4pm Problem Post
+
+```text
+It is 4pm. You know you had the right tab, the right folder, the right screenshot.
+
+You do not remember which app it was in.
+
+That is the product.
+
+MomentTrace turns the day into a private timeline of apps, websites, screenshots, and notes so you can get back to the work itself.
+```
+
+### Indie Hackers Post
+
+```text
+Building in public: MomentTrace.
+
+Problem: I lose work context all day (apps, sites, folders, screenshots).
+
+Solution: a local-first desktop timeline. Windows + macOS. No account. Data never leaves the machine unless you export it.
+
+Current status: functional beta. Not publicly pushing downloads yet because Windows is unsigned and macOS is ad-hoc (Gatekeeper). I want demand signal before I pay for Authenticode + Apple Developer ID.
+
+Question for IH: would you install a memory-timeline app if it stayed 100% local? What would make it a hard no?
+```
+
+### Two-week cadence
+
+1. Founder story (LinkedIn or X) + poster.
+2. Privacy contrast + Settings privacy crop.
+3. 4pm problem + timeline/detail screenshot.
+4. Indie Hackers long post.
+5. Repeat founder story on the other network; ask for a GitHub star.
+6-7. Reply to every comment. No new post.
+8. Overview as the daily story.
+9. What stays local.
+10. 45-60s demo from the script below.
+11. Quiet: move yeses onto a named list.
+12. If 25+ named yeses, say so.
+13-14. Decide whether to buy certs.
+
 ## Social Posts
 
 ### Launch Post
