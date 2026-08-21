@@ -318,11 +318,20 @@ h2 {
   border-block: 1px solid var(--line);
 }
 
+.timeline-shot {
+  background: #eef5f0;
+  border-bottom: 1px solid var(--line);
+}
+
 .media-row {
   display: grid;
   grid-template-columns: 0.88fr 1.12fr;
   gap: clamp(24px, 5vw, 58px);
   align-items: center;
+}
+
+.media-row.reverse {
+  grid-template-columns: 1.12fr 0.88fr;
 }
 
 .media-row img {

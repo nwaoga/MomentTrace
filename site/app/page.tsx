@@ -47,12 +47,12 @@ export default function Home() {
             </div>
             <div className="hero-visual" aria-label="MomentTrace app preview">
               <img
-                src="/momenttrace-avalonia-shell-current.png"
-                alt="MomentTrace desktop app showing the private timeline interface"
+                src="/momenttrace-overview-dashboard.png"
+                alt="MomentTrace desktop app showing the Overview daily summary dashboard"
               />
               <div className="preview-badge">
-                <strong>Local-first beta</strong>
-                <span>Stored on your device</span>
+                <strong>Daily Overview</strong>
+                <span>Heatmap, focus, top apps</span>
               </div>
             </div>
           </div>
@@ -118,25 +118,46 @@ export default function Home() {
         <section id="showcase" className="showcase">
           <div className="section-inner media-row">
             <div>
-              <h2>Find the moment, then get back to the work.</h2>
+              <h2>See the shape of the day before diving in.</h2>
               <p className="section-copy">
-                Search or scan through captured activity, save important
-                moments, add notes, and use previews to recognize what you were
-                doing before you reopen the source.
+                Overview turns raw activity into a daily story: active time,
+                moments captured, top apps, focus rhythm, heatmap, and the
+                sessions worth revisiting.
               </p>
               <ul className="list">
-                <li>Capture apps, websites, screenshots, folders, and timestamps.</li>
-                <li>Bookmark and pin the moments that matter.</li>
+                <li>Scan activity density without reading a raw event log.</li>
+                <li>Spot top apps and context switches quickly.</li>
                 <li>
-                  Use Overview when you want the story of the day instead of a
-                  raw event log.
+                  Jump from the big picture into the exact Timeline moment.
                 </li>
               </ul>
             </div>
             <img
+              src="/momenttrace-overview-detail.png"
+              alt="MomentTrace Overview showing daily metrics, activity heatmap, category mix, and top apps"
+            />
+          </div>
+        </section>
+
+        <section className="timeline-shot">
+          <div className="section-inner media-row reverse">
+            <img
               src="/momenttrace-timeline-detail.png"
               alt="MomentTrace timeline with screenshot detail pane"
             />
+            <div>
+              <h2>Then open the exact moment you need.</h2>
+              <p className="section-copy">
+                Timeline keeps the details close: screenshots, app and website
+                context, saved moments, notes, and quick reopen actions for the
+                work you want back.
+              </p>
+              <ul className="list">
+                <li>Search or scan captured activity by time and context.</li>
+                <li>Save, pin, and annotate important moments.</li>
+                <li>Use previews to recognize the work before reopening it.</li>
+              </ul>
+            </div>
           </div>
         </section>
 
