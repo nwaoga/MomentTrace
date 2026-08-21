@@ -1,5 +1,7 @@
 const betaReleaseUrl =
   "https://github.com/nwaoga/MomentTrace/releases/tag/v0.1.1-beta.15";
+const signedBuildWaitlistUrl =
+  "mailto:blakboi@hotmail.co.uk?subject=MomentTrace%20first%20signed%20build%20list&body=Hi%20Eric%2C%0A%0APlease%20add%20me%20to%20the%20MomentTrace%20first%20signed-build%20list.%0A%0AName%3A%20%0APlatform%3A%20Windows%20%2F%20macOS%0AWhat%20I%20want%20MomentTrace%20for%3A%20";
 
 export default function Home() {
   return (
@@ -11,8 +13,8 @@ export default function Home() {
         <nav className="nav">
           <a href="#features">Features</a>
           <a href="#privacy">Privacy</a>
-          <a href="#beta" className="button primary">
-            Download Beta
+          <a href="#waitlist" className="button primary">
+            Join Waitlist
           </a>
         </nav>
       </header>
@@ -28,16 +30,16 @@ export default function Home() {
               locally on your device.
             </p>
             <div className="hero-actions">
-              <a className="button primary" href={betaReleaseUrl}>
-                Download Beta
+              <a className="button primary" href={signedBuildWaitlistUrl}>
+                Join the Signed-Build List
               </a>
               <a className="button secondary" href="#showcase">
                 See how it works
               </a>
             </div>
             <p className="hero-note">
-              Local-first. Private by default. Built for people who need to
-              recover context fast.
+              Public push starts after signed Windows and notarized macOS builds.
+              Early demand decides when that happens.
             </p>
           </div>
         </section>
@@ -161,13 +163,40 @@ export default function Home() {
           </div>
         </section>
 
+        <section id="waitlist" className="waitlist">
+          <div className="section-inner waitlist-band">
+            <div>
+              <span className="eyebrow">First signed-build list</span>
+              <h2>Want the trusted installer when it is ready?</h2>
+              <p className="section-copy">
+                MomentTrace is collecting named interest before spending on
+                Windows Authenticode signing and macOS Developer ID
+                notarization. The trigger is simple: 25+ real people asking for
+                the first signed build.
+              </p>
+            </div>
+            <div className="signal-panel">
+              <strong>How to be counted</strong>
+              <p>
+                Send your name, platform, and one sentence about why you want a
+                private workday timeline. You will be added to the first
+                signed-build list.
+              </p>
+              <a className="button primary" href={signedBuildWaitlistUrl}>
+                Email Me In
+              </a>
+            </div>
+          </div>
+        </section>
+
         <section id="beta" className="beta">
           <div className="section-inner">
             <div className="section-head">
-              <h2>Try the desktop beta.</h2>
+              <h2>Need to try the current beta?</h2>
               <p className="section-copy">
-                Install it, use it for a real work session, then tell us what
-                helped you recover context and what felt too sensitive or noisy.
+                The functional beta is available for people who already want to
+                test it, but broad public sharing waits until the installers are
+                signed and trusted by the operating system.
               </p>
             </div>
             <div className="beta-grid">
@@ -180,17 +209,17 @@ export default function Home() {
                 </p>
               </div>
               <div className="beta-item">
-                <h3>Known release note</h3>
+                <h3>Trust caveat</h3>
                 <p>
-                  The verified-publisher flow is ready, but public installers
-                  need a real Windows signing certificate configured in release
-                  secrets.
+                  Windows and macOS builds are not yet signed with public
+                  release certificates, so first-run security prompts are
+                  expected.
                 </p>
               </div>
             </div>
             <p className="beta-action">
               <a className="button primary" href={betaReleaseUrl}>
-                Download Beta
+                Download Unsigned Beta
               </a>
             </p>
           </div>

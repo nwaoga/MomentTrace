@@ -314,6 +314,48 @@ h2 {
   line-height: 1.45;
 }
 
+.waitlist {
+  background: var(--paper);
+  color: var(--paper-ink);
+}
+
+.waitlist .eyebrow {
+  color: #365f45;
+  border-color: rgba(54, 95, 69, 0.28);
+  background: rgba(123, 211, 154, 0.18);
+}
+
+.waitlist .section-copy {
+  color: #55594f;
+}
+
+.waitlist-band {
+  display: grid;
+  grid-template-columns: 1fr minmax(300px, 420px);
+  gap: 28px;
+  align-items: center;
+}
+
+.signal-panel {
+  border: 1px solid rgba(29, 33, 28, 0.14);
+  border-radius: 8px;
+  padding: 24px;
+  background: #fffaf0;
+  box-shadow: 0 18px 48px rgba(20, 21, 18, 0.12);
+}
+
+.signal-panel strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 20px;
+}
+
+.signal-panel p {
+  margin: 0 0 18px;
+  color: #55594f;
+  line-height: 1.55;
+}
+
 .beta {
   background: #221b17;
   border-top: 1px solid rgba(241, 189, 101, 0.24);
@@ -355,6 +397,7 @@ h2 {
   .feature-grid,
   .media-row,
   .privacy-band,
+  .waitlist-band,
   .beta-grid {
     grid-template-columns: 1fr;
   }
