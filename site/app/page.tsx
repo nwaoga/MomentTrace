@@ -1,7 +1,7 @@
+import WaitlistForm from "./WaitlistForm";
+
 const betaReleaseUrl =
   "https://github.com/nwaoga/MomentTrace/releases/tag/v0.1.1-beta.15";
-const signedBuildWaitlistUrl =
-  "mailto:blakboi@hotmail.co.uk?subject=MomentTrace%20first%20signed%20build%20list&body=Hi%20Eric%2C%0A%0APlease%20add%20me%20to%20the%20MomentTrace%20first%20signed-build%20list.%0A%0AName%3A%20%0APlatform%3A%20Windows%20%2F%20macOS%0AWhat%20I%20want%20MomentTrace%20for%3A%20";
 
 export default function Home() {
   return (
@@ -32,7 +32,7 @@ export default function Home() {
                 context without sending your work history to a cloud account.
               </p>
               <div className="hero-actions">
-                <a className="button primary" href={signedBuildWaitlistUrl}>
+                <a className="button primary" href="#waitlist">
                   Join the Signed-Build List
                 </a>
                 <a className="button secondary" href="#showcase">
@@ -219,13 +219,11 @@ export default function Home() {
               <span className="signal-number">0 / 25</span>
               <strong>Named requests so far</strong>
               <p>
-                Send your name, platform, and one sentence about why you want a
-                private workday timeline. You will be added to the first
-                signed-build list.
+                Add your details here. You will be counted once by email, and
+                duplicates update your existing request instead of inflating the
+                signal.
               </p>
-              <a className="button primary" href={signedBuildWaitlistUrl}>
-                Email Me In
-              </a>
+              <WaitlistForm />
             </div>
           </div>
         </section>
