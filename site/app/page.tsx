@@ -1,5 +1,6 @@
 import AnalyticsTracker from "./AnalyticsTracker";
 import WaitlistForm from "./WaitlistForm";
+import WaitlistSignal from "./WaitlistSignal";
 
 const betaReleaseUrl =
   "https://github.com/nwaoga/MomentTrace/releases/tag/v0.1.1-beta.15";
@@ -230,7 +231,7 @@ export default function Home() {
               </p>
             </div>
             <div className="signal-panel">
-              <span className="signal-number">0 / 25</span>
+              <WaitlistSignal />
               <strong>Named requests so far</strong>
               <p>
                 Add your details here. You will be counted once by email, and

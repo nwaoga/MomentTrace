@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { trackLandingEvent } from "./AnalyticsTracker";
+import { announceWaitlistSignal } from "./WaitlistSignal";
 
 type SubmitState =
   | { status: "idle"; message: string }
@@ -54,6 +55,10 @@ export default function WaitlistForm() {
 
       form.reset();
       trackLandingEvent("waitlist_submit_success");
+      announceWaitlistSignal({
+        count: payload.count,
+        goal: payload.goal,
+      });
       setState({
         status: "success",
         message: `You're on the list. Current signal: ${payload.count ?? 0} / ${
