@@ -13,6 +13,7 @@ export default function Home() {
         <nav className="nav">
           <a href="#features">Features</a>
           <a href="#privacy">Privacy</a>
+          <a href="#beta">Beta</a>
           <a href="#waitlist" className="button primary">
             Join Waitlist
           </a>
@@ -21,35 +22,53 @@ export default function Home() {
 
       <main>
         <section className="hero">
-          <div className="hero-content">
-            <span className="eyebrow">Windows and macOS beta now available</span>
-            <h1>Your private memory timeline for the workday.</h1>
-            <p className="lede">
-              MomentTrace helps you retrace apps, websites, screenshots, notes,
-              and saved moments from your day, with activity history stored
-              locally on your device.
-            </p>
-            <div className="hero-actions">
-              <a className="button primary" href={signedBuildWaitlistUrl}>
-                Join the Signed-Build List
-              </a>
-              <a className="button secondary" href="#showcase">
-                See how it works
-              </a>
+          <div className="section-inner hero-grid">
+            <div className="hero-content">
+              <span className="eyebrow">Early access for Windows and macOS</span>
+              <h1>Find the work you were just thinking about.</h1>
+              <p className="lede">
+                MomentTrace is a private desktop timeline for apps, websites,
+                screenshots, notes, and saved moments. It helps you recover
+                context without sending your work history to a cloud account.
+              </p>
+              <div className="hero-actions">
+                <a className="button primary" href={signedBuildWaitlistUrl}>
+                  Join the Signed-Build List
+                </a>
+                <a className="button secondary" href="#showcase">
+                  See the Timeline
+                </a>
+              </div>
+              <div className="signal-strip" aria-label="Launch signal">
+                <span>Goal</span>
+                <strong>25 named yeses</strong>
+                <span>before buying signing certificates</span>
+              </div>
             </div>
-            <p className="hero-note">
-              Public push starts after signed Windows and notarized macOS builds.
-              Early demand decides when that happens.
-            </p>
+            <div className="hero-visual" aria-label="MomentTrace app preview">
+              <img
+                src="/momenttrace-avalonia-shell-current.png"
+                alt="MomentTrace desktop app showing the private timeline interface"
+              />
+              <div className="preview-badge">
+                <strong>Local-first beta</strong>
+                <span>Stored on your device</span>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section className="poster" aria-label="MomentTrace promotional overview">
-          <div className="section-inner poster-frame">
-            <img
-              src="/momenttrace-promotional-poster.png"
-              alt="MomentTrace promotional overview showing Overview, Timeline, recall, and privacy features"
-            />
+        <section className="intro-band" aria-label="MomentTrace positioning">
+          <div className="section-inner intro-grid">
+            <p>
+              Built for the 4pm problem: you remember the tab, folder, app, or
+              screenshot existed. You just do not remember where.
+            </p>
+            <div className="mini-points">
+              <span>Private by default</span>
+              <span>No account required</span>
+              <span>Delete everything locally</span>
+            </div>
           </div>
         </section>
 
@@ -67,8 +86,8 @@ export default function Home() {
               <article className="feature">
                 <strong>Timeline</strong>
                 <p>
-                  See your workday as a timeline of real app, website, document,
-                  and screenshot moments.
+                  Scan your day as app, website, document, folder, and
+                  screenshot moments.
                 </p>
               </article>
               <article className="feature">
@@ -81,8 +100,8 @@ export default function Home() {
               <article className="feature">
                 <strong>Recall</strong>
                 <p>
-                  Reopen captured websites, folders, and saved work so you can
-                  get back to the thing itself.
+                  Reopen captured websites, folders, and saved work from the
+                  moment you found.
                 </p>
               </article>
               <article className="feature">
@@ -98,10 +117,6 @@ export default function Home() {
 
         <section id="showcase" className="showcase">
           <div className="section-inner media-row">
-            <img
-              src="/momenttrace-timeline-detail.png"
-              alt="MomentTrace timeline with screenshot detail pane"
-            />
             <div>
               <h2>Find the moment, then get back to the work.</h2>
               <p className="section-copy">
@@ -118,6 +133,10 @@ export default function Home() {
                 </li>
               </ul>
             </div>
+            <img
+              src="/momenttrace-timeline-detail.png"
+              alt="MomentTrace timeline with screenshot detail pane"
+            />
           </div>
         </section>
 
@@ -167,7 +186,7 @@ export default function Home() {
           <div className="section-inner waitlist-band">
             <div>
               <span className="eyebrow">First signed-build list</span>
-              <h2>Want the trusted installer when it is ready?</h2>
+              <h2>Help decide when MomentTrace buys trust.</h2>
               <p className="section-copy">
                 MomentTrace is collecting named interest before spending on
                 Windows Authenticode signing and macOS Developer ID
@@ -176,7 +195,8 @@ export default function Home() {
               </p>
             </div>
             <div className="signal-panel">
-              <strong>How to be counted</strong>
+              <span className="signal-number">0 / 25</span>
+              <strong>Named requests so far</strong>
               <p>
                 Send your name, platform, and one sentence about why you want a
                 private workday timeline. You will be added to the first
@@ -218,7 +238,7 @@ export default function Home() {
               </div>
             </div>
             <p className="beta-action">
-              <a className="button primary" href={betaReleaseUrl}>
+              <a className="button secondary" href={betaReleaseUrl}>
                 Download Unsigned Beta
               </a>
             </p>
