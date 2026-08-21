@@ -1,4 +1,6 @@
 import { and, count, desc, eq, sql } from "drizzle-orm";
+import { env } from "cloudflare:workers";
+import { getChatGPTUser } from "../../chatgpt-auth";
 import { getDb } from "../../../db";
 import { analyticsDailyMetrics } from "../../../db/schema";
 
@@ -16,6 +18,31 @@ function metricDate() {
 
 function cleanEventName(value: unknown) {
   return typeof value === "string" && allowedEvents.has(value) ? value : "";
+}
+
+function adminEmails() {
+  return String(env.METRICS_ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+async function requireMetricsAccess() {
+  const user = await getChatGPTUser();
+
+  if (!user) {
+    return Response.json({ error: "Sign in is required." }, { status: 401 });
+  }
+
+  const allowedEmails = adminEmails();
+  if (
+    allowedEmails.length > 0 &&
+    !allowedEmails.includes(user.email.toLowerCase())
+  ) {
+    return Response.json({ error: "Metrics access denied." }, { status: 403 });
+  }
+
+  return null;
 }
 
 function toRouteErrorMessage(error: unknown) {
@@ -36,6 +63,11 @@ function toRouteErrorMessage(error: unknown) {
 
 export async function GET() {
   try {
+    const accessError = await requireMetricsAccess();
+    if (accessError) {
+      return accessError;
+    }
+
     const db = getDb();
     const rows = await db
       .select({
