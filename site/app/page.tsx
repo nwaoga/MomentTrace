@@ -1,3 +1,4 @@
+import AnalyticsTracker from "./AnalyticsTracker";
 import WaitlistForm from "./WaitlistForm";
 
 const betaReleaseUrl =
@@ -6,6 +7,7 @@ const betaReleaseUrl =
 export default function Home() {
   return (
     <>
+      <AnalyticsTracker />
       <header className="topbar" aria-label="Primary">
         <div className="brand">
           <span className="mark" aria-hidden="true" /> MomentTrace
@@ -14,7 +16,11 @@ export default function Home() {
           <a href="#features">Features</a>
           <a href="#privacy">Privacy</a>
           <a href="#beta">Beta</a>
-          <a href="#waitlist" className="button primary">
+          <a
+            href="#waitlist"
+            className="button primary"
+            data-track-event="join_waitlist_click"
+          >
             Join Waitlist
           </a>
         </nav>
@@ -32,10 +38,18 @@ export default function Home() {
                 context without sending your work history to a cloud account.
               </p>
               <div className="hero-actions">
-                <a className="button primary" href="#waitlist">
+                <a
+                  className="button primary"
+                  href="#waitlist"
+                  data-track-event="join_waitlist_click"
+                >
                   Join the Signed-Build List
                 </a>
-                <a className="button secondary" href="#showcase">
+                <a
+                  className="button secondary"
+                  href="#showcase"
+                  data-track-event="see_timeline_click"
+                >
                   See the Timeline
                 </a>
               </div>
@@ -257,7 +271,11 @@ export default function Home() {
               </div>
             </div>
             <p className="beta-action">
-              <a className="button secondary" href={betaReleaseUrl}>
+              <a
+                className="button secondary"
+                href={betaReleaseUrl}
+                data-track-event="download_beta_click"
+              >
                 Download Unsigned Beta
               </a>
             </p>

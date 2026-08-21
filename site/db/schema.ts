@@ -22,3 +22,20 @@ export const waitlistSignups = sqliteTable(
     ),
   }),
 );
+
+export const analyticsDailyMetrics = sqliteTable(
+  "analytics_daily_metrics",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    metricDate: text("metric_date").notNull(),
+    eventName: text("event_name").notNull(),
+    count: integer("count").notNull().default(0),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => ({
+    eventDateIdx: uniqueIndex("idx_analytics_daily_metrics_event_date").on(
+      table.metricDate,
+      table.eventName,
+    ),
+  }),
+);
