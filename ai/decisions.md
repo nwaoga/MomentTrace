@@ -43,6 +43,9 @@
 - [2026-07-17] GitHub Actions artifact storage quota is treated as a release-operations dependency. A `CreateArtifact` quota failure should be handled by deleting obsolete workflow artifacts/prerelease assets and rerunning the same tag workflow, not by changing app code or moving the tag.
 - [2026-07-17] App build identity should remain separate from semantic assembly/file versioning: Settings may show release label, GitHub run number/attempt, and short commit SHA, while OS-level assembly/file versions stay numeric.
 - [2026-07-19] Public marketing should wait until the release has an explicit signing/trust and update story. Prefer a shared Velopack updater path for Windows and macOS if it fits the final packaging model; keep Sparkle as the macOS-native fallback, and treat manual update checks as an acceptable first step before fully automatic updates.
+- [2026-08-21] Public beta interest collection should run through the hosted landing page first: real screenshots, D1-backed waitlist storage, anonymous CTA metrics, and a protected owner-only metrics dashboard are enough to measure early signal before broader launch tooling is added.
+- [2026-08-23] Community launch should start with one honest feedback-seeking post at a time. The first live pass is `r/SideProject` with a short native Reddit teaser video and the beta-page CTA; measure replies and `/admin/metrics` before copying the post into other communities.
+- [2026-08-23] Operational continuity should not depend on a single stale Azure DevOps PAT. When ADO access is down, record launch/ops notes in `ai/` immediately and backfill ADO once PAT access is refreshed.
 
 ## Recently Completed
 

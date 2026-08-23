@@ -21,7 +21,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 ---
 
-## Current State (2026-08-09 23:00 UTC+1)
+## Current State (2026-08-23 18:20 UTC+1)
 
 **Phase:** Beta release readiness and marketing prep.
 
@@ -51,6 +51,11 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Windows signing secret setup now has a repo helper, `scripts/configure-windows-signing-secrets.ps1`, which validates a PFX for private key, Code Signing EKU, and expiry before setting GitHub secrets. No local/GitHub signing certificate material was found on 2026-08-11, so `AB#142` is blocked on obtaining/providing the real PFX and password.
 - README preview SVG rendering has been fixed and validated locally.
 - Marketing launch kit and static landing page draft are in `docs/`.
+- Public beta landing page is live at `https://momenttrace-beta.ericnwaogwugwu.chatgpt.site`.
+- The public beta page now uses real MomentTrace screenshots, a live waitlist backed by D1, anonymous event counters for page/CTA activity, and a protected `/admin/metrics` dashboard allowlisted to the owner email.
+- The landing page waitlist signal is now live rather than hardcoded; current public count reflects the real `/api/waitlist` total.
+- A short Reddit-ready teaser video now exists locally at `momenttrace-reddit-teaser.mp4` for social/community posts.
+- First public community post is live on `r/SideProject` with the teaser video and beta-page CTA; next pickup is monitoring comments and admin metrics before repeating the post elsewhere.
 - Monetization posture: public marketing and founder-license interest should wait until Windows and macOS artifacts are available from the same release tag and have both passed install/launch/background smoke.
 - Shared presentation builders for timeline, overview, and detail context.
 - Local SQLite activity store and Windows foreground recorder.
@@ -127,6 +132,8 @@ Users should be able to quickly revisit what happened during a day, recover past
 **Pick up now:**
 
 - `AB#142`: Configure real Windows signing certificate secrets, rerun a prerelease with `require_windows_signing=true`, and smoke the verified-publisher installer prompt.
+- Azure DevOps REST access is currently blocked because the PAT in `D:\source\PatAdo.json` expired on 2026-08-23. Refresh the PAT before syncing the latest landing-page/marketing notes back into ADO.
+- Monitor the first `r/SideProject` post and the live `/admin/metrics` dashboard together. Capture early objections, privacy questions, and install-trust concerns before posting to a second community.
 - Continue Signing, Trust, And Updates before public marketing: Apple Developer ID/notarization and at least a manual update-check path.
 - Finish the remaining `AB#130` verification on a real Mac: normal app and Safari visual crops passed locally on 2026-07-12; still confirm multi-monitor behavior and avoid closing the work item solely on visual evidence because the exact method is not persisted.
 - Update Azure DevOps from a machine with ADO access: add the 2026-07-12 real Mac smoke note to `AB#130`, keep `AB#130` open for multi-monitor/exact-method confirmation, and add the preview-modal verification note to the relevant UI/release-train work item if tracking separately.
