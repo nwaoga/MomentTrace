@@ -67,7 +67,7 @@
 - [x] [2026-08-09 23:20 UTC+1] Windows signing readiness gate: release workflow now requires Windows Authenticode signing for stable tags, lets manual prerelease runs opt in with `require_windows_signing=true`, fails early when signing is required but PFX secrets are missing, and verifies final `MomentTrace.Desktop.exe` plus setup executable signature status before upload. Real certificate procurement/secrets and verified-publisher smoke remain open.
 - [x] [2026-08-11] Added `scripts/configure-windows-signing-secrets.ps1` for `AB#142`: validates a PFX has a private key, Code Signing EKU, and non-expired certificate before uploading `WINDOWS_SIGNING_PFX_BASE64` and `WINDOWS_SIGNING_PFX_PASSWORD` with `gh secret set`. Current machine/GitHub check found no signing secrets or local code-signing certificate material, so verified-publisher smoke remains blocked on the real PFX/password.
 - [x] [2026-08-21] Public beta site launched with the real dark MomentTrace palette, live D1 waitlist storage, anonymous CTA/page metrics, a protected `/admin/metrics` dashboard, and a live waitlist signal on the landing page.
-- [x] [2026-08-23] First public community launch pass: created `momenttrace-reddit-teaser.mp4` from the current product screenshots and published the first `r/SideProject` post using the teaser video plus the public beta-page CTA.
+- [x] [2026-08-23] First public community launch pass: created `docs/assets/momenttrace-reddit-teaser.mp4` from the current product screenshots and published the first `r/SideProject` post using the teaser video plus the public beta-page CTA.
 
 ## QA Notes
 

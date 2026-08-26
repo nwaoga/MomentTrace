@@ -145,6 +145,7 @@ Existing sanitized assets:
 - `docs/assets/momenttrace-settings-privacy-preview.png`
 - `docs/assets/momenttrace-theme-collage.svg`
 - `docs/assets/momenttrace-theme-collage.png`
+- `docs/assets/momenttrace-reddit-teaser.mp4`
 
 Recommended poster usage:
 

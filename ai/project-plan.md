@@ -54,7 +54,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - Public beta landing page is live at `https://momenttrace-beta.ericnwaogwugwu.chatgpt.site`.
 - The public beta page now uses real MomentTrace screenshots, a live waitlist backed by D1, anonymous event counters for page/CTA activity, and a protected `/admin/metrics` dashboard allowlisted to the owner email.
 - The landing page waitlist signal is now live rather than hardcoded; current public count reflects the real `/api/waitlist` total.
-- A short Reddit-ready teaser video now exists locally at `momenttrace-reddit-teaser.mp4` for social/community posts.
+- A short Reddit-ready teaser video now exists locally at `docs/assets/momenttrace-reddit-teaser.mp4` for social/community posts.
 - First public community post is live on `r/SideProject` with the teaser video and beta-page CTA; next pickup is monitoring comments and admin metrics before repeating the post elsewhere.
 - Monetization posture: public marketing and founder-license interest should wait until Windows and macOS artifacts are available from the same release tag and have both passed install/launch/background smoke.
 - Shared presentation builders for timeline, overview, and detail context.
