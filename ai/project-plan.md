@@ -56,6 +56,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - The landing page waitlist signal is now live rather than hardcoded; current public count reflects the real `/api/waitlist` total.
 - A short Reddit-ready teaser video now exists locally at `docs/assets/momenttrace-reddit-teaser.mp4` for social/community posts.
 - First public community post is live on `r/SideProject` with the teaser video and beta-page CTA; next pickup is monitoring comments and admin metrics before repeating the post elsewhere.
+- Overview now includes local rule-based "work blocks" that group nearby related moments into larger recoverable chunks, addressing early launch feedback that raw app-by-app activity needs a higher-level job/session layer.
 - Monetization posture: public marketing and founder-license interest should wait until Windows and macOS artifacts are available from the same release tag and have both passed install/launch/background smoke.
 - Shared presentation builders for timeline, overview, and detail context.
 - Local SQLite activity store and Windows foreground recorder.

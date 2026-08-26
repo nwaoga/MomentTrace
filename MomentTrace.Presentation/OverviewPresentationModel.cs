@@ -10,6 +10,8 @@ public sealed class OverviewPresentationModel
 
     public required IReadOnlyList<ActivityMomentViewModel> Sessions { get; init; }
 
+    public required IReadOnlyList<WorkBlockViewModel> WorkBlocks { get; init; }
+
     public required IReadOnlyList<OverviewMetricViewModel> SummaryMetrics { get; init; }
 
     public required IReadOnlyList<DaySummaryMetricViewModel> DaySummaryMetrics { get; init; }

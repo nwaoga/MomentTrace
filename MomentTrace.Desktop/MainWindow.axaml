@@ -2082,6 +2082,93 @@
                                     Grid.Column="1"
                                     VerticalAlignment="Top"
                                     Spacing="14">
+                            <Border Classes="overviewPanel">
+                                <StackPanel Spacing="10">
+                                    <StackPanel Spacing="3">
+                                        <TextBlock Text="Work blocks"
+                                                   Foreground="{DynamicResource TextBrush}"
+                                                   FontSize="16"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="Related moments recovered as larger chunks"
+                                                   Foreground="{DynamicResource SubtleTextBrush}"
+                                                   FontSize="11" />
+                                    </StackPanel>
+                                    <ItemsControl x:Name="OverviewWorkBlocksItems">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Classes="momentCard"
+                                                        Click="OverviewMomentButton_Click"
+                                                        CommandParameter="{Binding RepresentativeMomentId}"
+                                                        HorizontalAlignment="Stretch"
+                                                        HorizontalContentAlignment="Stretch"
+                                                        Margin="0,0,0,10"
+                                                        ToolTip.Tip="Jump to this work block in the timeline">
+                                                    <Border Background="{DynamicResource ElevatedPanelBrush}"
+                                                            BorderBrush="{DynamicResource FaintBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="10"
+                                                            Padding="12">
+                                                        <Grid ColumnDefinitions="Auto,*"
+                                                              ColumnSpacing="10">
+                                                            <Border Width="4"
+                                                                    Background="{Binding AccentBrush}"
+                                                                    CornerRadius="3" />
+                                                            <StackPanel Grid.Column="1"
+                                                                        Spacing="5">
+                                                                <Grid ColumnDefinitions="*,Auto"
+                                                                      ColumnSpacing="10">
+                                                                    <TextBlock Text="{Binding Title}"
+                                                                               Foreground="{DynamicResource TextBrush}"
+                                                                               FontSize="13"
+                                                                               FontWeight="SemiBold"
+                                                                               TextTrimming="CharacterEllipsis" />
+                                                                    <TextBlock Grid.Column="1"
+                                                                               Text="{Binding DurationLabel}"
+                                                                               Foreground="{DynamicResource AccentBrush}"
+                                                                               FontSize="11"
+                                                                               FontWeight="SemiBold" />
+                                                                </Grid>
+                                                                <TextBlock Text="{Binding Summary}"
+                                                                           Foreground="{DynamicResource MutedTextBrush}"
+                                                                           FontSize="11"
+                                                                           TextWrapping="Wrap"
+                                                                           MaxLines="2" />
+                                                                <Grid ColumnDefinitions="*,Auto"
+                                                                      ColumnSpacing="8">
+                                                                    <TextBlock Text="{Binding TimeRange}"
+                                                                               Foreground="{DynamicResource SubtleTextBrush}"
+                                                                               FontSize="11" />
+                                                                    <Border Grid.Column="1"
+                                                                            Classes="infoChip"
+                                                                            Padding="7,2">
+                                                                        <TextBlock Text="{Binding MomentCountLabel}"
+                                                                                   Foreground="{DynamicResource TextBrush}"
+                                                                                   FontSize="10"
+                                                                                   FontWeight="SemiBold" />
+                                                                    </Border>
+                                                                </Grid>
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </Border>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <Border x:Name="OverviewWorkBlocksEmptyState"
+                                            Padding="16"
+                                            CornerRadius="12"
+                                            Background="{DynamicResource ElevatedPanelBrush}"
+                                            BorderBrush="{DynamicResource FaintBorderBrush}"
+                                            BorderThickness="1"
+                                            IsVisible="False">
+                                        <TextBlock Text="Related work blocks will appear after multiple moments are captured."
+                                                   Foreground="{DynamicResource MutedTextBrush}"
+                                                   FontSize="11"
+                                                   TextWrapping="Wrap"
+                                                   TextAlignment="Center" />
+                                    </Border>
+                                </StackPanel>
+                            </Border>
                             <controls:CategoryBreakdownControl x:Name="OverviewCategoryBreakdownControl"
                                                                Title="Activity by category" />
                             <Border Classes="overviewPanel">

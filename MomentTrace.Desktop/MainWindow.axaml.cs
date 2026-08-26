@@ -438,6 +438,12 @@ public partial class MainWindow : Window
             .Take(4)
             .Select(ToOverviewTopApplicationRow)
             .ToList();
+        var workBlockRows = overview.WorkBlocks
+            .OrderByDescending(block => block.Duration)
+            .ThenBy(block => block.StartedAt)
+            .Take(4)
+            .Select(ToOverviewWorkBlockRow)
+            .ToList();
         var focusBlocks = overview.FocusBlocks.Take(16).ToList();
 
         OverviewDateText.Text = overview.DateLabel;
@@ -454,6 +460,8 @@ public partial class MainWindow : Window
         _overviewFocusSignature = focusSignature;
 
         OverviewMomentsItems.ItemsSource = overviewMomentRows;
+        OverviewWorkBlocksItems.ItemsSource = workBlockRows;
+        OverviewWorkBlocksEmptyState.IsVisible = workBlockRows.Count == 0;
         OverviewCategoryBreakdownControl.Items = overview.CategoryBreakdown;
         OverviewTopApplicationsItems.ItemsSource = topApplicationRows;
         OverviewFocusRhythmControl.Items = focusBlocks;
@@ -2097,7 +2105,9 @@ public partial class MainWindow : Window
             selectedDate.ToString("yyyyMMdd"),
             overview.TotalActive.Ticks,
             overview.Sessions.Count,
+            overview.WorkBlocks.Count,
             string.Join(",", overview.Sessions.Select(BuildMomentMutationSignature)),
+            string.Join(",", overview.WorkBlocks.Select(block => $"{block.RepresentativeMomentId}:{block.StartedAt.UtcTicks}:{block.EndedAt.UtcTicks}:{block.MomentCount}:{block.Title}")),
             string.Join(",", overview.DaySummaryMetrics.Select(metric => $"{metric.Label}:{metric.Value}:{metric.Detail}")),
             string.Join(",", overview.KeyMoments.Select(moment => $"{moment.Id}:{moment.IsPinned}:{moment.Title}:{moment.Subtitle}:{moment.Duration}")),
             string.Join(",", overview.TopApplications.Select(app => $"{app.AppName}:{app.Duration}")),
@@ -2517,6 +2527,12 @@ public partial class MainWindow : Window
                 ? overview.TopApplications[0].AppName
                 : $"{overview.TopApplications.Count} applications";
             return $"{overview.Sessions.Count} moment{(overview.Sessions.Count == 1 ? string.Empty : "s")} captured so far across {applicationLabel} with {OverviewPresentationBuilder.FormatDuration(overview.TotalActive)} active time.";
+        }
+
+        if (overview.WorkBlocks.Count > 0)
+        {
+            var blockLabel = overview.WorkBlocks.Count == 1 ? "one recoverable work block" : $"{overview.WorkBlocks.Count} recoverable work blocks";
+            return $"{overview.Sessions.Count} moments grouped into {blockLabel} across {overview.TopApplications.Count} applications with {OverviewPresentationBuilder.FormatDuration(overview.TotalActive)} active time.";
         }
 
         return $"{overview.Sessions.Count} moments captured across {overview.TopApplications.Count} applications with {OverviewPresentationBuilder.FormatDuration(overview.TotalActive)} active time.";
@@ -3008,6 +3024,18 @@ public partial class MainWindow : Window
             Math.Max(app.Percent * 160d, 12d));
     }
 
+    private static OverviewWorkBlockRow ToOverviewWorkBlockRow(WorkBlockViewModel block)
+    {
+        return new OverviewWorkBlockRow(
+            block.RepresentativeMomentId,
+            block.Title,
+            block.Summary,
+            block.TimeRange,
+            block.DurationLabel,
+            block.MomentCountLabel,
+            block.AccentBrush);
+    }
+
     private sealed record MomentRow(
         long Id,
         string Title,
@@ -3054,6 +3082,15 @@ public partial class MainWindow : Window
         string Glyph,
         string AccentBrush,
         double BarWidth);
+
+    private sealed record OverviewWorkBlockRow(
+        long RepresentativeMomentId,
+        string Title,
+        string Summary,
+        string TimeRange,
+        string DurationLabel,
+        string MomentCountLabel,
+        string AccentBrush);
 
     private sealed record OverviewMomentRow(
         long Id,

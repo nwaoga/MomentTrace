@@ -17,7 +17,6 @@
 - [ ] Add a Windows and macOS self-update path before public marketing, preferring Velopack unless macOS packaging/signing pushes that platform toward Sparkle.
 - [ ] Prepare paid/founder-license launch only after Windows and macOS artifacts from the same beta tag pass install, launch, and background smoke testing.
 - [ ] Promote marketing launch assets after release artifacts, signing/trust caveats, and the update path are verified.
-- [ ] Add a higher-level session or "job" grouping view so related timeline moments can be recovered as one block later, not only as raw app-by-app activity.
 - [ ] Refresh the Azure DevOps PAT, then sync the live landing page / waitlist / Reddit launch notes into the relevant ADO marketing work item(s).
 
 ## Done
@@ -68,6 +67,7 @@
 - [x] [2026-08-11] Added `scripts/configure-windows-signing-secrets.ps1` for `AB#142`: validates a PFX has a private key, Code Signing EKU, and non-expired certificate before uploading `WINDOWS_SIGNING_PFX_BASE64` and `WINDOWS_SIGNING_PFX_PASSWORD` with `gh secret set`. Current machine/GitHub check found no signing secrets or local code-signing certificate material, so verified-publisher smoke remains blocked on the real PFX/password.
 - [x] [2026-08-21] Public beta site launched with the real dark MomentTrace palette, live D1 waitlist storage, anonymous CTA/page metrics, a protected `/admin/metrics` dashboard, and a live waitlist signal on the landing page.
 - [x] [2026-08-23] First public community launch pass: created `docs/assets/momenttrace-reddit-teaser.mp4` from the current product screenshots and published the first `r/SideProject` post using the teaser video plus the public beta-page CTA.
+- [x] [2026-08-26] Add a higher-level "work blocks" grouping view in Overview so related timeline moments can be recovered as one block later, not only as raw app-by-app activity.
 
 ## QA Notes
 

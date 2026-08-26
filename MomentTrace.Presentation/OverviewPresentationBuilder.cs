@@ -25,6 +25,9 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
         var sessions = _timelineBuilder.BuildSessions(dayActivities, isSortedDescending: true)
             .OrderBy(activity => activity.SessionStartedAt)
             .ToList();
+        var workBlocks = _timelineBuilder.BuildWorkBlocks(sessions)
+            .OrderBy(block => block.StartedAt)
+            .ToList();
         var topApplications = BuildTopApplications(dayActivities, totalActive).ToList();
         var focusBlocks = BuildFocusBlocks(sessions);
         var longestFocus = focusBlocks.Where(block => !block.IsGap).OrderByDescending(block => block.Duration).FirstOrDefault();
@@ -36,6 +39,7 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
             DateLabel = selectedDate.ToString("dddd, d MMMM"),
             TotalActive = totalActive,
             Sessions = sessions,
+            WorkBlocks = workBlocks,
             TopApplications = topApplications,
             FocusBlocks = focusBlocks,
             HeatmapSegments = BuildHeatmap(dayActivities, selectedDate).ToList(),
@@ -50,11 +54,12 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
                 new("Gaps or idle space", ActivityPalette.Gap)
             ],
             LongestFocusDuration = longestFocus is null ? "None yet" : FormatDuration(longestFocus.Duration),
-            DaySummaryMetrics = BuildDaySummaryMetrics(selectedDate, sessions, totalActive, topApplications, longestFocus, dayActivities),
+            DaySummaryMetrics = BuildDaySummaryMetrics(selectedDate, sessions, workBlocks, totalActive, topApplications, longestFocus, dayActivities),
             SummaryMetrics =
             [
                 new("Remembered Span", FormatDuration(totalActive), "Foreground time captured locally"),
                 new("Moments", sessions.Count.ToString(), "Grouped from related activity"),
+                new("Work Blocks", workBlocks.Count.ToString(), "Related moments recovered as larger chunks"),
                 new("Most Seen App", topApplications.FirstOrDefault()?.AppName ?? "No activity yet", topApplications.FirstOrDefault()?.Duration ?? "Waiting for activity"),
                 new("Longest Visible Run", longestFocus is null ? "No run yet" : FormatDuration(longestFocus.Duration), longestFocus?.Label ?? "Visible blocks appear here")
             ]
@@ -79,6 +84,7 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
     private static IReadOnlyList<DaySummaryMetricViewModel> BuildDaySummaryMetrics(
         DateTime selectedDate,
         IReadOnlyList<ActivityMomentViewModel> sessions,
+        IReadOnlyList<WorkBlockViewModel> workBlocks,
         TimeSpan totalActive,
         IReadOnlyList<TopApplicationViewModel> topApplications,
         FocusBlockViewModel? longestFocus,
@@ -106,11 +112,23 @@ public sealed class OverviewPresentationBuilder(TimelinePresentationBuilder time
         [
             new("Selected date", selectedDate.ToString("ddd, d MMM"), "The day currently being summarised", ActivityPalette.Apps, "◴"),
             new("Moments captured", sessions.Count.ToString(), "Grouped local moments for this day", ActivityPalette.Web, "◫"),
+            new("Work blocks", workBlocks.Count.ToString(), BuildWorkBlockMetricDetail(workBlocks), ActivityPalette.Development, "▦"),
             new("Active time", FormatDuration(totalActive), busiestMoment is null ? "No activity detected" : $"Mostly around {busiestMoment.CardTime}", ActivityPalette.Development, "∿"),
             new("Applications used", appsUsed.ToString(), topApplications.FirstOrDefault()?.AppName ?? "Waiting for activity", ActivityPalette.Documents, "⌘"),
             new("Longest activity", longestFocus is null ? "0m" : FormatDuration(longestFocus.Duration), longestFocus?.Label ?? "No visible run yet", ActivityPalette.SystemActivity, "◎"),
             new("Idle time", FormatDuration(idleTime), idleTime > TimeSpan.Zero ? "No activity detected" : "Fully active day", ActivityPalette.Gap, "☾")
         ];
+    }
+
+    private static string BuildWorkBlockMetricDetail(IReadOnlyList<WorkBlockViewModel> workBlocks)
+    {
+        var longest = workBlocks
+            .OrderByDescending(block => block.Duration)
+            .FirstOrDefault();
+
+        return longest is null
+            ? "Related runs will appear here"
+            : $"{longest.DurationLabel} around {longest.Title}";
     }
 
     private static IEnumerable<HeatmapSegmentViewModel> BuildHeatmap(IReadOnlyList<TimelineActivity> activities, DateTime day)
