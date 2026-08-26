@@ -2097,12 +2097,12 @@
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <Button Classes="momentCard"
-                                                        Click="OverviewMomentButton_Click"
-                                                        CommandParameter="{Binding RepresentativeMomentId}"
+                                                        Click="OverviewWorkBlockButton_Click"
+                                                        CommandParameter="{Binding}"
                                                         HorizontalAlignment="Stretch"
                                                         HorizontalContentAlignment="Stretch"
                                                         Margin="0,0,0,10"
-                                                        ToolTip.Tip="Jump to this work block in the timeline">
+                                                        ToolTip.Tip="Focus this work block in the timeline">
                                                     <Border Background="{DynamicResource ElevatedPanelBrush}"
                                                             BorderBrush="{DynamicResource FaintBorderBrush}"
                                                             BorderThickness="1"
@@ -2128,6 +2128,11 @@
                                                                                FontSize="11"
                                                                                FontWeight="SemiBold" />
                                                                 </Grid>
+                                                                <TextBlock Text="{Binding ContextLabel}"
+                                                                           Foreground="{DynamicResource AccentBrush}"
+                                                                           FontSize="11"
+                                                                           FontWeight="SemiBold"
+                                                                           TextTrimming="CharacterEllipsis" />
                                                                 <TextBlock Text="{Binding Summary}"
                                                                            Foreground="{DynamicResource MutedTextBrush}"
                                                                            FontSize="11"

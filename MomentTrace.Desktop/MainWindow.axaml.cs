@@ -874,6 +874,19 @@ public partial class MainWindow : Window
         await NavigateToTimelineMomentAsync(momentId);
     }
 
+    private async void OverviewWorkBlockButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { CommandParameter: OverviewWorkBlockRow block })
+        {
+            return;
+        }
+
+        await ShowTimelineRangeAsync(
+            block.StartedAt.LocalDateTime,
+            block.EndedAt.LocalDateTime,
+            block.RepresentativeMomentId > 0 ? block.RepresentativeMomentId : null);
+    }
+
     private void OverviewOpenMomentButton_Click(object? sender, RoutedEventArgs e)
     {
         if (!TryGetMomentId(sender, out var momentId))
@@ -2347,14 +2360,14 @@ public partial class MainWindow : Window
         await RefreshTimelineAsync();
     }
 
-    private async Task ShowTimelineRangeAsync(DateTime start, DateTime end)
+    private async Task ShowTimelineRangeAsync(DateTime start, DateTime end, long? selectedMomentId = null)
     {
         ClearSearchFilter();
         SelectTimelineDate(start.Date);
         _selectedRailSelection = RailSelection.Timeline;
         _timelineFocusStart = start;
         _timelineFocusEnd = end;
-        _selectedMomentId = null;
+        _selectedMomentId = selectedMomentId;
         ShowTimelinePage();
         ApplyOverviewTimelineContextState();
         await RefreshTimelineAsync();
@@ -3030,6 +3043,9 @@ public partial class MainWindow : Window
             block.RepresentativeMomentId,
             block.Title,
             block.Summary,
+            block.ContextLabel,
+            block.StartedAt,
+            block.EndedAt,
             block.TimeRange,
             block.DurationLabel,
             block.MomentCountLabel,
@@ -3087,6 +3103,9 @@ public partial class MainWindow : Window
         long RepresentativeMomentId,
         string Title,
         string Summary,
+        string ContextLabel,
+        DateTimeOffset StartedAt,
+        DateTimeOffset EndedAt,
         string TimeRange,
         string DurationLabel,
         string MomentCountLabel,

@@ -16,6 +16,7 @@ public sealed class WorkBlockViewModel
         Moments = moments;
         Title = BuildTitle(moments, category);
         Summary = BuildSummary(moments);
+        ContextLabel = BuildContextLabel(moments);
         AccentBrush = GetAccentBrush(category);
     }
 
@@ -32,6 +33,8 @@ public sealed class WorkBlockViewModel
     public string Title { get; }
 
     public string Summary { get; }
+
+    public string ContextLabel { get; }
 
     public string TimeRange => $"{StartedAt.LocalDateTime:HH:mm} - {EndedAt.LocalDateTime:HH:mm}";
 
@@ -88,6 +91,34 @@ public sealed class WorkBlockViewModel
         var countText = $"{moments.Count} moment{(moments.Count == 1 ? string.Empty : "s")}";
 
         return $"Recovered {countText} across {appText}.";
+    }
+
+    private static string BuildContextLabel(IReadOnlyList<ActivityMomentViewModel> moments)
+    {
+        var hosts = moments
+            .Select(moment => TryGetHost(moment.Resource, out var host) ? host : null)
+            .Where(host => !string.IsNullOrWhiteSpace(host))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(2)
+            .ToArray();
+
+        if (hosts.Length > 0)
+        {
+            return hosts.Length == 1
+                ? hosts[0]!
+                : string.Join(" + ", hosts);
+        }
+
+        var apps = moments
+            .Select(moment => moment.AppName.Trim())
+            .Where(app => !string.IsNullOrWhiteSpace(app))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(2)
+            .ToArray();
+
+        return apps.Length == 0
+            ? "Local activity"
+            : string.Join(" + ", apps);
     }
 
     private static string? GetDominantApp(IReadOnlyList<ActivityMomentViewModel> moments)

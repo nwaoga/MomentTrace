@@ -68,6 +68,7 @@ public sealed class WorkBlockPresentationTests
 
         var block = Assert.Single(blocks);
         Assert.Equal("Work around example.com", block.Title);
+        Assert.Equal("example.com", block.ContextLabel);
         Assert.Equal(2, block.MomentCount);
     }
 
