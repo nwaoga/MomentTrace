@@ -32,11 +32,15 @@ export default function Home() {
           <div className="section-inner hero-grid">
             <div className="hero-content">
               <span className="eyebrow">Early access for Windows and macOS</span>
-              <h1>Find the work you were just thinking about.</h1>
+              <h1>Recover the work you were just doing.</h1>
               <p className="lede">
-                MomentTrace is a private desktop timeline for apps, websites,
-                screenshots, notes, and saved moments. It helps you recover
-                context without sending your work history to a cloud account.
+                MomentTrace is a local-first desktop recall app for apps,
+                websites, screenshots, notes, and saved moments. It helps you
+                get back to the right tab, file, app, or screenshot without
+                sending your work history to a cloud account.
+              </p>
+              <p className="trust-line">
+                Nothing leaves your machine unless you choose to export it.
               </p>
               <div className="hero-actions">
                 <a
@@ -54,8 +58,13 @@ export default function Home() {
                   See the Timeline
                 </a>
               </div>
+              <div className="hero-points" aria-label="Privacy and trust">
+                <span>Local-first by default</span>
+                <span>No account required</span>
+                <span>Delete everything locally</span>
+              </div>
               <div className="signal-strip" aria-label="Launch signal">
-                <span>Goal</span>
+                <span>Signal goal</span>
                 <strong>25 named yeses</strong>
                 <span>before buying signing certificates</span>
               </div>
@@ -66,8 +75,8 @@ export default function Home() {
                 alt="MomentTrace desktop app showing the Overview daily summary dashboard"
               />
               <div className="preview-badge">
-                <strong>Daily Overview</strong>
-                <span>Heatmap, focus, top apps</span>
+                <strong>Normal day view</strong>
+                <span>Overview, focus rhythm, top apps</span>
               </div>
             </div>
           </div>

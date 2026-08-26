@@ -17,6 +17,7 @@
 - [ ] Add a Windows and macOS self-update path before public marketing, preferring Velopack unless macOS packaging/signing pushes that platform toward Sparkle.
 - [ ] Prepare paid/founder-license launch only after Windows and macOS artifacts from the same beta tag pass install, launch, and background smoke testing.
 - [ ] Promote marketing launch assets after release artifacts, signing/trust caveats, and the update path are verified.
+- [ ] Add a higher-level session or "job" grouping view so related timeline moments can be recovered as one block later, not only as raw app-by-app activity.
 - [ ] Refresh the Azure DevOps PAT, then sync the live landing page / waitlist / Reddit launch notes into the relevant ADO marketing work item(s).
 
 ## Done

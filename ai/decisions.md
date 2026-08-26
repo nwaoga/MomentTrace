@@ -46,6 +46,7 @@
 - [2026-08-21] Public beta interest collection should run through the hosted landing page first: real screenshots, D1-backed waitlist storage, anonymous CTA metrics, and a protected owner-only metrics dashboard are enough to measure early signal before broader launch tooling is added.
 - [2026-08-23] Community launch should start with one honest feedback-seeking post at a time. The first live pass is `r/SideProject` with a short native Reddit teaser video and the beta-page CTA; measure replies and `/admin/metrics` before copying the post into other communities.
 - [2026-08-23] Operational continuity should not depend on a single stale Azure DevOps PAT. When ADO access is down, record launch/ops notes in `ai/` immediately and backfill ADO once PAT access is refreshed.
+- [2026-08-23] Cold launch traffic should see the privacy reassurance before the product metaphor. Lead the hosted beta page with "Nothing leaves your machine unless you choose to export it" and avoid using "desktop memory timeline" as the first-frame description, because some readers initially interpret it as screen recording.
 
 ## Recently Completed
 

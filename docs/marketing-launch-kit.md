@@ -1,6 +1,6 @@
 # MomentTrace Marketing Launch Kit
 
-This kit is for the first public beta push. It keeps the message simple: MomentTrace is a private, local-first memory timeline for your workday.
+This kit is for the first public beta push. It keeps the message simple: MomentTrace helps you recover the work you were just doing, while keeping your history local to your machine.
 
 ## Positioning
 
@@ -8,11 +8,11 @@ MomentTrace helps people remember what they did, where they were, and how to get
 
 ## One-Liner
 
-MomentTrace is a local-first desktop memory timeline that helps you retrace apps, websites, screenshots, notes, and work moments from your day.
+MomentTrace is a local-first desktop recall app that helps you retrace apps, websites, screenshots, notes, and work moments from your day.
 
 ## Short Description
 
-MomentTrace quietly builds a private timeline of your desktop activity so you can recover context, reopen work, and understand where your time went. Your history stays on your machine, with controls for privacy filtering, local cleanup, screenshots, bookmarks, and notes.
+MomentTrace quietly captures a private local history of your desktop activity so you can recover context, reopen work, and understand where your time went. Nothing leaves your machine unless you choose to export it, and the app includes privacy filtering, local cleanup, screenshots, bookmarks, and notes.
 
 ## Long Description
 
@@ -24,11 +24,20 @@ Public paid-beta or founder-license offers should wait until Windows and macOS a
 
 ## Core Messages
 
-- Remember your workday without manually tracking it.
+- Recover the work you were just doing without manual tracking.
 - Recover the app, website, document, or screenshot you were looking at.
 - Keep your timeline local to your machine.
 - Filter sensitive activity and delete all local data when needed.
 - Use Overview to understand the day at a glance, then jump into exact moments.
+
+## Early Feedback Adjustments
+
+First public community feedback on 2026-08-23 highlighted two messaging changes worth keeping:
+
+- Lead with local/private reassurance above the fold. "Nothing leaves your machine" should appear before people have time to imagine cloud tracking or screen recording.
+- Avoid using "desktop memory timeline" as the first-frame description in cold traffic. Some readers briefly interpret it as screen recording, which raises the wrong trust concern before they understand the product.
+
+The same feedback also pointed to a product direction: the raw app-by-app capture layer may need a higher-level "job" or "session" grouping mode so people can recover a block of work the next morning instead of revisiting every individual moment.
 
 ## Audience
 
@@ -46,13 +55,13 @@ A static landing page draft is available at `docs/landing/index.html`. It uses s
 Headline:
 
 ```text
-Your private memory timeline for the workday.
+Recover the work you were just doing.
 ```
 
 Subhead:
 
 ```text
-MomentTrace helps you retrace apps, websites, screenshots, notes, and saved moments from your day, with activity history stored locally on your device.
+MomentTrace is a local-first desktop recall app for apps, websites, screenshots, notes, and saved moments. It helps you get back to the right tab, file, app, or screenshot without sending your work history to a cloud account.
 ```
 
 Primary CTA:
@@ -70,7 +79,7 @@ See how it works
 Trust line:
 
 ```text
-Local-first. Private by default. Built for people who need to recover context fast.
+Nothing leaves your machine unless you choose to export it.
 ```
 
 ### Feature Blocks
