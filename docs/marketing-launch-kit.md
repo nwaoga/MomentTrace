@@ -180,6 +180,8 @@ This phase is demand signal: founder posts, a waitlist of named people, GitHub s
 
 **Do not ask for money.** Paid/founder-license stays blocked until both platforms ship from the same trusted tag.
 
+First Reddit signal on 2026-08-29: the `r/SideProject` teaser reached about 1.1K views after 6 days, with 6 upvotes, a 100% upvote ratio, 2 comments, 3 shares, and 0 reposts. Read this as early awareness rather than strong demand. Before repeating the same CTA, check the live waitlist/admin metrics and test a sharper founder-story or privacy-contrast post.
+
 ### Founder Story Post
 
 ```text

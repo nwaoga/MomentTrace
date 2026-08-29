@@ -56,6 +56,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 - The landing page waitlist signal is now live rather than hardcoded; current public count reflects the real `/api/waitlist` total.
 - A short Reddit-ready teaser video now exists locally at `docs/assets/momenttrace-reddit-teaser.mp4` for social/community posts.
 - First public community post is live on `r/SideProject` with the teaser video and beta-page CTA; next pickup is monitoring comments and admin metrics before repeating the post elsewhere.
+- First Reddit post-insights snapshot on 2026-08-29: about 1.1K views, 6 upvotes, 100% upvote ratio, 2 comments, 3 shares, and 0 reposts after 6 days. Treat this as useful reach but weak public discussion; inspect landing-page metrics and named waitlist before posting the same angle elsewhere.
 - Overview now includes local rule-based "work blocks" that group nearby related moments into larger recoverable chunks, addressing early launch feedback that raw app-by-app activity needs a higher-level job/session layer.
 - Monetization posture: public marketing and founder-license interest should wait until Windows and macOS artifacts are available from the same release tag and have both passed install/launch/background smoke.
 - Shared presentation builders for timeline, overview, and detail context.
@@ -134,7 +135,7 @@ Users should be able to quickly revisit what happened during a day, recover past
 
 - `AB#142`: Configure real Windows signing certificate secrets, rerun a prerelease with `require_windows_signing=true`, and smoke the verified-publisher installer prompt.
 - Azure DevOps REST access is currently blocked because the PAT in `D:\source\PatAdo.json` expired on 2026-08-23. Refresh the PAT before syncing the latest landing-page/marketing notes back into ADO.
-- Monitor the first `r/SideProject` post and the live `/admin/metrics` dashboard together. Capture early objections, privacy questions, and install-trust concerns before posting to a second community.
+- Check the live `/admin/metrics` dashboard and named waitlist count, then decide the next soft marketing post. The first Reddit post reached about 1.1K views but only produced light public engagement, so the next post should test a sharper problem/privacy angle rather than repeat the same teaser.
 - Continue Signing, Trust, And Updates before public marketing: Apple Developer ID/notarization and at least a manual update-check path.
 - Finish the remaining `AB#130` verification on a real Mac: normal app and Safari visual crops passed locally on 2026-07-12; still confirm multi-monitor behavior and avoid closing the work item solely on visual evidence because the exact method is not persisted.
 - Update Azure DevOps from a machine with ADO access: add the 2026-07-12 real Mac smoke note to `AB#130`, keep `AB#130` open for multi-monitor/exact-method confirmation, and add the preview-modal verification note to the relevant UI/release-train work item if tracking separately.
