@@ -215,6 +215,10 @@ Success bar for this post: 3+ named replies/DMs or waitlist signups from people 
 
 Follow-up if it works: reply manually, ask what they were trying to recover, and invite them onto the first signed-build list. Do not ask for money and do not move to Product Hunt, Show HN, or paid-founder-license messaging.
 
+Posting update: the LinkedIn version should include the public beta link in the post body and attach `docs/assets/momenttrace-promotional-poster.png`. This is acceptable for the soft test because the copy still frames the ask as feedback/signal, says downloads are not being broadly pushed yet, and avoids any paid/founder-license CTA.
+
+After posting, capture a 24-48 hour snapshot covering LinkedIn reactions/comments/reposts, named replies/DMs, landing-page views, waitlist joins, beta download clicks, and recurring privacy/trust objections.
+
 ### Founder Story Post
 
 ```text
