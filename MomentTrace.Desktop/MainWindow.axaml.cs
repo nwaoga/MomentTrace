@@ -13,6 +13,7 @@ using MomentTrace.Presentation;
 using MomentTrace.Storage;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -48,9 +49,12 @@ public partial class MainWindow : Window
     private IReadOnlyList<TimelineActivity> _selectedDateActivities = [];
     private IReadOnlyList<ActivityMomentViewModel> _sessions = [];
     private IReadOnlyList<TimelineSessionGroup> _timelineGroups = [];
+    private IReadOnlyList<TimelineGroupRow> _timelineGroupRows = [];
     private readonly Dictionary<string, bool> _timelineGroupExpansionStates = new(StringComparer.Ordinal);
+    private readonly Dictionary<long, MomentRow> _timelineMomentRowsById = [];
     private OverviewPresentationModel? _currentOverview;
     private long? _selectedMomentId;
+    private long? _selectedTimelineRowId;
     private string _searchText = string.Empty;
     private bool _isDetailPaneVisible = true;
     private RailSelection _selectedRailSelection = RailSelection.Timeline;
@@ -382,8 +386,14 @@ public partial class MainWindow : Window
         var timelineChanged = !string.Equals(refreshSignature, _timelineRefreshSignature, StringComparison.Ordinal);
         if (timelineChanged)
         {
-            TimelineGroupsItems.ItemsSource = BuildTimelineGroupRows();
+            _timelineGroupRows = BuildTimelineGroupRows();
+            RebuildTimelineMomentRowIndex(_timelineGroupRows);
+            TimelineGroupsItems.ItemsSource = _timelineGroupRows;
             _timelineRefreshSignature = refreshSignature;
+        }
+        else
+        {
+            UpdateSelectedTimelineRow(_selectedMomentId);
         }
 
         UpdateTimelineEmptyState();
@@ -852,16 +862,18 @@ public partial class MainWindow : Window
             return;
         }
 
+        var previousSelectedId = _selectedMomentId;
         _selectedMomentId = selected.Id;
         _isDetailPaneVisible = true;
         ApplyDetailPaneVisibility();
-        _timelineRefreshSignature = string.Empty;
-        TimelineGroupsItems.ItemsSource = BuildTimelineGroupRows();
-        _timelineRefreshSignature = BuildTimelineRefreshSignature(GetSelectedDate());
+        if (previousSelectedId != selected.Id)
+        {
+            UpdateSelectedTimelineRow(selected.Id);
+        }
+
         ShowDetail(selected);
         _lastDetailedMomentId = selected.Id;
         _lastDetailSignature = BuildDetailSignature(selected);
-        ScrollSelectedMomentIntoView();
     }
 
     private async void OverviewMomentButton_Click(object? sender, RoutedEventArgs e)
@@ -2094,7 +2106,6 @@ public partial class MainWindow : Window
             _timelineFocusStart?.Ticks,
             _timelineFocusEnd?.Ticks,
             _preferences.TimelineViewMode,
-            _selectedMomentId,
             string.Join(",", _timelineGroups.Select(group => $"{group.ExpansionKey}:{group.IsExpanded}")),
             string.Join(",", _sessions.Select(BuildMomentMutationSignature)));
     }
@@ -2833,6 +2844,39 @@ public partial class MainWindow : Window
             .ToList();
     }
 
+    private void RebuildTimelineMomentRowIndex(IReadOnlyList<TimelineGroupRow> groupRows)
+    {
+        _timelineMomentRowsById.Clear();
+        foreach (var row in groupRows.SelectMany(group => group.Moments))
+        {
+            _timelineMomentRowsById[row.Id] = row;
+        }
+
+        _selectedTimelineRowId = _selectedMomentId is long selectedId && _timelineMomentRowsById.ContainsKey(selectedId)
+            ? selectedId
+            : null;
+    }
+
+    private void UpdateSelectedTimelineRow(long? selectedId)
+    {
+        if (_selectedTimelineRowId == selectedId)
+        {
+            return;
+        }
+
+        if (_selectedTimelineRowId is long previousId && _timelineMomentRowsById.TryGetValue(previousId, out var previousRow))
+        {
+            previousRow.SetSelected(false, ColorToHex(_currentTheme.RaisedSurface), ColorToHex(_currentTheme.Stroke));
+        }
+
+        _selectedTimelineRowId = null;
+        if (selectedId is long nextId && _timelineMomentRowsById.TryGetValue(nextId, out var nextRow))
+        {
+            nextRow.SetSelected(true, ColorToHex(_currentTheme.AccentSoft), ColorToHex(_currentTheme.Accent));
+            _selectedTimelineRowId = nextId;
+        }
+    }
+
     private bool MatchesSearch(ActivityMomentViewModel session)
     {
         if (string.IsNullOrWhiteSpace(_searchText))
@@ -2935,14 +2979,11 @@ public partial class MainWindow : Window
     private MomentRow ToMomentRow(ActivityMomentViewModel session, bool isSelected)
     {
         var row = ToMomentRow(session);
-        return row with
-        {
-            IsSelected = isSelected,
-            CardBackground = isSelected
-                ? ColorToHex(_currentTheme.AccentSoft)
-                : ColorToHex(_currentTheme.RaisedSurface),
-            BorderBrush = isSelected ? ColorToHex(_currentTheme.Accent) : ColorToHex(_currentTheme.Stroke)
-        };
+        row.SetSelected(
+            isSelected,
+            isSelected ? ColorToHex(_currentTheme.AccentSoft) : ColorToHex(_currentTheme.RaisedSurface),
+            isSelected ? ColorToHex(_currentTheme.Accent) : ColorToHex(_currentTheme.Stroke));
+        return row;
     }
 
     private static string ColorToHex(Color color) => $"#{color.R:X2}{color.G:X2}{color.B:X2}";
@@ -3052,31 +3093,116 @@ public partial class MainWindow : Window
             block.AccentBrush);
     }
 
-    private sealed record MomentRow(
-        long Id,
-        string Title,
-        string Subtitle,
-        string Meta,
-        string TimeLabel,
-        string SeenLabel,
-        string? PreviewPath,
-        string? IconPath,
-        string Glyph,
-        string GlyphBackground,
-        string GlyphForeground,
-        string KindLabel,
-        string KindBackground,
-        string KindForeground,
-        string SavedIndicator,
-        bool HasSavedIndicator,
-        bool IsSelected,
-        string CardBackground,
-        string BorderBrush,
-        bool ShowPreviewImage = false,
-        bool ShowHeroIcon = false,
-        bool ShowSmallIcon = false,
-        bool ShowSmallGlyph = true,
-        bool ShowGlyphFallback = true);
+    private sealed class MomentRow(
+        long id,
+        string title,
+        string subtitle,
+        string meta,
+        string timeLabel,
+        string seenLabel,
+        string? previewPath,
+        string? iconPath,
+        string glyph,
+        string glyphBackground,
+        string glyphForeground,
+        string kindLabel,
+        string kindBackground,
+        string kindForeground,
+        string savedIndicator,
+        bool hasSavedIndicator,
+        bool isSelected,
+        string cardBackground,
+        string borderBrush,
+        bool showPreviewImage = false,
+        bool showHeroIcon = false,
+        bool showSmallIcon = false,
+        bool showSmallGlyph = true,
+        bool showGlyphFallback = true) : INotifyPropertyChanged
+    {
+        private bool _isSelected = isSelected;
+        private string _cardBackground = cardBackground;
+        private string _borderBrush = borderBrush;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public long Id { get; } = id;
+
+        public string Title { get; } = title;
+
+        public string Subtitle { get; } = subtitle;
+
+        public string Meta { get; } = meta;
+
+        public string TimeLabel { get; } = timeLabel;
+
+        public string SeenLabel { get; } = seenLabel;
+
+        public string? PreviewPath { get; } = previewPath;
+
+        public string? IconPath { get; } = iconPath;
+
+        public string Glyph { get; } = glyph;
+
+        public string GlyphBackground { get; } = glyphBackground;
+
+        public string GlyphForeground { get; } = glyphForeground;
+
+        public string KindLabel { get; } = kindLabel;
+
+        public string KindBackground { get; } = kindBackground;
+
+        public string KindForeground { get; } = kindForeground;
+
+        public string SavedIndicator { get; } = savedIndicator;
+
+        public bool HasSavedIndicator { get; } = hasSavedIndicator;
+
+        public bool IsSelected
+        {
+            get => _isSelected;
+            private set => SetField(ref _isSelected, value, nameof(IsSelected));
+        }
+
+        public string CardBackground
+        {
+            get => _cardBackground;
+            private set => SetField(ref _cardBackground, value, nameof(CardBackground));
+        }
+
+        public string BorderBrush
+        {
+            get => _borderBrush;
+            private set => SetField(ref _borderBrush, value, nameof(BorderBrush));
+        }
+
+        public bool ShowPreviewImage { get; } = showPreviewImage;
+
+        public bool ShowHeroIcon { get; } = showHeroIcon;
+
+        public bool ShowSmallIcon { get; } = showSmallIcon;
+
+        public bool ShowSmallGlyph { get; } = showSmallGlyph;
+
+        public bool ShowGlyphFallback { get; } = showGlyphFallback;
+
+        public void SetSelected(bool isSelected, string cardBackground, string borderBrush)
+        {
+            IsSelected = isSelected;
+            CardBackground = cardBackground;
+            BorderBrush = borderBrush;
+        }
+
+        private void SetField<T>(ref T field, T value, string propertyName)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value))
+            {
+                return;
+            }
+
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
 
     private sealed record TimelineGroupRow(
         TimelineSessionGroup Group,
