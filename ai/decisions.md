@@ -47,6 +47,7 @@
 - [2026-08-23] Community launch should start with one honest feedback-seeking post at a time. The first live pass is `r/SideProject` with a short native Reddit teaser video and the beta-page CTA; measure replies and `/admin/metrics` before copying the post into other communities.
 - [2026-08-23] Operational continuity should not depend on a single stale Azure DevOps PAT. When ADO access is down, record launch/ops notes in `ai/` immediately and backfill ADO once PAT access is refreshed.
 - [2026-08-23] Cold launch traffic should see the privacy reassurance before the product metaphor. Lead the hosted beta page with "Nothing leaves your machine unless you choose to export it" and avoid using "desktop memory timeline" as the first-frame description, because some readers initially interpret it as screen recording.
+- [2026-08-29] The next soft marketing test should move to a named founder/operator channel, preferably LinkedIn, and use a lost-context plus privacy-contrast angle. Success is named qualitative demand and privacy/trust clarity, not beta downloads, revenue, or a founder-license CTA.
 
 ## Recently Completed
 

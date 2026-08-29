@@ -182,6 +182,39 @@ This phase is demand signal: founder posts, a waitlist of named people, GitHub s
 
 First Reddit signal on 2026-08-29: the `r/SideProject` teaser reached about 1.1K views after 6 days, with 6 upvotes, a 100% upvote ratio, 2 comments, 3 shares, and 0 reposts. The matching landing-page metrics snapshot showed 26 page views, 1 join-waitlist click, 1 successful waitlist signup, 1 beta download click, 0 timeline clicks, 3.8% waitlist conversion, and 3.8% download intent. Read this as early awareness plus one real named signal, not enough demand for paid/founder-license promotion. Next post should test a sharper founder-story or privacy-contrast angle rather than repeat the same teaser.
 
+### Next Marketing Handoff (2026-08-29)
+
+Recommended next channel: LinkedIn founder/operator post. Use X only if the personal audience there is meaningfully stronger. LinkedIn is the better next soft test because it can produce named replies/DMs from people who feel the lost-context problem at work, without creating broad cold-download pressure around the current unsigned/not-notarized builds.
+
+Angle: lost work context plus privacy contrast. Lead with the problem, then make the local-first posture explicit before mentioning the beta.
+
+Post copy:
+
+```text
+I keep losing the thread of what I was doing.
+
+Not the big project. The tiny handoff moments:
+
+- which tab had the thing
+- which folder I was in
+- which screenshot explained the bug
+- which app I switched away from before the meeting
+
+Most tools that solve this want to upload your work history somewhere.
+
+I am testing the opposite idea with MomentTrace: a private desktop timeline that stays on your machine. Apps, websites, screenshots, notes, saved moments, and a daily recap, with privacy filters and full local cleanup.
+
+The Windows + macOS beta exists, but I am not broadly pushing downloads until signing, notarization, and updates are stronger.
+
+Right now I am looking for signal from people who lose context across tabs/apps all day:
+
+Would you want a local-first recall tool like this, or is desktop activity history a hard no even if it stays on-device?
+```
+
+Success bar for this post: 3+ named replies/DMs or waitlist signups from people who can describe a real lost-context use case, plus no recurring confusion that MomentTrace is cloud surveillance or continuous public screen recording. A strong secondary signal is 50+ landing-page visits with at least 2 waitlist joins and 1+ direct qualitative objection about privacy, signing, or update trust. Do not judge success by beta downloads yet.
+
+Follow-up if it works: reply manually, ask what they were trying to recover, and invite them onto the first signed-build list. Do not ask for money and do not move to Product Hunt, Show HN, or paid-founder-license messaging.
+
 ### Founder Story Post
 
 ```text

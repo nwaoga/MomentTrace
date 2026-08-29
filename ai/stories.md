@@ -70,6 +70,7 @@
 - [x] [2026-08-26] Add a higher-level "work blocks" grouping view in Overview so related timeline moments can be recovered as one block later, not only as raw app-by-app activity. Second pass made block cards source-aware and focused the full block range in Timeline rather than only jumping to a representative moment.
 - [x] [2026-08-29] Published `v0.1.1-beta.15` icon parity pass: Windows portable/setup executables expose the MomentTrace app icon, the Windows tray mark was already visually confirmed in the beta.15 smoke, and the macOS app bundle declares `MomentTrace.icns` with multi-size ICNS entries for Finder/Dock while the shipped binaries retain both full-colour and template tray assets plus `SetIsTemplateIcon`.
 - [x] [2026-08-29] Dense-day selection lag pass: direct timeline card clicks now keep the existing timeline row tree alive, update only the previous/current selected row styles through `INotifyPropertyChanged`, and skip the scroll-to-estimated-offset nudge when the clicked row is already visible.
+- [x] [2026-08-29] Prepared the next marketing handoff after the first `r/SideProject` signal: recommend a LinkedIn founder/operator post using a lost-context plus privacy-contrast angle, with success measured by named replies/DMs or waitlist signups rather than downloads or paid intent.
 
 ## QA Notes
 
