@@ -807,3 +807,7 @@ For Azure DevOps planning, current implementation work is tracked in the MomentT
 ## Planning
 
 See [`ai/project-plan.md`](ai/project-plan.md) for the active roadmap, Azure DevOps mapping, QA checklist, and current stability punch list.
+
+## License
+
+MomentTrace is released under the [MIT License](LICENSE). Copyright (c) 2026 Eric Nwaogwugwu.
